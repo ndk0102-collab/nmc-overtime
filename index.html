@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NMC 잔업</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1E5AA8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="NMC 잔업">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+:root{
+  --bg:#EEF2F7; --card:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#5B6474;
+  --line:#DCE3EC; --soft:#F3F6FA;
+  --accent:#1E5AA8; --accent-strong:#174A8C; --accent-soft:#E6EFFB;
+  --ot:#174A8C; --ot-bg:#DFEBFB; --hol:#C2272D; --hol-bg:#FCE4E4; --hol-col:#FFF5F5;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans','Noto Sans KR','Noto Sans Thai','Noto Sans Myanmar','Malgun Gothic','Apple SD Gothic Neo','Leelawadee UI','Myanmar Text','Myanmar Sangam MN',Tahoma,sans-serif;font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+html[lang="th"] body{line-height:1.6}
+html[lang="my"] body{line-height:1.75}
+button{font:inherit;color:inherit}
+.demo{margin:0;padding:8px 14px;background:#FFF4E5;color:#7A4A00;font-size:13px;font-weight:700;text-align:center}
+
+/* 상단 바 */
+.appbar{background:var(--accent);color:#fff;padding:14px 16px 18px;border-radius:0 0 24px 24px;box-shadow:0 2px 10px rgba(23,74,140,.25)}
+.ab-in,.who{max-width:640px;margin:0 auto}
+.ab-in{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:800;letter-spacing:-0.01em}
+.logo{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;background:#fff;color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.04em}
+.toplang{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.who{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.who b{font-size:23px;font-weight:800;min-width:0;overflow-wrap:anywhere}
+.wholink{min-height:44px;padding:0 4px;border:0;background:none;color:#fff;font-size:15px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;flex-shrink:0}
+
+/* 본문 */
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 32px}
+.wrap.withnav{padding-bottom:110px}
+.wrap.wide{max-width:1480px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin:0 0 12px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.sec{font-size:15px;font-weight:800;color:var(--ink2);margin:0 0 12px}
+.hint{font-size:14px;color:var(--muted);margin:12px 2px 0}
+
+/* 날짜 버튼 */
+.days{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{flex:0 0 auto;width:64px;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 2px;border-radius:18px;border:2px solid var(--line);background:#fff;cursor:pointer;scroll-snap-align:start}
+.day .dw{font-size:12px;font-weight:700;color:var(--muted);line-height:1.2;white-space:nowrap}
+.day .dn{font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.day .dh{min-width:30px;height:20px;padding:0 6px;border-radius:999px;font-size:12px;font-weight:800;line-height:20px;text-align:center}
+.day .dh.ot{background:var(--ot-bg);color:var(--ot)}
+.day .dh.hol{background:var(--hol-bg);color:var(--hol)}
+.day.hol .dw,.day.hol .dn{color:var(--hol)}
+.day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 12px rgba(30,90,168,.3)}
+.day[aria-pressed="true"] .dw,.day[aria-pressed="true"] .dn{color:#fff}
+.day[aria-pressed="true"] .dh.ot,.day[aria-pressed="true"] .dh.hol{background:#fff;color:var(--accent-strong)}
+.day.hol[aria-pressed="true"]{background:var(--hol);border-color:var(--hol);box-shadow:0 4px 12px rgba(194,39,45,.28)}
+.day.hol[aria-pressed="true"] .dh.hol,.day.hol[aria-pressed="true"] .dh.ot{color:var(--hol)}
+.selinfo{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.seldate{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;min-height:32px;padding:0 12px;border-radius:999px;font-size:14px;font-weight:800}
+.badge.ot{background:var(--ot-bg);color:var(--ot)}
+.badge.hol{background:var(--hol-bg);color:var(--hol)}
+
+/* 시간 버튼 */
+.note{display:flex;align-items:flex-start;gap:8px;margin:0 0 14px;padding:10px 12px;border-radius:12px;background:#E7F4EC;color:#14532D;font-size:15px;font-weight:700}
+.note svg{flex-shrink:0;margin-top:2px}
+.hgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hgrid.hol{grid-template-columns:repeat(4,minmax(0,1fr))}
+.hbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72px;padding:6px 4px;border-radius:16px;border:2px solid var(--line);background:#fff;cursor:pointer}
+.hgrid.hol .hbtn{min-height:60px}
+.hbtn b{font-size:25px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.hbtn span,.hbtn small{font-size:12px;font-weight:700;color:var(--muted);line-height:1.35}
+.hbtn small{font-variant-numeric:tabular-nums}
+.hbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.hgrid.hol .hbtn[aria-pressed="true"]{background:var(--hol);border-color:var(--hol)}
+.hbtn[aria-pressed="true"] span,.hbtn[aria-pressed="true"] small{color:#fff}
+.primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:60px;margin:16px 0 0;border:0;border-radius:16px;background:var(--accent);color:#fff;font-size:19px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(30,90,168,.28)}
+.primary:disabled{opacity:.55;cursor:default;box-shadow:none}
+.secondary{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:52px;margin:10px 0 0;border:2px solid #F3C5C0;border-radius:16px;background:#fff;color:var(--hol);font-size:16px;font-weight:700;cursor:pointer}
+.foot{color:var(--muted);font-size:14px}
+.foot .wk{display:flex;align-items:center;gap:6px;margin:4px 4px 0}
+.help{background:#fff;border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-top:10px;color:var(--ink2)}
+.help summary{min-height:46px;display:flex;align-items:center;font-weight:700;cursor:pointer}
+.help p{font-size:15px;margin:2px 0 12px}
+.install{border:2px solid #BFD3F0;background:#F5F9FF}
+.inst-head{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:17px;font-weight:800;color:var(--accent-strong)}
+.inst-head svg{flex-shrink:0}
+.install .primary{margin:0 0 12px}
+.inst-steps{margin:0;padding:0;list-style:none}
+.inst-steps li{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:15px;line-height:1.5}
+.linkbtn{display:block;width:100%;min-height:44px;margin:2px 0 0;border:0;background:none;color:var(--muted);font-size:15px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* 월 이동 · 합계 */
+.monthbar{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.mtitle{flex:1;margin:0;text-align:center;font-size:25px;font-weight:800;letter-spacing:-0.01em}
+.iconbtn{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;flex-shrink:0;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--ink2);cursor:pointer}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.stat{padding:12px 10px 10px;border-radius:18px;background:#fff;border:1px solid var(--line)}
+.stat span{display:block;font-size:13px;font-weight:800;color:var(--muted)}
+.stat b{display:block;font-size:clamp(18px,5.6vw,28px);font-weight:800;line-height:1.2;font-variant-numeric:tabular-nums;white-space:nowrap}
+.stat b small{font-size:13px;font-weight:700;margin-left:3px;color:var(--muted)}
+.stat.ot b{color:var(--ot)}
+.stat.hol b{color:var(--hol)}
+.stat.sum{background:var(--ink);border-color:var(--ink)}
+.stat.sum span,.stat.sum b small{color:#CBD5E1}
+.stat.sum b{color:#fff}
+
+/* 내 기록 달력 */
+.cal{padding:12px}
+.cal-h,.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-h span{padding:0 0 6px;text-align:center;font-size:12px;font-weight:800;color:var(--muted)}
+.cal-h span.hol{color:var(--hol)}
+.cday{position:relative;display:flex;align-items:center;justify-content:center;min-height:58px;padding:16px 2px 4px;border-radius:12px;border:1px solid transparent;background:var(--soft);font:inherit;color:inherit}
+.cday .cd{position:absolute;top:3px;left:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.cday.hol{background:var(--hol-col)}
+.cday.hol .cd{color:var(--hol)}
+.cday .ch{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.cday.ot.has{background:var(--ot-bg);border-color:#C6DBF6}
+.cday.hol.has{background:var(--hol-bg);border-color:#F4C4C4}
+.cday .ch.ot{color:var(--ot)}
+.cday .ch.hol{color:var(--hol)}
+.cday.today{border:2px solid var(--accent)}
+button.cday{cursor:pointer}
+.cblank{min-height:58px}
+
+/* 전체 현황 표 */
+.board{padding:0;overflow:hidden}
+.bscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bt{border-collapse:separate;border-spacing:0;min-width:100%;font-variant-numeric:tabular-nums}
+.bt th,.bt td{height:42px;padding:0;text-align:center;font-size:13px;border-bottom:1px solid #EDF1F6}
+.bt thead th{height:50px;background:#F7F9FC;color:var(--ink2);font-weight:800;border-bottom:1px solid var(--line)}
+.bt thead th.dc{min-width:36px;width:36px}
+.bt .dnum{display:block;font-size:14px;line-height:1.1}
+.bt .dwk{display:block;font-size:12px;font-weight:700;line-height:1.2;color:var(--muted)}
+.bt thead th.hol{background:var(--hol);color:#fff}
+.bt thead th.hol .dwk{color:#FFE1E1}
+.bt td.hol{background:var(--hol-col)}
+.bt thead th.today{box-shadow:inset 0 -4px 0 var(--accent)}
+.bt thead th.hol.today{box-shadow:inset 0 -4px 0 #0F172A}
+.bt td.today{background:#FFF8E1}
+.bt .cname{position:sticky;left:0;z-index:2;min-width:88px;padding:0 10px;text-align:left;white-space:nowrap;background:#fff;font-size:14px;font-weight:800;border-right:1px solid var(--line)}
+.bt thead .cname{background:#F7F9FC;color:var(--muted);font-size:13px}
+.bt .cname i{display:inline-block;min-width:20px;font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.bt .v{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:26px;padding:0 3px;border-radius:8px;font-size:13px;font-weight:800}
+.bt .v.ot{background:var(--ot-bg);color:var(--ot)}
+.bt .v.hol{background:var(--hol-bg);color:var(--hol)}
+.bt .ct{min-width:52px;padding:0 6px;font-size:14px;font-weight:800}
+.bt .ct.ot{color:var(--ot);background:#F4F8FE}
+.bt .ct.hol{color:var(--hol);background:#FFF6F6}
+.bt thead .ct.ot,.bt thead .ct.hol{font-size:13px}
+.bt .csum{position:sticky;right:0;z-index:2;min-width:58px;padding:0 6px;background:var(--ink);color:#fff;font-size:15px;font-weight:800;border-bottom-color:#1E293B}
+.bt thead .csum{background:var(--ink);color:#fff;font-size:13px}
+.bt .z{color:#94A3B8;font-weight:600}
+.bt tr.me .cname{color:var(--accent-strong);background:#EEF5FF}
+.bt tr.me .cname i{color:var(--accent-strong)}
+.bt tfoot th,.bt tfoot td{height:46px;background:#F7F9FC;font-weight:800;border-bottom:0}
+.bt tfoot .cname{background:#F7F9FC;color:var(--ink2);font-size:13px}
+.bt tfoot .csum{background:#1E293B}
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:10px 14px 12px;border-top:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px}
+.legend i.ot{background:var(--ot-bg);border:1px solid #9DBFEA}
+.legend i.hol{background:var(--hol-bg);border:1px solid #EDA3A3}
+.legend i.td{background:#FFF8E1;border:1px solid #F0D58A}
+
+/* 첫 화면 */
+.h1{font-size:22px;font-weight:800;line-height:1.5;margin:4px 0 16px}
+.h2{font-size:21px;font-weight:800;margin:0 0 14px}
+.langbtn{display:flex;align-items:center;width:100%;min-height:64px;margin:0 0 10px;padding:8px 18px;border-radius:18px;border:2px solid var(--line);background:#fff;font-size:21px;font-weight:700;text-align:left;cursor:pointer}
+.langbtn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-strong)}
+.names{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.namebtn{display:flex;align-items:center;gap:10px;min-height:66px;padding:6px 14px;border-radius:18px;border:2px solid var(--line);background:#fff;font-size:21px;font-weight:800;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.namebtn i{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;border-radius:9px;background:var(--accent-soft);color:var(--accent-strong);font-size:13px;font-style:normal}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:50vh;text-align:center;color:var(--muted)}
+.center .primary{max-width:280px}
+.spinner{width:36px;height:36px;border-radius:50%;border:4px solid #D5DCE6;border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+.muted{margin:0;color:var(--muted);font-size:15px}
+
+/* 아래 메뉴 */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:6px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(15,23,42,.06)}
+.nav-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.navbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:58px;padding:4px;border:0;border-radius:14px;background:none;color:var(--muted);font-size:13px;font-weight:800;line-height:1.25;cursor:pointer}
+.navbtn[aria-current="page"]{background:var(--accent-soft);color:var(--accent-strong)}
+
+/* 창 · 알림 */
+.overlay{position:fixed;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;padding:12px;background:rgba(15,23,42,.45)}
+.sheet{width:100%;max-width:520px;max-height:90vh;overflow:auto;padding:18px;border-radius:22px;background:#fff}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.ghost,.danger{min-height:56px;border-radius:16px;font-size:17px;font-weight:800;cursor:pointer}
+.ghost{border:2px solid var(--line);background:#fff}
+.danger{border:0;background:var(--hol);color:#fff}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;width:max-content;max-width:calc(100% - 28px);padding:14px 18px;border-radius:16px;background:#0F172A;color:#fff;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.up{bottom:96px}
+.toast svg{flex-shrink:0}
+button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(function () {
+  'use strict';
+
+  /* ───────── 문구 (5개 언어) ───────── */
+  var I18N = {
+    ko: {
+      app: 'NMC 잔업', chooseName: '내 이름을 누르세요', nameMissing: '이름이 없으면 사무실에 말씀하세요.',
+      hello: '{name}님', change: '바꾸기', navRec: '등록', navMine: '내 기록', navAll: '전체 현황',
+      pickDay: '날짜를 고르세요', today: '오늘', otBadge: '잔업 · {t}부터', holBadge: '휴일 근무',
+      howMany: '몇 시간 했나요?', hUnit: '시간', hours: '{h}시간',
+      save: '등록하기', update: '수정하기', del: '삭제', cancel: '취소', saving: '저장 중…',
+      saved: '등록되었습니다', updated: '수정되었습니다', deleted: '삭제되었습니다',
+      already: '이 날짜에 {h}시간이 등록되어 있습니다', pickFirst: '시간을 먼저 고르세요', confirmDel: '이 기록을 삭제할까요?',
+      otLabel: '잔업', holLabel: '휴일', sumLabel: '합계', dayTotal: '일 합계', name: '이름',
+      tapToEdit: '최근 {n}일 안의 날짜를 누르면 고칠 수 있습니다',
+      loading: '불러오는 중…', errConn: '연결 오류입니다. 다시 시도해 주세요.',
+      errDate: '날짜를 확인해 주세요 (최근 {n}일까지만 가능)', errName: '이름이 명단에 없습니다. 사무실에 말씀하세요.',
+      tooOld: '{n}일이 지난 기록은 사무실에서 고칩니다', retry: '다시 시도',
+      work: '근무 08:00–17:00 · 잔업 {t}부터',
+      installTitle: '휴대폰 홈 화면에 추가하기',
+      installAndroid: '안드로이드(크롬): 오른쪽 위 ⋮ → "앱 설치" 또는 "홈 화면에 추가"',
+      installIphone: '아이폰(사파리): 아래쪽 공유 버튼 → "홈 화면에 추가"',
+      installSamsung: '갤럭시(삼성 인터넷): 오른쪽 아래 ≡ → "현재 페이지 추가" → "홈 화면"',
+      installCard: '휴대폰에 앱으로 설치하세요', installBtn: '앱 설치', later: '나중에',
+      installed: '설치되었습니다. 이제 바탕화면 아이콘으로 여세요.',
+      wd: ['일', '월', '화', '수', '목', '금', '토'], wds: ['일', '월', '화', '수', '목', '금', '토'],
+      refresh: '새로고침', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
+    },
+    en: {
+      app: 'NMC Overtime', chooseName: 'Tap your name', nameMissing: 'If your name is not here, tell the office.',
+      hello: 'Hi, {name}', change: 'Change', navRec: 'Record', navMine: 'My record', navAll: 'Everyone',
+      pickDay: 'Choose the day', today: 'Today', otBadge: 'Overtime · from {t}', holBadge: 'Holiday work',
+      howMany: 'How many hours?', hUnit: 'hours', hours: '{h} h',
+      save: 'Save', update: 'Update', del: 'Delete', cancel: 'Cancel', saving: 'Saving…',
+      saved: 'Saved', updated: 'Updated', deleted: 'Deleted',
+      already: '{h} h already saved for this day', pickFirst: 'Choose the hours first', confirmDel: 'Delete this record?',
+      otLabel: 'OT', holLabel: 'Holiday', sumLabel: 'Total', dayTotal: 'Day total', name: 'Name',
+      tapToEdit: 'Tap a day from the last {n} days to change it',
+      loading: 'Loading…', errConn: 'Connection error. Please try again.',
+      errDate: 'Please check the date (only the last {n} days)', errName: 'Your name is not on the list. Tell the office.',
+      tooOld: 'Records older than {n} days are changed by the office', retry: 'Try again',
+      work: 'Work 08:00–17:00 · Overtime from {t}',
+      installTitle: 'Add to your phone’s home screen',
+      installAndroid: 'Android (Chrome): tap ⋮ at the top right → "Install app" or "Add to Home screen"',
+      installIphone: 'iPhone (Safari): tap the Share button → "Add to Home Screen"',
+      installSamsung: 'Galaxy (Samsung Internet): tap ≡ at the bottom right → "Add page to" → "Home screen"',
+      installCard: 'Install it on your phone as an app', installBtn: 'Install app', later: 'Later',
+      installed: 'Installed. Open it from the icon on your home screen.',
+      wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      refresh: 'Refresh', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
+    },
+    th: {
+      app: 'NMC โอที', chooseName: 'แตะชื่อของคุณ', nameMissing: 'ถ้าไม่มีชื่อของคุณ กรุณาแจ้งสำนักงาน',
+      hello: 'สวัสดี {name}', change: 'เปลี่ยน', navRec: 'บันทึก', navMine: 'ของฉัน', navAll: 'ทุกคน',
+      pickDay: 'เลือกวัน', today: 'วันนี้', otBadge: 'โอที · เริ่ม {t}', holBadge: 'ทำงานวันหยุด',
+      howMany: 'ทำกี่ชั่วโมง?', hUnit: 'ชม.', hours: '{h} ชม.',
+      save: 'บันทึก', update: 'แก้ไข', del: 'ลบ', cancel: 'ยกเลิก', saving: 'กำลังบันทึก…',
+      saved: 'บันทึกแล้ว', updated: 'แก้ไขแล้ว', deleted: 'ลบแล้ว',
+      already: 'วันที่นี้บันทึกไว้แล้ว {h} ชม.', pickFirst: 'กรุณาเลือกจำนวนชั่วโมงก่อน', confirmDel: 'ลบบันทึกนี้ใช่ไหม',
+      otLabel: 'โอที', holLabel: 'วันหยุด', sumLabel: 'รวม', dayTotal: 'รวมรายวัน', name: 'ชื่อ',
+      tapToEdit: 'แตะวันที่ภายใน {n} วันล่าสุดเพื่อแก้ไข',
+      loading: 'กำลังโหลด…', errConn: 'เชื่อมต่อไม่ได้ กรุณาลองอีกครั้ง',
+      errDate: 'กรุณาตรวจสอบวันที่ (ย้อนหลังได้ {n} วัน)', errName: 'ไม่มีชื่อของคุณในรายชื่อ กรุณาแจ้งสำนักงาน',
+      tooOld: 'บันทึกที่เกิน {n} วัน สำนักงานจะเป็นผู้แก้ไข', retry: 'ลองอีกครั้ง',
+      work: 'เวลางาน 08:00–17:00 · โอทีเริ่ม {t}',
+      installTitle: 'เพิ่มไว้ที่หน้าจอหลักของโทรศัพท์',
+      installAndroid: 'Android (Chrome): แตะ ⋮ มุมขวาบน → "ติดตั้งแอป" หรือ "เพิ่มลงในหน้าจอหลัก"',
+      installIphone: 'iPhone (Safari): แตะปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม"',
+      installSamsung: 'Galaxy (Samsung Internet): แตะ ≡ มุมขวาล่าง → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
+      installCard: 'ติดตั้งเป็นแอปในโทรศัพท์', installBtn: 'ติดตั้งแอป', later: 'ไว้ทีหลัง',
+      installed: 'ติดตั้งแล้ว เปิดจากไอคอนบนหน้าจอหลัก',
+      wd: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'], wds: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
+      refresh: 'รีเฟรช', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
+    },
+    vi: {
+      app: 'NMC Tăng ca', chooseName: 'Bấm vào tên của bạn', nameMissing: 'Nếu không có tên của bạn, hãy báo văn phòng.',
+      hello: 'Xin chào {name}', change: 'Đổi', navRec: 'Ghi', navMine: 'Của tôi', navAll: 'Mọi người',
+      pickDay: 'Chọn ngày', today: 'Hôm nay', otBadge: 'Tăng ca · từ {t}', holBadge: 'Làm ngày nghỉ',
+      howMany: 'Bạn làm bao nhiêu giờ?', hUnit: 'giờ', hours: '{h} giờ',
+      save: 'Lưu', update: 'Sửa', del: 'Xóa', cancel: 'Hủy', saving: 'Đang lưu…',
+      saved: 'Đã lưu', updated: 'Đã sửa', deleted: 'Đã xóa',
+      already: 'Ngày này đã lưu {h} giờ', pickFirst: 'Hãy chọn số giờ trước', confirmDel: 'Xóa bản ghi này?',
+      otLabel: 'Tăng ca', holLabel: 'Ngày nghỉ', sumLabel: 'Tổng', dayTotal: 'Tổng ngày', name: 'Tên',
+      tapToEdit: 'Bấm vào ngày trong {n} ngày gần đây để sửa',
+      loading: 'Đang tải…', errConn: 'Lỗi kết nối. Vui lòng thử lại.',
+      errDate: 'Vui lòng kiểm tra ngày (chỉ trong {n} ngày gần đây)', errName: 'Tên của bạn không có trong danh sách. Hãy báo văn phòng.',
+      tooOld: 'Bản ghi quá {n} ngày sẽ do văn phòng sửa', retry: 'Thử lại',
+      work: 'Giờ làm 08:00–17:00 · Tăng ca từ {t}',
+      installTitle: 'Thêm vào màn hình chính của điện thoại',
+      installAndroid: 'Android (Chrome): bấm ⋮ ở góc trên bên phải → "Cài đặt ứng dụng" hoặc "Thêm vào màn hình chính"',
+      installIphone: 'iPhone (Safari): bấm nút Chia sẻ → "Thêm vào MH chính"',
+      installSamsung: 'Galaxy (Samsung Internet): bấm ≡ ở góc dưới bên phải → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
+      installCard: 'Cài vào điện thoại như một ứng dụng', installBtn: 'Cài đặt ứng dụng', later: 'Để sau',
+      installed: 'Đã cài đặt. Hãy mở bằng biểu tượng trên màn hình chính.',
+      wd: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], wds: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+      refresh: 'Làm mới', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
+    },
+    my: {
+      app: 'NMC အချိန်ပို', chooseName: 'သင့်အမည်ကို နှိပ်ပါ', nameMissing: 'သင့်အမည် မပါလျှင် ရုံးခန်းသို့ ပြောပါ။',
+      hello: 'မင်္ဂလာပါ {name}', change: 'ပြောင်းရန်', navRec: 'ထည့်ရန်', navMine: 'ကျွန်ုပ်၏', navAll: 'အားလုံး',
+      pickDay: 'ရက်ရွေးပါ', today: 'ယနေ့', otBadge: 'အချိန်ပို · {t} မှ', holBadge: 'ပိတ်ရက် အလုပ်',
+      howMany: 'ဘယ်နှစ်နာရီ လုပ်ခဲ့သလဲ', hUnit: 'နာရီ', hours: '{h} နာရီ',
+      save: 'သိမ်းမည်', update: 'ပြင်မည်', del: 'ဖျက်မည်', cancel: 'မလုပ်တော့ပါ', saving: 'သိမ်းနေသည်…',
+      saved: 'သိမ်းပြီးပါပြီ', updated: 'ပြင်ပြီးပါပြီ', deleted: 'ဖျက်ပြီးပါပြီ',
+      already: 'ဤရက်အတွက် {h} နာရီ သိမ်းပြီးသား', pickFirst: 'နာရီကို အရင် ရွေးပါ', confirmDel: 'ဤမှတ်တမ်းကို ဖျက်မလား',
+      otLabel: 'အချိန်ပို', holLabel: 'ပိတ်ရက်', sumLabel: 'စုစုပေါင်း', dayTotal: 'နေ့စုစုပေါင်း', name: 'အမည်',
+      tapToEdit: 'နောက်ဆုံး {n} ရက်အတွင်း ရက်ကိုနှိပ်ပြီး ပြင်နိုင်သည်',
+      loading: 'ခဏစောင့်ပါ…', errConn: 'ချိတ်ဆက်မှု မအောင်မြင်ပါ။ ထပ်စမ်းကြည့်ပါ။',
+      errDate: 'ရက်စွဲကို စစ်ဆေးပါ (နောက်ဆုံး {n} ရက်အတွင်းသာ)', errName: 'သင့်အမည် စာရင်းတွင် မပါပါ။ ရုံးခန်းသို့ ပြောပါ။',
+      tooOld: '{n} ရက်ကျော်သော မှတ်တမ်းများကို ရုံးခန်းမှ ပြင်ပေးပါမည်', retry: 'ထပ်စမ်းရန်',
+      work: 'အလုပ်ချိန် 08:00–17:00 · အချိန်ပို {t} မှ',
+      installTitle: 'ဖုန်း ပင်မစာမျက်နှာတွင် ထည့်ရန်',
+      installAndroid: 'Android (Chrome): ညာဘက်အပေါ် ⋮ ကိုနှိပ် → "Install app" သို့မဟုတ် "Add to Home screen"',
+      installIphone: 'iPhone (Safari): မျှဝေရန် ခလုတ်ကိုနှိပ် → "Add to Home Screen"',
+      installSamsung: 'Galaxy (Samsung Internet): ညာဘက်အောက် ≡ ကိုနှိပ် → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
+      installCard: 'ဖုန်းထဲတွင် အက်ပ်အဖြစ် ထည့်သွင်းပါ', installBtn: 'အက်ပ် ထည့်သွင်းရန်', later: 'နောက်မှ',
+      installed: 'ထည့်သွင်းပြီးပါပြီ။ ပင်မစာမျက်နှာရှိ အိုင်ကွန်မှ ဖွင့်ပါ။',
+      wd: ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      refresh: 'ပြန်ဖွင့်ရန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့'
+    }
+  };
+  var MONTHS = {
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+    th: ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'],
+    my: ['ဇန်နဝါရီ', 'ဖေဖော်ဝါရီ', 'မတ်', 'ဧပြီ', 'မေ', 'ဇွန်', 'ဇူလိုင်', 'ဩဂုတ်', 'စက်တင်ဘာ', 'အောက်တိုဘာ', 'နိုဝင်ဘာ', 'ဒီဇင်ဘာ']
+  };
+  var LANGS = [['ko', '한국어'], ['en', 'English'], ['th', 'ภาษาไทย'], ['vi', 'Tiếng Việt'], ['my', 'မြန်မာ']];
+  var LANG_TITLE = [['ko', '언어'], ['en', 'Language'], ['th', 'ภาษา'], ['vi', 'Ngôn ngữ'], ['my', 'ဘာသာစကား']];
+
+  /* ───────── 아이콘 ───────── */
+  function svg(d, size) {
+    return '<svg aria-hidden="true" width="' + (size || 20) + '" height="' + (size || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+  }
+  var ICON = {
+    globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/>', 18),
+    chevL: svg('<path d="M15 5l-7 7 7 7"/>', 22),
+    chevR: svg('<path d="M9 5l7 7-7 7"/>', 22),
+    check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+    trash: svg('<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/>'),
+    clock: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', 18),
+    refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>', 22),
+    plus: svg('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', 24),
+    cal: svg('<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', 24),
+    grid: svg('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M9 4v16"/>', 24),
+    phone: svg('<rect x="6.5" y="2" width="11" height="20" rx="2.5"/><path d="M12 6.5v7M9 10.5l3 3 3-3"/><path d="M10.5 18h3"/>', 26)
+  };
+
+  /* ───────── 상태 ───────── */
+  var GAS = !!(window.google && google.script && google.script.run);   // 구글 Apps Script 화면 안
+  var API = (!GAS && window.NMC_API) ? String(window.NMC_API) : '';    // 설치형 앱(GitHub 주소)
+  var LIVE = GAS || !!API;
+  var installEvt = null;
+  var S = {
+    lang: null, me: null, employees: [], holidays: [], today: '', oldest: '',
+    otStart: '17:30', stepMin: 30, maxMin: 300, maxHolMin: 720, backDays: 7,
+    months: {}, loadingMonth: {}, monthErr: {},
+    ready: false, fatal: false, started: false,
+    tab: 'rec', date: '', minutes: 0, viewYm: '',
+    busy: false, sheet: null, toast: null, toastTimer: null,
+    boardYm: null, boardScroll: null
+  };
+
+  function T() { return I18N[S.lang] || I18N.ko; }
+  function tr(key, vars) {
+    var s = T()[key];
+    if (s == null) s = I18N.ko[key];
+    if (s == null) s = key;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(String(vars[k])); });
+    return s;
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ───────── 날짜·시간 ───────── */
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymdOf(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function parseYmd(s) { var p = s.split('-'); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
+  function addDays(s, n) { var d = parseYmd(s); d.setDate(d.getDate() + n); return ymdOf(d); }
+  function ymOf(s) { return s.slice(0, 7); }
+  function addMonths(ym, n) {
+    var p = ym.split('-');
+    var d = new Date(Number(p[0]), Number(p[1]) - 1 + n, 1);
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1);
+  }
+  function daysIn(ym) { var p = ym.split('-'); return new Date(Number(p[0]), Number(p[1]), 0).getDate(); }
+  function isHol(date) { var w = parseYmd(date).getDay(); return w === 0 || w === 6 || S.holidays.indexOf(date) >= 0; }
+  function fmtDate(s) { var d = parseYmd(s); return (d.getMonth() + 1) + '.' + d.getDate() + ' (' + T().wd[d.getDay()] + ')'; }
+  function monthTitle(ym) {
+    var y = ym.slice(0, 4), m = Number(ym.slice(5, 7));
+    if (S.lang === 'en') return MONTHS.en[m - 1] + ' ' + y;
+    if (S.lang === 'th') return MONTHS.th[m - 1] + ' ' + y;
+    if (S.lang === 'vi') return 'Tháng ' + m + ' / ' + y;
+    if (S.lang === 'my') return y + ' ' + MONTHS.my[m - 1];
+    return y + '년 ' + m + '월';
+  }
+  function endTime(min) {
+    var p = S.otStart.split(':');
+    var t = Number(p[0]) * 60 + Number(p[1]) + min;
+    return pad(Math.floor(t / 60) % 24) + ':' + pad(t % 60);
+  }
+  function fmtH(min) { return String(Math.round(min / 6) / 10); }
+  function hrs(min) { return tr('hours', { h: fmtH(min) }); }
+
+  /* ───────── 데이터 ───────── */
+  function myEntry(date) {
+    var list = S.months[ymOf(date)];
+    if (!list || !S.me) return null;
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].name === S.me && list[i].date === date) return list[i];
+    }
+    return null;
+  }
+  function editable(date) { return date >= S.oldest && date <= S.today; }
+
+  var DEMO = null;
+
+  var ACTIONS = { apiInit: ['init'], apiMonth: ['month', 'ym'], apiSave: ['save', 'name', 'date', 'minutes'], apiDelete: ['delete', 'name', 'date'] };
+  function apiFetch(fn, args) {
+    var spec = ACTIONS[fn];
+    var q = 'action=' + spec[0];
+    for (var i = 1; i < spec.length; i++) q += '&' + spec[i] + '=' + encodeURIComponent(args[i - 1] == null ? '' : String(args[i - 1]));
+    var url = API + (API.indexOf('?') < 0 ? '?' : '&') + q + '&_=' + Date.now();
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 30000) : null;
+    return fetch(url, { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (res) { if (!res.ok) throw new Error('http_' + res.status); return res.json(); })
+      .then(function (r) {
+        if (timer) clearTimeout(timer);
+        if (r && r.ok) return r.data;
+        throw new Error((r && r.error) || 'bad_response');
+      }, function (err) {
+        if (timer) clearTimeout(timer);
+        throw err;
+      });
+  }
+  function call(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (resolve, reject) {
+      if (GAS) {
+        var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+        runner[fn].apply(runner, args);
+      } else if (API) {
+        apiFetch(fn, args).then(resolve, reject);
+      } else {
+        setTimeout(function () {
+          try { resolve(DEMO[fn].apply(null, args)); } catch (e) { reject(e); }
+        }, 250);
+      }
+    });
+  }
+
+  function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function stored(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function readUrl(cb) {
+    if (GAS && google.script.url) {
+      try { google.script.url.getLocation(function (loc) { cb((loc && loc.parameter) || {}); }); return; } catch (e) {}
+    }
+    var p = {};
+    try { new URLSearchParams(location.search).forEach(function (v, k) { p[k] = v; }); } catch (e) {}
+    cb(p);
+  }
+  /* 주소에 언어·이름을 넣어 두면, 그 화면을 홈 화면에 추가했을 때 다음부터 바로 열립니다. */
+  function syncUrl() {
+    if (!LIVE) return;
+    var p = {};
+    if (S.lang) p.l = S.lang;
+    if (S.me) p.n = S.me;
+    if (GAS) {
+      if (google.script.history) { try { google.script.history.replace(null, p); } catch (e) {} }
+      return;
+    }
+    try {
+      var qs = Object.keys(p).map(function (k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    } catch (e) {}
+  }
+  function standalone() {
+    try { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; } catch (e) { return false; }
+  }
+  function applyLang() {
+    document.documentElement.lang = S.lang || 'ko';
+    if (LIVE) document.title = tr('app');
+  }
+
+  /* ───────── 화면 그리기 ───────── */
+  var root = document.getElementById('app');
+
+  function render() {
+    var sc = document.getElementById('bscroll');
+    if (sc) S.boardScroll = sc.scrollLeft;
+    var main = S.lang && S.ready && S.me;
+    var h = '';
+    if (!LIVE) h += '<p class="demo">미리보기 · 보내 주신 11월 표 숫자를 예시로 넣었습니다 · 입력해도 저장되지 않습니다</p>';
+    h += appbar();
+    h += '<main class="wrap' + (main ? ' withnav' : '') + (main && S.tab === 'all' ? ' wide' : '') + '">';
+    if (!S.lang) h += viewLang();
+    else if (!S.ready) h += S.fatal ? viewFatal() : viewLoading();
+    else if (!S.me) h += viewNames();
+    else h += S.tab === 'rec' ? viewRec() : S.tab === 'mine' ? viewMine() : viewAll();
+    h += '</main>';
+    if (main) h += nav();
+    if (S.sheet === 'lang') h += sheetLang();
+    if (S.sheet === 'confirm') h += sheetConfirm();
+    if (S.toast) h += '<div class="toast' + (main ? ' up' : '') + '" role="status">' + S.toast + '</div>';
+    root.innerHTML = h;
+    afterRender();
+  }
+
+  function afterRender() {
+    var sc = document.getElementById('bscroll');
+    if (!sc) return;
+    if (S.boardYm === S.viewYm && S.boardScroll != null) {
+      sc.scrollLeft = S.boardScroll;
+    } else {
+      S.boardYm = S.viewYm;
+      var th = sc.querySelector('th.today');
+      sc.scrollLeft = th ? Math.max(0, th.offsetLeft + th.offsetWidth - sc.clientWidth + 58 + 36 * 2) : 0;
+      S.boardScroll = sc.scrollLeft;
+    }
+    sc.addEventListener('scroll', function () { S.boardScroll = sc.scrollLeft; }, { passive: true });
+  }
+
+  function appbar() {
+    var langName = '';
+    LANGS.forEach(function (l) { if (l[0] === S.lang) langName = l[1]; });
+    var h = '<header class="appbar"><div class="ab-in"><div class="brand"><span class="logo" aria-hidden="true">NMC</span><span>' + esc(tr('app')) + '</span></div>';
+    if (S.lang) {
+      h += '<button type="button" class="toplang" data-act="langsheet" aria-label="' + esc(tr('language')) + ': ' + esc(langName) + '">' + ICON.globe + '<span>' + esc(langName) + '</span></button>';
+    }
+    h += '</div>';
+    if (S.lang && S.ready && S.me) {
+      h += '<div class="who"><b>' + esc(tr('hello', { name: S.me })) + '</b><button type="button" class="wholink" data-act="changeme">' + esc(tr('change')) + '</button></div>';
+    }
+    return h + '</header>';
+  }
+
+  function nav() {
+    var items = [['rec', 'navRec', ICON.plus], ['mine', 'navMine', ICON.cal], ['all', 'navAll', ICON.grid]];
+    var h = '<nav class="nav"><div class="nav-in">';
+    items.forEach(function (it) {
+      h += '<button type="button" class="navbtn" data-act="tab" data-v="' + it[0] + '"' + (S.tab === it[0] ? ' aria-current="page"' : '') + '>' + it[2] + '<span>' + esc(tr(it[1])) + '</span></button>';
+    });
+    return h + '</div></nav>';
+  }
+
+  function viewLang() {
+    var h = '<h1 class="h1">' + LANG_TITLE.map(function (l) { return '<span lang="' + l[0] + '">' + l[1] + '</span>'; }).join(' · ') + '</h1>';
+    LANGS.forEach(function (l) {
+      h += '<button type="button" class="langbtn" lang="' + l[0] + '" data-act="lang" data-v="' + l[0] + '">' + l[1] + '</button>';
+    });
+    return h;
+  }
+
+  function viewLoading() {
+    return '<div class="center"><div class="spinner" aria-hidden="true"></div><p>' + esc(tr('loading')) + '</p></div>';
+  }
+
+  function viewFatal() {
+    return '<div class="center"><p>' + esc(tr('errConn')) + '</p><button type="button" class="primary" data-act="retry">' + esc(tr('retry')) + '</button></div>';
+  }
+
+  function viewNames() {
+    var h = '<section class="card"><h2 class="h2">' + esc(tr('chooseName')) + '</h2>';
+    if (S.employees.length) {
+      h += '<div class="names">';
+      S.employees.forEach(function (n, i) {
+        h += '<button type="button" class="namebtn" data-act="me" data-v="' + esc(n) + '"><i>' + (i + 1) + '</i><span>' + esc(n) + '</span></button>';
+      });
+      h += '</div>';
+    }
+    return h + '<p class="hint">' + esc(tr('nameMissing')) + '</p></section>';
+  }
+
+  function viewRec() {
+    var ex = myEntry(S.date);
+    var hol = isHol(S.date);
+    var monthReady = !!S.months[ymOf(S.date)];
+
+    var showCard = API && !standalone() && !S.hideInstall;
+    var h = showCard ? installCard() : '';
+    h += '<section class="card"><h2 class="sec">' + esc(tr('pickDay')) + '</h2><div class="days">';
+    for (var i = 0; i <= S.backDays; i++) {
+      var d = addDays(S.today, -i);
+      if (d < S.oldest) break;
+      var e = myEntry(d), dh = isHol(d), w = parseYmd(d);
+      h += '<button type="button" class="day' + (dh ? ' hol' : '') + '" aria-pressed="' + (S.date === d) + '" data-act="day" data-v="' + d + '" aria-label="' + esc(fmtDate(d)) + (e ? ' · ' + esc(hrs(e.minutes)) : '') + '">' +
+        '<span class="dw">' + esc(i === 0 ? tr('today') : T().wds[w.getDay()]) + '</span>' +
+        '<span class="dn">' + w.getDate() + '</span>' +
+        (e ? '<span class="dh ' + (dh ? 'hol' : 'ot') + '">' + fmtH(e.minutes) + '</span>' : '<span class="dh"></span>') + '</button>';
+    }
+    h += '</div><div class="selinfo"><span class="seldate">' + esc(fmtDate(S.date)) + '</span>' +
+      (hol ? '<span class="badge hol">' + esc(tr('holBadge')) + '</span>' : '<span class="badge ot">' + esc(tr('otBadge', { t: S.otStart })) + '</span>') +
+      '</div></section>';
+
+    h += '<section class="card">';
+    if (ex) h += '<p class="note">' + ICON.check + '<span>' + esc(tr('already', { h: fmtH(ex.minutes) })) + '</span></p>';
+    h += '<h2 class="sec">' + esc(tr('howMany')) + '</h2><div class="hgrid' + (hol ? ' hol' : '') + '">';
+    var max = hol ? S.maxHolMin : S.maxMin;
+    for (var m = S.stepMin; m <= max; m += S.stepMin) {
+      h += '<button type="button" class="hbtn" aria-pressed="' + (S.minutes === m) + '" data-act="min" data-v="' + m + '" aria-label="' + esc(hrs(m)) + '">' +
+        '<b>' + fmtH(m) + '</b><span>' + esc(tr('hUnit')) + '</span>' + (hol ? '' : '<small>~' + endTime(m) + '</small>') + '</button>';
+    }
+    h += '</div>';
+    h += '<button type="button" class="primary" data-act="save"' + (S.busy || !monthReady ? ' disabled' : '') + '>' +
+      (S.busy ? esc(tr('saving')) : esc(tr(ex ? 'update' : 'save'))) + '</button>';
+    if (ex) h += '<button type="button" class="secondary" data-act="askdel"' + (S.busy ? ' disabled' : '') + '>' + ICON.trash + '<span>' + esc(tr('del')) + '</span></button>';
+    h += '</section>';
+
+    h += '<div class="foot"><p class="wk">' + ICON.clock + '<span>' + esc(tr('work', { t: S.otStart })) + '</span></p>';
+    if (!standalone() && !showCard) {
+      h += '<details class="help"><summary>' + esc(tr('installTitle')) + '</summary>' +
+        (installEvt ? '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>' : '') +
+        '<p>' + esc(tr('installAndroid')) + '</p><p>' + esc(tr('installSamsung')) + '</p><p>' + esc(tr('installIphone')) + '</p></details>';
+    }
+    return h + '</div>';
+  }
+
+  function installCard() {
+    var h = '<section class="card install"><p class="inst-head">' + ICON.phone + '<span>' + esc(tr('installCard')) + '</span></p>';
+    if (installEvt) h += '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>';
+    h += '<ul class="inst-steps"><li>' + esc(tr('installAndroid')) + '</li><li>' + esc(tr('installSamsung')) + '</li><li>' + esc(tr('installIphone')) + '</li></ul>';
+    return h + '<button type="button" class="linkbtn" data-act="hideinstall">' + esc(tr('later')) + '</button></section>';
+  }
+
+  function monthBar(withRefresh) {
+    var cur = ymOf(S.today);
+    var h = '<div class="monthbar"><button type="button" class="iconbtn" data-act="mprev" aria-label="' + esc(tr('prevMonth')) + '">' + ICON.chevL + '</button>';
+    h += '<h2 class="mtitle">' + esc(monthTitle(S.viewYm)) + '</h2>';
+    if (withRefresh) h += '<button type="button" class="iconbtn" data-act="refresh" aria-label="' + esc(tr('refresh')) + '">' + ICON.refresh + '</button>';
+    h += '<button type="button" class="iconbtn" data-act="mnext" aria-label="' + esc(tr('nextMonth')) + '"' + (S.viewYm >= cur ? ' disabled' : '') + '>' + ICON.chevR + '</button></div>';
+    return h;
+  }
+
+  function monthPending(ym) {
+    if (S.monthErr[ym]) {
+      return '<section class="card"><p class="muted">' + esc(tr('errConn')) + '</p><button type="button" class="primary" data-act="refresh">' + esc(tr('retry')) + '</button></section>';
+    }
+    return '<section class="card"><p class="muted">' + esc(tr('loading')) + '</p></section>';
+  }
+
+  function stats(ot, hol) {
+    var u = '<small>' + esc(tr('hUnit')) + '</small>';
+    return '<div class="stats"><div class="stat ot"><span>' + esc(tr('otLabel')) + '</span><b>' + fmtH(ot) + u + '</b></div>' +
+      '<div class="stat hol"><span>' + esc(tr('holLabel')) + '</span><b>' + fmtH(hol) + u + '</b></div>' +
+      '<div class="stat sum"><span>' + esc(tr('sumLabel')) + '</span><b>' + fmtH(ot + hol) + u + '</b></div></div>';
+  }
+
+  function viewMine() {
+    var ym = S.viewYm, list = S.months[ym];
+    var h = monthBar(false);
+    if (!list) return h + monthPending(ym);
+    var mine = {}, ot = 0, hol = 0;
+    list.forEach(function (e) { if (e.name === S.me) mine[e.date] = (mine[e.date] || 0) + e.minutes; });
+    Object.keys(mine).forEach(function (d) { if (isHol(d)) hol += mine[d]; else ot += mine[d]; });
+    h += stats(ot, hol);
+    h += '<section class="card cal"><div class="cal-h">';
+    for (var i = 0; i < 7; i++) h += '<span' + (i === 0 || i === 6 ? ' class="hol"' : '') + '>' + esc(T().wds[i]) + '</span>';
+    h += '</div><div class="cal-g">';
+    var first = parseYmd(ym + '-01').getDay();
+    for (i = 0; i < first; i++) h += '<span class="cblank"></span>';
+    var n = daysIn(ym);
+    for (var d = 1; d <= n; d++) {
+      var date = ym + '-' + pad(d), v = mine[date], dh = isHol(date);
+      var cls = 'cday ' + (dh ? 'hol' : 'ot') + (v ? ' has' : '') + (date === S.today ? ' today' : '');
+      var inner = '<span class="cd">' + d + '</span>' + (v ? '<span class="ch ' + (dh ? 'hol' : 'ot') + '">' + fmtH(v) + '</span>' : '');
+      if (editable(date)) {
+        h += '<button type="button" class="' + cls + '" data-act="caledit" data-v="' + date + '" aria-label="' + esc(fmtDate(date)) + (v ? ' · ' + esc(hrs(v)) : '') + '">' + inner + '</button>';
+      } else {
+        h += '<div class="' + cls + '">' + inner + '</div>';
+      }
+    }
+    h += '</div><p class="hint">' + esc(tr('tapToEdit', { n: S.backDays })) + '</p></section>';
+    return h;
+  }
+
+  function viewAll() {
+    var ym = S.viewYm, list = S.months[ym];
+    var h = monthBar(true);
+    if (!list) return h + monthPending(ym);
+    var names = S.employees.slice();
+    list.forEach(function (e) { if (names.indexOf(e.name) < 0) names.push(e.name); });
+    var grid = {};
+    names.forEach(function (n) { grid[n] = {}; });
+    list.forEach(function (e) { grid[e.name][e.date] = (grid[e.name][e.date] || 0) + e.minutes; });
+    var dates = [], n = daysIn(ym);
+    for (var d = 1; d <= n; d++) dates.push(ym + '-' + pad(d));
+    var colTot = {}, gOt = 0, gHol = 0;
+
+    var t = '<table class="bt"><thead><tr><th scope="col" class="cname">' + esc(tr('name')) + '</th>';
+    dates.forEach(function (date) {
+      var dd = parseYmd(date);
+      t += '<th scope="col" class="dc' + (isHol(date) ? ' hol' : '') + (date === S.today ? ' today' : '') + '"><span class="dnum">' + dd.getDate() + '</span><span class="dwk">' + esc(T().wds[dd.getDay()]) + '</span></th>';
+    });
+    t += '<th scope="col" class="ct ot">' + esc(tr('otLabel')) + '</th><th scope="col" class="ct hol">' + esc(tr('holLabel')) + '</th><th scope="col" class="csum">' + esc(tr('sumLabel')) + '</th></tr></thead><tbody>';
+    names.forEach(function (name, idx) {
+      var row = grid[name], ot = 0, hol = 0;
+      t += '<tr' + (name === S.me ? ' class="me"' : '') + '><th scope="row" class="cname"><i>' + (idx + 1) + '</i>' + esc(name) + '</th>';
+      dates.forEach(function (date) {
+        var v = row[date], dh = isHol(date);
+        if (v) {
+          if (dh) hol += v; else ot += v;
+          colTot[date] = (colTot[date] || 0) + v;
+        }
+        t += '<td class="' + (dh ? 'hol' : '') + (date === S.today ? ' today' : '') + '">' + (v ? '<span class="v ' + (dh ? 'hol' : 'ot') + '">' + fmtH(v) + '</span>' : '') + '</td>';
+      });
+      gOt += ot;
+      gHol += hol;
+      t += '<td class="ct ot">' + (ot ? fmtH(ot) : '<span class="z">0</span>') + '</td><td class="ct hol">' + (hol ? fmtH(hol) : '<span class="z">0</span>') + '</td><td class="csum">' + fmtH(ot + hol) + '</td></tr>';
+    });
+    t += '</tbody><tfoot><tr><th scope="row" class="cname">' + esc(tr('dayTotal')) + '</th>';
+    dates.forEach(function (date) {
+      var v = colTot[date];
+      t += '<td class="' + (isHol(date) ? 'hol' : '') + (date === S.today ? ' today' : '') + '">' + (v ? fmtH(v) : '') + '</td>';
+    });
+    t += '<td class="ct ot">' + fmtH(gOt) + '</td><td class="ct hol">' + fmtH(gHol) + '</td><td class="csum">' + fmtH(gOt + gHol) + '</td></tr></tfoot></table>';
+
+    h += stats(gOt, gHol);
+    h += '<section class="card board"><div class="bscroll" id="bscroll">' + t + '</div>';
+    h += '<div class="legend"><span><i class="ot"></i>' + esc(tr('otLabel')) + '</span><span><i class="hol"></i>' + esc(tr('holBadge')) + '</span><span><i class="td"></i>' + esc(tr('todayMark')) + '</span></div></section>';
+    return h;
+  }
+
+  function sheetLang() {
+    var h = '<div class="overlay" data-act="close"><div class="sheet" data-act="noop" role="dialog" aria-modal="true" aria-label="' + esc(tr('language')) + '">';
+    LANGS.forEach(function (l) {
+      h += '<button type="button" class="langbtn" lang="' + l[0] + '" data-act="lang" data-v="' + l[0] + '" aria-pressed="' + (S.lang === l[0]) + '">' + l[1] + '</button>';
+    });
+    return h + '<button type="button" class="ghost" style="width:100%" data-act="close">' + esc(tr('cancel')) + '</button></div></div>';
+  }
+
+  function sheetConfirm() {
+    var ex = myEntry(S.date);
+    var h = '<div class="overlay" data-act="close"><div class="sheet" data-act="noop" role="alertdialog" aria-modal="true" aria-label="' + esc(tr('confirmDel')) + '">';
+    h += '<p class="h2">' + esc(tr('confirmDel')) + '</p>';
+    if (ex) h += '<p class="muted">' + esc(fmtDate(S.date)) + ' · ' + esc(hrs(ex.minutes)) + '</p>';
+    return h + '<div class="two"><button type="button" class="ghost" data-act="close">' + esc(tr('cancel')) + '</button><button type="button" class="danger" data-act="del">' + esc(tr('del')) + '</button></div></div></div>';
+  }
+
+  /* ───────── 동작 ───────── */
+  function showToast(html) {
+    S.toast = html;
+    render();
+    clearTimeout(S.toastTimer);
+    S.toastTimer = setTimeout(function () { S.toast = null; render(); }, 2600);
+  }
+  function toast(text) { showToast('<span>' + esc(text) + '</span>'); }
+  function toastOk(text) { showToast(ICON.check + '<span>' + esc(text) + '</span>'); }
+  function errText(err) {
+    var m = String((err && err.message) || err || '');
+    if (m.indexOf('bad_date') >= 0) return tr('errDate', { n: S.backDays });
+    if (m.indexOf('bad_name') >= 0) return tr('errName');
+    return tr('errConn');
+  }
+
+  function applyInit(r) {
+    S.employees = r.employees || [];
+    S.holidays = r.holidays || [];
+    S.today = r.today;
+    S.oldest = r.oldest;
+    S.otStart = r.otStart || '17:30';
+    S.stepMin = r.stepMin || 30;
+    S.maxMin = r.maxMin || 300;
+    S.maxHolMin = r.maxHolidayMin || 720;
+    S.backDays = r.backDays || 7;
+    if (r.month) { S.months[r.month.ym] = r.month.entries; S.monthErr[r.month.ym] = false; }
+    if (S.me && S.employees.indexOf(S.me) < 0) { S.me = null; store('nmc_ot_me', null); }
+    if (!S.date || !editable(S.date)) { S.date = S.today; S.minutes = 0; }
+    if (!S.viewYm) S.viewYm = ymOf(S.today);
+  }
+
+  function loadInit() {
+    S.fatal = false;
+    render();
+    call('apiInit').then(function (r) {
+      applyInit(r);
+      S.minutes = pickedMinutesFor(S.date);
+      S.ready = true;
+      render();
+      syncUrl();
+    }, function () { S.fatal = true; render(); });
+  }
+
+  function loadMonth(ym, after) {
+    if (S.loadingMonth[ym]) return;
+    S.loadingMonth[ym] = true;
+    call('apiMonth', ym).then(function (r) {
+      S.loadingMonth[ym] = false;
+      S.months[r.ym] = r.entries;
+      if (r.holidays) S.holidays = r.holidays;
+      S.monthErr[r.ym] = false;
+      if (after) after();
+      render();
+    }, function () {
+      S.loadingMonth[ym] = false;
+      if (!S.months[ym]) S.monthErr[ym] = true;
+      toast(tr('errConn'));
+    });
+  }
+  function ensureMonth(ym, after) { if (!S.months[ym]) loadMonth(ym, after); }
+
+  function pickedMinutesFor(date) { var e = myEntry(date); return e ? e.minutes : 0; }
+
+  function setDate(d) {
+    S.date = d;
+    S.minutes = pickedMinutesFor(d);
+    if (!S.months[ymOf(d)]) ensureMonth(ymOf(d), function () { if (S.date === d) S.minutes = pickedMinutesFor(d); });
+    render();
+  }
+
+  function setLang(l) {
+    if (!I18N[l]) return;
+    S.lang = l;
+    S.toast = null;
+    clearTimeout(S.toastTimer);
+    store('nmc_ot_lang', l);
+    applyLang();
+    syncUrl();
+  }
+
+  function setMe(n) {
+    S.me = n;
+    store('nmc_ot_me', n);
+    S.tab = 'rec';
+    S.date = S.today;
+    S.minutes = pickedMinutesFor(S.date);
+    syncUrl();
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function save() {
+    if (S.busy) return;
+    if (!S.minutes) { toast(tr('pickFirst')); return; }
+    var had = !!myEntry(S.date), date = S.date, minutes = S.minutes;
+    S.busy = true;
+    render();
+    call('apiSave', S.me, date, minutes).then(function (r) {
+      S.busy = false;
+      S.months[r.ym] = r.entries;
+      if (r.holidays) S.holidays = r.holidays;
+      toastOk(tr(had ? 'updated' : 'saved') + ' · ' + fmtDate(date) + ' · ' + hrs(minutes));
+    }, function (err) {
+      S.busy = false;
+      toast(errText(err));
+    });
+  }
+
+  function del() {
+    if (S.busy) return;
+    var date = S.date;
+    S.busy = true;
+    render();
+    call('apiDelete', S.me, date).then(function (r) {
+      S.busy = false;
+      S.months[r.ym] = r.entries;
+      if (S.date === date) S.minutes = 0;
+      toastOk(tr('deleted') + ' · ' + fmtDate(date));
+    }, function (err) {
+      S.busy = false;
+      toast(errText(err));
+    });
+  }
+
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.getAttribute('data-act'), v = el.getAttribute('data-v');
+    switch (act) {
+      case 'noop': return;
+      case 'lang': setLang(v); S.sheet = null; render(); if (!S.started) start(); return;
+      case 'langsheet': S.sheet = 'lang'; render(); return;
+      case 'close': S.sheet = null; render(); return;
+      case 'retry': loadInit(); return;
+      case 'me': setMe(v); return;
+      case 'changeme': S.me = null; store('nmc_ot_me', null); syncUrl(); render(); window.scrollTo(0, 0); return;
+      case 'tab': S.tab = v; if (v !== 'rec') ensureMonth(S.viewYm); render(); window.scrollTo(0, 0); return;
+      case 'day': setDate(v); return;
+      case 'min': S.minutes = Number(v); render(); return;
+      case 'save': save(); return;
+      case 'askdel': S.sheet = 'confirm'; render(); return;
+      case 'del': S.sheet = null; del(); return;
+      case 'mprev': S.viewYm = addMonths(S.viewYm, -1); ensureMonth(S.viewYm); render(); return;
+      case 'mnext':
+        if (S.viewYm < ymOf(S.today)) { S.viewYm = addMonths(S.viewYm, 1); ensureMonth(S.viewYm); render(); }
+        return;
+      case 'refresh': S.monthErr[S.viewYm] = false; render(); loadMonth(S.viewYm); return;
+      case 'caledit':
+        if (editable(v)) { S.tab = 'rec'; setDate(v); window.scrollTo(0, 0); }
+        else toast(tr('tooOld', { n: S.backDays }));
+        return;
+      case 'install':
+        if (!installEvt) return;
+        try {
+          installEvt.prompt();
+          installEvt.userChoice.then(function () { installEvt = null; render(); }, function () {});
+        } catch (e) { installEvt = null; render(); }
+        return;
+      case 'hideinstall': S.hideInstall = true; store('nmc_ot_hide_install', '1'); render(); return;
+    }
+  });
+
+  /* 크롬이 '앱 설치'를 허락하면 화면에 설치 버튼을 보여 줍니다. */
+  window.addEventListener('beforeinstallprompt', function (ev) {
+    ev.preventDefault();
+    installEvt = ev;
+    if (S.lang && S.ready && S.me) render();
+  });
+  window.addEventListener('appinstalled', function () {
+    installEvt = null;
+    S.hideInstall = true;
+    store('nmc_ot_hide_install', '1');
+    toastOk(tr('installed'));
+  });
+
+  /* 앱을 다시 열면(화면이 다시 보이면) 최신 기록으로 새로 고칩니다. */
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden || !S.ready || S.busy) return;
+    call('apiInit').then(function (r) {
+      var viewYm = S.viewYm;
+      applyInit(r);
+      if (viewYm !== ymOf(S.today) && S.months[viewYm]) loadMonth(viewYm);
+      render();
+    }, function () {});
+  });
+
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && S.sheet) { S.sheet = null; render(); }
+  });
+
+  function start() {
+    S.started = true;
+    loadInit();
+  }
+
+  readUrl(function (p) {
+    S.hideInstall = stored('nmc_ot_hide_install') === '1';
+    var l = p.l || stored('nmc_ot_lang');
+    if (l && I18N[l]) S.lang = l;
+    S.me = p.n || stored('nmc_ot_me') || null;
+    if (S.me) store('nmc_ot_me', S.me);
+    if (S.lang) store('nmc_ot_lang', S.lang);
+    applyLang();
+    render();
+    start();
+  });
+})();
+</script>
+</body>
+</html>
