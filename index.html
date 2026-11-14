@@ -222,6 +222,43 @@ button.cday{cursor:pointer}
 .toast.up{bottom:96px}
 .toast svg{flex-shrink:0}
 button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-offset:2px}
+.printbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 12px}
+.printhead{display:none}
+@media print{
+  @page{size:A4 landscape;margin:9mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{background:#fff}
+  .appbar,.nav,.demo,.toast,.overlay,.monthbar,.stats,.legend,.printbtn,.install,.foot{display:none!important}
+  .wrap,.wrap.wide,.wrap.withnav{max-width:none;margin:0;padding:0}
+  .card,.board{border:0;border-radius:0;box-shadow:none;padding:0;margin:0;overflow:visible}
+  .printhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 6px}
+  .printhead h1{margin:0;font-size:18pt;font-weight:800}
+  .printhead p{margin:0;font-size:10pt;color:#333}
+  .bscroll{overflow:visible!important}
+  .bt{width:100%;min-width:0;table-layout:fixed;border-collapse:collapse}
+  .bt th,.bt td{height:auto;padding:6px 0;font-size:10pt;border:1px solid #9aa3ad!important;color:#000}
+  .bt thead th{height:auto;background:#eef1f5!important;color:#000}
+  .bt thead th.dc{width:auto;min-width:0}
+  .bt .dnum{font-size:9.5pt}
+  .bt .dwk{font-size:7.5pt;color:#444}
+  .bt thead th.hol{background:#f9d6d6!important;color:#9b1c1c}
+  .bt thead th.hol .dwk{color:#9b1c1c}
+  .bt td.hol{background:#fff3f3!important}
+  .bt thead th.today,.bt thead th.hol.today{box-shadow:none}
+  .bt td.today{background:none!important}
+  .bt td.hol.today{background:#fff3f3!important}
+  .bt .cname{position:static;width:12%;min-width:0;padding:6px 5px;font-size:10.5pt;background:#fff!important;color:#000;border-right:1px solid #9aa3ad}
+  .bt .cname i{min-width:16px;font-size:7.5pt;color:#555}
+  .bt .v{min-width:0;height:auto;padding:0;border-radius:0;background:none!important;font-size:10pt;color:#000}
+  .bt .v.hol{color:#9b1c1c}
+  .bt .ct{width:4.8%;min-width:0;padding:6px 2px;font-size:10pt;background:#fff!important}
+  .bt .csum{position:static;width:5.4%;min-width:0;padding:6px 2px;background:#eef1f5!important;color:#000;font-size:10.5pt;border-bottom-color:#9aa3ad}
+  .bt thead .csum,.bt tfoot .csum{background:#dde3ea!important;color:#000}
+  .bt tfoot th,.bt tfoot td{height:auto;background:#eef1f5!important}
+  .bt tr.me .cname{background:#fff!important;color:#000}
+  .bt .z{color:#888}
+  .bt tr{break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -258,7 +295,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: '아이폰은 사파리(Safari)에서 설치합니다. 이 링크를 사파리로 연 다음: 아래쪽 공유 버튼 → "홈 화면에 추가"',
       desktopTip: 'PC에서는 크롬 주소창 오른쪽의 설치 아이콘을 누르면 됩니다. 휴대폰에 설치하려면 이 링크를 휴대폰에서 여세요.',
       wd: ['일', '월', '화', '수', '목', '금', '토'], wds: ['일', '월', '화', '수', '목', '금', '토'],
-      refresh: '새로고침', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
+      refresh: '새로고침', printBtn: '이 달 표 인쇄', printTitle: '시간 외 근무 시간 (남명)', printedAt: '출력', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
     },
     en: {
       app: 'NMC Overtime', chooseName: 'Tap your name', nameMissing: 'If your name is not here, tell the office.',
@@ -286,7 +323,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'On iPhone, install from Safari. Open this link in Safari, then: Share button → "Add to Home Screen"',
       desktopTip: 'On a PC, click the install icon at the right end of the Chrome address bar. To install on a phone, open this link on the phone.',
       wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      refresh: 'Refresh', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
+      refresh: 'Refresh', printBtn: 'Print this month', printTitle: 'Overtime hours (NMC)', printedAt: 'Printed', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
     },
     th: {
       app: 'NMC โอที', chooseName: 'แตะชื่อของคุณ', nameMissing: 'ถ้าไม่มีชื่อของคุณ กรุณาแจ้งสำนักงาน',
@@ -314,7 +351,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'บน iPhone ให้ติดตั้งจาก Safari เปิดลิงก์นี้ใน Safari แล้ว: ปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม"',
       desktopTip: 'บนคอมพิวเตอร์ ให้คลิกไอคอนติดตั้งทางขวาของแถบที่อยู่ใน Chrome หากจะติดตั้งในโทรศัพท์ ให้เปิดลิงก์นี้ในโทรศัพท์',
       wd: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'], wds: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
-      refresh: 'รีเฟรช', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
+      refresh: 'รีเฟรช', printBtn: 'พิมพ์ตารางเดือนนี้', printTitle: 'ชั่วโมงทำงานล่วงเวลา (NMC)', printedAt: 'พิมพ์เมื่อ', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
     },
     vi: {
       app: 'NMC Tăng ca', chooseName: 'Bấm vào tên của bạn', nameMissing: 'Nếu không có tên của bạn, hãy báo văn phòng.',
@@ -342,7 +379,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'Trên iPhone, hãy cài bằng Safari. Mở link này bằng Safari, rồi: nút Chia sẻ → "Thêm vào MH chính"',
       desktopTip: 'Trên máy tính, bấm biểu tượng cài đặt ở cuối thanh địa chỉ Chrome. Để cài trên điện thoại, hãy mở link này trên điện thoại.',
       wd: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], wds: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-      refresh: 'Làm mới', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
+      refresh: 'Làm mới', printBtn: 'In bảng tháng này', printTitle: 'Giờ làm thêm (NMC)', printedAt: 'In lúc', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
     },
     my: {
       app: 'NMC အချိန်ပို', chooseName: 'သင့်အမည်ကို နှိပ်ပါ', nameMissing: 'သင့်အမည် မပါလျှင် ရုံးခန်းသို့ ပြောပါ။',
@@ -370,7 +407,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'iPhone တွင် Safari မှ ထည့်သွင်းပါ။ ဤလင့်ခ်ကို Safari ဖြင့်ဖွင့်ပြီး မျှဝေရန် ခလုတ် → "Add to Home Screen"',
       desktopTip: 'ကွန်ပျူတာတွင် Chrome လိပ်စာဘား၏ ညာဘက်ရှိ ထည့်သွင်းရန် အိုင်ကွန်ကို နှိပ်ပါ။ ဖုန်းတွင် ထည့်သွင်းရန် ဤလင့်ခ်ကို ဖုန်းဖြင့် ဖွင့်ပါ။',
       wd: ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      refresh: 'ပြန်ဖွင့်ရန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့'
+      refresh: 'ပြန်ဖွင့်ရန်', printBtn: 'ဤလဇယားကို ပုံနှိပ်ရန်', printTitle: 'အချိန်ပို နာရီ (NMC)', printedAt: 'ပုံနှိပ်ချိန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့'
     }
   };
   var MONTHS = {
@@ -396,6 +433,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     plus: svg('<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>', 24),
     cal: svg('<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', 24),
     grid: svg('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M9 4v16"/>', 24),
+    print: svg('<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>', 22),
     phone: svg('<rect x="6.5" y="2" width="11" height="20" rx="2.5"/><path d="M12 6.5v7M9 10.5l3 3 3-3"/><path d="M10.5 18h3"/>', 26)
   };
 
@@ -838,7 +876,12 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     t += '<td class="ct ot">' + fmtH(gOt) + '</td><td class="ct hol">' + fmtH(gHol) + '</td><td class="csum">' + fmtH(gOt + gHol) + '</td></tr></tfoot></table>';
 
     h += stats(gOt, gHol);
-    h += '<section class="card board"><div class="bscroll" id="bscroll">' + t + '</div>';
+    var now = new Date();
+    var printed = ymdOf(now) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
+    h += '<button type="button" class="ghost printbtn" data-act="print">' + ICON.print + '<span>' + esc(tr('printBtn')) + '</span></button>';
+    h += '<section class="card board"><div class="printhead"><h1>' + esc(monthTitle(ym)) + ' ' + esc(tr('printTitle')) + '</h1><p>' +
+      esc(tr('otLabel')) + ' ' + esc(hrs(gOt)) + ' · ' + esc(tr('holLabel')) + ' ' + esc(hrs(gHol)) + ' · ' + esc(tr('sumLabel')) + ' ' + esc(hrs(gOt + gHol)) +
+      ' · ' + esc(tr('printedAt')) + ' ' + printed + '</p></div><div class="bscroll" id="bscroll">' + t + '</div>';
     h += '<div class="legend"><span><i class="ot"></i>' + esc(tr('otLabel')) + '</span><span><i class="hol"></i>' + esc(tr('holBadge')) + '</span><span><i class="td"></i>' + esc(tr('todayMark')) + '</span></div></section>';
     return h;
   }
@@ -1017,6 +1060,9 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
           installEvt.prompt();
           installEvt.userChoice.then(function () { installEvt = null; render(); }, function () {});
         } catch (e) { installEvt = null; render(); }
+        return;
+      case 'print':
+        try { window.print(); } catch (e) {}
         return;
       case 'pickdate':
         S.pickYm = ymOf(S.date || S.today);
