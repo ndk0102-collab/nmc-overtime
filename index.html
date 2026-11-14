@@ -65,8 +65,16 @@ button{font:inherit;color:inherit}
 .day .dh.ot{background:var(--ot-bg);color:var(--ot)}
 .day .dh.hol{background:var(--hol-bg);color:var(--hol)}
 .day.hol .dw,.day.hol .dn{color:var(--hol)}
-.day.other{color:var(--accent-strong);border-style:dashed;background:var(--soft)}
-.day.other .dw{white-space:normal;text-align:center;font-size:11px;color:var(--accent-strong)}
+.sechead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}
+.sechead .sec{margin:0}
+.pickbtn{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 16px;border-radius:999px;border:2px solid var(--accent);background:#fff;color:var(--accent-strong);font-size:16px;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.pickbtn svg{width:20px;height:20px}
+.sheet.pick{max-width:460px}
+.sheet.pick .monthbar{margin-bottom:8px}
+.sheet.pick .mtitle{font-size:21px}
+.cday.sel{background:var(--accent);border-color:var(--accent)}
+.cday.sel .cd,.cday.sel .ch{color:#fff}
+.cday.future{opacity:.35}
 .day[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);box-shadow:0 4px 12px rgba(30,90,168,.3)}
 .day[aria-pressed="true"] .dw,.day[aria-pressed="true"] .dn{color:#fff}
 .day[aria-pressed="true"] .dh.ot,.day[aria-pressed="true"] .dh.hol{background:#fff;color:var(--accent-strong)}
@@ -233,7 +241,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       saved: '등록되었습니다', updated: '수정되었습니다', deleted: '삭제되었습니다',
       already: '이 날짜에 {h}시간이 등록되어 있습니다', pickFirst: '시간을 먼저 고르세요', confirmDel: '이 기록을 삭제할까요?',
       otLabel: '잔업', holLabel: '휴일', sumLabel: '합계', dayTotal: '일 합계', name: '이름',
-      tapToEdit: '날짜를 누르면 등록하거나 고칠 수 있습니다', otherDay: '다른 날짜',
+      tapToEdit: '날짜를 누르면 등록하거나 고칠 수 있습니다', otherDay: '다른 날짜', pickDate: '날짜 선택',
       loading: '불러오는 중…', errConn: '연결 오류입니다. 다시 시도해 주세요.',
       errDate: '날짜를 확인해 주세요 (오늘 이후 날짜는 안 됩니다)', errName: '이름이 명단에 없습니다. 사무실에 말씀하세요.',
       tooOld: '{n}일이 지난 기록은 사무실에서 고칩니다', retry: '다시 시도',
@@ -261,7 +269,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       saved: 'Saved', updated: 'Updated', deleted: 'Deleted',
       already: '{h} h already saved for this day', pickFirst: 'Choose the hours first', confirmDel: 'Delete this record?',
       otLabel: 'OT', holLabel: 'Holiday', sumLabel: 'Total', dayTotal: 'Day total', name: 'Name',
-      tapToEdit: 'Tap a date to add or change it', otherDay: 'Other date',
+      tapToEdit: 'Tap a date to add or change it', otherDay: 'Other date', pickDate: 'Choose date',
       loading: 'Loading…', errConn: 'Connection error. Please try again.',
       errDate: 'Please check the date (future dates are not allowed)', errName: 'Your name is not on the list. Tell the office.',
       tooOld: 'Records older than {n} days are changed by the office', retry: 'Try again',
@@ -289,7 +297,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       saved: 'บันทึกแล้ว', updated: 'แก้ไขแล้ว', deleted: 'ลบแล้ว',
       already: 'วันที่นี้บันทึกไว้แล้ว {h} ชม.', pickFirst: 'กรุณาเลือกจำนวนชั่วโมงก่อน', confirmDel: 'ลบบันทึกนี้ใช่ไหม',
       otLabel: 'โอที', holLabel: 'วันหยุด', sumLabel: 'รวม', dayTotal: 'รวมรายวัน', name: 'ชื่อ',
-      tapToEdit: 'แตะวันที่เพื่อบันทึกหรือแก้ไข', otherDay: 'วันอื่น',
+      tapToEdit: 'แตะวันที่เพื่อบันทึกหรือแก้ไข', otherDay: 'วันอื่น', pickDate: 'เลือกวันที่',
       loading: 'กำลังโหลด…', errConn: 'เชื่อมต่อไม่ได้ กรุณาลองอีกครั้ง',
       errDate: 'กรุณาตรวจสอบวันที่ (เลือกวันในอนาคตไม่ได้)', errName: 'ไม่มีชื่อของคุณในรายชื่อ กรุณาแจ้งสำนักงาน',
       tooOld: 'บันทึกที่เกิน {n} วัน สำนักงานจะเป็นผู้แก้ไข', retry: 'ลองอีกครั้ง',
@@ -317,7 +325,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       saved: 'Đã lưu', updated: 'Đã sửa', deleted: 'Đã xóa',
       already: 'Ngày này đã lưu {h} giờ', pickFirst: 'Hãy chọn số giờ trước', confirmDel: 'Xóa bản ghi này?',
       otLabel: 'Tăng ca', holLabel: 'Ngày nghỉ', sumLabel: 'Tổng', dayTotal: 'Tổng ngày', name: 'Tên',
-      tapToEdit: 'Bấm vào ngày để ghi hoặc sửa', otherDay: 'Ngày khác',
+      tapToEdit: 'Bấm vào ngày để ghi hoặc sửa', otherDay: 'Ngày khác', pickDate: 'Chọn ngày',
       loading: 'Đang tải…', errConn: 'Lỗi kết nối. Vui lòng thử lại.',
       errDate: 'Vui lòng kiểm tra ngày (không được chọn ngày tương lai)', errName: 'Tên của bạn không có trong danh sách. Hãy báo văn phòng.',
       tooOld: 'Bản ghi quá {n} ngày sẽ do văn phòng sửa', retry: 'Thử lại',
@@ -345,7 +353,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       saved: 'သိမ်းပြီးပါပြီ', updated: 'ပြင်ပြီးပါပြီ', deleted: 'ဖျက်ပြီးပါပြီ',
       already: 'ဤရက်အတွက် {h} နာရီ သိမ်းပြီးသား', pickFirst: 'နာရီကို အရင် ရွေးပါ', confirmDel: 'ဤမှတ်တမ်းကို ဖျက်မလား',
       otLabel: 'အချိန်ပို', holLabel: 'ပိတ်ရက်', sumLabel: 'စုစုပေါင်း', dayTotal: 'နေ့စုစုပေါင်း', name: 'အမည်',
-      tapToEdit: 'ရက်စွဲကိုနှိပ်ပြီး ထည့်နိုင် ပြင်နိုင်သည်', otherDay: 'အခြားရက်',
+      tapToEdit: 'ရက်စွဲကိုနှိပ်ပြီး ထည့်နိုင် ပြင်နိုင်သည်', otherDay: 'အခြားရက်', pickDate: 'ရက်ရွေးရန်',
       loading: 'ခဏစောင့်ပါ…', errConn: 'ချိတ်ဆက်မှု မအောင်မြင်ပါ။ ထပ်စမ်းကြည့်ပါ။',
       errDate: 'ရက်စွဲကို စစ်ဆေးပါ (နောက်ရက်များကို မရွေးနိုင်ပါ)', errName: 'သင့်အမည် စာရင်းတွင် မပါပါ။ ရုံးခန်းသို့ ပြောပါ။',
       tooOld: '{n} ရက်ကျော်သော မှတ်တမ်းများကို ရုံးခန်းမှ ပြင်ပေးပါမည်', retry: 'ထပ်စမ်းရန်',
@@ -551,12 +559,15 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     if (S.sheet === 'lang') h += sheetLang();
     if (S.sheet === 'confirm') h += sheetConfirm();
     if (S.sheet === 'install') h += sheetInstall();
+    if (S.sheet === 'pick') h += sheetPick();
     if (S.toast) h += '<div class="toast' + (main ? ' up' : '') + '" role="status">' + S.toast + '</div>';
     root.innerHTML = h;
     afterRender();
   }
 
   function afterRender() {
+    var strip = root.querySelector('.days'), on = strip && strip.querySelector('[aria-pressed="true"]');
+    if (on && on.offsetLeft + on.offsetWidth > strip.clientWidth) strip.scrollLeft = Math.max(0, on.offsetLeft - 8);
     var sc = document.getElementById('bscroll');
     if (!sc) return;
     if (S.boardYm === S.viewYm && S.boardScroll != null) {
@@ -628,7 +639,8 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
 
     var showCard = API && !standalone() && !S.hideInstall;
     var h = showCard ? installCard() : '';
-    h += '<section class="card"><h2 class="sec">' + esc(tr('pickDay')) + '</h2><div class="days">';
+    h += '<section class="card"><div class="sechead"><h2 class="sec">' + esc(tr('pickDay')) + '</h2>' +
+      '<button type="button" class="pickbtn" data-act="pickdate">' + ICON.cal + '<span>' + esc(tr('pickDate')) + '</span></button></div><div class="days">';
     // 이번 달 1일부터 오늘까지 전부 (달 초에는 최근 S.backDays일), 그 전 날짜는 '다른 날짜'에서
     var days = [];
     var from = addDays(S.today, -S.backDays);
@@ -647,7 +659,6 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
         '<span class="dn">' + w.getDate() + '</span>' +
         (e ? '<span class="dh ' + (dh ? 'hol' : 'ot') + '">' + fmtH(e.minutes) + '</span>' : '<span class="dh"></span>') + '</button>';
     });
-    h += '<button type="button" class="day other" data-act="otherday">' + ICON.cal + '<span class="dw">' + esc(tr('otherDay')) + '</span></button>';
     h += '</div><div class="selinfo"><span class="seldate">' + esc(fmtDate(S.date)) + '</span>' +
       (hol ? '<span class="badge hol">' + esc(tr('holBadge')) + '</span>' : '<span class="badge ot">' + esc(tr('otBadge', { t: S.otStart })) + '</span>') +
       '</div></section>';
@@ -694,6 +705,33 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       return 'chrome';
     }
     return 'desktop';
+  }
+
+  /* 날짜 선택 달력: 오늘까지의 모든 날짜(지난달 이전 포함)를 직접 고릅니다. */
+  function sheetPick() {
+    var ym = S.pickYm, list = S.months[ym], cur = ymOf(S.today);
+    var mine = {};
+    if (list) list.forEach(function (e) { if (e.name === S.me) mine[e.date] = (mine[e.date] || 0) + e.minutes; });
+    var h = '<div class="overlay" data-act="close"><div class="sheet pick" data-act="noop" role="dialog" aria-modal="true" aria-label="' + esc(tr('pickDate')) + '">';
+    h += '<div class="monthbar"><button type="button" class="iconbtn" data-act="pprev" aria-label="' + esc(tr('prevMonth')) + '">' + ICON.chevL + '</button>' +
+      '<h2 class="mtitle">' + esc(monthTitle(ym)) + '</h2>' +
+      '<button type="button" class="iconbtn" data-act="pnext" aria-label="' + esc(tr('nextMonth')) + '"' + (ym >= cur ? ' disabled' : '') + '>' + ICON.chevR + '</button></div>';
+    h += '<div class="cal-h">';
+    for (var i = 0; i < 7; i++) h += '<span' + (i === 0 || i === 6 ? ' class="hol"' : '') + '>' + esc(T().wds[i]) + '</span>';
+    h += '</div><div class="cal-g">';
+    var first = parseYmd(ym + '-01').getDay();
+    for (i = 0; i < first; i++) h += '<span class="cblank"></span>';
+    var n = daysIn(ym);
+    for (var d = 1; d <= n; d++) {
+      var date = ym + '-' + pad(d), v = mine[date], dh = isHol(date);
+      var cls = 'cday ' + (dh ? 'hol' : 'ot') + (v ? ' has' : '') + (date === S.today ? ' today' : '') + (date === S.date ? ' sel' : '');
+      var inner = '<span class="cd">' + d + '</span>' + (v ? '<span class="ch ' + (dh ? 'hol' : 'ot') + '">' + fmtH(v) + '</span>' : '');
+      if (editable(date)) h += '<button type="button" class="' + cls + '" data-act="pickday" data-v="' + date + '" aria-label="' + esc(fmtDate(date)) + (v ? ' · ' + esc(hrs(v)) : '') + '">' + inner + '</button>';
+      else h += '<div class="' + cls + ' future">' + inner + '</div>';
+    }
+    h += '</div>';
+    if (!list) h += '<p class="hint">' + esc(S.monthErr[ym] ? tr('errConn') : tr('loading')) + '</p>';
+    return h + '<button type="button" class="ghost" style="width:100%;margin-top:12px" data-act="close">' + esc(tr('closeBtn')) + '</button></div></div>';
   }
 
   function sheetInstall() {
@@ -979,6 +1017,22 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
           installEvt.prompt();
           installEvt.userChoice.then(function () { installEvt = null; render(); }, function () {});
         } catch (e) { installEvt = null; render(); }
+        return;
+      case 'pickdate':
+        S.pickYm = ymOf(S.date || S.today);
+        S.sheet = 'pick';
+        ensureMonth(S.pickYm);
+        render();
+        return;
+      case 'pprev': S.pickYm = addMonths(S.pickYm, -1); ensureMonth(S.pickYm); render(); return;
+      case 'pnext':
+        if (S.pickYm < ymOf(S.today)) { S.pickYm = addMonths(S.pickYm, 1); ensureMonth(S.pickYm); render(); }
+        return;
+      case 'pickday':
+        if (!editable(v)) return;
+        S.sheet = null;
+        S.tab = 'rec';
+        setDate(v);
         return;
       case 'otherday':
         S.tab = 'mine';

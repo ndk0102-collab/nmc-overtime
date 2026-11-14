@@ -1,5 +1,5 @@
 /* NMC 잔업 — 앱 화면 파일만 저장해 둡니다. 기록 데이터는 항상 구글 시트에서 새로 받습니다. */
-const CACHE = 'nmc-ot-v4';
+const CACHE = 'nmc-ot-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png'];
 
 self.addEventListener('install', (event) => {
