@@ -103,6 +103,7 @@ button{font:inherit;color:inherit}
 .install .primary{margin:0 0 12px}
 .inst-steps{margin:0;padding:0;list-style:none}
 .inst-steps li{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:15px;line-height:1.5}
+.inst-main{margin:0 0 14px;padding:14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-strong);font-size:18px;font-weight:800;line-height:1.6}
 .linkbtn{display:block;width:100%;min-height:44px;margin:2px 0 0;border:0;background:none;color:var(--muted);font-size:15px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 
 /* 월 이동 · 합계 */
@@ -241,6 +242,11 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       installSamsung: '갤럭시(삼성 인터넷): 오른쪽 아래 ≡ → "현재 페이지 추가" → "홈 화면"',
       installCard: '휴대폰에 앱으로 설치하세요', installBtn: '앱 설치', later: '나중에',
       installed: '설치되었습니다. 이제 바탕화면 아이콘으로 여세요.',
+      installHow: '앱 설치 방법', otherPhones: '다른 휴대폰이면', closeBtn: '닫기', openOutside: '인터넷 앱으로 열기',
+      kakaoTip: '카카오톡 안에서는 설치가 안 됩니다. 아래 버튼을 눌러 인터넷 앱에서 연 다음 [앱 설치]를 다시 누르세요.',
+      inappTip: '이 화면에서는 설치가 안 됩니다. 아래 버튼을 누르거나, 오른쪽 위 ⋮ → "다른 브라우저로 열기"를 누르세요.',
+      iosOther: '아이폰은 사파리(Safari)에서 설치합니다. 이 링크를 사파리로 연 다음: 아래쪽 공유 버튼 → "홈 화면에 추가"',
+      desktopTip: 'PC에서는 크롬 주소창 오른쪽의 설치 아이콘을 누르면 됩니다. 휴대폰에 설치하려면 이 링크를 휴대폰에서 여세요.',
       wd: ['일', '월', '화', '수', '목', '금', '토'], wds: ['일', '월', '화', '수', '목', '금', '토'],
       refresh: '새로고침', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
     },
@@ -264,6 +270,11 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       installSamsung: 'Galaxy (Samsung Internet): tap ≡ at the bottom right → "Add page to" → "Home screen"',
       installCard: 'Install it on your phone as an app', installBtn: 'Install app', later: 'Later',
       installed: 'Installed. Open it from the icon on your home screen.',
+      installHow: 'How to install', otherPhones: 'Other phones', closeBtn: 'Close', openOutside: 'Open in browser',
+      kakaoTip: 'You can’t install inside KakaoTalk. Tap the button below to open it in your browser, then tap [Install app] again.',
+      inappTip: 'You can’t install from this screen. Tap the button below, or tap ⋮ at the top right → "Open in browser".',
+      iosOther: 'On iPhone, install from Safari. Open this link in Safari, then: Share button → "Add to Home Screen"',
+      desktopTip: 'On a PC, click the install icon at the right end of the Chrome address bar. To install on a phone, open this link on the phone.',
       wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       refresh: 'Refresh', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
     },
@@ -287,6 +298,11 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       installSamsung: 'Galaxy (Samsung Internet): แตะ ≡ มุมขวาล่าง → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
       installCard: 'ติดตั้งเป็นแอปในโทรศัพท์', installBtn: 'ติดตั้งแอป', later: 'ไว้ทีหลัง',
       installed: 'ติดตั้งแล้ว เปิดจากไอคอนบนหน้าจอหลัก',
+      installHow: 'วิธีติดตั้ง', otherPhones: 'โทรศัพท์รุ่นอื่น', closeBtn: 'ปิด', openOutside: 'เปิดในเบราว์เซอร์',
+      kakaoTip: 'ติดตั้งในคาเคาทอล์กไม่ได้ แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์ แล้วแตะ [ติดตั้งแอป] อีกครั้ง',
+      inappTip: 'ติดตั้งจากหน้านี้ไม่ได้ แตะปุ่มด้านล่าง หรือแตะ ⋮ มุมขวาบน → "เปิดในเบราว์เซอร์"',
+      iosOther: 'บน iPhone ให้ติดตั้งจาก Safari เปิดลิงก์นี้ใน Safari แล้ว: ปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม"',
+      desktopTip: 'บนคอมพิวเตอร์ ให้คลิกไอคอนติดตั้งทางขวาของแถบที่อยู่ใน Chrome หากจะติดตั้งในโทรศัพท์ ให้เปิดลิงก์นี้ในโทรศัพท์',
       wd: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'], wds: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
       refresh: 'รีเฟรช', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
     },
@@ -310,6 +326,11 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       installSamsung: 'Galaxy (Samsung Internet): bấm ≡ ở góc dưới bên phải → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
       installCard: 'Cài vào điện thoại như một ứng dụng', installBtn: 'Cài đặt ứng dụng', later: 'Để sau',
       installed: 'Đã cài đặt. Hãy mở bằng biểu tượng trên màn hình chính.',
+      installHow: 'Cách cài đặt', otherPhones: 'Điện thoại khác', closeBtn: 'Đóng', openOutside: 'Mở bằng trình duyệt',
+      kakaoTip: 'Không thể cài trong KakaoTalk. Bấm nút bên dưới để mở bằng trình duyệt, rồi bấm [Cài đặt ứng dụng] lần nữa.',
+      inappTip: 'Không thể cài từ màn hình này. Bấm nút bên dưới, hoặc bấm ⋮ ở góc trên bên phải → "Mở bằng trình duyệt".',
+      iosOther: 'Trên iPhone, hãy cài bằng Safari. Mở link này bằng Safari, rồi: nút Chia sẻ → "Thêm vào MH chính"',
+      desktopTip: 'Trên máy tính, bấm biểu tượng cài đặt ở cuối thanh địa chỉ Chrome. Để cài trên điện thoại, hãy mở link này trên điện thoại.',
       wd: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], wds: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
       refresh: 'Làm mới', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
     },
@@ -333,6 +354,11 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       installSamsung: 'Galaxy (Samsung Internet): ညာဘက်အောက် ≡ ကိုနှိပ် → "Add page to / 현재 페이지 추가" → "Home screen / 홈 화면"',
       installCard: 'ဖုန်းထဲတွင် အက်ပ်အဖြစ် ထည့်သွင်းပါ', installBtn: 'အက်ပ် ထည့်သွင်းရန်', later: 'နောက်မှ',
       installed: 'ထည့်သွင်းပြီးပါပြီ။ ပင်မစာမျက်နှာရှိ အိုင်ကွန်မှ ဖွင့်ပါ။',
+      installHow: 'ထည့်သွင်းနည်း', otherPhones: 'အခြားဖုန်းများ', closeBtn: 'ပိတ်ရန်', openOutside: 'ဘရောက်ဇာဖြင့် ဖွင့်ရန်',
+      kakaoTip: 'KakaoTalk ထဲတွင် ထည့်သွင်း၍ မရပါ။ အောက်ပါခလုတ်ကိုနှိပ်ပြီး ဘရောက်ဇာဖြင့်ဖွင့်ကာ [အက်ပ် ထည့်သွင်းရန်] ကို ထပ်နှိပ်ပါ။',
+      inappTip: 'ဤစာမျက်နှာမှ ထည့်သွင်း၍ မရပါ။ အောက်ပါခလုတ်ကိုနှိပ်ပါ (သို့) ညာဘက်အပေါ် ⋮ → "Open in browser" ကိုနှိပ်ပါ။',
+      iosOther: 'iPhone တွင် Safari မှ ထည့်သွင်းပါ။ ဤလင့်ခ်ကို Safari ဖြင့်ဖွင့်ပြီး မျှဝေရန် ခလုတ် → "Add to Home Screen"',
+      desktopTip: 'ကွန်ပျူတာတွင် Chrome လိပ်စာဘား၏ ညာဘက်ရှိ ထည့်သွင်းရန် အိုင်ကွန်ကို နှိပ်ပါ။ ဖုန်းတွင် ထည့်သွင်းရန် ဤလင့်ခ်ကို ဖုန်းဖြင့် ဖွင့်ပါ။',
       wd: ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       refresh: 'ပြန်ဖွင့်ရန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့'
     }
@@ -522,6 +548,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     if (main) h += nav();
     if (S.sheet === 'lang') h += sheetLang();
     if (S.sheet === 'confirm') h += sheetConfirm();
+    if (S.sheet === 'install') h += sheetInstall();
     if (S.toast) h += '<div class="toast' + (main ? ' up' : '') + '" role="status">' + S.toast + '</div>';
     root.innerHTML = h;
     afterRender();
@@ -630,7 +657,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     h += '<div class="foot"><p class="wk">' + ICON.clock + '<span>' + esc(tr('work', { t: S.otStart })) + '</span></p>';
     if (!standalone() && !showCard) {
       h += '<details class="help"><summary>' + esc(tr('installTitle')) + '</summary>' +
-        (installEvt ? '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>' : '') +
+        (API ? '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>' : '') +
         '<p>' + esc(tr('installAndroid')) + '</p><p>' + esc(tr('installSamsung')) + '</p><p>' + esc(tr('installIphone')) + '</p></details>';
     }
     return h + '</div>';
@@ -638,9 +665,34 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
 
   function installCard() {
     var h = '<section class="card install"><p class="inst-head">' + ICON.phone + '<span>' + esc(tr('installCard')) + '</span></p>';
-    if (installEvt) h += '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>';
-    h += '<ul class="inst-steps"><li>' + esc(tr('installAndroid')) + '</li><li>' + esc(tr('installSamsung')) + '</li><li>' + esc(tr('installIphone')) + '</li></ul>';
+    h += '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>';
     return h + '<button type="button" class="linkbtn" data-act="hideinstall">' + esc(tr('later')) + '</button></section>';
+  }
+
+  /* 어느 휴대폰·인터넷 앱에서 열었는지 (설치 방법 안내용) */
+  function envOf() {
+    var ua = navigator.userAgent || '';
+    if (/KAKAOTALK/i.test(ua)) return 'kakao';
+    if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) {
+      return /CriOS|FxiOS|EdgiOS|NAVER|Line\/|FBAN|FBAV|Instagram/i.test(ua) ? 'iosother' : 'ios';
+    }
+    if (/Android/i.test(ua)) {
+      if (/SamsungBrowser/i.test(ua)) return 'samsung';
+      if (/NAVER|Line\/|FBAN|FBAV|Instagram|DaumApps|; wv\)/i.test(ua)) return 'inapp';
+      return 'chrome';
+    }
+    return 'desktop';
+  }
+
+  function sheetInstall() {
+    var env = envOf();
+    var main = { chrome: 'installAndroid', samsung: 'installSamsung', ios: 'installIphone', iosother: 'iosOther', kakao: 'kakaoTip', inapp: 'inappTip', desktop: 'desktopTip' }[env];
+    var h = '<div class="overlay" data-act="close"><div class="sheet" data-act="noop" role="dialog" aria-modal="true" aria-label="' + esc(tr('installHow')) + '">';
+    h += '<p class="h2">' + esc(tr('installHow')) + '</p><p class="inst-main">' + esc(tr(main)) + '</p>';
+    if (env === 'kakao' || env === 'inapp') h += '<button type="button" class="primary" data-act="openext">' + esc(tr('openOutside')) + '</button>';
+    h += '<p class="sec" style="margin-top:16px">' + esc(tr('otherPhones')) + '</p><ul class="inst-steps">';
+    ['installAndroid', 'installSamsung', 'installIphone'].forEach(function (k) { if (k !== main) h += '<li>' + esc(tr(k)) + '</li>'; });
+    return h + '</ul><button type="button" class="ghost" style="width:100%;margin-top:8px" data-act="close">' + esc(tr('closeBtn')) + '</button></div></div>';
   }
 
   function monthBar(withRefresh) {
@@ -910,13 +962,17 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
         else toast(tr('tooOld', { n: S.backDays }));
         return;
       case 'install':
-        if (!installEvt) return;
+        if (!installEvt) { S.sheet = 'install'; render(); return; }
         try {
           installEvt.prompt();
           installEvt.userChoice.then(function () { installEvt = null; render(); }, function () {});
         } catch (e) { installEvt = null; render(); }
         return;
       case 'hideinstall': S.hideInstall = true; store('nmc_ot_hide_install', '1'); render(); return;
+      case 'openext':
+        if (envOf() === 'kakao') location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+        else location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end';
+        return;
     }
   });
 
