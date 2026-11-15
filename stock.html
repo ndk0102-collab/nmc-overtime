@@ -1427,7 +1427,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         var t2 = '<b>제품마다 kg당 남는 돈</b> (재료·운송비만 뺀 것, 추정): ' + ranked.map(function (q) { return ptxt(q.p) + ' ' + fmt(q.cKg) + '원'; }).join(' · ') + '.';
         if (chips.length >= 2 && chips[0].cKg - chips[chips.length - 1].cKg >= 30) {
           var hi = chips[0], lo = chips[chips.length - 1];
-          t2 += ' 고정비는 무엇을 팔든 나가므로, 같은 설비로 만드는 칼라칩 가운데 kg당 더 남는 것을 더 팔수록 이익이 커집니다. ' + ptxt(hi.p) + '을(를) ' + ptxt(lo.p) + ' 대신 1톤 팔면 약 ' + esc(won((hi.cKg - lo.cKg) * 1000)) + ' 더 남습니다.';
+          var los = chips.filter(function (q) { return Math.abs(q.cKg - lo.cKg) < 1; }).map(function (q) { return ptxt(q.p); }).join('·');
+          t2 += ' 고정비는 무엇을 팔든 나가므로, 같은 설비로 만드는 칼라칩 가운데 kg당 더 남는 것을 더 팔수록 이익이 커집니다. ' + ptxt(hi.p) + '을(를) ' + los + ' 대신 1톤 팔면 약 ' + esc(won((hi.cKg - lo.cKg) * 1000)) + ' 더 남습니다.';
         }
         if (D.rev > 0 && D.est / D.rev > 0.5) t2 += ' 다만 매출 대부분이 추정 단가라, 이 차이는 실제 판 값이 아니라 손익 설정의 단가 차이에 가깝습니다.';
         tips.push(t2);
