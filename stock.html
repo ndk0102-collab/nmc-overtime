@@ -1100,7 +1100,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function sheetLogin() {
     var x = S.sheet;
-    return '<h2 class="h2" id="sh-title">관리자 로그인</h2><p class="muted">잔업·급여 관리자 비밀번호를 넣으면 재고 화면 전체가 열립니다.</p>' +
+    return '<h2 class="h2" id="sh-title">관리자 로그인</h2><p class="muted">관리자 비밀번호(잔업·급여 관리자와 같음)를 넣으면 ' + esc(VIEW_NAME) + ' 화면이 열립니다.</p>' +
       '<label class="vh" for="lg-pw">비밀번호</label><input id="lg-pw" class="text" type="password" autocomplete="current-password" maxlength="100" placeholder="비밀번호">' +
       (x.err ? '<p class="bad mt8" role="alert">' + esc(x.err) + '</p>' : '') +
       '<div class="two mt16"><button type="button" class="ghost" data-act="close">닫기</button>' +
