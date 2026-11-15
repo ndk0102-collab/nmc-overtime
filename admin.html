@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#1E5AA8">
+<title>NMC 급여 관리</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<style id="pageStyle">@page { size: A4 portrait; margin: 8mm; }</style>
+<style>
+:root {
+  --blue: #1E5AA8; --blue-d: #17467F; --blue-l: #E8F0FB; --ink: #1B2430; --muted: #5B6676; --line: #D9E0EA;
+  --bg: #EEF2F7; --card: #FFFFFF; --warn: #9A4B00; --warn-bg: #FFF4E5; --ok: #146C43; --ok-bg: #E7F6EE;
+  --err: #B42318; --err-bg: #FDECEA;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+  color: var(--ink); background: var(--bg); font-size: 15px; line-height: 1.45;
+}
+button, input, select { font: inherit; color: inherit; }
+.num, td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 20; background: var(--blue); color: #fff; box-shadow: 0 1px 0 rgba(0,0,0,.08); }
+.top-in { max-width: 1560px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.brand { font-weight: 800; font-size: 17px; letter-spacing: -.2px; margin-right: auto; }
+.brand small { font-weight: 500; opacity: .8; margin-left: 6px; font-size: 13px; }
+.mnav { display: flex; align-items: center; gap: 6px; }
+.mnav b { font-size: 17px; min-width: 120px; text-align: center; }
+.iconbtn { border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.12); color: #fff; border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+.iconbtn:hover { background: rgba(255,255,255,.24); }
+.paydate { font-size: 13px; opacity: .92; }
+
+.tabs { max-width: 1560px; margin: 0 auto; padding: 10px 16px 0; display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: #fff; border-radius: 10px 10px 0 0; padding: 9px 15px; cursor: pointer; font-weight: 600; color: var(--muted); border-bottom: none; }
+.tab[aria-selected="true"] { color: var(--blue); background: var(--card); box-shadow: inset 0 3px 0 var(--blue); }
+main { max-width: 1560px; margin: 0 auto; padding: 0 16px 40px; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 0 12px 12px 12px; padding: 18px; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 14px; }
+.toolbar h2 { font-size: 18px; margin: 0 auto 0 0; }
+.btn { border: 1px solid var(--blue); background: #fff; color: var(--blue); border-radius: 9px; padding: 8px 14px; font-weight: 600; cursor: pointer; }
+.btn:hover { background: var(--blue-l); }
+.btn.primary { background: var(--blue); color: #fff; }
+.btn.primary:hover { background: var(--blue-d); }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.danger { border-color: var(--err); color: var(--err); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.banner { border-radius: 10px; padding: 10px 14px; margin: 12px 0 0; font-size: 14px; }
+.banner.info { background: var(--blue-l); color: #183B66; }
+.banner.warn { background: var(--warn-bg); color: var(--warn); }
+.banner.ok { background: var(--ok-bg); color: var(--ok); }
+.banner.err { background: var(--err-bg); color: var(--err); }
+.banners { max-width: 1560px; margin: 0 auto; padding: 0 16px; }
+
+/* tables */
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; }
+.grid th, .grid td { padding: 6px 7px; border-bottom: 1px solid var(--line); background: #fff; }
+.grid thead th { background: #F5F8FC; position: sticky; top: 0; z-index: 1; font-weight: 700; font-size: 12px; color: #36404D; white-space: nowrap; }
+.grid tbody tr:nth-child(even) td { background: #FAFBFD; }
+.grid tbody tr:hover td { background: #F1F6FD; }
+.grid.sticky1 th:first-child, .grid.sticky1 td:first-child { position: sticky; left: 0; z-index: 2; box-shadow: 1px 0 0 var(--line); }
+.grid.sticky1 thead th:first-child { z-index: 3; }
+.grid .pin { position: sticky; right: 0; z-index: 2; box-shadow: -1px 0 0 var(--line); }
+.grid thead th.pin { z-index: 3; }
+.grid tfoot td { font-weight: 800; background: #F0F4FA; border-top: 2px solid #B9C6D8; }
+.grid td.name { font-weight: 700; white-space: nowrap; }
+.grid .grp-pay { border-left: 2px solid #C9D6E8; }
+.grid .grp-ded { border-left: 2px solid #E8D3C9; }
+.grid .net { font-weight: 800; color: var(--blue-d); }
+.linkish { border: none; background: none; padding: 0; color: var(--blue); font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.warnmark { color: var(--warn); font-weight: 800; margin-left: 4px; }
+.warnlist { margin: 14px 0 0; padding: 12px 14px; background: var(--warn-bg); border-radius: 10px; color: var(--warn); font-size: 13.5px; }
+.warnlist ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* login */
+.login { max-width: 380px; margin: 12vh auto; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; box-shadow: 0 8px 30px rgba(20,40,80,.08); }
+.login h1 { margin: 0 0 4px; font-size: 22px; color: var(--blue); }
+.login p { margin: 0 0 16px; color: var(--muted); }
+.login input { width: 100%; padding: 12px 14px; border: 1px solid #B8C4D4; border-radius: 10px; font-size: 17px; }
+.login input:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
+.login .btn { width: 100%; margin-top: 12px; padding: 12px; font-size: 16px; }
+.login .err { color: var(--err); margin: 12px 0 0; }
+
+/* forms */
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+.field label { display: block; font-size: 12.5px; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.field input[type=text], .field input[type=password], .field select, .field input:not([type]) {
+  width: 100%; padding: 8px 10px; border: 1px solid #B8C4D4; border-radius: 8px; background: #fff;
+}
+.field input:focus, .field select:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
+.field .hint { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.check { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; padding-top: 18px; }
+.checks { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 26px; }
+.checks .check { padding-top: 0; }
+.check input { width: 18px; height: 18px; }
+fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; }
+legend { font-weight: 700; color: var(--blue); padding: 0 6px; }
+
+/* modal */
+.modal { position: fixed; inset: 0; background: rgba(15,25,40,.45); z-index: 50; display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 4vh 12px; }
+.modal-box { background: #fff; border-radius: 14px; width: min(900px, 100%); padding: 20px 22px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+.modal-box h3 { margin: 0 0 12px; font-size: 19px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+
+/* slips */
+.sliplayout { display: grid; grid-template-columns: 200px 1fr; gap: 16px; }
+.sliplist { display: flex; flex-direction: column; gap: 4px; max-height: 70vh; overflow-y: auto; }
+.sliplist button { text-align: left; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 7px 10px; cursor: pointer; display: flex; justify-content: space-between; gap: 6px; }
+.sliplist button[aria-current="true"] { border-color: var(--blue); background: var(--blue-l); font-weight: 700; }
+.slipview { background: #F6F8FB; border-radius: 12px; padding: 14px; overflow-x: auto; }
+.slip { background: #fff; border: 1.5px solid #2B3A4D; width: 190mm; max-width: 100%; margin: 0 auto; padding: 4mm 5mm 3mm; font-size: 9.2pt; line-height: 1.3; color: #111; }
+.slip-h { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #2B3A4D; padding-bottom: 1.8mm; }
+.slip-h .t1 { font-size: 14pt; font-weight: 800; letter-spacing: -.3px; }
+.slip-h .t2 { font-size: 9pt; color: #444; }
+.slip-h .co { font-weight: 800; font-size: 11pt; }
+.slip-who { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 1mm 4mm; padding: 1.5mm 0; border-bottom: 1px solid #999; font-size: 9pt; }
+.slip-who b { font-size: 10.5pt; }
+.slip-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5mm; margin-top: 1.8mm; align-items: start; }
+.slip-t { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.slip-t col.c1 { width: 31%; }
+.slip-t col.c3 { width: 22%; }
+.slip-t caption { text-align: left; font-weight: 800; padding: 0 0 .8mm; font-size: 9.2pt; }
+.slip-t th, .slip-t td { border: 1px solid #9AA4B1; padding: .5mm 1.2mm; vertical-align: top; line-height: 1.22; }
+.slip-t th { background: #EEF2F7; font-size: 7.6pt; font-weight: 700; }
+.slip-t td.lbl { font-size: 8.6pt; }
+.slip-t td.lbl b { font-weight: 600; }
+.slip-t td.how { font-size: 6.9pt; color: #333; word-break: keep-all; overflow-wrap: anywhere; }
+.slip-t td.amt { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; font-size: 9pt; }
+.slip-t .lbl small { display: block; font-size: 6.5pt; color: #555; line-height: 1.15; }
+.slip-t tr.sum td { font-weight: 800; background: #F3F6FA; font-size: 8.6pt; }
+.slip-net { display: flex; justify-content: space-between; align-items: center; margin-top: 2mm; border: 2px solid #2B3A4D; padding: 1.4mm 3mm; }
+.slip-net .v { font-size: 14pt; font-weight: 900; }
+.slip-net .acct { font-size: 8.6pt; color: #333; text-align: right; }
+.slip-days { margin-top: 1.6mm; font-size: 7.4pt; color: #222; line-height: 1.3; }
+.slip-days b { font-weight: 700; }
+.slip-note { margin: 1mm 0 0; font-size: 6.9pt; color: #444; }
+
+/* print */
+#print { display: none; }
+.pl-title { font-size: 13pt; font-weight: 800; margin: 0 0 3mm; display: flex; justify-content: space-between; align-items: baseline; }
+.pl-title small { font-size: 8.5pt; font-weight: 500; color: #444; }
+table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
+.pl th, .pl td { border: 1px solid #8C97A6; padding: .9mm 1mm; }
+.pl th { background: #E9EEF5; font-weight: 700; }
+.pl td { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pl td:first-child { text-align: left; font-weight: 700; }
+.pl tfoot td { font-weight: 800; background: #F1F4F8; }
+.pl-sign { margin-top: 4mm; display: flex; justify-content: flex-end; gap: 6mm; font-size: 9pt; }
+.pl-sign span { border: 1px solid #8C97A6; width: 26mm; height: 15mm; display: inline-flex; align-items: flex-start; justify-content: center; padding-top: 1mm; }
+.pair { break-after: page; page-break-after: always; }
+.pair:last-child { break-after: auto; page-break-after: auto; }
+.pair .slip { width: 100%; max-width: none; break-inside: avoid; page-break-inside: avoid; }
+.pair .slip + .slip { margin-top: 6mm; }
+@media print {
+  body { background: #fff; }
+  body.printing > *:not(#print) { display: none !important; }
+  body.printing #print { display: block; }
+  .slip { border-width: 1.2px; }
+}
+@media screen and (max-width: 760px) {
+  .sliplayout { grid-template-columns: 1fr; }
+  .slipview { padding: 6px; }
+  .slipview .slip { width: 100%; padding: 3mm; font-size: 10pt; }
+  .slipview .slip-h { flex-wrap: wrap; gap: 4px; }
+  .slipview .slip-who { grid-template-columns: 1fr; }
+  .slipview .slip-cols { grid-template-columns: 1fr; gap: 3mm; }
+  .slipview .slip-net { flex-wrap: wrap; gap: 4px; }
+  .slipview .slip-t td.lbl { font-size: 10pt; }
+  .slipview .slip-t td.how { font-size: 8pt; }
+  .slipview .slip-t td.amt { font-size: 10pt; }
+  .sliplist { flex-direction: row; flex-wrap: wrap; max-height: none; }
+  .mnav b { min-width: 0; }
+}
+
+.loading { position: fixed; inset: 0; background: rgba(238,242,247,.6); z-index: 60; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--blue); }
+.loading span { background: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1B2430; color: #fff; padding: 10px 18px; border-radius: 10px; z-index: 70; font-size: 14px; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 0 0 14px; }
+.kv div { background: #F5F8FC; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.kv small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; }
+.kv b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.pill { display: inline-block; padding: 1px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.bad { background: var(--err-bg); color: var(--err); }
+.pill.off { background: #EEF0F3; color: #6B7480; }
+.note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+.note li { margin: 3px 0; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="print" aria-hidden="true"></div>
+<script>window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";</script>
+<script src="payroll.js?v=v8"></script>
+<script>
+(function () {
+  'use strict';
+  var P = window.NMCPay;
+  var API = String(window.NMC_API || '');
+  var app = document.getElementById('app');
+  var TOKEN_KEY = 'nmc_pay_token';
+  var S = { token: '', data: null, month: null, tab: 'ledger', slip: '', busy: 0, err: '', edit: null, adjEdit: null };
+  try { S.token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { S.token = ''; }
+
+  var ERR = {
+    bad_pw: '비밀번호가 맞지 않습니다.',
+    locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다. 잠시 뒤 다시 해 주세요.',
+    auth: '로그인 시간이 지났습니다. 다시 들어와 주세요.',
+    net: '인터넷 연결을 확인해 주세요.',
+    timeout: '응답이 늦습니다. 잠시 뒤 다시 해 주세요.',
+    bad_month: '달 형식이 맞지 않습니다.',
+    bad_name: '이름을 확인해 주세요.',
+    bad_value: '입력한 값을 확인해 주세요 (숫자 범위·글자 수).',
+    bad_account: '계좌번호는 숫자와 - 만 6~30자로 넣어 주세요.',
+    weak_pw: '새 비밀번호는 8자 이상으로 해 주세요.',
+    server: '서버에서 처리하지 못했습니다. 잠시 뒤 다시 해 주세요.'
+  };
+  function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다: ' + c); }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  var fmt = P.fmt;
+  function ymTitle(ym) { return ym.slice(0, 4) + '년 ' + Number(ym.slice(5, 7)) + '월'; }
+  function shiftYm(ym, d) {
+    var y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)) + d;
+    while (m < 1) { m += 12; y--; }
+    while (m > 12) { m -= 12; y++; }
+    return y + '-' + (m < 10 ? '0' : '') + m;
+  }
+  var WD = ['일', '월', '화', '수', '목', '금', '토'];
+  function md(date) {
+    var p = date.split('-').map(Number);
+    return p[1] + '/' + p[2] + '(' + WD[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()] + ')';
+  }
+
+  /* ───────── 서버 ───────── */
+  function call(action, payload) {
+    var body = { action: action };
+    if (S.token && action !== 'login') body.token = S.token;
+    Object.keys(payload || {}).forEach(function (k) { body[k] = payload[k]; });
+    var ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 60000);
+    return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('net'); return r.json(); }, function (e) {
+        throw new Error(e && e.name === 'AbortError' ? 'timeout' : 'net');
+      })
+      .then(function (j) {
+        clearTimeout(timer);
+        if (!j || !j.ok) throw new Error((j && j.error) || 'server');
+        return j.data;
+      }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function busy(on) {
+    S.busy += on ? 1 : -1;
+    var el = document.getElementById('loading');
+    if (S.busy > 0 && !el) {
+      el = document.createElement('div');
+      el.id = 'loading'; el.className = 'loading';
+      el.innerHTML = '<span>처리하는 중…</span>';
+      document.body.appendChild(el);
+    } else if (S.busy <= 0 && el) { S.busy = 0; el.remove(); }
+  }
+  function toast(msg) {
+    var el = document.createElement('div');
+    el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.remove(); }, 2600);
+  }
+  function guard(p) {
+    busy(true);
+    return p.then(function (v) { busy(false); return v; }, function (e) {
+      busy(false);
+      if (String(e && e.message) === 'auth') { logoutLocal(ERR.auth); }
+      else alert(errText(e));
+      throw e;
+    });
+  }
+  function setToken(t) {
+    S.token = t || '';
+    try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+  }
+  function logoutLocal(msg) {
+    setToken('');
+    S.data = null; S.month = null; S.edit = null; S.err = msg || '';
+    render();
+  }
+
+  function load(ym) {
+    return guard(call('data', ym ? { ym: ym } : {})).then(function (d) {
+      S.data = d;
+      if (!S.slip || d.employees.indexOf(S.slip) < 0) S.slip = '';
+      recompute();
+    });
+  }
+  function recompute() {
+    S.month = P.computeMonth(S.data);
+    if (!S.slip && S.month.rows.length) S.slip = S.month.rows[0].name;
+    render();
+  }
+
+  /* ───────── 화면 ───────── */
+  function render() {
+    if (!S.token || !S.data) { app.innerHTML = viewLogin(); bindLogin(); return; }
+    app.innerHTML = viewTop() + viewBanners() + viewTabs() + '<main><section class="panel" id="panel">' + viewTab() + '</section></main>' + (S.edit ? viewEdit() : '');
+    bindMain();
+  }
+
+  function viewLogin() {
+    return '<section class="login" aria-labelledby="lt">' +
+      '<h1 id="lt">NMC 급여 관리</h1>' +
+      '<p>관리자 비밀번호를 넣어 주세요.</p>' +
+      '<form id="loginForm" autocomplete="off">' +
+      '<label class="hidden" for="pw">비밀번호</label>' +
+      '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
+      '<button class="btn primary" type="submit">들어가기</button>' +
+      '</form>' + (S.err ? '<p class="err" role="alert">' + esc(S.err) + '</p>' : '') + '</section>';
+  }
+  function bindLogin() {
+    var f = document.getElementById('loginForm');
+    var pw = document.getElementById('pw');
+    pw.focus();
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var v = pw.value;
+      pw.value = '';
+      if (!v) return;
+      busy(true);
+      call('login', { pw: v }).then(function (r) {
+        busy(false);
+        setToken(r.token);
+        S.err = '';
+        return load('');
+      }).catch(function (e) {
+        busy(false);
+        if (S.token && S.data) return;
+        S.err = errText(e);
+        setToken('');
+        render();
+      });
+    });
+  }
+
+  function viewTop() {
+    var m = S.month;
+    return '<header class="top"><div class="top-in">' +
+      '<div class="brand">NMC 급여 관리<small>' + esc(m.config.company) + '</small></div>' +
+      '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
+      '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +
+      '<div class="paydate">지급일 ' + esc(m.payDate) + '</div>' +
+      '<button class="iconbtn" data-act="reload">새로 불러오기</button>' +
+      '<button class="iconbtn" data-act="logout">로그아웃</button>' +
+      '</div></header>';
+  }
+
+  function viewBanners() {
+    var m = S.month, d = S.data, out = [];
+    if (m.partial) {
+      out.push(['info', ymTitle(m.ym) + '은 아직 끝나지 않았습니다 (오늘 ' + esc(d.today) + '). 잔업 기록은 ' +
+        (m.lastRecord ? esc(md(m.lastRecord)) + '까지 들어와 있고' : '아직 없고') + ', 월말까지 더 들어오면 금액이 바뀝니다.']);
+    } else if (m.future) {
+      out.push(['info', '아직 오지 않은 달입니다.']);
+    }
+    var nw = m.rows.filter(function (r) { return r.warnings.length; }).length;
+    if (nw) out.push(['warn', '확인할 것이 있는 직원 ' + nw + '명 — 급여대장 아래 목록을 보세요.']);
+    if (d.ledgerSaved) out.push(['ok', esc(d.ledgerSaved)]);
+    if (!out.length) return '';
+    return '<div class="banners">' + out.map(function (b) { return '<div class="banner ' + b[0] + '">' + b[1] + '</div>'; }).join('') + '</div>';
+  }
+
+  var TABS = [['ledger', '급여대장'], ['slips', '명세서'], ['staff', '직원 설정'], ['adjust', '추가·공제'], ['bank', '은행 이체 파일'], ['config', '기준·비밀번호']];
+  function viewTabs() {
+    return '<nav class="tabs" role="tablist">' + TABS.map(function (t) {
+      return '<button class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '">' + t[1] + '</button>';
+    }).join('') + '</nav>';
+  }
+  function viewTab() {
+    switch (S.tab) {
+      case 'slips': return viewSlips();
+      case 'staff': return viewStaff();
+      case 'adjust': return viewAdjust();
+      case 'bank': return viewBank();
+      case 'config': return viewConfig();
+      default: return viewLedger();
+    }
+  }
+
+  /* 급여대장 */
+  var PAY_KEYS = ['base', 'ot', 'night', 'hol', 'bonus', 'otherPay', 'gross'];
+  var DED_KEYS = ['np', 'hi', 'ltc', 'ei', 'it', 'lt', 'dorm', 'otherDed', 'dedTotal'];
+  var KEEP_COLS = ['name', 'base', 'gross', 'dedTotal', 'net'];
+  function viewLedger() {
+    var L = P.ledger(S.month);
+    var t = S.month.totals;
+    // 화면에서는 모두 0인 칸(야간·기타 등)을 숨깁니다. 인쇄·엑셀·시트 저장은 모든 칸을 그대로 씁니다.
+    var show = P.LEDGER_COLS.map(function (c, i) {
+      return KEEP_COLS.indexOf(c[0]) >= 0 || L.rows.some(function (r) { return r[i]; });
+    });
+    var cols = P.LEDGER_COLS.filter(function (c, i) { return show[i]; });
+    L = {
+      rows: L.rows.map(function (r) { return r.filter(function (v, i) { return show[i]; }); }),
+      totals: L.totals.filter(function (v, i) { return show[i]; })
+    };
+    var head = '<tr>' + cols.map(function (c, i) {
+      var cls = i === 0 ? '' : 'n';
+      if (c[0] === 'base') cls += ' grp-pay';
+      if (c[0] === 'np') cls += ' grp-ded';
+      if (c[0] === 'net') cls += ' pin';
+      return '<th class="' + cls + '" scope="col">' + esc(c[1]) + '</th>';
+    }).join('') + '</tr>';
+    var body = S.month.rows.map(function (r, ri) {
+      var row = L.rows[ri];
+      return '<tr>' + cols.map(function (c, i) {
+        if (i === 0) {
+          return '<td class="name"><button class="linkish" data-slip="' + esc(r.name) + '">' + esc(r.name) + '</button>' +
+            (r.warnings.length ? '<span class="warnmark" title="' + esc(r.warnings.join(' / ')) + '">⚠</span>' : '') + '</td>';
+        }
+        var v = row[i];
+        var cls = 'n' + (c[0] === 'base' ? ' grp-pay' : '') + (c[0] === 'np' ? ' grp-ded' : '') + (c[0] === 'net' ? ' net pin' : '');
+        var txt = (c[0] === 'otH' || c[0] === 'holH') ? (v ? String(v) : '') : (v ? fmt(v) : '');
+        return '<td class="' + cls + '">' + txt + '</td>';
+      }).join('') + '</tr>';
+    }).join('');
+    var foot = '<tr>' + L.totals.map(function (v, i) {
+      var c = cols[i];
+      if (i === 0) return '<td style="white-space:nowrap">' + esc(v) + '</td>';
+      var cls = 'n' + (c[0] === 'base' ? ' grp-pay' : '') + (c[0] === 'np' ? ' grp-ded' : '') + (c[0] === 'net' ? ' net pin' : '');
+      return '<td class="' + cls + '">' + (c[0] === 'otH' || c[0] === 'holH' ? String(v) : fmt(v)) + '</td>';
+    }).join('') + '</tr>';
+    var warns = S.month.rows.filter(function (r) { return r.warnings.length; });
+    return '<div class="toolbar"><h2>' + ymTitle(S.month.ym) + ' 급여대장</h2>' +
+      '<button class="btn" data-act="printLedger">급여대장 인쇄</button>' +
+      '<button class="btn" data-act="xlsxLedger">엑셀로 받기</button>' +
+      '<button class="btn primary" data-act="saveLedger">구글 시트에 저장</button></div>' +
+      '<div class="kv">' +
+      '<div><small>인원</small><b>' + S.month.rows.length + '명</b></div>' +
+      '<div><small>지급 합계</small><b>' + fmt(t.gross || 0) + '원</b></div>' +
+      '<div><small>공제 합계</small><b>' + fmt(t.dedTotal || 0) + '원</b></div>' +
+      '<div><small>실지급액 합계 (통장 입금)</small><b>' + fmt(t.net || 0) + '원</b></div>' +
+      '</div>' +
+      '<div class="scroll"><table class="grid sticky1" id="ledgerTable"><thead>' + head + '</thead><tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table></div>' +
+      (warns.length ? '<div class="warnlist"><b>확인할 것</b><ul>' + warns.map(function (r) {
+        return '<li><b>' + esc(r.name) + '</b>: ' + r.warnings.map(esc).join(' · ') + '</li>';
+      }).join('') + '</ul></div>' : '') +
+      '<ul class="note">' +
+      '<li>이름을 누르면 그 사람 명세서가 열립니다. 금액은 원 단위, 시간은 잔업 앱 기록 그대로입니다.</li>' +
+      '<li>4대보험은 이번 달 급여로 계산했습니다. 공단 고지서 금액과 맞추려면 「직원 설정」의 <b>보험 기준월액</b>에 신고한 보수월액을 넣으세요.</li>' +
+      '<li>소득세는 국세청 근로소득 간이세액표(2026.3.1. 시행)를 그대로 찾아 넣었습니다. 지방소득세는 소득세의 10%입니다.</li>' +
+      '</ul>';
+  }
+
+  /* 명세서 */
+  function slipHtml(r) {
+    var m = S.month, cfg = m.config, e = r.emp;
+    var ymT = ymTitle(m.ym);
+    var enMonth = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][Number(m.ym.slice(5, 7)) - 1] + ' ' + m.ym.slice(0, 4);
+    function rows(list) {
+      return list.map(function (x) {
+        return '<tr><td class="lbl"><b>' + esc(x.label) + '</b>' + (x.en ? '<small>' + esc(x.en) + '</small>' : '') + '</td>' +
+          '<td class="how">' + esc(x.how || '') + '</td><td class="amt">' + fmt(x.amount) + '</td></tr>';
+      }).join('');
+    }
+    var days = r.hours.days.map(function (d) {
+      return md(d.date) + ' ' + P.hrs(d.minutes) + 'h' + (d.type === 'holiday' ? '(휴일)' : '');
+    }).join(' · ');
+    var hourTxt = '연장 ' + P.hrs(r.hours.ot * 60) + '시간' + (r.hours.night ? ' · 야간 ' + P.hrs(r.hours.night * 60) + '시간' : '') +
+      ' · 휴일 ' + P.hrs((r.hours.hol + r.hours.holOver) * 60) + '시간';
+    var acct = e.account ? esc(e.bank) + ' ' + esc(P.maskAccount(e.account)) + (e.holder ? ' (' + esc(e.holder) + ')' : '') : '미등록';
+    return '<article class="slip">' +
+      '<div class="slip-h"><div><div class="t1">' + ymT + ' 급여명세서</div><div class="t2">Payslip · ' + enMonth + '</div></div>' +
+      '<div style="text-align:right"><div class="co">' + esc(cfg.company) + '</div><div class="t2">지급일 Pay date <b>' + esc(m.payDate) + '</b></div></div></div>' +
+      '<div class="slip-who"><div>성명 Name&nbsp; <b>' + esc(r.name) + '</b></div>' +
+      '<div>생년월일·사번 ID&nbsp; <b>' + esc(e.idno || '-') + '</b></div>' +
+      '<div>국적 Nationality&nbsp; <b>' + esc(e.nation || '-') + '</b></div></div>' +
+      '<div class="slip-cols">' +
+      '<table class="slip-t"><caption>지급 내역 Earnings</caption><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup><tr><th>항목</th><th>계산 방법</th><th>금액(원)</th></tr>' + rows(r.pay) +
+      '<tr class="sum"><td colspan="2">지급 합계 Total earnings</td><td class="amt">' + fmt(r.gross) + '</td></tr></table>' +
+      '<table class="slip-t"><caption>공제 내역 Deductions</caption><colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup><tr><th>항목</th><th>계산 방법</th><th>금액(원)</th></tr>' + rows(r.ded) +
+      '<tr class="sum"><td colspan="2">공제 합계 Total deductions</td><td class="amt">' + fmt(r.dedTotal) + '</td></tr></table>' +
+      '</div>' +
+      '<div class="slip-net"><div>실지급액 Net pay&nbsp; <span class="v">' + fmt(r.net) + '원</span></div><div class="acct">입금 계좌 ' + acct + '</div></div>' +
+      '<div class="slip-days"><b>근무 기록 Work record</b> ' + hourTxt + (days ? ' — ' + esc(days) : '') + '</div>' +
+      '<p class="slip-note">통상시급 ' + P.fmtRate(r.hourly) + '원 기준 · 연장근로 ×' + cfg.otRate + ' · 야간(22시~) +' + cfg.nightAdd +
+      ' · 휴일 8시간까지 ×' + cfg.holRate + ', 8시간 넘으면 ×' + cfg.holOverRate +
+      (r.otExempt ? ' · 비과세 연장근로수당 ' + fmt(r.otExempt) + '원' : '') + '</p>' +
+      '</article>';
+  }
+  function viewSlips() {
+    var rows = S.month.rows;
+    var cur = rows.filter(function (r) { return r.name === S.slip; })[0] || rows[0];
+    return '<div class="toolbar"><h2>' + ymTitle(S.month.ym) + ' 급여명세서</h2>' +
+      (cur ? '<button class="btn" data-act="printOne">이 명세서 인쇄</button>' : '') +
+      '<button class="btn primary" data-act="printSlips">전체 인쇄 (한 장에 2명)</button></div>' +
+      (cur ? '<div class="sliplayout"><div class="sliplist" role="list">' + rows.map(function (r) {
+        return '<button data-slip="' + esc(r.name) + '" aria-current="' + (r === cur) + '"><span>' + esc(r.name) + (r.warnings.length ? ' <span class="warnmark">⚠</span>' : '') + '</span><span class="num muted">' + fmt(r.net) + '</span></button>';
+      }).join('') + '</div><div class="slipview">' + slipHtml(cur) + '</div></div>' : '<p>직원이 없습니다.</p>');
+  }
+
+  /* 직원 설정 */
+  function viewStaff() {
+    var cfg = S.month.config;
+    var list = staffList();
+    var head = ['이름', '재직', '국적', '기본급', '통상시급', '성과급', '기숙사비', '국민연금', '건강', '장기요양', '고용', '가족', '은행', '계좌번호', ''];
+    return '<div class="toolbar"><h2>직원 급여 설정</h2><span class="muted">고친 내용은 구글 시트 「급여설정」에 저장되고, 모든 달 계산에 쓰입니다.</span></div>' +
+      '<div class="scroll"><table class="grid sticky1"><thead><tr>' + head.map(function (h, i) { return '<th' + (i >= 3 && i <= 6 ? ' class="n"' : '') + '>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      list.map(function (e) {
+        function yn(v) { return v ? '<span class="pill ok">적용</span>' : '<span class="pill off">안 함</span>'; }
+        return '<tr><td class="name">' + esc(e.name) + '</td>' +
+          '<td>' + (e.active ? '재직' : '<span class="pill off">퇴사</span>') + '</td>' +
+          '<td>' + (e.nation ? esc(e.nation) : '<span class="pill bad">미입력</span>') + '</td>' +
+          '<td class="n">' + fmt(e.base) + '</td><td class="n">' + P.fmtRate(e.hourly || cfg.hourly) + '</td>' +
+          '<td class="n">' + (e.bonus ? fmt(e.bonus) : '') + '</td><td class="n">' + (e.dorm ? fmt(e.dorm) : '없음') + '</td>' +
+          '<td>' + yn(e.np) + '</td><td>' + yn(e.hi) + '</td><td>' + yn(e.hi && e.ltc) + '</td><td>' + yn(e.ei) + '</td>' +
+          '<td class="n">' + e.family + (e.kids ? ' (자녀 ' + e.kids + ')' : '') + '</td>' +
+          '<td>' + (e.bank ? esc(e.bank) : '<span class="pill bad">없음</span>') + '</td>' +
+          '<td>' + (e.account ? esc(P.maskAccount(e.account)) : '<span class="pill bad">없음</span>') + '</td>' +
+          '<td><button class="btn small" data-editemp="' + esc(e.name) + '">고치기</button></td></tr>';
+      }).join('') + '</tbody></table></div>' +
+      '<ul class="note"><li>국민연금은 국적에 따라 다릅니다: 태국·베트남·캄보디아·인도네시아·필리핀·스리랑카 등은 적용, 미얀마·네팔·방글라데시·파키스탄 등은 적용 제외 (국민연금공단 국가별 적용 현황). 국적을 고르면 자동으로 맞춰집니다.</li>' +
+      '<li>E-9 근로자가 장기요양보험 가입 제외를 신청했다면 「장기요양」을 끄세요.</li></ul>';
+  }
+  function staffList() {
+    var d = S.data, names = [], by = {};
+    (d.settings || []).forEach(function (s) { by[s.name] = s; });
+    (d.employees || []).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
+    Object.keys(by).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
+    return names.map(function (n) { var e = P.employee(by[n] || { name: n }); e.name = n; return e; });
+  }
+
+  function viewEdit() {
+    var e = S.edit, cfg = S.month.config;
+    function txt(k, label, hint, extra) {
+      return '<div class="field"><label for="f_' + k + '">' + label + '</label><input type="text" id="f_' + k + '" name="' + k + '" value="' + esc(e[k] == null ? '' : e[k]) + '"' + (extra || '') + '>' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+    }
+    function money(k, label, hint) {
+      var v = e[k] ? fmt(e[k]) : (k === 'insBase' ? '' : '0');
+      return '<div class="field"><label for="f_' + k + '">' + label + '</label><input type="text" inputmode="numeric" class="money" id="f_' + k + '" name="' + k + '" value="' + v + '">' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
+    }
+    function chk(k, label) {
+      return '<label class="check"><input type="checkbox" name="' + k + '"' + (e[k] ? ' checked' : '') + '> ' + label + '</label>';
+    }
+    var nations = ['<option value="">(고르세요)</option>'].concat(P.NATIONS.map(function (n) { return '<option' + (e.nation === n ? ' selected' : '') + '>' + n + '</option>'; }));
+    if (e.nation && P.NATIONS.indexOf(e.nation) < 0) nations.push('<option selected>' + esc(e.nation) + '</option>');
+    var banks = P.BANKS.map(function (b) { return '<option value="' + esc(b[0]) + '">'; }).join('');
+    return '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="et"><form class="modal-box" id="empForm" autocomplete="off">' +
+      '<h3 id="et">' + esc(e.name) + ' — 급여 설정</h3>' +
+      '<fieldset><legend>기본</legend><div class="form">' +
+      '<div class="checks">' + chk('active', '재직 중 (급여 계산에 넣기)') + '</div>' +
+      '<div class="field"><label for="f_nation">국적</label><select id="f_nation" name="nation">' + nations.join('') + '</select><div class="hint">고르면 국민연금 적용 여부가 맞춰집니다</div></div>' +
+      txt('idno', '생년월일 또는 사번', '명세서에 들어갑니다 (근로자 확인용)', ' maxlength="30"') +
+      txt('joined', '입사일', '예: 2024-03-02', ' maxlength="20"') +
+      '</div></fieldset>' +
+      '<fieldset><legend>급여</legend><div class="form">' +
+      money('base', '기본급 (월)', '209시간 × 10,320원 = 2,156,880원') +
+      money('hourly', '통상시급 (잔업수당 기준)', '2026년 최저임금 10,320원') +
+      money('bonus', '성과급 (매월)', '없으면 0') +
+      money('dorm', '기숙사비 (매월 공제)', '없으면 0') +
+      '</div></fieldset>' +
+      '<fieldset><legend>4대보험 · 세금</legend><div class="form">' +
+      '<div class="checks">' + chk('np', '국민연금') + chk('hi', '건강보험') + chk('ltc', '장기요양보험') + chk('ei', '고용보험') + '</div>' +
+      money('insBase', '보험 기준월액 (비우면 이번 달 급여)', '공단에 신고한 보수월액을 넣으면 고지서와 맞습니다') +
+      '<div class="field"><label for="f_family">공제대상 가족 수 (본인 포함)</label><input type="text" inputmode="numeric" id="f_family" name="family" value="' + e.family + '"></div>' +
+      '<div class="field"><label for="f_kids">그중 8~20세 자녀 수</label><input type="text" inputmode="numeric" id="f_kids" name="kids" value="' + e.kids + '"></div>' +
+      '<div class="field"><label for="f_taxRatio">소득세 원천징수 비율</label><select id="f_taxRatio" name="taxRatio">' + [80, 100, 120].map(function (v) { return '<option value="' + v + '"' + (e.taxRatio === v ? ' selected' : '') + '>' + v + '%</option>'; }).join('') + '</select></div>' +
+      (cfg.otExempt ? '<div class="checks">' + chk('otExemptOk', '생산직 연장근로수당 비과세 대상 (작년 총급여 3,700만원 이하)') + '</div>' + money('otExemptUsed', '올해 이미 비과세로 처리한 연장수당', '연 한도 ' + fmt(cfg.otExemptYear) + '원에서 뺍니다') : '') +
+      '</div></fieldset>' +
+      '<fieldset><legend>급여 통장</legend><div class="form">' +
+      '<div class="field"><label for="f_bank">은행</label><input type="text" id="f_bank" name="bank" list="bankList" value="' + esc(e.bank) + '" maxlength="30"><datalist id="bankList">' + banks + '</datalist><div class="hint">목록에서 고르면 은행 코드가 맞춰집니다</div></div>' +
+      txt('account', '계좌번호', '숫자만 또는 - 포함', ' inputmode="numeric" maxlength="30"') +
+      txt('holder', '예금주 (통장 이름 그대로)', '영문 이름이면 통장과 똑같이', ' maxlength="40"') +
+      txt('memo', '메모', '', ' maxlength="200"') +
+      '</div></fieldset>' +
+      '<div class="modal-actions"><button type="button" class="btn" data-act="closeEdit">닫기</button><button type="submit" class="btn primary">저장</button></div>' +
+      '</form></div>';
+  }
+
+  function readEditForm(form) {
+    var e = {}, base = S.edit;
+    Object.keys(P.EMP_DEFAULTS).forEach(function (k) { e[k] = base[k]; });
+    e.name = base.name;
+    var fd = form.elements;
+    ['active', 'np', 'hi', 'ltc', 'ei', 'otExemptOk'].forEach(function (k) { if (fd[k]) e[k] = !!fd[k].checked; });
+    ['nation', 'idno', 'joined', 'bank', 'account', 'holder', 'memo'].forEach(function (k) { if (fd[k]) e[k] = String(fd[k].value || '').trim(); });
+    ['base', 'hourly', 'bonus', 'dorm', 'insBase', 'otExemptUsed', 'family', 'kids', 'taxRatio'].forEach(function (k) {
+      if (!fd[k]) return;
+      var s = String(fd[k].value || '').replace(/[^0-9.]/g, '');
+      e[k] = s === '' ? 0 : Number(s);
+    });
+    if (!(e.family >= 1)) e.family = 1;
+    return e;
+  }
+
+  /* 추가·공제 */
+  function viewAdjust() {
+    var d = S.data, a = S.adjEdit || { name: '', kind: 'pay', label: '', amount: '', memo: '' };
+    var names = S.month.rows.map(function (r) { return r.name; });
+    staffList().forEach(function (e) { if (names.indexOf(e.name) < 0) names.push(e.name); });
+    var list = (d.adjustments || []);
+    return '<div class="toolbar"><h2>' + ymTitle(S.month.ym) + ' 추가 지급 · 공제</h2><span class="muted">이 달에만 들어가는 금액입니다.</span></div>' +
+      '<form id="adjForm" class="form" autocomplete="off" style="margin-bottom:16px">' +
+      '<div class="field"><label for="a_name">직원</label><select id="a_name" name="name" required><option value="">(고르세요)</option>' +
+      names.map(function (n) { return '<option' + (a.name === n ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field"><label for="a_kind">구분</label><select id="a_kind" name="kind">' + Object.keys(P.KINDS).map(function (k) {
+        return '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + P.KINDS[k] + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label for="a_label">항목 이름</label><input type="text" id="a_label" name="label" maxlength="30" required placeholder="예: 상여금, 결근 1일, 가불 상환" value="' + esc(a.label) + '"></div>' +
+      '<div class="field"><label for="a_amount">금액 (원)</label><input type="text" inputmode="numeric" class="money" id="a_amount" name="amount" required value="' + (a.amount ? fmt(a.amount) : '') + '"></div>' +
+      '<div class="field"><label for="a_memo">메모 (명세서 계산 방법 칸)</label><input type="text" id="a_memo" name="memo" maxlength="100" value="' + esc(a.memo || '') + '"></div>' +
+      '<div class="field" style="display:flex;align-items:flex-end;gap:8px">' + (a.id ? '<button type="button" class="btn" data-act="cancelAdj">취소</button>' : '') +
+      '<button class="btn primary" type="submit">' + (a.id ? '고친 내용 저장' : '추가') + '</button></div>' +
+      '</form>' +
+      (list.length ? '<div class="scroll"><table class="grid"><thead><tr><th>직원</th><th>구분</th><th>항목</th><th class="n">금액</th><th>메모</th><th></th></tr></thead><tbody>' +
+        list.map(function (x) {
+          return '<tr><td class="name">' + esc(x.name) + '</td><td>' + esc(P.KINDS[x.kind] || x.kind) + '</td><td>' + esc(x.label) + '</td>' +
+            '<td class="n">' + (x.kind === 'pay' || x.kind === 'paynt' ? '+' : '−') + fmt(x.amount) + '</td><td>' + esc(x.memo) + '</td>' +
+            '<td style="white-space:nowrap"><button class="btn small" data-editadj="' + esc(x.id) + '">고치기</button> <button class="btn small danger" data-deladj="' + esc(x.id) + '">삭제</button></td></tr>';
+        }).join('') + '</tbody></table></div>' : '<p class="muted">이 달에 넣은 추가·공제가 없습니다.</p>') +
+      '<ul class="note"><li><b>지급 (세금 붙음)</b>: 상여금·추가 수당 — 4대보험·소득세 계산에 들어갑니다.</li>' +
+      '<li><b>지급 (비과세)</b>: 실비 등 세금이 없는 돈.</li>' +
+      '<li><b>빼기 (결근 등, 세금 전)</b>: 결근·중도 입사처럼 급여 자체가 줄어드는 금액 — 세금도 줄어듭니다.</li>' +
+      '<li><b>공제 (가불 등, 세금 후)</b>: 가불 상환처럼 세금 계산 뒤에 빼는 금액.</li></ul>';
+  }
+
+  /* 은행 이체 */
+  function viewBank() {
+    var rows = P.bankRows(S.month);
+    var ok = rows.filter(function (r) { return r.ok; });
+    var bad = rows.filter(function (r) { return !r.ok; });
+    var total = ok.reduce(function (s, r) { return s + r.amount; }, 0);
+    return '<div class="toolbar"><h2>' + ymTitle(S.month.ym) + ' 급여 이체 파일</h2>' +
+      '<button class="btn primary" data-act="xlsxBank"' + (ok.length ? '' : ' disabled') + '>엑셀 파일 받기 (.xlsx)</button>' +
+      '<button class="btn" data-act="csvBank"' + (ok.length ? '' : ' disabled') + '>CSV 받기</button></div>' +
+      '<div class="kv"><div><small>이체 건수</small><b>' + ok.length + '건</b></div><div><small>이체 금액 합계</small><b>' + fmt(total) + '원</b></div>' +
+      '<div><small>빠진 사람</small><b>' + bad.length + '명</b></div><div><small>지급일</small><b>' + esc(S.month.payDate) + '</b></div></div>' +
+      (bad.length ? '<div class="banner warn" style="margin:0 0 12px">이체 파일에서 빠진 사람: ' + bad.map(function (r) { return '<b>' + esc(r.name) + '</b>(' + esc(r.problem) + ')'; }).join(', ') +
+        ' — 「직원 설정」에서 은행·계좌·예금주를 넣으면 들어갑니다.</div>' : '') +
+      '<div class="scroll"><table class="grid"><thead><tr><th>직원</th><th>은행</th><th>은행코드</th><th>계좌번호</th><th>예금주</th><th class="n">이체 금액</th><th>받는 분 통장 표시</th><th>내 통장 표시</th><th>상태</th></tr></thead><tbody>' +
+      rows.map(function (r) {
+        return '<tr><td class="name">' + esc(r.name) + '</td><td>' + esc(r.bank) + '</td><td>' + esc(r.code) + '</td><td>' + esc(r.account) + '</td><td>' + esc(r.holder) + '</td>' +
+          '<td class="n">' + fmt(r.amount) + '</td><td>' + esc(r.memoTo) + '</td><td>' + esc(r.memoFrom) + '</td>' +
+          '<td>' + (r.ok ? '<span class="pill ok">들어감</span>' : '<span class="pill bad">' + esc(r.problem) + '</span>') + '</td></tr>';
+      }).join('') + '</tbody><tfoot><tr><td colspan="5">합계 (들어가는 ' + ok.length + '건)</td><td class="n">' + fmt(total) + '</td><td colspan="3"></td></tr></tfoot></table></div>' +
+      '<ul class="note"><li>은행 기업뱅킹의 <b>대량이체(급여이체)</b> 메뉴에서 이 엑셀 파일을 올리면 됩니다. 이체 실행(인증·OTP)은 은행 화면에서 직접 하세요.</li>' +
+      '<li>열 순서: 은행코드 · 은행 · 계좌번호(숫자만) · 예금주 · 이체금액 · 받는 분 통장 표시 · 내 통장 표시 · 직원. 은행마다 올리는 양식의 열 순서가 다를 수 있습니다.</li>' +
+      '<li>통장 표시 글자는 「기준·비밀번호」에서 바꿀 수 있습니다.</li></ul>';
+  }
+
+  /* 기준 */
+  function viewConfig() {
+    var cfg = S.month.config;
+    var fields = P.CONFIG_FIELDS.map(function (f) {
+      var k = f[0], v = cfg[k];
+      if (f[2] === 'bool') return '<label class="check"><input type="checkbox" name="' + k + '"' + (v ? ' checked' : '') + '> ' + esc(f[1]) + '</label>';
+      var shown = f[2] === 'int' ? fmt(v) : f[2] === 'pct' ? String(v) : String(v == null ? '' : v);
+      return '<div class="field"><label for="c_' + k + '">' + esc(f[1]) + '</label><input type="text" id="c_' + k + '" name="' + k + '" value="' + esc(shown) + '"' + (f[2] === 'text' ? ' maxlength="40"' : ' inputmode="decimal"') + '></div>';
+    }).join('');
+    return '<div class="toolbar"><h2>계산 기준</h2><span class="muted">2026년 기준값이 들어 있습니다. 요율이 바뀌면 여기서 고치세요.</span></div>' +
+      '<form id="cfgForm" autocomplete="off"><div class="form">' + fields + '</div>' +
+      '<div class="modal-actions"><button type="button" class="btn" data-act="cfgDefaults">2026년 기본값으로</button><button type="submit" class="btn primary">기준 저장</button></div></form>' +
+      '<ul class="note"><li>국민연금 4.75% · 건강보험 3.595% · 장기요양 = 건강보험료 × 0.9448/7.19 · 고용보험 0.9% (2026년 근로자 부담). 국민연금 기준소득월액은 41만~659만원 (2026.7~2027.6).</li>' +
+      '<li>토요일: 근로계약서에 「매주 토요일 휴일」로 되어 있어 휴일근로(8시간까지 ×1.5, 넘으면 ×2.0)로 계산합니다. 토요일이 무급 휴무일이면 끄세요 (그러면 연장근로 ×1.5).</li>' +
+      '<li>생산직 연장근로수당 비과세(월정액급여 260만원 이하, 작년 총급여 3,700만원 이하, 연 240만원 한도)는 세무사와 확인한 뒤 켜세요.</li></ul>' +
+      '<fieldset style="margin-top:18px"><legend>관리자 비밀번호 바꾸기</legend>' +
+      '<form id="pwForm" class="form" autocomplete="off">' +
+      '<div class="field"><label for="p_old">지금 비밀번호</label><input type="password" id="p_old" name="old" autocomplete="current-password" maxlength="100"></div>' +
+      '<div class="field"><label for="p_new">새 비밀번호 (8자 이상)</label><input type="password" id="p_new" name="new1" autocomplete="new-password" maxlength="64"></div>' +
+      '<div class="field"><label for="p_new2">새 비밀번호 한 번 더</label><input type="password" id="p_new2" name="new2" autocomplete="new-password" maxlength="64"></div>' +
+      '<div class="field" style="display:flex;align-items:flex-end"><button class="btn" type="submit">비밀번호 바꾸기</button></div>' +
+      '</form></fieldset>';
+  }
+
+  /* ───────── 동작 ───────── */
+  function bindMain() {
+    app.querySelectorAll('[data-tab]').forEach(function (b) {
+      b.addEventListener('click', function () { S.tab = b.getAttribute('data-tab'); S.adjEdit = null; render(); });
+    });
+    app.querySelectorAll('[data-slip]').forEach(function (b) {
+      b.addEventListener('click', function () { S.slip = b.getAttribute('data-slip'); S.tab = 'slips'; render(); });
+    });
+    app.querySelectorAll('[data-editemp]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var n = b.getAttribute('data-editemp');
+        S.edit = staffList().filter(function (e) { return e.name === n; })[0];
+        render();
+      });
+    });
+    app.querySelectorAll('[data-editadj]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-editadj');
+        S.adjEdit = (S.data.adjustments || []).filter(function (x) { return x.id === id; })[0] || null;
+        render();
+      });
+    });
+    app.querySelectorAll('[data-deladj]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-deladj');
+        var x = (S.data.adjustments || []).filter(function (a) { return a.id === id; })[0];
+        if (!x || !confirm(x.name + ' — ' + x.label + ' ' + fmt(x.amount) + '원을 지울까요?')) return;
+        guard(call('deleteAdjust', { ym: S.month.ym, id: id })).then(function (list) { S.data.adjustments = list; S.adjEdit = null; recompute(); toast('지웠습니다'); });
+      });
+    });
+    app.querySelectorAll('[data-act]').forEach(function (b) {
+      b.addEventListener('click', function (ev) { act(b.getAttribute('data-act'), ev); });
+    });
+    app.querySelectorAll('input.money').forEach(function (inp) {
+      inp.addEventListener('blur', function () {
+        var s = inp.value.replace(/[^0-9]/g, '');
+        inp.value = s ? fmt(Number(s)) : '';
+      });
+    });
+    var nat = document.getElementById('f_nation');
+    if (nat) {
+      nat.addEventListener('change', function () {
+        var f = document.getElementById('empForm');
+        if (nat.value) f.elements.np.checked = P.PENSION_EXEMPT.indexOf(nat.value) < 0;
+      });
+    }
+    var ef = document.getElementById('empForm');
+    if (ef) {
+      ef.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var e = readEditForm(ef);
+        if (e.account && !/^[0-9\- ]{6,30}$/.test(e.account)) { alert(ERR.bad_account); return; }
+        guard(call('saveEmployee', { emp: e })).then(function (saved) {
+          var list = S.data.settings || [];
+          var i = -1;
+          list.forEach(function (s, j) { if (s.name === saved.name) i = j; });
+          if (i >= 0) list[i] = saved; else list.push(saved);
+          S.data.settings = list;
+          S.edit = null;
+          recompute();
+          toast(saved.name + ' 설정을 저장했습니다');
+        });
+      });
+      ef.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { S.edit = null; render(); } });
+      var first = ef.querySelector('input,select');
+      if (first) first.focus();
+    }
+    var af = document.getElementById('adjForm');
+    if (af) {
+      af.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var fd = af.elements;
+        var adj = {
+          id: S.adjEdit ? S.adjEdit.id : '',
+          name: fd.name.value, kind: fd.kind.value, label: fd.label.value.trim(),
+          amount: Number(String(fd.amount.value).replace(/[^0-9]/g, '')), memo: fd.memo.value.trim()
+        };
+        if (!adj.name || !adj.label || !(adj.amount > 0)) { alert('직원, 항목 이름, 금액을 넣어 주세요.'); return; }
+        guard(call('saveAdjust', { ym: S.month.ym, adj: adj })).then(function (list) {
+          S.data.adjustments = list; S.adjEdit = null; recompute(); toast('저장했습니다');
+        });
+      });
+    }
+    var cf = document.getElementById('cfgForm');
+    if (cf) {
+      cf.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var out = {};
+        P.CONFIG_FIELDS.forEach(function (f) {
+          var el = cf.elements[f[0]];
+          if (!el) return;
+          if (f[2] === 'bool') out[f[0]] = !!el.checked;
+          else if (f[2] === 'text') out[f[0]] = String(el.value || '').trim();
+          else {
+            var s = String(el.value || '').replace(/[^0-9.]/g, '');
+            if (s !== '') out[f[0]] = Number(s);
+          }
+        });
+        guard(call('saveConfig', { config: out })).then(function (cfg) { S.data.config = cfg; recompute(); toast('기준을 저장했습니다'); });
+      });
+    }
+    var pf = document.getElementById('pwForm');
+    if (pf) {
+      pf.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var o = pf.elements.old.value, n1 = pf.elements.new1.value, n2 = pf.elements.new2.value;
+        if (n1 !== n2) { alert('새 비밀번호 두 칸이 서로 다릅니다.'); return; }
+        if (n1.length < 8) { alert(ERR.weak_pw); return; }
+        guard(call('changePw', { oldPw: o, newPw: n1 })).then(function () {
+          pf.reset(); toast('비밀번호를 바꿨습니다. 다음 로그인부터 새 비밀번호를 쓰세요.');
+        }).catch(function () { pf.elements.old.value = ''; });
+      });
+    }
+  }
+
+  function act(a) {
+    var m = S.month;
+    switch (a) {
+      case 'prev': load(shiftYm(m.ym, -1)); break;
+      case 'next': load(shiftYm(m.ym, 1)); break;
+      case 'reload': load(m.ym).then(function () { toast('새로 불러왔습니다'); }); break;
+      case 'logout':
+        call('logout', {}).catch(function () {});
+        logoutLocal('');
+        break;
+      case 'closeEdit': S.edit = null; render(); break;
+      case 'cancelAdj': S.adjEdit = null; render(); break;
+      case 'printLedger': printLedger(); break;
+      case 'printSlips': printSlips(m.rows); break;
+      case 'printOne': printSlips(m.rows.filter(function (r) { return r.name === S.slip; })); break;
+      case 'xlsxLedger': {
+        var L = P.ledger(m);
+        var title = [ymTitle(m.ym) + ' 급여대장 · ' + m.config.company + ' · 지급일 ' + m.payDate];
+        download('급여대장_' + m.ym + '.xlsx', XLSX.build('급여대장', [title, L.header].concat(L.rows, [L.totals]), { numStyle: true, widths: [12, 9, 9].concat(L.header.slice(3).map(function () { return 11; })) }));
+        break;
+      }
+      case 'saveLedger': {
+        var L2 = P.ledger(m);
+        guard(call('saveLedger', { ym: m.ym, ledger: { header: L2.header, rows: L2.rows, totals: L2.totals } })).then(function (r) {
+          S.data.ledgerSaved = r.savedAt; render(); toast('구글 시트에 저장했습니다');
+        });
+        break;
+      }
+      case 'xlsxBank': case 'csvBank': {
+        var rows = P.bankRows(m).filter(function (r) { return r.ok; });
+        var header = ['은행코드', '은행', '계좌번호', '예금주', '이체금액', '받는분통장표시', '내통장표시', '직원'];
+        var body = rows.map(function (r) { return [r.code, r.bank, r.account, r.holder, r.amount, r.memoTo, r.memoFrom, r.name]; });
+        if (a === 'xlsxBank') download('급여이체_' + m.ym + '.xlsx', XLSX.build('급여이체', [header].concat(body), { widths: [9, 12, 18, 16, 12, 16, 14, 10] }));
+        else download('급여이체_' + m.ym + '.csv', CSV.build([header].concat(body)));
+        break;
+      }
+      case 'cfgDefaults': {
+        if (!confirm('계산 기준을 2026년 기본값으로 되돌릴까요? (회사 이름·통장 표시는 그대로)')) return;
+        var d = {};
+        P.CONFIG_FIELDS.forEach(function (f) { if (f[0] !== 'company' && f[0] !== 'memoTo' && f[0] !== 'memoFrom') d[f[0]] = P.CONFIG_DEFAULTS[f[0]]; });
+        guard(call('saveConfig', { config: d })).then(function (cfg) { S.data.config = cfg; recompute(); toast('기본값으로 되돌렸습니다'); });
+        break;
+      }
+    }
+  }
+
+  /* ───────── 인쇄 ───────── */
+  function printNow(kind, html) {
+    var box = document.getElementById('print');
+    box.innerHTML = html;
+    document.getElementById('pageStyle').textContent = kind === 'ledger'
+      ? '@page { size: A4 landscape; margin: 8mm; }' : '@page { size: A4 portrait; margin: 8mm; }';
+    document.body.classList.add('printing');
+    setTimeout(function () { window.print(); }, 60);
+  }
+  window.addEventListener('afterprint', function () {
+    document.body.classList.remove('printing');
+    document.getElementById('print').innerHTML = '';
+  });
+  function ledgerPrintHtml() {
+    var m = S.month, L = P.ledger(m);
+    return '<div class="pl-title"><span>' + ymTitle(m.ym) + ' 급여대장 · ' + esc(m.config.company) + '</span><small>지급일 ' + esc(m.payDate) +
+      ' · 출력 ' + esc(new Date().toLocaleString('ko-KR')) + '</small></div>' +
+      '<table class="pl"><thead><tr>' + L.header.map(function (h) { return '<th>' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      L.rows.map(function (r) {
+        return '<tr>' + r.map(function (v, i) { return '<td>' + (i === 0 ? esc(v) : (i <= 2 ? (v ? String(v) : '') : (v ? fmt(v) : ''))) + '</td>'; }).join('') + '</tr>';
+      }).join('') + '</tbody><tfoot><tr>' + L.totals.map(function (v, i) { return '<td>' + (i === 0 ? esc(v) : (i <= 2 ? String(v) : fmt(v))) + '</td>'; }).join('') + '</tr></tfoot></table>' +
+      '<div class="pl-sign"><span>담당</span><span>대표</span></div>';
+  }
+  function printLedger() { printNow('ledger', ledgerPrintHtml()); }
+  function slipsPrintHtml(rows) {
+    var out = '';
+    for (var i = 0; i < rows.length; i += 2) {
+      out += '<div class="pair">' + slipHtml(rows[i]) + (rows[i + 1] ? slipHtml(rows[i + 1]) : '') + '</div>';
+    }
+    return out;
+  }
+  function printSlips(rows) { if (rows.length) printNow('slips', slipsPrintHtml(rows)); }
+
+  /* ───────── 파일 ───────── */
+  function download(name, blob) {
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  }
+
+  var CSV = {
+    build: function (rows) {
+      var text = rows.map(function (r) {
+        return r.map(function (v) {
+          var s = String(v == null ? '' : v);
+          return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }).join(',');
+      }).join('\r\n');
+      return new Blob(['﻿' + text + '\r\n'], { type: 'text/csv;charset=utf-8' });
+    }
+  };
+
+  /* 작은 엑셀(.xlsx) 만들기 — 압축 없이 ZIP 으로 묶습니다 (외부 프로그램 없음) */
+  var XLSX = (function () {
+    var TABLE = (function () {
+      var t = [];
+      for (var n = 0; n < 256; n++) {
+        var c = n;
+        for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+        t.push(c >>> 0);
+      }
+      return t;
+    })();
+    function crc32(b) {
+      var c = 0xFFFFFFFF;
+      for (var i = 0; i < b.length; i++) c = TABLE[(c ^ b[i]) & 0xFF] ^ (c >>> 8);
+      return (c ^ 0xFFFFFFFF) >>> 0;
+    }
+    function dos() {
+      var d = new Date();
+      return {
+        time: (d.getHours() << 11) | (d.getMinutes() << 5) | Math.floor(d.getSeconds() / 2),
+        date: ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()
+      };
+    }
+    function zip(files) {
+      var enc = new TextEncoder(), parts = [], central = [], offset = 0, t = dos();
+      files.forEach(function (f) {
+        var name = enc.encode(f.name), data = enc.encode(f.data), crc = crc32(data);
+        var h = new DataView(new ArrayBuffer(30));
+        h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+        h.setUint16(10, t.time, true); h.setUint16(12, t.date, true); h.setUint32(14, crc, true);
+        h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+        parts.push(new Uint8Array(h.buffer), name, data);
+        var c = new DataView(new ArrayBuffer(46));
+        c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+        c.setUint16(12, t.time, true); c.setUint16(14, t.date, true); c.setUint32(16, crc, true); c.setUint32(20, data.length, true);
+        c.setUint32(24, data.length, true); c.setUint16(28, name.length, true); c.setUint16(30, 0, true); c.setUint16(32, 0, true);
+        c.setUint16(34, 0, true); c.setUint16(36, 0, true); c.setUint32(38, 0, true); c.setUint32(42, offset, true);
+        central.push(new Uint8Array(c.buffer), name);
+        offset += 30 + name.length + data.length;
+      });
+      var size = 0;
+      central.forEach(function (p) { size += p.length; });
+      var e = new DataView(new ArrayBuffer(22));
+      e.setUint32(0, 0x06054b50, true); e.setUint16(4, 0, true); e.setUint16(6, 0, true); e.setUint16(8, files.length, true);
+      e.setUint16(10, files.length, true); e.setUint32(12, size, true); e.setUint32(16, offset, true); e.setUint16(20, 0, true);
+      return new Blob(parts.concat(central, [new Uint8Array(e.buffer)]), { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    }
+    function x(s) {
+      return String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+    function col(i) {
+      var s = '';
+      i++;
+      while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); }
+      return s;
+    }
+    var HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    var STYLES = HEAD + '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<fonts count="1"><font><sz val="11"/><name val="Malgun Gothic"/></font></fonts>' +
+      '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
+      '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+      '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+      '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs>' +
+      '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+    function sheet(rows, opt) {
+      var out = HEAD + '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
+      if (opt.widths && opt.widths.length) {
+        out += '<cols>' + opt.widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join('') + '</cols>';
+      }
+      out += '<sheetData>';
+      rows.forEach(function (row, r) {
+        out += '<row r="' + (r + 1) + '">';
+        row.forEach(function (v, c) {
+          var ref = col(c) + (r + 1);
+          if (typeof v === 'number' && isFinite(v)) out += '<c r="' + ref + '"' + (opt.numStyle && Math.abs(v) >= 1000 ? ' s="1"' : '') + '><v>' + v + '</v></c>';
+          else if (v !== '' && v != null) out += '<c r="' + ref + '" t="inlineStr"><is><t xml:space="preserve">' + x(v) + '</t></is></c>';
+        });
+        out += '</row>';
+      });
+      return out + '</sheetData></worksheet>';
+    }
+    function build(name, rows, opt) {
+      opt = opt || {};
+      return zip([
+        { name: '[Content_Types].xml', data: HEAD + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
+        { name: '_rels/.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+        { name: 'xl/workbook.xml', data: HEAD + '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="' + x(name) + '" sheetId="1" r:id="rId1"/></sheets></workbook>' },
+        { name: 'xl/_rels/workbook.xml.rels', data: HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+        { name: 'xl/styles.xml', data: STYLES },
+        { name: 'xl/worksheets/sheet1.xml', data: sheet(rows, opt) }
+      ]);
+    }
+    return { build: build };
+  })();
+
+  /* 시험용 */
+  window.__nmcAdmin = { state: function () { return S; }, slipsHtml: function () { return slipsPrintHtml(S.month.rows); }, ledgerHtml: function () { return ledgerPrintHtml(); } };
+
+  if (S.token) {
+    load('').catch(function () {});
+  }
+  render();
+})();
+</script>
+</body>
+</html>
