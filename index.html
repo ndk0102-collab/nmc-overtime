@@ -105,6 +105,8 @@ button{font:inherit;color:inherit}
 .foot{color:var(--muted);font-size:14px}
 .adminlink{display:block;width:max-content;margin:18px 0 0 auto;padding:6px 10px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:8px}
 .adminlink:hover{background:#E2E8F0;color:var(--ink2)}
+.adminlinks{display:flex;justify-content:flex-end;gap:4px;margin:18px 0 0}
+.adminlinks .adminlink{margin:0}
 .foot .wk{display:flex;align-items:center;gap:6px;margin:4px 4px 0}
 .help{background:#fff;border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-top:10px;color:var(--ink2)}
 .help summary{min-height:46px;display:flex;align-items:center;font-weight:700;cursor:pointer}
@@ -673,9 +675,9 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     return h + '<p class="hint">' + esc(tr('nameMissing')) + '</p></section>' + adminLink();
   }
 
-  /* 관리자(잔업 확인·수정, 급여) 화면으로 가는 작은 링크 — 비밀번호는 그 화면에서 묻습니다 */
+  /* 재고 입력 화면과 관리자(잔업 확인·수정, 급여, 손익) 화면으로 가는 작은 링크 — 관리자 비밀번호는 그 화면에서 묻습니다 */
   function adminLink() {
-    return API ? '<a class="adminlink" href="admin.html">관리자</a>' : '';
+    return API ? '<p class="adminlinks"><a class="adminlink" href="stock.html">재고</a><a class="adminlink" href="admin.html">관리자</a></p>' : '';
   }
 
   function viewRec() {

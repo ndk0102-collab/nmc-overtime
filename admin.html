@@ -35,6 +35,7 @@ button, input, select { font: inherit; color: inherit; }
 .mnav b { font-size: 17px; min-width: 120px; text-align: center; }
 .iconbtn { border: 1px solid rgba(255,255,255,.4); background: rgba(255,255,255,.12); color: #fff; border-radius: 8px; padding: 6px 11px; cursor: pointer; }
 .iconbtn:hover { background: rgba(255,255,255,.24); }
+a.iconbtn { text-decoration: none; display: inline-block; }
 .paydate { font-size: 13px; opacity: .92; }
 
 .tabs { max-width: 1560px; margin: 0 auto; padding: 10px 16px 0; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -224,7 +225,7 @@ table.pl.ot th { padding: .7mm .2mm; }
 <div id="app"></div>
 <div id="print" aria-hidden="true"></div>
 <script>window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";</script>
-<script src="payroll.js?v=v9"></script>
+<script src="payroll.js?v=v10"></script>
 <script>
 (function () {
   'use strict';
@@ -356,7 +357,7 @@ table.pl.ot th { padding: .7mm .2mm; }
   function viewLogin() {
     return '<section class="login" aria-labelledby="lt">' +
       '<h1 id="lt">NMC 관리</h1>' +
-      '<p>잔업 기록과 급여를 한 곳에서 봅니다. 관리자 비밀번호를 넣어 주세요.</p>' +
+      '<p>잔업 기록·급여와 손익(매입·매출)을 봅니다. 관리자 비밀번호를 넣어 주세요.</p>' +
       '<form id="loginForm" autocomplete="off">' +
       '<label class="hidden" for="pw">비밀번호</label>' +
       '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
@@ -395,6 +396,8 @@ table.pl.ot th { padding: .7mm .2mm; }
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
       '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +
       '<div class="paydate">지급일 ' + esc(m.payDate) + '</div>' +
+      '<a class="iconbtn" href="stock.html">재고</a>' +
+      '<a class="iconbtn" href="pnl.html">손익 (매입·매출)</a>' +
       '<button class="iconbtn" data-act="reload">새로 불러오기</button>' +
       '<button class="iconbtn" data-act="logout">로그아웃</button>' +
       '</div></header>';
