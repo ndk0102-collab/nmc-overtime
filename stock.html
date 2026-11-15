@@ -119,28 +119,129 @@ select.text{padding-right:8px}
 .qname small.stk .aft.neg{color:var(--bad)}
 .ptot{margin:10px 0 0;font-size:15px;color:var(--muted)}
 .ptot b{font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
-.outseg{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 12px}
 .card > .daterow:first-child{margin-top:0}
-.ohead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 6px}
-.ohead p{margin:0;color:var(--muted);font-size:15px}
-.ohead p b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
-.oday{border-top:1px solid var(--soft)}
-.oday summary{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:2px 12px;padding:12px 2px;cursor:pointer;list-style:none}
-.oday summary::-webkit-details-marker{display:none}
-.oday summary::after{content:'▾';display:inline-block;grid-column:3;grid-row:1;color:var(--muted);font-size:14px;transition:transform .15s}
-.oday[open] summary::after{transform:rotate(180deg)}
-.oday .od{font-weight:800;font-size:17px}
-.oday .okg{grid-column:2;text-align:right;color:var(--muted)}
-.oday .okg b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
-.oday summary small{grid-column:1 / span 2;color:var(--muted);font-size:13.5px;word-break:keep-all}
-.olines{list-style:none;margin:0 0 10px;padding:0 0 0 4px}
-.olines li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--soft)}
-.olines .on{display:flex;align-items:center;gap:8px;min-width:0}
-.olines .on b{display:block;font-size:15px}
-.olines .on small{display:block;color:var(--muted);font-size:13px;word-break:keep-all}
-.olines .oq{text-align:right;white-space:nowrap}
-.olines .oq b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
-.olines .oq small{display:block;color:var(--muted);font-size:12.5px}
+/* 전체관리: 현황 · 분석 */
+.tabs.t5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.addtitle{margin:0 0 6px;font-size:19px;font-weight:800;color:var(--ink)}
+.sumper{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin-top:10px}
+.sumper h3{margin:0 0 8px;font-size:16px;font-weight:800;color:var(--ink)}
+.sumper h3 small{font-size:13px;font-weight:600;color:var(--muted);margin-left:8px}
+.sumtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.sumtiles > div{background:var(--soft);border-radius:10px;padding:8px 8px 7px;min-width:0}
+.sumtiles span{display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.sumtiles b{display:block;font-size:19px;font-weight:800;line-height:1.25;font-variant-numeric:tabular-nums;word-break:keep-all;color:var(--ink)}
+.sumtiles b.money{font-size:16px}
+.sumtiles b small{font-size:12px;font-weight:700;color:var(--muted);margin-left:1px}
+.sumtiles i{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.3}
+.optseg{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.optseg button{min-height:40px;padding:0 14px;border:2px solid var(--line);border-radius:20px;background:var(--card);font-size:15px;font-weight:800;color:var(--ink2);cursor:pointer}
+.optseg button[aria-checked="true"]{border-color:var(--accent);background:var(--accent);color:#fff}
+.optseg.big{margin:0}
+.optseg.big button{min-height:44px;flex:1 1 auto}
+.anarange{margin:-2px 2px 0;font-size:13.5px;color:var(--muted)}
+.tent{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums;margin-top:10px}
+.tent th,.tent td{padding:6px 3px;border-bottom:1px solid var(--soft);text-align:right;white-space:nowrap}
+.tent th[scope="row"]{white-space:normal;word-break:keep-all;line-height:1.3}
+.tent thead th{font-size:12.5px;line-height:1.25;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line);vertical-align:bottom}
+.tent thead th small{font-size:11px;font-weight:700}
+.tent thead th.cur{color:var(--accent-strong)}
+.tent thead th:first-child,.tent th[scope="row"]{text-align:left}
+.tent th[scope="row"]{font-weight:600;color:var(--ink2)}
+.tent th[scope="row"] small{font-size:11.5px;color:var(--muted);font-weight:600}
+.tent .tprod th,.tent .tprod td{background:var(--soft);font-weight:800;color:var(--ink)}
+.tent .tcol{padding-left:8px}
+.tent .tcol .sw{width:12px;height:12px;margin-right:4px;vertical-align:-1px}
+.tent tfoot th,.tent tfoot td{font-weight:800;color:var(--ink);border-top:2px solid var(--line);border-bottom:0}
+.tent td.neg{color:var(--bad)}
+.anasum{margin:0 0 6px;font-size:15px;color:var(--ink2)}
+.rank{list-style:none;margin:0;padding:0}
+.rank li{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;column-gap:8px;padding:8px 0 7px;border-bottom:1px solid var(--soft)}
+.rank li:last-child{border-bottom:0}
+.rank .rk{font-weight:800;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.rank .rn{display:flex;align-items:center;gap:6px;min-width:0;font-weight:700;font-size:15px}
+.rank .rn > span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank .rv{text-align:right;white-space:nowrap;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rank .rv b{font-size:16px;color:var(--ink)}
+.rank .rv small{display:block;font-size:12px}
+.rank .rbar{grid-column:2 / 4;height:6px;border-radius:3px;background:var(--soft);margin-top:5px;overflow:hidden}
+.rank .rbar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+.plist{list-style:none;margin:0;padding:0}
+.plist li{padding:10px 0;border-bottom:1px solid var(--soft)}
+.plist .ph{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0}
+.plist .pn{font-size:17px;font-weight:800}
+.plist .pp{font-size:14px;color:var(--muted);white-space:nowrap}
+.plist .pp b{font-size:18px;color:var(--ink)}
+.plist .pp.neg b,.plist b.neg,.ptotal b.neg{color:var(--bad)}
+.plist .pd{margin:4px 0 0;font-size:14px;line-height:1.55;color:var(--ink2);word-break:keep-all}
+.plist .pd.warnline{color:var(--warn)}
+.hint.mt0{margin-top:0}
+.plist .pd.dim{color:var(--muted);font-size:13px}
+.ptotal{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;margin:10px 0 0;padding-top:10px;border-top:2px solid var(--line);font-size:15px;font-variant-numeric:tabular-nums}
+.ptotal dt{margin:0;color:var(--ink2)}
+.ptotal dt small{font-size:12px;color:var(--muted);margin-left:4px}
+.ptotal dd{margin:0;text-align:right;font-weight:700;white-space:nowrap}
+.ptotal .sub{font-weight:800;color:var(--ink);padding-bottom:6px;border-bottom:1px solid var(--soft)}
+.ptotal .fin{font-size:17px;font-weight:800;color:var(--ink)}
+.ptotal dd.neg{color:var(--bad)}
+.tips .sub{margin:6px 0 0;padding-left:16px;list-style:disc}
+.tips .sub li{margin:0 0 4px;font-size:14px;line-height:1.5}
+.tips b.neg{color:var(--bad)}
+.tips{margin:0;padding-left:20px}
+.tips li{margin:0 0 12px;font-size:15px;line-height:1.65;color:var(--ink2);word-break:keep-all}
+.tips li:last-child{margin-bottom:4px}
+.tips li b{color:var(--ink)}
+.trend{display:block;width:100%;height:auto;margin-top:6px}
+.trend .bm{fill:#9DB3CF}
+.trend .bo{fill:var(--accent)}
+.trend .ax{stroke:var(--line);stroke-width:1}
+.trend text{font-size:11px;fill:var(--muted)}
+.calleg .lg.tm::before{background:#9DB3CF}
+.calleg .lg.to::before{background:var(--accent)}
+.calback{padding:10px 12px}
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
+.calhead h2{margin:0;font-size:21px;font-weight:800}
+.calhead .ghost{min-width:48px;min-height:44px}
+.calsum{margin:0 0 10px;font-size:14px;color:var(--muted);text-align:center;word-break:keep-all}
+.calsum b{color:var(--ink);font-variant-numeric:tabular-nums}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cw{text-align:center;font-size:12.5px;font-weight:700;color:var(--muted);padding:2px 0}
+.cw.sun,.cd.sun .dn{color:#C62828}
+.cw.sat,.cd.sat .dn{color:#1E5AA8}
+.cd{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;min-height:64px;padding:4px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit}
+.cd.empty{border:0;background:transparent;cursor:default;min-height:0}
+.cd .dn{font-size:13px;font-weight:800;line-height:1.2}
+.cd .co,.cd .cp{display:block;font-size:11px;font-weight:800;line-height:1.3;letter-spacing:-0.02em;border-radius:5px;padding:0 2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.cd .co{background:#E3E8EF;color:var(--ink)}
+.cd .cp{border:1px dashed var(--accent);color:var(--accent-strong)}
+.cd .cx{display:block;font-size:10.5px;font-weight:800;color:var(--warn);line-height:1.2}
+.cd.short{border-color:var(--bad);background:var(--bad-soft)}
+.cd.short .cp{border-color:var(--bad);color:var(--bad);background:#fff}
+.cd.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.cd.sel{border-color:var(--accent);background:var(--accent-soft)}
+.cd.sel.short{background:var(--bad-soft)}
+.cd:focus-visible{outline:3px solid #F4B400;outline-offset:1px}
+.calleg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:10px 0 0;font-size:12.5px;color:var(--muted)}
+.calleg .lg::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;box-sizing:border-box}
+.calleg .lg.co::before{background:#E3E8EF}
+.calleg .lg.cp::before{border:1px dashed var(--accent)}
+.calleg .lg.cs::before{background:var(--bad-soft);border:1px solid var(--bad)}
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}
+.dayhead h2{margin:0;font-size:22px;font-weight:800}
+.dtag{font-size:13px;font-weight:800;color:var(--muted);background:var(--soft);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.dsec{margin:14px 0 4px;font-size:15px;font-weight:800;color:var(--ink2)}
+.dlist{list-style:none;margin:0;padding:0}
+.drow{display:flex;align-items:center;gap:8px;border-top:1px dashed var(--soft)}
+.dmain{flex:1;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;padding:10px 2px;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.dmain .dn2{display:flex;align-items:center;gap:8px;min-width:0}
+.dmain .dn2 b{display:block;font-size:15px}
+.dmain .dn2 small{display:block;color:var(--muted);font-size:13px;word-break:keep-all}
+.dmain .dq{text-align:right;white-space:nowrap}
+.dmain .dq b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
+.dmain .dq small{display:block;font-size:12.5px;color:var(--muted)}
+.dmain .dq small.bad{color:var(--bad);font-weight:800}
+.dmain .dq small.ok{color:var(--ok);font-weight:700}
+.dcf{flex-shrink:0;min-height:40px;padding:0 12px}
+.dadd{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:14px}
 .gate{color:var(--ink2);word-break:keep-all}
 .qbox{display:flex;align-items:center;gap:6px}
 .qin{width:100%;min-width:0;height:48px;border:2px solid var(--line);border-radius:10px;padding:0 10px;font-size:19px;font-weight:800;text-align:right;background:var(--card)}
@@ -378,9 +479,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var TOKEN_KEY = 'nmc_pay_token';                             // 관리자 화면에서 로그인하면 생기는 열쇠 (금액 보기용)
   /* 재고 화면 네 가지 (첫 화면에서 고름). 생산량만 누구나, 나머지는 관리자 비밀번호.
    *  stock.html           = 생산량 입력 (관리자 열쇠가 있어도 쓰지 않음)
-   *  stock.html?view=out  = 출고량: 날짜별 출고 (누르면 펼침) + 출고 넣기
+   *  stock.html?view=out  = 출고량: 달력 (날짜마다 출고·출고예정, 날짜를 눌러 넣기·고치기·지우기·확정, 예정은 그날 재고가 남는지 부족한지)
    *  stock.html?view=in   = 반입량: 반입 넣기
-   *  stock.html?view=all  = 전체관리: 현재고·입력·예정·월별·연간·기록·단가 (예전 주소 ?admin=1 도 여기로) */
+   *  stock.html?view=all  = 전체관리 (예전 주소 ?admin=1 도 여기로): 입력 없이 보고 분석하는 곳
+   *        현황(이때까지 생산·출고·매출, 10일 단위 색상별) · 분석(많이 나간 색상·매출·원가·이익·추이·이윤 늘릴 점) · 현재고 · 예정 · 기록 */
   var VIEW = (function () {
     var m = /[?&]view=(out|in|all)(?:&|$)/.exec(location.search);
     if (m) return m[1];
@@ -405,7 +507,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var WD = ['일', '월', '화', '수', '목', '금', '토'];
   var OWN = '남명';
   var UI_VER = '3-앱';
-  var TABS = [['in', '입력'], ['stock', '현재고'], ['plan', '예정'], ['month', '월별'], ['year', '연간'], ['log', '기록']];
+  var TABS = [['sum', '현황'], ['ana', '분석'], ['stock', '현재고'], ['plan', '예정'], ['log', '기록']];
   var ERR = {
     need_cust: '거래처를 넣어 주세요.',
     future_date: '실제 기록은 오늘 이후 날짜로 넣을 수 없습니다. 앞으로 나갈 것은 출고예정으로 넣어 주세요.',
@@ -442,19 +544,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'list', outYms: null, openDay: {},
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
     years: {}, yLoading: {}, yErr: {}, yv: '', yMin: '', yMax: '', yProd: '',
-    tab: stored('nmc_inv_tab') || 'stock',
+    tab: stored('nmc_inv_tab2') || 'sum',
     inType: stored('nmc_inv_type') || '출고', inDate: '', inPDate: '', inCust: '', inMemo: '', inPo: '', inProd: '', qty: {}, price: {},
     low: false, stProd: '',
     ym: '', mProd: '', mAll: false, custOpen: null,
     day: '',
     sheet: null
   };
-  if (!TABS.some(function (t) { return t[0] === S.tab; })) S.tab = 'stock';
+  if (!TABS.some(function (t) { return t[0] === S.tab; })) S.tab = 'sum';
   if (ACT_TYPES.concat(PLAN_TYPES).indexOf(S.inType) < 0) S.inType = '출고';
 
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
@@ -520,6 +623,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     setToken('');
     S.admin = false; S.money = false; S.ready = false; S.busy = false; S.sheet = null;
     S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = '';
+    S.allAdd = ''; S.pnl = null; S.pnlErr = false; S.stats = {}; S.sLoading = {}; S.sErr = {};
     start(quiet);
     if (msg) toast(msg);
   }
@@ -727,6 +831,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.years = {};
     S.yErr = {};
     S.yLoading = {};
+    S.stats = {}; S.sLoading = {}; S.sErr = {};
     if (r.year) { S.years[r.year.y] = r.year; S.yMin = r.year.minY; S.yMax = r.year.maxY; }
     if (!S.yv || S.yv < S.yMin || S.yv > S.yMax) S.yv = r.today.slice(0, 4);
     if (!S.inDate || S.inDate > S.today) S.inDate = S.today;
@@ -843,13 +948,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     else if (VIEW === 'in') { S.inType = '반입'; h += viewIn(); bar = true; }
     else if (VIEW === 'out') { h += viewOut(); bar = S.outMode === 'add'; }
+    else if (S.allAdd) {
+      h += '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="alladdback">← ' + (S.allAddFrom === 'stock' ? '현재고' : '예정') + '으로 돌아가기</button></section></div>' + viewIn();
+      bar = true;
+    }
     else {
       h += tabsHtml();
-      if (S.tab === 'in') { h += viewIn(); bar = true; }
+      if (S.tab === 'sum') h += viewSum();
+      else if (S.tab === 'ana') h += viewAna();
       else if (S.tab === 'stock') h += viewStock();
       else if (S.tab === 'plan') h += viewPlan();
-      else if (S.tab === 'month') h += viewMonth();
-      else if (S.tab === 'year') h += viewYear();
       else h += viewLog();
       h += footer();
     }
@@ -891,7 +999,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function tabsHtml() {
-    var h = '<nav class="tabs" role="tablist" aria-label="화면 고르기">';
+    var h = '<nav class="tabs t' + TABS.length + '" role="tablist" aria-label="화면 고르기">';
     var ps = planStats(), alert = ps.shortItems + ps.overdue;
     TABS.forEach(function (t) {
       var dot = t[0] === 'plan' && alert ? '<span class="dot" aria-hidden="true">' + alert + '</span>' : '';
@@ -899,6 +1007,493 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += '<button type="button" role="tab" class="tab" aria-selected="' + (S.tab === t[0]) + '" data-act="tab" data-v="' + t[0] + '"' + lab + '>' + t[1] + dot + '</button>';
     });
     return h + '</nav>';
+  }
+
+  /* ───────── 전체관리: 현황 · 분석 (2026-11-15 지시) ─────────
+     현황: 이때까지(이번 달·올해·기록 전체) 생산·출고·매출, 10일 단위(1~10일·11~20일·21일~말일)로 어느 색상을 얼마나 생산·출고·반입했는지.
+     분석: 많이 나간 색상, 매출, 만드는 데 드는 돈과 이익(손익 화면과 같은 식의 추정), 거래처, 달마다 추이, 이윤을 늘릴 점.
+     자료: 서버 apiStats(해) — 달·10일 구간·구분·품목별 합계 (관리자 열쇠로만).
+     원가·기본 단가·고정비는 손익 서버의 설정에서 관리자 열쇠로 받습니다. 이 파일에는 회사 숫자를 적지 않습니다.
+     매출 규칙(손익 화면과 같음): 남명(자사 시공) 출고는 매출에서 뺌. 단가 = 기록 단가 → 품목 기준 단가 → 손익 기본 단가(추정). */
+  var TIRE_KEYS = { s57: 1, s23: 1, s12: 1, mibun: 1, cord: 1, bead: 1 };
+  var PERIODS = [['m', '이번 달'], ['3m', '최근 3개월'], ['y', '올해'], ['all', '전체']];
+  function num0(v) { var n = Number(v); return isFinite(n) ? n : 0; }
+  function pct(v) { return Math.round(num0(v) * 1000) / 10 + '%'; }
+  function sum3(v) { return v[0] + v[1] + v[2]; }
+  function curYm() { return S.today.slice(0, 7); }
+  function daysIn(ym) { return new Date(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0).getDate(); }
+  /* 그 달 중 센 날의 비율: 지난 달은 1, 이번 달은 오늘까지 (고정비·한 달 평균에 씀) */
+  function monFrac(ym) { return ym === curYm() ? Number(S.today.slice(8, 10)) / daysIn(ym) : 1; }
+  function ymRange(a, b) { var out = []; for (var ym = a; ym <= b; ym = addMonths(ym, 1)) out.push(ym); return out; }
+  function kgTxt(n) { return fmt(Math.round(n)) + '<small>kg</small>'; }
+  function wonTxt(n) { return n < 0 ? '-' + won(-n) : won(n); }
+  /* 매출 가운데 추정 단가(기준·기본 단가)로 셈한 몫 */
+  function estNote(est, rev) {
+    if (!(est > 0) || !(rev > 0)) return '';
+    var p = Math.round(est / rev * 100);
+    if (p >= 100 && est < rev) p = 99;
+    return '추정 단가 ' + Math.max(1, p) + '%';
+  }
+  function man(v) { return fmt(Math.round(v / 10000)); }
+  function shortYm(ym) { return (ym.slice(0, 4) === S.today.slice(0, 4) ? '' : ym.slice(2, 4) + '년 ') + Number(ym.slice(5, 7)) + '월'; }
+  function redrawStats() { if ((S.tab === 'sum' || S.tab === 'ana') && !S.sheet && !S.allAdd) render(); }
+
+  function ensureStats(y) {
+    if (!S.stats) { S.stats = {}; S.sLoading = {}; S.sErr = {}; }
+    if (S.stats[y] || S.sLoading[y] || S.sErr[y]) return;
+    var L = S.sLoading, E = S.sErr, gen = S.gen;
+    L[y] = true;
+    call('apiStats', y).then(function (r) {
+      L[y] = false;
+      if (gen !== S.gen) return;
+      S.stats[y] = r;
+      redrawStats();
+    }, function (e) {
+      L[y] = false;
+      if (gen !== S.gen) return;
+      if (isAuth(e)) { lockDown(ERR.expired); return; }
+      E[y] = errText(e) || '불러오지 못했습니다';
+      redrawStats();
+    });
+  }
+  /* 손익 설정(원가표·기본 단가·고정비)과 손익에 저장된 달(급여). 관리자 열쇠로 손익 서버에서 */
+  function ensurePnl() {
+    if (!S.money || S.pnl || S.pnlLoading || S.pnlErr) return;
+    S.pnlLoading = true;
+    postAction({ action: 'pnl.call', fn: 'init', token: getToken() }).then(function (r) {
+      S.pnlLoading = false;
+      if (r && r.settings && typeof r.settings === 'object') S.pnl = { set: r.settings, months: r.months || {} };
+      else S.pnlErr = true;
+      redrawStats();
+    }, function () { S.pnlLoading = false; S.pnlErr = true; redrawStats(); });
+  }
+  /* 기초를 뺀 첫 기록 달. 이번 해 묶음을 받아야 압니다 (받기 전 null) */
+  function firstYm() {
+    var y = S.today.slice(0, 4);
+    ensureStats(y);
+    var st = S.stats[y];
+    return st ? (st.first ? st.first.slice(0, 7) : curYm()) : null;
+  }
+  function firstDay() { var st = S.stats && S.stats[S.today.slice(0, 4)]; return st && st.first ? st.first : S.today; }
+  /* 고른 달들의 묶음 줄 [달, 구간, 구분, 제품, 색상, kg, 기록 단가 금액, 그 kg, 남명 kg]. 아직 못 받은 해가 있으면 null */
+  function rowsOf(yms) {
+    var ys = {}, want = {}, ok = true, out = [];
+    yms.forEach(function (ym) { ys[ym.slice(0, 4)] = 1; want[ym] = 1; });
+    Object.keys(ys).forEach(function (y) { ensureStats(y); if (!S.stats[y]) ok = false; });
+    if (!ok) return null;
+    Object.keys(ys).forEach(function (y) { S.stats[y].rows.forEach(function (r) { if (want[r[0]]) out.push(r); }); });
+    return out;
+  }
+  function custOf(yms) {
+    var want = {}, out = {};
+    yms.forEach(function (ym) { want[ym] = 1; });
+    Object.keys(S.stats || {}).forEach(function (y) {
+      if (!S.stats[y]) return;
+      S.stats[y].cust.forEach(function (c) {
+        if (!want[c[0]]) return;
+        var o = out[c[1]] || (out[c[1]] = { name: c[1], kg: 0, revK: 0, kgK: 0 });
+        o.kg += c[2]; o.revK += c[3]; o.kgK += c[4];
+      });
+    });
+    return out;
+  }
+  function statsErr() { var e = S.sErr || {}, k = Object.keys(e).filter(function (y) { return e[y]; })[0]; return k ? e[k] : ''; }
+  function statsWait() {
+    var e = statsErr();
+    return '<section class="card"><p class="hint">' + (e ? esc(e) : '불러오는 중…') + '</p>' +
+      (e ? '<button type="button" class="ghost wide mt8" data-act="statsretry">다시 불러오기</button>' : '') + '</section>';
+  }
+  /* 손익 품목 (nm·lok·s57…). 서버가 손익 화면과 같은 규칙으로 정해 보냅니다 */
+  function lkOf(k) {
+    for (var y in (S.stats || {})) if (S.stats[y] && S.stats[y].keys && Object.prototype.hasOwnProperty.call(S.stats[y].keys, k)) return S.stats[y].keys[k];
+    return '';
+  }
+  function isOwn(c) { return String(c || '').replace(/\s+/g, '') === OWN; }
+  /* 단가 기록이 없는 판매에 쓰는 단가: 품목 기준 단가 → 손익 기본 단가 */
+  function refOf(k) {
+    var it = S.byKey[k];
+    if (it && typeof it.price === 'number' && it.price > 0) return { p: it.price, src: '기준 단가' };
+    var lk = lkOf(k), p = S.pnl && lk && S.pnl.set.prices ? num0(S.pnl.set.prices[lk]) : 0;
+    return p > 0 ? { p: p, src: '손익 기본 단가' } : null;
+  }
+  function refPrice(k) { var r = refOf(k); return r ? r.p : null; }
+  /* 출고 줄 → 판매(남명 뺌) kg·매출. est = 단가 기록이 없어 기준·기본 단가로 셈한 몫, none = 단가를 전혀 모르는 kg */
+  function saleOf(r) {
+    var sold = r[5] - r[8], rest = sold - r[7], p = rest > 0 ? refPrice(r[3] + '|' + r[4]) : null, e = p != null ? rest * p : 0;
+    return { sold: sold, own: r[8], rev: r[6] + e, est: e, none: rest > 0 && p == null ? rest : 0 };
+  }
+  /* 재료·운송비 (손익 화면 계산과 같은 식). 칼라칩(nm·lok): 판매 kg × kg당 원료비 + 매출 × 운송비율. 폐타이어 품목: 매출 × 원가율. 모르는 품목 null */
+  function matCost(lk, kg, rev) {
+    var st = S.pnl && S.pnl.set;
+    if (!st) return null;
+    if (lk === 'nm') return kg * num0(st.matNM) + rev * num0(st.epdmTr);
+    if (lk === 'lok') return kg * num0(st.matLOK) + rev * num0(st.epdmTr);
+    if (TIRE_KEYS[lk]) return rev * num0(st.tireRate);
+    return null;
+  }
+  function matPerKg(lk) { var st = S.pnl && S.pnl.set; return !st ? null : lk === 'nm' ? num0(st.matNM) : lk === 'lok' ? num0(st.matLOK) : null; }
+  /* 그 달 고정비 (손익 화면과 같음: 그 달 손익에 급여가 저장돼 있으면 인건비 = 급여 + 그 밖, 아니면 설정값). 이번 달은 오늘까지 날 수만큼. 이자·원금 뺌 */
+  function fixedOf(ym) {
+    var st = S.pnl.set, fx = st.fixed || {}, F = 0;
+    Object.keys(fx).forEach(function (k) { if (k !== 'labor') F += num0(fx[k]); });
+    var fl = num0(fx.labor), rec = S.pnl.months && S.pnl.months[ym], pay = rec && rec.pay, lab = fl;
+    if (pay && num0(pay.gross) > 0) lab = num0(pay.gross) + (st.laborOther == null || st.laborOther === '' ? Math.max(0, fl - num0(pay.gross)) : num0(st.laborOther));
+    return (F + lab) * monFrac(ym);
+  }
+
+  /* 기간 자료 묶기: 품목별·제품별 판매·매출·원가·이익 */
+  function anaData(yms, rows) {
+    var it = {}, D = { yms: yms, units: 0, out: 0, sold: 0, own: 0, rev: 0, est: 0, none: 0, revK: 0, kgK: 0, made: 0 };
+    yms.forEach(function (ym) { D.units += monFrac(ym); });
+    rows.forEach(function (r) {
+      var k = r[3] + '|' + r[4];
+      var o = it[k] || (it[k] = { key: k, p: r[3], c: r[4], lk: lkOf(k), out: 0, sold: 0, own: 0, rev: 0, est: 0, none: 0, revK: 0, kgK: 0, made: 0 });
+      if (r[2] === '생산') { o.made += r[5]; D.made += r[5]; return; }
+      if (r[2] !== '출고') return;
+      var v = saleOf(r);
+      o.out += r[5]; o.sold += v.sold; o.own += v.own; o.rev += v.rev; o.est += v.est; o.none += v.none; o.revK += r[6]; o.kgK += r[7];
+      D.out += r[5]; D.sold += v.sold; D.own += v.own; D.rev += v.rev; D.est += v.est; D.none += v.none; D.revK += r[6]; D.kgK += r[7];
+    });
+    D.items = Object.keys(it).map(function (k) { return it[k]; });
+    D.it = it;
+    D.cost = !!(S.pnl && S.pnl.set);
+    if (!D.cost) return D;
+    var st = S.pnl.set, share = Math.min(1, Math.max(0, num0(st.epdmShare)));
+    D.F = 0;
+    yms.forEach(function (ym) { D.F += fixedOf(ym); });
+    D.FE = D.F * share; D.FT = D.F - D.FE;
+    D.kgE = 0; D.kgT = 0; D.kgNM = 0; D.kgLOK = 0; D.revE = 0; D.unknown = [];
+    D.items.forEach(function (o) {
+      o.grp = o.lk === 'nm' || o.lk === 'lok' ? 'E' : TIRE_KEYS[o.lk] ? 'T' : '';
+      o.mat = o.sold > 0 ? matCost(o.lk, o.sold, o.rev) : 0;
+      if (o.grp === 'E') { D.kgE += o.sold; D.revE += o.rev; if (o.lk === 'nm') D.kgNM += o.sold; else D.kgLOK += o.sold; }
+      else if (o.grp === 'T') D.kgT += o.sold;
+      else if (o.sold > 0) D.unknown.push(o);
+    });
+    var pr = {};
+    D.items.forEach(function (o) {
+      o.fix = o.grp === 'E' ? (D.kgE ? D.FE * o.sold / D.kgE : 0) : o.grp === 'T' ? (D.kgT ? D.FT * o.sold / D.kgT : 0) : 0;
+      if (o.sold <= 0 || !o.grp) return;
+      var q = pr[o.p] || (pr[o.p] = { p: o.p, sold: 0, own: 0, rev: 0, est: 0, none: 0, mat: 0, fix: 0 });
+      q.sold += o.sold; q.rev += o.rev; q.est += o.est; q.none += o.none; q.mat += o.mat; q.fix += o.fix;
+    });
+    D.items.forEach(function (o) { if (o.own && pr[o.p]) pr[o.p].own += o.own; });
+    D.prods = Object.keys(pr).map(function (k) {
+      var q = pr[k];
+      q.contrib = q.rev - q.mat;
+      q.cKg = q.contrib / q.sold;
+      q.profit = q.contrib - q.fix;
+      q.perKg = q.profit / q.sold;
+      return q;
+    }).sort(function (a, b) { return b.contrib - a.contrib; });
+    D.mat = 0;
+    D.prods.forEach(function (q) { D.mat += q.mat; });
+    D.unalloc = (D.kgE ? 0 : D.FE) + (D.kgT ? 0 : D.FT);
+    D.revKnownCost = 0;
+    D.prods.forEach(function (q) { D.revKnownCost += q.rev; });
+    D.contrib = D.revKnownCost - D.mat;
+    D.profit = D.contrib - D.F;
+    D.eMargin = D.kgE ? (D.revE * (1 - num0(st.epdmTr)) - D.kgNM * num0(st.matNM) - D.kgLOK * num0(st.matLOK)) / D.kgE : null;
+    return D;
+  }
+
+  /* ── 현황 ── */
+  function viewSum() {
+    if (S.money) ensurePnl();
+    var cur = curYm(), y = cur.slice(0, 4), fy = firstYm();
+    if (!fy) return '<div class="stack">' + statsWait() + '</div>';
+    if (S.money && !S.pnl && !S.pnlErr) return '<div class="stack"><section class="card"><p class="hint">불러오는 중…</p></section></div>';
+    if (!S.sumYm || S.sumYm > cur || S.sumYm < fy) S.sumYm = cur;
+    if (!S.sumType) S.sumType = '출고';
+    var cands = [['이번 달', [cur], fmtYm(cur) + ' 1일~' + Number(S.today.slice(8, 10)) + '일'],
+      ['올해', ymRange(fy > y + '-01' ? fy : y + '-01', cur), fy > y + '-01' ? y + '년 · ' + fmtDate(firstDay()) + '부터' : y + '년'],
+      ['전체', ymRange(fy, cur), fmtDate(firstDay()) + '부터']];
+    var shown = [], last = '';
+    cands.forEach(function (c) { var sig = c[1].join(','); if (sig !== last) { shown.push(c); last = sig; } });
+    var allRows = rowsOf(ymRange(fy, cur));
+    if (!allRows) return '<div class="stack">' + statsWait() + '</div>';
+    var h = '<div class="stack"><section class="card"><h2 class="label">이때까지 · ' + esc(fmtDate(S.today)) + ' 기준</h2>';
+    shown.forEach(function (c) {
+      var want = {}, t = { made: 0, out: 0, ban: 0, own: 0, rev: 0, est: 0, none: 0 };
+      c[1].forEach(function (ym) { want[ym] = 1; });
+      allRows.forEach(function (r) {
+        if (!want[r[0]]) return;
+        if (r[2] === '생산') t.made += r[5];
+        else if (r[2] === '반입') t.ban += r[5];
+        else if (r[2] === '출고') { var v = saleOf(r); t.out += r[5]; t.own += v.own; t.rev += v.rev; t.est += v.est; t.none += v.none; }
+      });
+      h += '<div class="sumper"><h3>' + esc(c[0]) + '<small>' + esc(c[2]) + '</small></h3><div class="sumtiles">' +
+        '<div><span>생산</span><b>' + kgTxt(t.made) + '</b>' + (t.ban ? '<i>+ 반입 ' + fmt(t.ban) + ' kg</i>' : '') + '</div>' +
+        '<div><span>출고</span><b>' + kgTxt(t.out) + '</b>' + (t.own ? '<i>남명 ' + fmt(t.own) + ' kg 포함</i>' : '') + '</div>' +
+        (S.money ? '<div><span>매출</span><b class="money">' + esc(won(t.rev)) + '</b>' + (t.est || t.none ? '<i>' + [estNote(t.est, t.rev), t.none ? '단가 모르는 ' + fmt(t.none) + ' kg 뺌' : ''].filter(Boolean).join(' · ') + '</i>' : '') + '</div>' : '') +
+        '</div></div>';
+    });
+    if (shown.length === 1 && fy === cur) h += '<p class="note">기록은 ' + esc(fmtDate(firstDay())) + '부터 있어 이번 달이 곧 전체입니다.</p>';
+    if (S.money) h += '<p class="note">매출 = 판매 kg × 단가. 남명(자사 시공)으로 나간 것은 판매가 아니라서 뺐습니다(손익 화면과 같음). 단가를 적지 않은 출고는 품목 기준 단가, 없으면 손익 설정의 기본 단가로 계산한 추정입니다.' +
+      (S.pnlErr ? ' 손익 설정을 불러오지 못해 기본 단가는 쓰지 못했습니다.' : S.pnl ? '' : ' (손익 설정 불러오는 중)') + '</p>';
+    h += '</section>';
+
+    // 10일 단위
+    var ym = S.sumYm, t = S.sumType, rows = rowsOf([ym]);
+    h += '<section class="card"><div class="calhead"><button type="button" class="ghost sm" data-act="sumprev"' + (ym > fy ? '' : ' disabled') + ' aria-label="이전 달">◀</button>' +
+      '<h2>' + esc(fmtYm(ym)) + '</h2><button type="button" class="ghost sm" data-act="sumnext"' + (ym < cur ? '' : ' disabled') + ' aria-label="다음 달">▶</button></div>' +
+      '<p class="calsum">10일 단위 · 어느 색상이 얼마나</p>';
+    h += '<div class="optseg" role="radiogroup" aria-label="구분">' + ['출고', '생산', '반입'].map(function (x) {
+      return '<button type="button" role="radio" aria-checked="' + (t === x) + '" data-act="sumtype" data-v="' + x + '">' + x + '</button>';
+    }).join('') + '</div>';
+    if (!rows) h += '<p class="hint">불러오는 중…</p>';
+    else h += tenDayTable(ym, t, rows);
+    return h + '</section></div>';
+  }
+  function tenDayTable(ym, t, rows) {
+    var per = {}, ptot = {}, b = [0, 0, 0];
+    rows.forEach(function (r) {
+      if (r[2] !== t) return;
+      var k = r[3] + '|' + r[4];
+      var o = per[k] || (per[k] = { p: r[3], c: r[4], v: [0, 0, 0] });
+      o.v[r[1]] += r[5];
+      b[r[1]] += r[5];
+      (ptot[r[3]] || (ptot[r[3]] = [0, 0, 0]))[r[1]] += r[5];
+    });
+    var order = S.prods.filter(function (p) { return ptot[p]; }).concat(Object.keys(ptot).filter(function (p) { return S.prods.indexOf(p) < 0; }));
+    if (!order.length) return '<p class="hint">' + esc(fmtYm(ym)) + '에는 ' + t + ' 기록이 없습니다.</p>';
+    var last = daysIn(ym), isCur = ym === curYm(), td = Number(S.today.slice(8, 10));
+    var heads = [[1, 10], [11, 20], [21, last]].map(function (x, i) {
+      var live = isCur && td >= x[0] && td <= x[1] && td < x[1];
+      return '<th scope="col"' + (live ? ' class="cur"' : '') + '>' + x[0] + '~' + x[1] + '일' + (live ? '<br><small>' + td + '일까지</small>' : '') + '</th>';
+    }).join('');
+    var cell = function (x) { return '<td>' + (x ? fmt(x) : '<span class="z">–</span>') + '</td>'; };
+    var h = '<div class="tscroll"><table class="tent"><thead><tr><th scope="col">제품 · 색상</th>' + heads + '<th scope="col">합계</th></tr></thead><tbody>';
+    order.forEach(function (p) {
+      var pt = ptot[p];
+      h += '<tr class="tprod"><th scope="row">' + ptxt(p) + '</th>' + pt.map(cell).join('') + '<td>' + fmt(sum3(pt)) + '</td></tr>';
+      Object.keys(per).filter(function (k) { return per[k].p === p; }).sort(function (a, c) { return sum3(per[c].v) - sum3(per[a].v); }).forEach(function (k) {
+        var o = per[k];
+        h += '<tr><th scope="row" class="tcol">' + sw(o.c, o.p) + esc(o.c) + '</th>' + o.v.map(cell).join('') + '<td><b>' + fmt(sum3(o.v)) + '</b></td></tr>';
+      });
+    });
+    h += '</tbody><tfoot><tr><th scope="row">모두</th>' + b.map(cell).join('') + '<td>' + fmt(sum3(b)) + '</td></tr></tfoot></table></div>';
+    return h + '<p class="note">단위 kg. 제품마다 그 달 ' + t + '이 많은 색상부터 적었습니다.' + (t === '출고' ? ' 남명(자사 시공) 출고도 들어 있습니다.' : '') + '</p>';
+  }
+
+  /* ── 분석 ── */
+  function viewAna() {
+    if (S.money) ensurePnl();
+    if (!S.anaPer) S.anaPer = '3m';
+    var cur = curYm(), fy = firstYm();
+    var h = '<div class="stack"><div class="optseg big" role="radiogroup" aria-label="기간">' + PERIODS.map(function (x) {
+      return '<button type="button" role="radio" aria-checked="' + (S.anaPer === x[0]) + '" data-act="anaper" data-v="' + x[0] + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+    if (!fy) return h + statsWait() + '</div>';
+    var per = S.anaPer, a = per === 'm' ? cur : per === '3m' ? addMonths(cur, -2) : per === 'y' ? cur.slice(0, 4) + '-01' : fy;
+    if (a < fy) a = fy;
+    var yms = ymRange(a, cur), rows = rowsOf(yms);
+    if (!rows) return h + statsWait() + '</div>';
+    if (S.money && !S.pnl && !S.pnlErr) return h + '<section class="card"><p class="hint">손익 설정(원가표) 불러오는 중…</p></section></div>';
+    var D = anaData(yms, rows);
+    var range = esc(fmtDate(a === fy ? firstDay() : a + '-01')) + ' ~ ' + esc(fmtDate(S.today));
+    h += '<p class="anarange">' + range + (a === fy && per !== 'm' ? ' (기록 시작부터)' : '') + '</p>';
+    h += topCard(D) + (S.money ? profitCard(D) : '') + custCard2(D) + trendCard(fy) + tipsCard(D);
+    if (S.money) h += '<button type="button" class="ghost wide" data-act="bpopen">기준 단가 넣기·고치기</button>';
+    return h + '</div>';
+  }
+
+  function topCard(D) {
+    var top = D.items.filter(function (o) { return o.out > 0; }).sort(function (a, b) { return b.out - a.out; });
+    var h = '<section class="card"><h2 class="label">많이 나간 색상</h2>';
+    if (!top.length) return h + '<p class="hint">이 기간에 출고가 없습니다.</p></section>';
+    var mx = top[0].out;
+    h += '<p class="anasum">출고 <b>' + fmt(D.out) + '</b> kg' + (D.own ? ' (남명 ' + fmt(D.own) + ' kg 포함)' : '') +
+      (S.money ? ' · 매출 <b>' + esc(won(D.rev)) + '</b>' + (D.est ? ' (' + estNote(D.est, D.rev) + ')' : '') : '') + '</p><ol class="rank">';
+    top.slice(0, 10).forEach(function (o, i) {
+      h += '<li><span class="rk">' + (i + 1) + '</span><span class="rn">' + sw(o.c, o.p) + '<span>' + ptxt(o.p) + ' ' + esc(o.c) + '</span></span>' +
+        '<span class="rv"><b>' + fmt(o.out) + '</b> kg<small>' + Math.round(o.out / D.out * 100) + '%' + (S.money && o.rev ? ' · ' + esc(won(o.rev)) : '') + '</small></span>' +
+        '<span class="rbar" aria-hidden="true"><i style="width:' + Math.max(2, Math.round(o.out / mx * 100)) + '%"></i></span></li>';
+    });
+    h += '</ol>';
+    if (top.length > 10) {
+      var rest = top.slice(10).reduce(function (s, o) { return s + o.out; }, 0);
+      h += '<p class="note">나머지 ' + (top.length - 10) + '개 색상 · 모두 ' + fmt(rest) + ' kg (' + Math.round(rest / D.out * 100) + '%)</p>';
+    }
+    return h + '</section>';
+  }
+
+  function profitCard(D) {
+    var h = '<section class="card"><h2 class="label">제품별 매출 · 만드는 데 드는 돈 · 남는 돈 (추정)</h2>';
+    if (!D.cost) return h + '<p class="hint">손익 설정을 불러오지 못해 원가를 계산할 수 없습니다. 원가표는 손익 화면의 설정에 있습니다.</p></section>';
+    if (!D.prods.length) return h + '<p class="hint">이 기간에 판매(남명 뺀 출고)가 없습니다.</p></section>';
+    h += '<p class="hint mt0">남는 돈 = 매출 − 재료·운송비. 고정비(인건비·전기 등)는 무엇을 팔든 나가는 돈이라 맨 아래 모두에서 뺍니다.</p><ul class="plist">';
+    D.prods.forEach(function (q) {
+      var unit = q.rev / q.sold, mk = q.mat / q.sold, fk = q.fix / q.sold;
+      h += '<li><p class="ph"><span class="pn">' + ptxt(q.p) + '</span><span class="pp' + (q.contrib < 0 ? ' neg' : '') + '">남는 돈 <b>' + esc(wonTxt(q.contrib)) + '</b></span></p>' +
+        '<p class="pd">판매 ' + fmt(q.sold) + ' kg · 매출 ' + esc(won(q.rev)) + (q.est ? ' (' + estNote(q.est, q.rev) + ')' : '') + (q.own ? ' · 남명 ' + fmt(q.own) + ' kg은 판매에서 뺌' : '') + '</p>' +
+        '<p class="pd">kg당 · 판매가 <b>' + fmt(unit) + '원</b> − 재료·운송 <b>' + fmt(mk) + '원</b> = <b class="' + (q.cKg < 0 ? 'neg' : '') + '">' + fmt(q.cKg) + '원</b> 남음</p>' +
+        '<p class="pd dim">고정비를 판매 kg으로 나눈 몫(kg당 ' + fmt(fk) + '원)까지 빼면 kg당 ' + fmt(q.perKg) + '원 · 모두 ' + esc(wonTxt(q.profit)) + '</p>' +
+        (q.none ? '<p class="pd warnline">단가를 모르는 ' + fmt(q.none) + ' kg은 매출에 넣지 못했습니다.</p>' : '') + '</li>';
+    });
+    var per = D.yms.length === 1 ? shortYm(D.yms[0]) : shortYm(D.yms[0]) + '~' + shortYm(D.yms[D.yms.length - 1]);
+    h += '</ul><dl class="ptotal">' +
+      '<dt>매출</dt><dd>' + esc(won(D.revKnownCost)) + '</dd>' +
+      '<dt>재료·운송비</dt><dd>− ' + esc(won(D.mat)) + '</dd>' +
+      '<dt class="sub">재료비 빼고 남는 돈</dt><dd class="sub">' + esc(wonTxt(D.contrib)) + '</dd>' +
+      '<dt>고정비 <small>' + esc(per) + (D.yms.indexOf(curYm()) >= 0 ? ', 이번 달은 오늘까지' : '') + '</small></dt><dd>− ' + esc(won(D.F)) + '</dd>' +
+      '<dt class="fin">이익</dt><dd class="fin' + (D.profit < 0 ? ' neg' : '') + '">' + esc(wonTxt(D.profit)) + '</dd></dl>';
+    if (D.unalloc > 0) h += '<p class="note">이 기간 판매가 없는 쪽(칼라칩 또는 폐타이어)의 고정비 ' + esc(won(D.unalloc)) + '도 고정비에 들어 있습니다.</p>';
+    if (D.unknown.length) h += '<p class="note">원가 규칙을 모르는 품목은 빼고 계산했습니다: ' + D.unknown.map(function (o) { return esc(o.p + ' ' + o.c); }).join(', ') + '.</p>';
+    var st = S.pnl.set;
+    h += '<p class="note">모두 손익 화면의 설정으로 계산한 추정입니다. 재료·운송비 = 칼라칩은 판매 kg × kg당 원료비(NM ' + fmt(num0(st.matNM)) + '원 · LOK ' + fmt(num0(st.matLOK)) + '원) + 매출 × 운송비 ' + pct(st.epdmTr) +
+      ', 폐타이어 품목은 매출 × ' + pct(st.tireRate) + '. 고정비 = 손익 설정의 달 고정비(급여가 저장된 달은 급여 반영)이고 이자·원금은 넣지 않았습니다. 제품별 고정비 몫은 칼라칩 ' + pct(st.epdmShare) + ' · 폐타이어 나머지로 나눈 뒤 판매 kg 비율로 나눈 값입니다.</p>';
+    return h + '</section>';
+  }
+
+  function custCard2(D) {
+    var cs = custOf(D.yms), list = Object.keys(cs).map(function (k) { return cs[k]; }).sort(function (a, b) { return b.kg - a.kg; });
+    var h = '<section class="card"><h2 class="label">거래처별 출고</h2>';
+    if (!list.length) return h + '<p class="hint">이 기간에 출고가 없습니다.</p></section>';
+    var mx = list[0].kg;
+    h += '<ol class="rank">';
+    list.slice(0, 10).forEach(function (c, i) {
+      var own = isOwn(c.name);
+      h += '<li><span class="rk">' + (i + 1) + '</span><span class="rn"><span>' + esc(c.name || '거래처 없음') + (own ? ' <small class="muted">자사 시공</small>' : '') + '</span></span>' +
+        '<span class="rv"><b>' + fmt(c.kg) + '</b> kg<small>' + Math.round(c.kg / D.out * 100) + '%' + (S.money && c.kgK ? ' · 단가 적힌 ' + fmt(c.kgK) + ' kg ' + esc(won(c.revK)) : '') + '</small></span>' +
+        '<span class="rbar" aria-hidden="true"><i style="width:' + Math.max(2, Math.round(c.kg / mx * 100)) + '%"></i></span></li>';
+    });
+    h += '</ol>';
+    if (list.length > 10) h += '<p class="note">나머지 ' + (list.length - 10) + '곳</p>';
+    return h + '</section>';
+  }
+
+  /* 달마다 생산·출고·매출·이익 (기록이 있는 달, 최근 12달) */
+  function trendCard(fy) {
+    var cur = curYm(), a = addMonths(cur, -11);
+    if (a < fy) a = fy;
+    var yms = ymRange(a, cur), rows = rowsOf(yms);
+    var h = '<section class="card"><h2 class="label">달마다 추이</h2>';
+    if (!rows) return h + '<p class="hint">불러오는 중…</p></section>';
+    var M = yms.map(function (ym) { return { ym: ym, made: 0, out: 0, rows: [] }; }), idx = {};
+    yms.forEach(function (ym, i) { idx[ym] = i; });
+    rows.forEach(function (r) {
+      var m = M[idx[r[0]]];
+      if (r[2] === '생산') m.made += r[5];
+      else if (r[2] === '출고') m.out += r[5];
+      m.rows.push(r);
+    });
+    var cost = S.money && S.pnl;
+    M.forEach(function (m) {
+      if (!S.money) return;
+      var D = anaData([m.ym], m.rows);
+      m.rev = D.rev; m.est = D.est;
+      if (cost) m.profit = D.profit;
+    });
+    if (M.length >= 2) {
+      var mx = 1;
+      M.forEach(function (m) { mx = Math.max(mx, m.made, m.out); });
+      var n = M.length, W = 340, H = 150, top = 8, bot = 22, gw = W / Math.max(n, 6), bw = Math.min(14, gw / 3);
+      var svg = '<svg class="trend" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="달마다 생산과 출고">';
+      M.forEach(function (m, k) {
+        var x = k * gw + gw / 2, hm = (H - top - bot) * m.made / mx, ho = (H - top - bot) * m.out / mx;
+        svg += '<rect x="' + (x - bw - 1).toFixed(1) + '" y="' + (H - bot - hm).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + hm.toFixed(1) + '" rx="2" class="bm"><title>' + esc(fmtYm(m.ym)) + ' 생산 ' + fmt(m.made) + ' kg</title></rect>' +
+          '<rect x="' + (x + 1).toFixed(1) + '" y="' + (H - bot - ho).toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + ho.toFixed(1) + '" rx="2" class="bo"><title>' + esc(fmtYm(m.ym)) + ' 출고 ' + fmt(m.out) + ' kg</title></rect>' +
+          '<text x="' + x.toFixed(1) + '" y="' + (H - 6) + '" text-anchor="middle">' + Number(m.ym.slice(5)) + '월</text>';
+      });
+      svg += '<line x1="0" x2="' + W + '" y1="' + (H - bot) + '" y2="' + (H - bot) + '" class="ax"/></svg>';
+      h += svg + '<p class="calleg"><span class="lg tm">생산</span><span class="lg to">출고</span></p>';
+    }
+    h += '<div class="tscroll"><table class="tent trendt"><thead><tr><th scope="col">달</th><th scope="col">생산<br><small>kg</small></th><th scope="col">출고<br><small>kg</small></th>' +
+      (S.money ? '<th scope="col">매출<br><small>만원</small></th>' + (cost ? '<th scope="col">이익<br><small>만원</small></th>' : '') : '') + '</tr></thead><tbody>';
+    M.slice().reverse().forEach(function (m) {
+      h += '<tr><th scope="row">' + esc(shortYm(m.ym)) + (m.ym === cur ? '<br><small>' + Number(S.today.slice(8, 10)) + '일까지</small>' : '') + '</th><td>' + fmt(m.made) + '</td><td>' + fmt(m.out) + '</td>' +
+        (S.money ? '<td>' + man(m.rev) + '</td>' + (cost ? '<td class="' + (m.profit < 0 ? 'neg' : '') + '">' + man(m.profit) + '</td>' : '') : '') + '</tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '<p class="note">' + (S.money ? '매출·이익은 위 계산과 같은 추정입니다(이익은 고정비까지 뺀 것). ' : '') + (M.length < 2 ? '기록이 ' + esc(fmtYm(fy)) + '부터라 달마다 비교 그래프는 다음 달부터 보입니다.' : '') + '</p>';
+    return h + '</section>';
+  }
+
+  /* 이윤을 늘리려면: 기록·설정에서 바로 나오는 사실만 */
+  function tipsCard(D) {
+    var tips = [], st = D.cost ? S.pnl.set : null;
+    // 1) 단가 기록
+    if (S.money && D.sold > 0) {
+      var kr = D.kgK / D.sold;
+      if (kr < 0.8) tips.push('<b>단가 기록</b>: 판매 ' + fmt(D.sold) + ' kg 가운데 단가가 적힌 것은 ' + fmt(D.kgK) + ' kg(' + Math.round(kr * 100) + '%)입니다. 나머지 매출은 기준·기본 단가로 셈한 추정이라 실제 받은 돈과 다를 수 있습니다. 출고를 넣을 때 단가를 같이 넣으면 이 분석이 실제 금액이 됩니다.');
+    }
+    // 2) 제품별 kg당 이익
+    if (st) {
+      var ranked = D.prods.filter(function (q) { return q.sold >= 100; }).slice().sort(function (a, b) { return b.cKg - a.cKg; });
+      if (ranked.length >= 2) {
+        /* 바꿔 팔 수 있는 것은 같은 설비로 만드는 칼라칩끼리 (폐타이어 품목은 따로 나오는 것이라 비교에서 뺌) */
+        var chips = ranked.filter(function (q) { return D.items.some(function (o) { return o.p === q.p && o.grp === 'E'; }); });
+        var t2 = '<b>제품마다 kg당 남는 돈</b> (재료·운송비만 뺀 것, 추정): ' + ranked.map(function (q) { return ptxt(q.p) + ' ' + fmt(q.cKg) + '원'; }).join(' · ') + '.';
+        if (chips.length >= 2 && chips[0].cKg - chips[chips.length - 1].cKg >= 30) {
+          var hi = chips[0], lo = chips[chips.length - 1];
+          t2 += ' 고정비는 무엇을 팔든 나가므로, 같은 설비로 만드는 칼라칩 가운데 kg당 더 남는 것을 더 팔수록 이익이 커집니다. ' + ptxt(hi.p) + '을(를) ' + ptxt(lo.p) + ' 대신 1톤 팔면 약 ' + esc(won((hi.cKg - lo.cKg) * 1000)) + ' 더 남습니다.';
+        }
+        if (D.rev > 0 && D.est / D.rev > 0.5) t2 += ' 다만 매출 대부분이 추정 단가라, 이 차이는 실제 판 값이 아니라 손익 설정의 단가 차이에 가깝습니다.';
+        tips.push(t2);
+      }
+      // 3) 칼라칩 손익분기
+      if (D.eMargin != null && D.units > 0) {
+        var fE1 = D.F / D.units * Math.min(1, Math.max(0, num0(st.epdmShare))), avgE = D.kgE / D.units;
+        if (D.eMargin > 0) {
+          var be = fE1 / D.eMargin, r100 = function (x) { return fmt(Math.round(x / 100) * 100); };
+          tips.push('<b>칼라칩 손익분기</b>: 칼라칩은 kg당 재료·운송비를 빼면 약 ' + fmt(D.eMargin) + '원이 남습니다(추정). 칼라칩 몫 고정비 한 달 약 ' + esc(won(fE1)) + '을 채우려면 한 달에 약 <b>' + r100(be) + ' kg</b>을 팔아야 합니다. ' +
+            '이 기간 판매를 한 달로 환산하면 약 ' + r100(avgE) + ' kg' + (avgE >= be ? '으로 넘습니다.' : '으로 <b>' + r100(be - avgE) + ' kg 모자랍니다</b>. 판매량을 늘리거나 단가를 올려야 고정비를 채웁니다.') +
+            ' kg당 단가를 100원 올리면 같은 양으로 한 달 약 ' + esc(won(avgE * 100)) + '이 더 남습니다.');
+        } else tips.push('<b>칼라칩 손익분기</b>: 지금 단가로는 칼라칩 kg당 재료·운송비도 채우지 못합니다(추정). 단가 또는 원료비를 먼저 점검해야 합니다.');
+      }
+      // 폐타이어 쪽 손익분기 (판매가 있을 때)
+      if (D.kgT > 0 && D.units > 0) {
+        var revT = 0, matT = 0;
+        D.items.forEach(function (o) { if (o.grp === 'T') { revT += o.rev; matT += o.mat; } });
+        var tMargin = (revT - matT) / D.kgT, fT1 = D.F / D.units - D.F / D.units * Math.min(1, Math.max(0, num0(st.epdmShare))), avgT = D.kgT / D.units;
+        if (tMargin > 0 && fT1 > 0) {
+          var beT = fT1 / tMargin, r100t = function (x) { return fmt(Math.round(x / 100) * 100); };
+          tips.push('<b>폐타이어 손익분기</b>: 폐타이어 품목은 kg당 약 ' + fmt(tMargin) + '원이 남아, 그 몫 고정비 한 달 약 ' + esc(won(fT1)) + '을 채우려면 한 달 약 ' + r100t(beT) + ' kg을 팔아야 합니다(추정). ' +
+            '이 기간 판매를 한 달로 환산하면 약 ' + r100t(avgT) + ' kg' + (avgT >= beT ? '으로 넘습니다.' : '으로 <b>' + r100t(beT - avgT) + ' kg 모자랍니다</b>. 폐타이어 판매를 이 앱에 모두 넣고 있는지도 확인해 주세요(빠진 출고가 있으면 실제보다 나쁘게 보입니다).'));
+        }
+      }
+    }
+    // 4) 먼저 생산할 색상 (한 달 출고보다 현재고가 적거나, 예정 출고에 모자람)
+    var hot = D.items.map(function (o) {
+      var dem = D.units > 0 ? o.out / D.units : 0, s = stockOf(o.key), ps = S.plan.sum[o.key], need = ps ? ps.need : 0;
+      return { o: o, dem: dem, s: s, need: need, m: dem > 0 ? s / dem : Infinity };
+    }).filter(function (z) { return z.need > 0 || (z.dem >= 100 && z.s < z.dem); }).sort(function (a, b) { return (b.need > 0) - (a.need > 0) || a.m - b.m; }).slice(0, 6);
+    if (hot.length) tips.push('<b>먼저 생산할 색상</b>: 한 달 나가는 양보다 재고가 적거나, 잡힌 출고예정에 모자랍니다. 떨어지면 주문을 놓칩니다.<ul class="sub">' + hot.map(function (z) {
+      return '<li>' + ptxt(z.o.p) + ' ' + esc(z.o.c) + ' — 현재고 ' + fmt(z.s) + ' kg' + (z.dem ? ' · 한 달 출고 약 ' + fmt(z.dem) + ' kg' : '') + (z.need ? ' · <b class="neg">예정에 ' + fmt(z.need) + ' kg 부족</b>' : '') + '</li>';
+    }).join('') + '</ul>');
+    // 5) 쌓인 재고
+    var outBy = D.it;
+    var cold = S.items.map(function (x) {
+      var o = outBy[x.key], dem = o && D.units > 0 ? o.out / D.units : 0, s = stockOf(x.key);
+      return { x: x, dem: dem, s: s };
+    }).filter(function (z) { return z.s >= 1000 && (z.dem === 0 || z.s > z.dem * 6); }).sort(function (a, b) { return b.s - a.s; });
+    if (cold.length) {
+      var tied = 0, tiedKnown = false;
+      cold.forEach(function (z) { var mp = matPerKg(lkOf(z.x.key)); if (mp) { tied += z.s * mp; tiedKnown = true; } });
+      tips.push('<b>쌓인 재고</b>: 지금 나가는 속도로 6달 넘게 팔 양이거나 이 기간 출고가 없습니다. 이 색상은 생산을 줄이고 팔 곳을 먼저 찾는 것이 좋습니다.' +
+        (tiedKnown ? ' 이 재고에 들어간 원료비만 약 ' + esc(won(tied)) + '입니다(추정).' : '') + '<ul class="sub">' + cold.slice(0, 6).map(function (z) {
+        return '<li>' + ptxt(z.x.prod) + ' ' + esc(z.x.color) + ' — ' + fmt(z.s) + ' kg · ' + (z.dem ? '한 달 약 ' + fmt(z.dem) + ' kg 나감 (약 ' + Math.round(z.s / z.dem) + '달치)' : '이 기간 출고 없음') + '</li>';
+      }).join('') + (cold.length > 6 ? '<li>그 밖에 ' + (cold.length - 6) + '개 색상</li>' : '') + '</ul>');
+    }
+    // 6) 기준가보다 싸게 판 색상
+    if (S.money) {
+      var low = D.items.map(function (o) {
+        var ref = refOf(o.key), avg = o.kgK ? o.revK / o.kgK : null;
+        return { o: o, ref: ref, avg: avg, lost: ref && avg != null && avg < ref.p ? (ref.p - avg) * o.kgK : 0 };
+      }).filter(function (z) { return z.lost > 0; }).sort(function (a, b) { return b.lost - a.lost; }).slice(0, 5);
+      if (low.length) tips.push('<b>정해 둔 단가보다 낮게 판 색상</b>: 단가가 적힌 출고만 봤습니다. 거래처 단가를 점검할 만합니다.<ul class="sub">' + low.map(function (z) {
+        return '<li>' + ptxt(z.o.p) + ' ' + esc(z.o.c) + ' — 판 단가 평균 ' + fmt(z.avg) + '원, ' + z.ref.src + ' ' + fmt(z.ref.p) + '원 → ' + fmt(z.o.kgK) + ' kg에서 ' + esc(won(z.lost)) + ' 적게 받음</li>';
+      }).join('') + '</ul>');
+    }
+    // 7) 거래처 쏠림
+    var cs = custOf(D.yms), sold = Object.keys(cs).filter(function (k) { return !isOwn(k); }).map(function (k) { return cs[k]; }).sort(function (a, b) { return b.kg - a.kg; });
+    var soldKg = sold.reduce(function (s, c) { return s + c.kg; }, 0);
+    if (soldKg > 0 && sold[0].kg / soldKg >= 0.4) tips.push('<b>거래처 쏠림</b>: 판매의 ' + Math.round(sold[0].kg / soldKg * 100) + '%가 ' + esc(sold[0].name || '거래처 없음') + ' 한 곳입니다. 이 거래처의 단가·물량이 이익을 크게 좌우하므로, 단가 협의와 다른 거래처 늘리기를 함께 보는 것이 안전합니다.');
+    var h = '<section class="card"><h2 class="label">이윤을 늘리려면 · 데이터로 본 점</h2>';
+    if (!tips.length) return h + '<p class="hint">이 기간 자료로는 짚을 점이 없습니다.</p></section>';
+    return h + '<ul class="tips">' + tips.map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>' +
+      '<p class="note">이 앱의 출고·생산 기록, 현재고, 예정, 손익 설정에서 바로 계산한 것입니다. ‘추정’은 원가표·고정비를 나눈 계산값이라 실제와 다를 수 있습니다. 한 달 출고는 이 기간 출고를 한 달로 환산한 값입니다.</p></section>';
   }
 
   function viewLoading() {
@@ -932,7 +1527,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
-    if (QUICK) h += '<section class="card">';
+    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : '');
     else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
@@ -945,14 +1540,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '</div></div>';
     }
     h += '<div class="daterow"><h2 class="label">' + (plan ? '예정 날짜' : '날짜') + '</h2><p class="bigdate">' + esc(fmtDate(curDate())) + '</p></div>';
-    h += (plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
+    h += (VIEW === 'out' ? '<p class="hint">날짜는 달력에서 고른 날입니다. 바꾸려면 ‘← 달력으로’를 누르세요.</p>' : plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
 
     if (t === '출고' || t === '생산') {
       var pt = t + '예정';
       var due = S.plan.lines.filter(function (l) { return !l.fut && l.type === pt && l.date <= S.today; });
       if (due.length) {
-        h += '<div class="warnbox">오늘까지 날짜인 ' + pt + ' ' + due.length + '건이 아직 확정되지 않았습니다. 그 ' + t + '이라면 여기서 새로 넣지 말고 예정 화면에서 \'확정\'을 누르세요. 두 번 들어가면 재고가 틀어집니다.' +
-          '<br>' + (QUICK ? '<a class="link" href="stock.html?view=all">전체관리의 예정 화면으로</a>' : '<button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button>') + '</div>';
+        h += '<div class="warnbox">오늘까지 날짜인 ' + pt + ' ' + due.length + '건이 아직 확정되지 않았습니다. 그 ' + t + '이라면 여기서 새로 넣지 말고 ' + (VIEW === 'out' ? '달력에서 그 날짜를 눌러' : '예정 화면에서') + ' \'확정\'을 누르세요. 두 번 들어가면 재고가 틀어집니다.' +
+          '<br>' + (VIEW === 'out' ? '<button type="button" class="link" data-act="calback">← 달력으로</button>' : QUICK ? '<a class="link" href="stock.html?view=all">전체관리의 예정 화면으로</a>' : '<button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button>') + '</div>';
       }
     }
 
@@ -975,7 +1570,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
 
     h += '<section class="card"><h2 class="label">제품별 수량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
-    if (QUICK) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
+    if (QUICK || S.allAdd) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     var vl = vlabel(S.inProd);
     var hint = {
       '생산': '생산한 양을 ' + vl + '별로 넣으세요.',
@@ -992,7 +1587,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var sub = '재고 ' + fmt(kg) + ' kg';
       if (ps) sub += ps.need > 0 ? ' · <span class="bad">예정 반영 시 ' + fmt(ps.need) + ' 부족</span>' : ' · 예정 후 ' + fmt(ps.final);
       h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' +
-        (QUICK ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '<small class="' + st + '">' + sub + '</small>') + '</span></label>';
+        (QUICK || S.allAdd ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '<small class="' + st + '">' + sub + '</small>') + '</span></label>';
       h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
       h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
@@ -1040,69 +1635,130 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   /* 생산량 입력: 색상마다 현재고. 수량을 넣으면 넣은 뒤 재고를 같이 보여 줍니다 (저장하면 서버의 새 현재고로 바뀜). */
   function addedKg(it) { var n = parseKg(S.qty[it.key]); return n && n > 0 && n <= 1000000 ? n : 0; }
+  /* 출고예정: 그날 쓸 수 있는 재고 (앞선 예정까지 반영) → 넣은 양을 빼고 남는지, 모자라는지 */
+  function planAt(it, q) {
+    var pr = project([{ type: '출고예정', prod: it.prod, color: it.color, qty: q, date: S.inPDate }]);
+    var mine = pr.lines.filter(function (x) { return x.x; })[0];
+    return { before: mine ? mine.before : stockOf(it.key), short: mine ? mine.short : 0 };
+  }
   function stkHtml(it) {
-    var kg = stockOf(it.key), n = addedKg(it), out = S.inType === '출고', after = out ? kg - n : kg + n;
+    var kg = stockOf(it.key), n = addedKg(it);
+    if (S.inType === '출고예정') {
+      var pa = planAt(it, n);
+      return '<span class="k">그날 재고</span> <b class="now">' + fmt(Math.max(pa.before, 0)) + '</b> kg' +
+        (n ? (pa.short > 0 ? '<span class="aft neg">부족 <b>' + fmt(pa.short) + '</b> kg</span>' : '<span class="aft">남는 재고 <b>' + fmt(pa.before - n) + '</b> kg</span>') : '');
+    }
+    var out = S.inType === '출고', after = out ? kg - n : kg + n;
     return '<span class="k">현재고</span> <b class="now">' + fmt(kg) + '</b> kg' +
-      (n ? '<span class="aft' + (after < 0 ? ' neg' : '') + '">' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(after) + '</b> kg</span>' : '');
+      (n ? '<span class="aft' + (after < 0 ? ' neg' : '') + '">' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : '넣은 뒤 ') + '<b>' + fmt(after) + '</b> kg</span>' : '');
   }
   function ptotHtml(prod) {
+    if (S.inType === '출고예정') {
+      var b = 0, q = 0, sh = 0;
+      itemsOf(prod).forEach(function (it) { var x = addedKg(it), pa = planAt(it, x); b += Math.max(pa.before, 0); q += x; sh += pa.short; });
+      return ptxt(prod) + ' 그날 재고 합계 <b>' + fmt(b) + '</b> kg' + (q ? (sh ? ' → <span class="bad">부족 <b>' + fmt(sh) + '</b> kg</span>' : ' → 남는 재고 <b>' + fmt(b - q) + '</b> kg') : '');
+    }
     var kg = 0, n = 0, out = S.inType === '출고';
     itemsOf(prod).forEach(function (it) { kg += stockOf(it.key); n += addedKg(it); });
-    return ptxt(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
+    return ptxt(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
   }
 
-  /* 출고량: 날짜별 출고 (달마다 · 날짜에 합계 · 누르면 펼쳐서 거래처·제품·수량) + 출고 넣기 */
-  function viewOut() {
-    S.inType = '출고';
-    var add = S.outMode === 'add';
-    var h = '<div class="seg outseg" role="radiogroup" aria-label="출고량">' +
-      '<button type="button" class="segbtn sm" role="radio" aria-checked="' + !add + '" data-act="outmode" data-v="list">날짜별 출고</button>' +
-      '<button type="button" class="segbtn sm" role="radio" aria-checked="' + add + '" data-act="outmode" data-v="add">출고 넣기</button></div>';
-    return h + (add ? viewIn() : outList());
-  }
-  function outList() {
-    if (!S.outYms || !S.outYms.length) S.outYms = [S.today.slice(0, 7)];
-    var h = '<div class="stack">';
-    S.outYms.forEach(function (ym) {
-      var m = S.months[ym];
-      if (!m) {
-        ensureMonth(ym);
-        h += '<section class="card"><h2 class="label">' + esc(fmtYm(ym)) + ' 출고</h2><p class="hint">' + (S.mErr[ym] ? '불러오지 못했습니다. 위의 새로고침을 눌러 주세요.' : '불러오는 중…') + '</p></section>';
+  /* 출고량 = 달력 (2026-11-15 지시). 날짜마다 출고(실제)·출고예정 양, 예정 때문에 재고가 모자라는 날은 빨강.
+     날짜를 누르면 아래에 그날 출고·예정 목록 — 줄을 누르면 고치기·지우기, 예정은 '확정'.
+     '＋ 넣기': 오늘·지난 날은 출고, 오늘·앞날은 출고예정. 넣는 동안 그날 재고가 남는지 모자라는지 바로 보입니다. */
+  /* 달력 칸에 들어가게 짧게: 10톤 넘으면 '21t', 100kg~10톤은 '9.4t', 그 밑은 '25kg' */
+  function calAmt(kg) { return kg >= 10000 ? Math.round(kg / 1000) + 't' : kg >= 100 ? (Math.round(kg / 100) / 10) + 't' : fmt(kg) + 'kg'; }
+  function calDays(ym) {
+    var cur = S.today.slice(0, 7), days = {};
+    function day(d) { return days[d] || (days[d] = { out: [], plan: [], pin: [], outKg: 0, planKg: 0, short: false, overdue: false }); }
+    if (ym <= cur && S.months[ym]) {
+      S.months[ym].records.forEach(function (r) { if (r.type === '출고') { var x = day(r.date); x.out.push(r); x.outKg += r.qty; } });
+    }
+    S.plan.lines.forEach(function (l) {
+      if (l.date.slice(0, 7) !== ym) return;
+      if (l.fut) {
+        if (ym > cur && l.type === '출고') { var y = day(l.date); y.out.push(l); y.outKg += l.qty; }
         return;
       }
-      var days = {}, order = [], tot = 0;
-      m.records.forEach(function (r) {
-        if (r.type !== '출고') return;
-        if (!days[r.date]) { days[r.date] = []; order.push(r.date); }
-        days[r.date].push(r);
-        tot += r.qty;
-      });
-      order.sort().reverse();
-      h += '<section class="card"><div class="ohead"><h2 class="label">' + esc(fmtYm(ym)) + ' 출고</h2><p><b>' + fmt(tot) + '</b> kg · ' + order.length + '일</p></div>';
-      if (!order.length) h += '<p class="hint">이 달에는 출고 기록이 없습니다.</p>';
-      order.forEach(function (d) {
-        var rs = days[d], kg = 0, custs = [];
-        rs.forEach(function (r) { kg += r.qty; var c = r.cust || '거래처 없음'; if (custs.indexOf(c) < 0) custs.push(c); });
-        h += '<details class="oday" data-day="' + esc(d) + '"' + (S.openDay[d] ? ' open' : '') + '><summary>' +
-          '<span class="od">' + esc(fmtDate(d)) + '</span><span class="okg"><b>' + fmt(kg) + '</b> kg</span>' +
-          '<small>' + rs.length + '건 · ' + esc(custs.slice(0, 2).join(', ') + (custs.length > 2 ? ' 외 ' + (custs.length - 2) + '곳' : '')) + '</small></summary><ul class="olines">';
-        rs.forEach(function (r) {
-          h += '<li><span class="on">' + sw(r.color, r.prod) + '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b><small>' + esc(r.cust || '거래처 없음') +
-            (r.po ? ' · ' + esc(r.po) : '') + (r.memo ? ' · ' + esc(r.memo) : '') + '</small></span></span>' +
-            '<span class="oq"><b>' + fmt(r.qty) + ' kg</b>' + (S.money && r.price ? '<small>' + fmt(r.price) + '원/kg</small>' : '') + '</span></li>';
-        });
-        h += '</ul></details>';
-      });
-      h += '</section>';
+      var z = day(l.date);
+      if (l.type === '출고예정') { z.plan.push(l); z.planKg += l.qty; if (l.short > 0) z.short = true; if (l.overdue) z.overdue = true; }
+      else if (l.type === '생산예정') z.pin.push(l);
     });
-    var last = S.outYms[S.outYms.length - 1];
-    if (last > S.firstYm) h += '<button type="button" class="ghost wide" data-act="outmore">' + esc(fmtYm(addMonths(last, -1))) + ' 출고 더 보기</button>';
-    h += '<p class="note">출고 기록을 고치거나 지우려면 전체관리의 기록 화면에서 합니다.</p>';
-    return h + '</div>';
+    return days;
+  }
+  function viewOut() {
+    if (!S.calYm) S.calYm = S.today.slice(0, 7);
+    if (!S.calDay) S.calDay = S.today;
+    if (S.outMode === 'add') {
+      return '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="calback">← 달력으로</button></section></div>' + viewIn();
+    }
+    return '<div class="stack">' + calCard() + dayCard() + '</div>';
+  }
+  function calCard() {
+    var ym = S.calYm, cur = S.today.slice(0, 7);
+    if (ym <= cur && !S.months[ym]) ensureMonth(ym);
+    var loading = ym <= cur && !S.months[ym];
+    var days = calDays(ym), totOut = 0, totPlan = 0, nShort = 0;
+    Object.keys(days).forEach(function (d) { totOut += days[d].outKg; totPlan += days[d].planKg; if (days[d].short) nShort++; });
+    var p = ym.split('-'), y = Number(p[0]), mo = Number(p[1]);
+    var first = new Date(y, mo - 1, 1).getDay(), n = new Date(y, mo, 0).getDate();
+    var canPrev = ym > S.firstYm, canNext = ym < planMax().slice(0, 7);
+    var h = '<section class="card cal" aria-label="출고 달력">' +
+      '<div class="calhead"><button type="button" class="ghost sm" data-act="calprev"' + (canPrev ? '' : ' disabled') + ' aria-label="이전 달">◀</button>' +
+      '<h2>' + esc(fmtYm(ym)) + '</h2>' +
+      '<button type="button" class="ghost sm" data-act="calnext"' + (canNext ? '' : ' disabled') + ' aria-label="다음 달">▶</button></div>' +
+      '<p class="calsum">' + (loading ? (S.mErr[ym] ? '불러오지 못했습니다. 위의 새로고침을 눌러 주세요.' : '불러오는 중…') :
+        '출고 <b>' + fmt(totOut) + '</b> kg · 출고예정 <b>' + fmt(totPlan) + '</b> kg' + (nShort ? ' · <span class="bad">부족한 날 ' + nShort + '일</span>' : '')) + '</p>' +
+      '<div class="calgrid">';
+    ['일', '월', '화', '수', '목', '금', '토'].forEach(function (w, i) { h += '<span class="cw' + (i === 0 ? ' sun' : i === 6 ? ' sat' : '') + '" aria-hidden="true">' + w + '</span>'; });
+    for (var i = 0; i < first; i++) h += '<span class="cd empty" aria-hidden="true"></span>';
+    for (var dn = 1; dn <= n; dn++) {
+      var d = ym + '-' + pad(dn), x = days[d], wd = (first + dn - 1) % 7;
+      var cls = 'cd' + (d === S.today ? ' today' : '') + (d === S.calDay ? ' sel' : '') + (x && x.short ? ' short' : '') + (wd === 0 ? ' sun' : wd === 6 ? ' sat' : '');
+      var lab = fmtDate(d) + (x && x.outKg ? ' · 출고 ' + fmt(x.outKg) + 'kg' : '') + (x && x.planKg ? ' · 출고예정 ' + fmt(x.planKg) + 'kg' : '') + (x && x.short ? ' · 재고 부족' : '') + (x && x.overdue ? ' · 미확정' : '');
+      h += '<button type="button" class="' + cls + '" data-act="calday" data-v="' + d + '" aria-label="' + esc(lab) + '" aria-pressed="' + (d === S.calDay) + '"><span class="dn">' + dn + '</span>' +
+        (x && x.outKg ? '<span class="co">' + calAmt(x.outKg) + '</span>' : '') +
+        (x && x.planKg ? '<span class="cp">' + calAmt(x.planKg) + '</span>' : '') +
+        (x && x.overdue ? '<span class="cx">미확정</span>' : '') + '</button>';
+    }
+    h += '</div><p class="calleg"><span class="lg co">출고</span><span class="lg cp">출고예정</span><span class="lg cs">재고 부족</span></p></section>';
+    return h;
+  }
+  function dayCard() {
+    var d = S.calDay, x = calDays(d.slice(0, 7))[d] || { out: [], plan: [], pin: [], outKg: 0, planKg: 0 };
+    var past = d < S.today, fut = d > S.today;
+    var h = '<section class="card day" id="daycard"><div class="dayhead"><h2>' + esc(fmtDate(d)) + '</h2><span class="dtag">' + (d === S.today ? '오늘' : past ? '지난 날' : '앞날 (예정)') + '</span></div>';
+    h += '<h3 class="dsec">출고 ' + (x.out.length ? x.out.length + '건 · ' + fmt(x.outKg) + ' kg' : '없음') + '</h3>';
+    if (x.out.length) h += '<ul class="dlist">' + x.out.map(function (r) { return dayRow(r); }).join('') + '</ul>';
+    if (!past || x.plan.length) {
+      h += '<h3 class="dsec">출고예정 ' + (x.plan.length ? x.plan.length + '건 · ' + fmt(x.planKg) + ' kg' : '없음') + '</h3>';
+      if (x.plan.length) h += '<ul class="dlist">' + x.plan.map(function (l) { return dayRow(l); }).join('') + '</ul>';
+    }
+    if (x.pin.length) h += '<h3 class="dsec">생산예정 ' + x.pin.length + '건</h3><ul class="dlist">' + x.pin.map(function (l) { return dayRow(l); }).join('') + '</ul>';
+    h += '<div class="dadd">';
+    if (!fut) h += '<button type="button" class="primary" data-act="caladd" data-v="출고">＋ 출고 넣기</button>';
+    if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 출고예정 넣기</button>';
+    h += '</div>';
+    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">줄을 누르면 고치거나 지울 수 있습니다. 예정은 실제로 나간 날 ‘확정’을 누르면 출고가 됩니다.</p>';
+    return h + '</section>';
+  }
+  function dayRow(r) {
+    var plan = isPlan(r.type), sub = esc(r.cust || (r.type === '생산예정' ? '' : '거래처 없음'));
+    if (r.po) sub += (sub ? ' · ' : '') + esc(r.po);
+    if (r.memo) sub += (sub ? ' · ' : '') + esc(r.memo);
+    var right = '<b>' + (r.type === '생산예정' ? '+' : '') + fmt(r.qty) + ' kg</b>';
+    if (!plan && S.money && r.price) right += '<small>' + fmt(r.price) + '원/kg</small>';
+    if (r.type === '출고예정') right += r.short > 0 ? '<small class="bad">부족 ' + fmt(r.short) + ' kg</small>' : '<small class="ok">남음 ' + fmt(Math.max(r.after, 0)) + ' kg</small>';
+    var h = '<li class="drow"><button type="button" class="dmain" data-act="edit" data-v="' + esc(r.id) + '"><span class="dn2">' + sw(r.color, r.prod) +
+      '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') +
+      (r.type === '출고예정' ? '<small>그날 쓸 수 있는 재고 ' + fmt(Math.max(r.before, 0)) + ' kg</small>' : '') + '</span></span>' +
+      '<span class="dq">' + right + '</span></button>';
+    if (plan) h += '<button type="button" class="ghost sm dcf" data-act="confirm1" data-v="' + esc(r.id) + '">확정</button>';
+    return h + '</li>';
   }
   /* 재고 전체(관리자)로 들어왔는데 로그인 전: 비밀번호 안내만 */
   function viewGate() {
-    var what = { out: '날짜별 출고 보기와 출고 넣기는', 'in': '반입 넣기는', all: '현재고·출고·반입·예정·월별·연간·기록과 금액은' }[VIEW];
+    var what = { out: '날짜별 출고 보기와 출고 넣기는', 'in': '반입 넣기는', all: '현황·분석·현재고·예정·기록과 금액은' }[VIEW];
     return '<div class="stack"><section class="card"><h2 class="label">' + esc(VIEW_NAME) + ' · 관리자</h2>' +
       '<p class="gate">' + esc(what) + ' 관리자 비밀번호로 엽니다.</p>' +
       '<button type="button" class="primary wide mt12" data-act="login">관리자 로그인</button>' +
@@ -1322,13 +1978,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       S.price = {};
       if (sale) { S.inCust = ''; S.inPo = ''; }
       S.sheet = null;
-      if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab', 'plan'); }
-      if (VIEW === 'out' && type === '출고') {
-        S.outMode = 'list';
-        S.openDay[d0] = true;
-        if (!S.outYms) S.outYms = [S.today.slice(0, 7)];
-        if (S.outYms.indexOf(d0.slice(0, 7)) < 0) { S.outYms.push(d0.slice(0, 7)); S.outYms.sort().reverse(); }
-      }
+      if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab2', 'plan'); }
+      if (VIEW === 'out') { S.outMode = 'cal'; S.calDay = d0; S.calYm = d0.slice(0, 7); }
+      if (VIEW === 'all' && S.allAdd) { S.tab = S.allAddFrom === 'stock' ? 'stock' : 'plan'; store('nmc_inv_tab2', S.tab); S.allAdd = ''; }
       render();
       window.scrollTo(0, 0);
       var ps = planStats();
@@ -1464,8 +2116,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += '<ul class="rlist">' + ev.map(function (l) { return planRow(l, 'item'); }).join('') + '</ul>';
       if (ps.need > 0) h += '<button type="button" class="ghost wide mt8" data-act="planprod" data-v="' + esc(k) + '">부족분 ' + fmt(ps.need) + ' kg 생산예정 넣기</button>';
     }
-    h += '<div class="two mt16"><button type="button" class="ghost" data-act="adjust" data-v="' + esc(k) + '">재고 맞추기</button>' +
-      '<button type="button" class="primary" data-act="initem" data-v="' + esc(k) + '">이 ' + (vlabel(it.prod) === '색상' ? '색' : vlabel(it.prod)) + ' 입력하기</button></div>';
+    h += '<button type="button" class="ghost wide mt16" data-act="adjust" data-v="' + esc(k) + '">재고 맞추기</button>';
     h += '<button type="button" class="ghost wide mt8" data-act="close">닫기</button>';
     return h;
   }
@@ -1701,10 +2352,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function goPlanProd(k) {
     var it = S.byKey[k], s = S.plan.sum[k];
     if (!it) return;
-    S.tab = 'in';
-    store('nmc_inv_tab', 'in');
+    S.allAddFrom = S.tab;
+    S.allAdd = '생산예정';
     S.inType = '생산예정';
     store('nmc_inv_type', '생산예정');
+    S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = '';
     S.inPDate = s && s.shortEff && s.shortEff >= S.today ? s.shortEff : S.today;
     S.qty = {};
     if (s && s.need) S.qty[k] = String(s.need);
@@ -2253,7 +2905,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var it = S.byKey[k];
     if (!it) return;
     S.tab = 'in';
-    store('nmc_inv_tab', 'in');
+    store('nmc_inv_tab2', 'in');
     S.inProd = it.prod;
     S.sheet = null;
     render();
@@ -2267,11 +2919,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
   }
 
-  document.addEventListener('toggle', function (ev) {
-    var el = ev.target;
-    if (el && el.classList && el.classList.contains('oday')) S.openDay[el.getAttribute('data-day')] = el.open;
-  }, true);
-
   document.addEventListener('click', function (ev) {
     var el = ev.target.closest ? ev.target.closest('[data-act]') : null;
     if (!el || el.disabled) return;
@@ -2279,18 +2926,27 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     switch (act) {
       case 'overlay': if (ev.target === el) closeSheet(); return;
       case 'close': closeSheet(); return;
-      case 'tab': S.tab = v; store('nmc_inv_tab', v); S.sheet = null; render(); window.scrollTo(0, 0); return;
-      case 'refresh': refresh(true); return;
+      case 'tab': S.tab = v; store('nmc_inv_tab2', v); S.allAdd = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'refresh': S.pnl = null; S.pnlErr = false; refresh(true); return;
       case 'login': openSheet({ kind: 'login', err: '' }); return;
       case 'dologin': doLogin(); return;
       case 'logout': doLogout(); return;
-      case 'outmode': S.outMode = v === 'add' ? 'add' : 'list'; S.sheet = null; render(); window.scrollTo(0, 0); return;
-      case 'outmore': S.outYms.push(addMonths(S.outYms[S.outYms.length - 1], -1)); render(); return;
+      case 'calprev': S.calYm = addMonths(S.calYm, -1); render(); return;
+      case 'calnext': S.calYm = addMonths(S.calYm, 1); render(); return;
+      case 'calday': S.calDay = v; render(); var dc = document.getElementById('daycard'); if (dc && dc.scrollIntoView) dc.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
+      case 'caladd': S.inType = v === '출고예정' ? '출고예정' : '출고'; if (S.inType === '출고') S.inDate = S.calDay; else S.inPDate = S.calDay; S.qty = {}; S.price = {}; S.inCust = ''; S.inPo = ''; S.inMemo = ''; S.outMode = 'add'; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'calback': S.outMode = 'cal'; S.qty = {}; S.price = {}; S.sheet = null; render(); return;
+      case 'alladdback': S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'sumprev': S.sumYm = addMonths(S.sumYm, -1); render(); return;
+      case 'sumnext': S.sumYm = addMonths(S.sumYm, 1); render(); return;
+      case 'sumtype': S.sumType = v; render(); return;
+      case 'anaper': S.anaPer = v; render(); return;
+      case 'statsretry': S.sErr = {}; S.pnlErr = false; render(); return;
       case 'retry': start(); return;
       case 'intype': S.inType = v; store('nmc_inv_type', v); render(); return;
       case 'indate': S.inDate = v; render(); return;
       case 'inpdate': S.inPDate = v; render(); return;
-      case 'newplan': S.tab = 'in'; store('nmc_inv_tab', 'in'); S.inType = v; store('nmc_inv_type', v); S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'newplan': S.allAddFrom = S.tab; S.allAdd = v; S.inType = v; store('nmc_inv_type', v); S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'planprod': goPlanProd(v); return;
       case 'pline': openSheet({ kind: 'pline', id: v }); return;
       case 'confirm1': openConfirm([v]); return;
