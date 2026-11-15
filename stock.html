@@ -264,12 +264,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .ptag{display:inline-flex;align-items:center;min-height:22px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:800;color:#fff;white-space:nowrap;margin-right:6px;vertical-align:1px;background:#5A6471}
 /* 제품 색: NM-CHIP 빨강, LOK-CHIP 녹색, 일반 EPDM 무색, 그 밖의 제품 회색 */
 .ptag.pc-nm,.pc-nm .phead{background:#C62828}
-.ptag.pc-lok,.pc-lok .phead{background:#1B7A43}
+.ptag.pc-lok,.pc-lok .phead{background:#268653}
 .ptag.pc-etc,.pc-etc .phead{background:#5A6471}
 .ptag.pc-plain{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px #AEB7C2}
 .pc-plain .phead{background:#fff;color:var(--ink);border-bottom:1px solid var(--line)}
 .tile.tl{border-left:5px solid #5A6471}
-.tile.tl.pc-nm{border-left-color:#C62828}.tile.tl.pc-lok{border-left-color:#1B7A43}.tile.tl.pc-plain{border-left-color:#C8CFD8}
+.ptx.pc-nm{color:#C62828}.ptx.pc-lok{color:#268653}
+.ptab.pc-nm{color:#C62828}.ptab.pc-lok{color:#268653}
+.ptab.pc-nm[aria-selected="true"]{background:#C62828;border-color:#C62828;color:#fff}
+.ptab.pc-lok[aria-selected="true"]{background:#268653;border-color:#268653;color:#fff}
+.chip.pc-nm{color:#C62828}.chip.pc-lok{color:#268653}
+.chip.pc-nm[aria-pressed="true"]{background:#C62828;border-color:#C62828;color:#fff}
+.chip.pc-lok[aria-pressed="true"]{background:#268653;border-color:#268653;color:#fff}
+.tile.tl.pc-nm{border-left-color:#C62828}.tile.tl.pc-lok{border-left-color:#268653}.tile.tl.pc-plain{border-left-color:#C8CFD8}
 .pgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
 @media (min-width:900px){.pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
@@ -577,7 +584,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   /* 단가 키: 색상 제품은 제품 하나에 한 값, 규격·종류 제품은 줄마다 */
   function pkeyOf(it) { return S.kind[it.prod] && S.kind[it.prod] !== 'color' ? it.key : it.prod; }
   function baseOf(pk) { var it = S.byKey[pk]; return it ? it.price : basePrice(pk); }
-  function prodHead(p) { return esc(p).replace(/[ \-]/, '<br>'); }
+  function prodHead(p) { return '<span class="ptx ' + pcls(p) + '">' + esc(p).replace(/[ \-]/, '<br>') + '</span>'; }
   function pill(st) { return '<span class="pill ' + st + '">' + STATUS_LABEL[st] + '</span>'; }
   function tile(label, v, sub) {
     return '<div class="tile"><span>' + esc(label) + '</span><b>' + fmt(v) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>';
@@ -592,6 +599,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function signed(l) { return isSale(l.type) ? -l.qty : l.qty; }
   function pcls(p) { return p === 'NM-CHIP' ? 'pc-nm' : p === 'LOK-CHIP' ? 'pc-lok' : p === '일반 EPDM' ? 'pc-plain' : 'pc-etc'; }
   function ptag(p) { return '<span class="ptag ' + pcls(p) + '">' + esc(p) + '</span>'; }
+  /* 제품 이름 글자에 색: NM-CHIP 빨강, LOK-CHIP 초록 (다른 제품은 그대로) */
+  function ptxt(p) { return '<span class="ptx ' + pcls(p) + '">' + esc(p) + '</span>'; }
+  function paintProds(html) { return String(html).replace(/NM-CHIP|LOK-CHIP/g, function (m) { return '<span class="ptx ' + pcls(m) + '">' + m + '</span>'; }); }
   function chip(label, on, act, v) {
     return '<button type="button" class="chip" aria-pressed="' + !!on + '" data-act="' + act + '" data-v="' + esc(v) + '">' + esc(label) + '</button>';
   }
@@ -1018,7 +1028,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.saved.length) {
       h += '<section class="card"><h2 class="label">방금 저장한 생산 (이 화면에서)</h2><ul class="cflist">';
       S.saved.forEach(function (x) {
-        h += '<li class="cfrow"><span class="cfname">' + esc(fmtDate(x.date)) + ' · ' + x.n + '건</span><b>' + fmt(x.kg) + ' kg</b><small>' + esc(x.text) + '</small></li>';
+        h += '<li class="cfrow"><span class="cfname">' + esc(fmtDate(x.date)) + ' · ' + x.n + '건</span><b>' + fmt(x.kg) + ' kg</b><small>' + paintProds(esc(x.text)) + '</small></li>';
       });
       h += '</ul><p class="hint">잘못 넣었으면 관리자에게 알려 주세요. 고치기·지우기는 관리자만 할 수 있습니다.</p></section>';
     }
@@ -1038,7 +1048,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function ptotHtml(prod) {
     var kg = 0, n = 0, out = S.inType === '출고';
     itemsOf(prod).forEach(function (it) { kg += stockOf(it.key); n += addedKg(it); });
-    return esc(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
+    return ptxt(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
   }
 
   /* 출고량: 날짜별 출고 (달마다 · 날짜에 합계 · 누르면 펼쳐서 거래처·제품·수량) + 출고 넣기 */
@@ -1077,7 +1087,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
           '<span class="od">' + esc(fmtDate(d)) + '</span><span class="okg"><b>' + fmt(kg) + '</b> kg</span>' +
           '<small>' + rs.length + '건 · ' + esc(custs.slice(0, 2).join(', ') + (custs.length > 2 ? ' 외 ' + (custs.length - 2) + '곳' : '')) + '</small></summary><ul class="olines">';
         rs.forEach(function (r) {
-          h += '<li><span class="on">' + sw(r.color, r.prod) + '<span><b>' + esc(r.prod + ' ' + r.color) + '</b><small>' + esc(r.cust || '거래처 없음') +
+          h += '<li><span class="on">' + sw(r.color, r.prod) + '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b><small>' + esc(r.cust || '거래처 없음') +
             (r.po ? ' · ' + esc(r.po) : '') + (r.memo ? ' · ' + esc(r.memo) : '') + '</small></span></span>' +
             '<span class="oq"><b>' + fmt(r.qty) + ' kg</b>' + (S.money && r.price ? '<small>' + fmt(r.price) + '원/kg</small>' : '') + '</span></li>';
         });
@@ -1154,7 +1164,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<div class="ptabs" role="tablist" aria-label="제품">', last = null;
     S.prods.forEach(function (p, i) {
       if (multiLine() && lineOf(p) !== last) { last = lineOf(p); h += '<span class="pgl" aria-hidden="true">' + esc(lineName(last)) + '</span>'; }
-      h += '<button type="button" class="ptab" role="tab" aria-selected="' + (cur === p) + '" data-act="' + act + '" data-v="' + esc(p) + '">' + esc(p) +
+      h += '<button type="button" class="ptab ' + pcls(p) + '" role="tab" aria-selected="' + (cur === p) + '" data-act="' + act + '" data-v="' + esc(p) + '">' + esc(p) +
         (badges ? '<span class="badge" id="badge-' + i + '">' + (countIn(p) || '') + '</span>' : '') + '</button>';
     });
     return h + '</div>';
@@ -1351,7 +1361,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       ps.forEach(function (p) { gt += per[p] || 0; });
       h += '<div class="gsum' + (gi ? ' next' : '') + '">' + (multi ? '<p class="glabel">' + esc(lineName(ln)) + '</p>' : '') +
         '<p class="big">' + fmt(multi ? gt : total) + '<small> kg</small></p><div class="tiles">' + ps.map(function (p) {
-          return '<div class="tile tl ' + pcls(p) + '"><span>' + esc(p) + '</span><b>' + fmt(per[p] || 0) + '</b></div>';
+          return '<div class="tile tl ' + pcls(p) + '"><span>' + ptxt(p) + '</span><b>' + fmt(per[p] || 0) + '</b></div>';
         }).join('') + '</div></div>';
     });
     var ps = planStats();
@@ -1432,7 +1442,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!it) return '<p>품목을 찾을 수 없습니다.</p><button type="button" class="ghost wide mt16" data-act="close">닫기</button>';
     var kg = stockOf(k), st = statusOf(it, kg), ym = S.today.slice(0, 7), m = S.months[ym];
     if (!m) ensureMonth(ym);
-    var h = '<h2 class="h2" id="sh-title">' + sw(it.color, it.prod) + esc(it.prod) + ' · ' + esc(it.color) + '</h2>';
+    var h = '<h2 class="h2" id="sh-title">' + sw(it.color, it.prod) + '<span>' + ptxt(it.prod) + ' · ' + esc(it.color) + '</span></h2>';
     h += '<p class="big">' + fmt(kg) + '<small> kg</small> ' + pill(st) + '</p>';
     h += '<p class="muted">' + (it.alert || it.ok ? '긴급: ' + fmt(it.alert) + ' kg 미만 · OK: ' + fmt(it.ok) + ' kg 이상'
       : '긴급·OK 기준이 없습니다. 구글 시트 \'재고품목\'의 C·D열에 넣으면 부족 표시가 나옵니다.') + '</p>';
@@ -1473,7 +1483,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!it) return '';
     var kg = stockOf(k);
     var h = '<h2 class="h2" id="sh-title">재고 맞추기</h2>';
-    h += '<p class="cfname">' + sw(it.color, it.prod) + '<b>' + esc(it.prod) + ' · ' + esc(it.color) + '</b></p>';
+    h += '<p class="cfname">' + sw(it.color, it.prod) + '<b>' + ptxt(it.prod) + ' · ' + esc(it.color) + '</b></p>';
     h += '<p class="muted mt8">장부 재고는 <b>' + fmt(kg) + ' kg</b>입니다. 창고에서 실제로 센 양을 넣으면 차이만큼 오늘(' + esc(fmtDate(S.today)) + ') 날짜로 \'재고조정\'이 기록됩니다.</p>';
     h += '<label class="label mt12" for="adj-val">실제 재고 (kg)</label>';
     h += '<input id="adj-val" class="text" type="text" inputmode="numeric" autocomplete="off" data-in="adj" value="' + esc(S.sheet.val) + '">';
@@ -1631,7 +1641,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<h2 class="h2" id="sh-title">' + (single ? (l.type === '출고예정' ? '출고 확정' : '생산 확정') : ls.length + '건 확정') + '</h2>';
     h += '<p class="muted">확정하면 현재고에 들어갑니다(' + (single ? (l.type === '출고예정' ? '출고' : '생산') : '출고예정 → 출고, 생산예정 → 생산') + ').</p>';
     h += '<ul class="cflist">' + ls.map(function (x) {
-      return '<li class="cfrow"><span class="cfname">' + sw(x.color, x.prod) + esc(x.prod) + ' · ' + esc(x.color) + '</span><b>' + (isSale(x.type) ? '-' : '+') + fmt(x.qty) + ' kg</b>' +
+      return '<li class="cfrow"><span class="cfname">' + sw(x.color, x.prod) + '<span>' + ptxt(x.prod) + ' · ' + esc(x.color) + '</span></span><b>' + (isSale(x.type) ? '-' : '+') + fmt(x.qty) + ' kg</b>' +
         '<small class="muted">' + esc(x.type + ' · ' + fmtDate(x.date) + (x.cust ? ' · ' + x.cust : '')) + '</small></li>';
     }).join('') + '</ul>';
     h += '<p class="label mt16">실제 날짜</p><div class="chips">';
@@ -1766,7 +1776,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<div class="chips" role="group" aria-label="제품 고르기">' + chip(multi ? '전체' : '모든 제품', !P && selLine == null, 'yprod', '') +
       (multi ? lines.map(function (ln) { return chip(lineName(ln) + ' 전체', selLine === ln, 'yprod', 'line:' + ln); }).join('') : '') +
       Y.prods.filter(function (p) { return S.prods.indexOf(p) >= 0 || Y.months.some(function (o) { return o.p[p] && (o.p[p].out || o.p[p].prod); }); })
-        .map(function (p) { return chip(p, P === p, 'yprod', p); }).join('') + '</div>';
+        .map(function (p) { return chip(p, P === p, 'yprod', p).replace('class="chip"', 'class="chip ' + pcls(p) + '"'); }).join('') + '</div>';
 
     var tot = zeroY(), done = [], cur = null, firstM = '';
     Y.months.forEach(function (o) {
