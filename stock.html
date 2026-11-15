@@ -111,16 +111,37 @@ select.text{padding-right:8px}
 .qname small{display:block;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .qname small.bad{color:var(--bad)}
 .qname small.warn{color:var(--warn)}
-.psum.next{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
-.psum-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 0 4px}
-.psum-h span{font-size:15px;font-weight:800;color:var(--ink2)}
-.psum-h b{font-size:28px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
-.psum-h b small{font-size:14px;font-weight:700;color:var(--muted)}
-.psum-l{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);word-break:keep-all}
-.psum-l b{color:var(--ink);font-variant-numeric:tabular-nums}
-.psum-s{margin-top:12px;font-size:14px;color:var(--muted);word-break:keep-all}
+.qname small.stk{display:block;margin-top:1px;font-size:13px;color:var(--muted);line-height:1.3}
+.qname small.stk .now,.qname small.stk .aft b{display:inline}
+.qname small.stk .now{font-size:23px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.01em}
+.qname small.stk .aft{display:block;color:var(--accent-strong);font-weight:700}
+.qname small.stk .aft b{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.qname small.stk .aft.neg{color:var(--bad)}
 .ptot{margin:10px 0 0;font-size:15px;color:var(--muted)}
-.ptot b{color:var(--ink);font-variant-numeric:tabular-nums}
+.ptot b{font-size:20px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.outseg{grid-template-columns:repeat(2,minmax(0,1fr));margin:0 0 12px}
+.card > .daterow:first-child{margin-top:0}
+.ohead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 6px}
+.ohead p{margin:0;color:var(--muted);font-size:15px}
+.ohead p b{font-size:22px;color:var(--ink);font-variant-numeric:tabular-nums}
+.oday{border-top:1px solid var(--soft)}
+.oday summary{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:2px 12px;padding:12px 2px;cursor:pointer;list-style:none}
+.oday summary::-webkit-details-marker{display:none}
+.oday summary::after{content:'▾';display:inline-block;grid-column:3;grid-row:1;color:var(--muted);font-size:14px;transition:transform .15s}
+.oday[open] summary::after{transform:rotate(180deg)}
+.oday .od{font-weight:800;font-size:17px}
+.oday .okg{grid-column:2;text-align:right;color:var(--muted)}
+.oday .okg b{font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums}
+.oday summary small{grid-column:1 / span 2;color:var(--muted);font-size:13.5px;word-break:keep-all}
+.olines{list-style:none;margin:0 0 10px;padding:0 0 0 4px}
+.olines li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--soft)}
+.olines .on{display:flex;align-items:center;gap:8px;min-width:0}
+.olines .on b{display:block;font-size:15px}
+.olines .on small{display:block;color:var(--muted);font-size:13px;word-break:keep-all}
+.olines .oq{text-align:right;white-space:nowrap}
+.olines .oq b{display:block;font-size:16px;font-variant-numeric:tabular-nums}
+.olines .oq small{display:block;color:var(--muted);font-size:12.5px}
+.gate{color:var(--ink2);word-break:keep-all}
 .qbox{display:flex;align-items:center;gap:6px}
 .qin{width:100%;min-width:0;height:48px;border:2px solid var(--line);border-radius:10px;padding:0 10px;font-size:19px;font-weight:800;text-align:right;background:var(--card)}
 .qin:focus{border-color:var(--accent);outline:none}
@@ -348,6 +369,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var API = DEMO ? '' : String(window.NMC_API || '');
   var LIVE = !!API;
   var TOKEN_KEY = 'nmc_pay_token';                             // 관리자 화면에서 로그인하면 생기는 열쇠 (금액 보기용)
+  /* 재고 화면 네 가지 (첫 화면에서 고름). 생산량만 누구나, 나머지는 관리자 비밀번호.
+   *  stock.html           = 생산량 입력 (관리자 열쇠가 있어도 쓰지 않음)
+   *  stock.html?view=out  = 출고량: 날짜별 출고 (누르면 펼침) + 출고 넣기
+   *  stock.html?view=in   = 반입량: 반입 넣기
+   *  stock.html?view=all  = 전체관리: 현재고·입력·예정·월별·연간·기록·단가 (예전 주소 ?admin=1 도 여기로) */
+  var VIEW = (function () {
+    var m = /[?&]view=(out|in|all)(?:&|$)/.exec(location.search);
+    if (m) return m[1];
+    return /[?&]admin=1(?:&|$)/.test(location.search) ? 'all' : 'prod';
+  })();
+  var ADMIN_VIEW = VIEW !== 'prod';
+  var QUICK = VIEW === 'out' || VIEW === 'in';
+  var VIEW_NAME = { prod: '생산량 입력', out: '출고량', 'in': '반입량', all: '전체관리' }[VIEW];
 
   /* 화면 표시용 색 (실제 제품 색과 똑같지는 않습니다) */
   var SWATCH = {
@@ -401,7 +435,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [],
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'list', outYms: null, openDay: {},
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
@@ -423,9 +457,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function call(fn) {
     var args = Array.prototype.slice.call(arguments, 1);
     return new Promise(function (resolve, reject) {
+      var token = '';
+      if (ADMIN_VIEW) { try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {} }
       if (LIVE) {
-        var token = '';
-        try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
         var ctl = window.AbortController ? new AbortController() : null;
         var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 60000);
         fetch(API, { method: 'POST', body: JSON.stringify({ action: 'stock.call', fn: fn, args: args, token: token }), redirect: 'follow',
@@ -437,7 +471,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
           }, function (e) { clearTimeout(timer); reject(new Error(e && e.name === 'AbortError' ? 'timeout' : 'net')); });
       } else if (DEMO) {
         setTimeout(function () {
-          try { resolve(JSON.parse(JSON.stringify(DEMO[fn].apply(null, args)))); } catch (e) { reject(e); }
+          try { DEMO.__token = token; resolve(JSON.parse(JSON.stringify(DEMO[fn].apply(null, args)))); } catch (e) { reject(e); } finally { DEMO.__token = undefined; }
         }, 180);
       } else {
         reject(new Error('no_server'));
@@ -475,11 +509,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function isAuth(e) { return /auth/.test(String((e && e.message) || e || '')); }
   /* 관리자 화면을 닫고 생산 입력 화면으로. 넣던 숫자는 지웁니다 (출고 등으로 넣던 것이 생산으로 저장되지 않게). */
-  function lockDown(msg) {
+  function lockDown(msg, quiet) {
     setToken('');
     S.admin = false; S.money = false; S.ready = false; S.busy = false; S.sheet = null;
     S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = '';
-    start();
+    start(quiet);
     if (msg) toast(msg);
   }
   function failed(e) { if (S.admin && isAuth(e)) { lockDown(ERR.expired); return; } toast(errText(e)); }
@@ -793,7 +827,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += header();
     var bar = false;
     if (!S.ready) h += S.fatal ? viewFatal() : viewLoading();
-    else if (!S.admin) { h += viewProd(); bar = true; h += footLocked(); }
+    else if (!S.admin) {
+      if (ADMIN_VIEW) h += viewGate();
+      else { h += viewProd(); bar = true; h += footLocked(); }
+    }
+    else if (VIEW === 'in') { S.inType = '반입'; h += viewIn(); bar = true; }
+    else if (VIEW === 'out') { h += viewOut(); bar = S.outMode === 'add'; }
     else {
       h += tabsHtml();
       if (S.tab === 'in') { h += viewIn(); bar = true; }
@@ -831,11 +870,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function header() {
-    var sub = S.today ? fmtDateLong(S.today) : '칼라칩 재고 관리';
-    if (S.ready && !S.admin) sub = '생산량 입력 · ' + sub;
+    var sub = VIEW_NAME + (S.today ? ' · ' + fmtDateLong(S.today) : '');
+    if (ADMIN_VIEW && S.ready && !S.admin) sub = VIEW_NAME + ' · 관리자';
     var nav = '<a class="ghost sm navbtn" href="./" aria-label="홈 (첫 화면)">' + ICON.home + '<span>홈</span></a>';
     if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
-    else if (S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
+    else if (ADMIN_VIEW && S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
     return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + esc(sub) + '</p></div>' +
       '<div class="hbtns">' + nav +
       '<button type="button" class="iconbtn" data-act="refresh" aria-label="새로고침"' + (S.ready ? '' : ' disabled') + '>' + ICON.refresh + '</button></div></header>';
@@ -883,6 +922,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
+    if (QUICK) h += '<section class="card">';
+    else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
       h += '<button type="button" class="segbtn" role="radio" aria-checked="' + (t === x) + '" data-act="intype" data-v="' + x + '">' + x + '</button>';
@@ -892,6 +933,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += '<button type="button" class="segbtn sm" role="radio" aria-checked="' + (t === x) + '" data-act="intype" data-v="' + x + '">' + x + (x === '출고예정' ? ' (발주)' : '') + '</button>';
     });
     h += '</div></div>';
+    }
     h += '<div class="daterow"><h2 class="label">' + (plan ? '예정 날짜' : '날짜') + '</h2><p class="bigdate">' + esc(fmtDate(curDate())) + '</p></div>';
     h += (plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
 
@@ -900,7 +942,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var due = S.plan.lines.filter(function (l) { return !l.fut && l.type === pt && l.date <= S.today; });
       if (due.length) {
         h += '<div class="warnbox">오늘까지 날짜인 ' + pt + ' ' + due.length + '건이 아직 확정되지 않았습니다. 그 ' + t + '이라면 여기서 새로 넣지 말고 예정 화면에서 \'확정\'을 누르세요. 두 번 들어가면 재고가 틀어집니다.' +
-          '<br><button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button></div>';
+          '<br>' + (QUICK ? '<a class="link" href="stock.html?view=all">전체관리의 예정 화면으로</a>' : '<button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button>') + '</div>';
       }
     }
 
@@ -923,6 +965,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
 
     h += '<section class="card"><h2 class="label">제품별 수량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
+    if (QUICK) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     var vl = vlabel(S.inProd);
     var hint = {
       '생산': '생산한 양을 ' + vl + '별로 넣으세요.',
@@ -939,7 +982,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var sub = '재고 ' + fmt(kg) + ' kg';
       if (ps) sub += ps.need > 0 ? ' · <span class="bad">예정 반영 시 ' + fmt(ps.need) + ' 부족</span>' : ' · 예정 후 ' + fmt(ps.final);
       h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' +
-        '<small class="' + st + '">' + sub + '</small></span></label>';
+        (QUICK ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '<small class="' + st + '">' + sub + '</small>') + '</span></label>';
       h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
       h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
@@ -955,23 +998,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   /* 생산 입력 (관리자 로그인 전: 링크가 있으면 누구나). 재고·기록·금액은 보이지 않습니다. */
   function viewProd() {
     S.inType = '생산';
-    var h = '<div class="stack">' + stockSummary();
+    var h = '<div class="stack">';
     h += '<section class="card"><div class="daterow"><h2 class="label">생산 날짜</h2><p class="bigdate">' + esc(fmtDate(S.inDate)) + '</p></div>' +
       dateChips('indate', S.inDate, 'in-date') + '</section>';
     h += '<section class="card"><h2 class="label">제품별 생산량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
-    if (S.hasStock) {
-      var ptot = 0;
-      itemsOf(S.inProd).forEach(function (it) { ptot += stockOf(it.key); });
-      h += '<p class="ptot">' + esc(S.inProd) + ' 현재 재고 <b>' + fmt(ptot) + ' kg</b></p>';
-    }
+    if (S.hasStock) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p><ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
-      var sub = '';
-      if (S.hasStock) {
-        var kg = stockOf(it.key), st = statusOf(it, kg);
-        sub = '<small class="' + st + '">재고 ' + fmt(kg) + ' kg' + (st === 'bad' ? ' · 긴급' : st === 'warn' ? ' · 생산준비' : '') + '</small>';
-      }
+      var sub = S.hasStock ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '';
       h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' + sub + '</span></label>';
       h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
@@ -991,28 +1026,77 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return h;
   }
   function footLocked() {
-    return '<footer class="foot"><p class="note">이 화면에서는 생산량 넣기와 현재 재고 보기만 됩니다. 출고·반입·예정·월별·연간·기록과 금액은 관리자 비밀번호로 로그인해야 보입니다.</p></footer>';
+    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣습니다. 색상마다 지금 재고(kg)가 보이고, 수량을 넣으면 넣은 뒤 재고로 바뀝니다.</p></footer>';
   }
-  /* 생산 입력 화면 맨 위: 현재 재고 (분류별 합계, 제품별 합계, 긴급·생산준비 품목 수). 예정·금액은 넣지 않습니다. */
-  function stockSummary() {
-    if (!S.hasStock) return '';
-    var per = {}, total = 0, nb = 0, nw = 0;
-    S.items.forEach(function (it) {
-      var kg = stockOf(it.key), st = statusOf(it, kg);
-      per[it.prod] = (per[it.prod] || 0) + kg;
-      total += kg;
-      if (st === 'bad') nb++; else if (st === 'warn') nw++;
+  /* 생산량 입력: 색상마다 현재고. 수량을 넣으면 넣은 뒤 재고를 같이 보여 줍니다 (저장하면 서버의 새 현재고로 바뀜). */
+  function addedKg(it) { var n = parseKg(S.qty[it.key]); return n && n > 0 && n <= 1000000 ? n : 0; }
+  function stkHtml(it) {
+    var kg = stockOf(it.key), n = addedKg(it), out = S.inType === '출고', after = out ? kg - n : kg + n;
+    return '<span class="k">현재고</span> <b class="now">' + fmt(kg) + '</b> kg' +
+      (n ? '<span class="aft' + (after < 0 ? ' neg' : '') + '">' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(after) + '</b> kg</span>' : '');
+  }
+  function ptotHtml(prod) {
+    var kg = 0, n = 0, out = S.inType === '출고';
+    itemsOf(prod).forEach(function (it) { kg += stockOf(it.key); n += addedKg(it); });
+    return esc(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
+  }
+
+  /* 출고량: 날짜별 출고 (달마다 · 날짜에 합계 · 누르면 펼쳐서 거래처·제품·수량) + 출고 넣기 */
+  function viewOut() {
+    S.inType = '출고';
+    var add = S.outMode === 'add';
+    var h = '<div class="seg outseg" role="radiogroup" aria-label="출고량">' +
+      '<button type="button" class="segbtn sm" role="radio" aria-checked="' + !add + '" data-act="outmode" data-v="list">날짜별 출고</button>' +
+      '<button type="button" class="segbtn sm" role="radio" aria-checked="' + add + '" data-act="outmode" data-v="add">출고 넣기</button></div>';
+    return h + (add ? viewIn() : outList());
+  }
+  function outList() {
+    if (!S.outYms || !S.outYms.length) S.outYms = [S.today.slice(0, 7)];
+    var h = '<div class="stack">';
+    S.outYms.forEach(function (ym) {
+      var m = S.months[ym];
+      if (!m) {
+        ensureMonth(ym);
+        h += '<section class="card"><h2 class="label">' + esc(fmtYm(ym)) + ' 출고</h2><p class="hint">' + (S.mErr[ym] ? '불러오지 못했습니다. 위의 새로고침을 눌러 주세요.' : '불러오는 중…') + '</p></section>';
+        return;
+      }
+      var days = {}, order = [], tot = 0;
+      m.records.forEach(function (r) {
+        if (r.type !== '출고') return;
+        if (!days[r.date]) { days[r.date] = []; order.push(r.date); }
+        days[r.date].push(r);
+        tot += r.qty;
+      });
+      order.sort().reverse();
+      h += '<section class="card"><div class="ohead"><h2 class="label">' + esc(fmtYm(ym)) + ' 출고</h2><p><b>' + fmt(tot) + '</b> kg · ' + order.length + '일</p></div>';
+      if (!order.length) h += '<p class="hint">이 달에는 출고 기록이 없습니다.</p>';
+      order.forEach(function (d) {
+        var rs = days[d], kg = 0, custs = [];
+        rs.forEach(function (r) { kg += r.qty; var c = r.cust || '거래처 없음'; if (custs.indexOf(c) < 0) custs.push(c); });
+        h += '<details class="oday" data-day="' + esc(d) + '"' + (S.openDay[d] ? ' open' : '') + '><summary>' +
+          '<span class="od">' + esc(fmtDate(d)) + '</span><span class="okg"><b>' + fmt(kg) + '</b> kg</span>' +
+          '<small>' + rs.length + '건 · ' + esc(custs.slice(0, 2).join(', ') + (custs.length > 2 ? ' 외 ' + (custs.length - 2) + '곳' : '')) + '</small></summary><ul class="olines">';
+        rs.forEach(function (r) {
+          h += '<li><span class="on">' + sw(r.color, r.prod) + '<span><b>' + esc(r.prod + ' ' + r.color) + '</b><small>' + esc(r.cust || '거래처 없음') +
+            (r.po ? ' · ' + esc(r.po) : '') + (r.memo ? ' · ' + esc(r.memo) : '') + '</small></span></span>' +
+            '<span class="oq"><b>' + fmt(r.qty) + ' kg</b>' + (S.money && r.price ? '<small>' + fmt(r.price) + '원/kg</small>' : '') + '</span></li>';
+        });
+        h += '</ul></details>';
+      });
+      h += '</section>';
     });
-    var multi = multiLine();
-    var h = '<section class="card" aria-labelledby="h-stock"><h2 class="label" id="h-stock">현재 재고 · ' + esc(fmtDate(S.today)) + ' 기준</h2>';
-    (S.lines.length ? S.lines : ['']).forEach(function (ln, gi) {
-      var ps = prodsOfLine(ln), gt = 0;
-      ps.forEach(function (p) { gt += per[p] || 0; });
-      h += '<div class="psum' + (gi ? ' next' : '') + '"><p class="psum-h"><span>' + esc(multi ? lineName(ln) : '전체') + '</span><b>' + fmt(multi ? gt : total) + '<small> kg</small></b></p>' +
-        '<p class="psum-l">' + ps.map(function (p) { return '<span>' + esc(p) + ' <b>' + fmt(per[p] || 0) + '</b></span>'; }).join('') + '</p></div>';
-    });
-    if (nb || nw) h += '<p class="psum-s"><span class="pill bad">긴급</span> ' + nb + '품목 &nbsp;<span class="pill warn">생산준비</span> ' + nw + '품목 · 색상별 재고는 아래 입력 칸에 있습니다.</p>';
-    return h + '</section>';
+    var last = S.outYms[S.outYms.length - 1];
+    if (last > S.firstYm) h += '<button type="button" class="ghost wide" data-act="outmore">' + esc(fmtYm(addMonths(last, -1))) + ' 출고 더 보기</button>';
+    h += '<p class="note">출고 기록을 고치거나 지우려면 전체관리의 기록 화면에서 합니다.</p>';
+    return h + '</div>';
+  }
+  /* 재고 전체(관리자)로 들어왔는데 로그인 전: 비밀번호 안내만 */
+  function viewGate() {
+    var what = { out: '날짜별 출고 보기와 출고 넣기는', 'in': '반입 넣기는', all: '현재고·출고·반입·예정·월별·연간·기록과 금액은' }[VIEW];
+    return '<div class="stack"><section class="card"><h2 class="label">' + esc(VIEW_NAME) + ' · 관리자</h2>' +
+      '<p class="gate">' + esc(what) + ' 관리자 비밀번호로 엽니다.</p>' +
+      '<button type="button" class="primary wide mt12" data-act="login">관리자 로그인</button>' +
+      '<p class="hint mt12"><a href="stock.html">생산량 입력으로 가기</a></p></section></div>';
   }
   function sheetLogin() {
     var x = S.sheet;
@@ -1046,8 +1130,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function doLogout() {
     var t = getToken();
     if (t) postAction({ action: 'logout', token: t }).catch(function () {});
-    lockDown();
-    toastOk('로그아웃했습니다 · 생산량 입력만 열려 있습니다');
+    lockDown('', true);
+    toastOk('로그아웃했습니다');
   }
   /* 관리자가 아닌 저장: 서버는 건수·kg만 돌려줍니다. 이 화면에서 넣은 것만 아래에 보여 줍니다. */
   function savedLocked(type, n, tot, ls, r) {
@@ -1098,6 +1182,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     el.classList.toggle('filled', !!v);
     var w = document.getElementById('w-' + it.idx);
     if (w) w.textContent = warnFor(it);
+    var sk = document.getElementById('s-' + it.idx);
+    if (sk) sk.innerHTML = stkHtml(it);
+    var pt = document.getElementById('ptot');
+    if (pt && it.prod === S.inProd) pt.innerHTML = ptotHtml(S.inProd);
     var b = document.getElementById('badge-' + S.prods.indexOf(it.prod));
     if (b) b.textContent = countIn(it.prod) || '';
     var bar = document.getElementById('inbar');
@@ -1209,6 +1297,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         return;
       }
     }
+    var d0 = curDate();
     S.busy = true;
     renderSheet();
     call('apiSave', {
@@ -1224,6 +1313,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (sale) { S.inCust = ''; S.inPo = ''; }
       S.sheet = null;
       if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab', 'plan'); }
+      if (VIEW === 'out' && type === '출고') {
+        S.outMode = 'list';
+        S.openDay[d0] = true;
+        if (!S.outYms) S.outYms = [S.today.slice(0, 7)];
+        if (S.outYms.indexOf(d0.slice(0, 7)) < 0) { S.outYms.push(d0.slice(0, 7)); S.outYms.sort().reverse(); }
+      }
       render();
       window.scrollTo(0, 0);
       var ps = planStats();
@@ -2162,6 +2257,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
   }
 
+  document.addEventListener('toggle', function (ev) {
+    var el = ev.target;
+    if (el && el.classList && el.classList.contains('oday')) S.openDay[el.getAttribute('data-day')] = el.open;
+  }, true);
+
   document.addEventListener('click', function (ev) {
     var el = ev.target.closest ? ev.target.closest('[data-act]') : null;
     if (!el || el.disabled) return;
@@ -2174,6 +2274,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'login': openSheet({ kind: 'login', err: '' }); return;
       case 'dologin': doLogin(); return;
       case 'logout': doLogout(); return;
+      case 'outmode': S.outMode = v === 'add' ? 'add' : 'list'; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'outmore': S.outYms.push(addMonths(S.outYms[S.outYms.length - 1], -1)); render(); return;
       case 'retry': start(); return;
       case 'intype': S.inType = v; store('nmc_inv_type', v); render(); return;
       case 'indate': S.inDate = v; render(); return;
@@ -2300,6 +2402,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function refresh(loud) {
     if (S.busy || !S.ready) return;
     if (!S.admin) {
+      if (ADMIN_VIEW) return;
       formCall().then(function (r) { applyForm(r); render(); if (loud) toastOk('새로 불러왔습니다'); }, function (e) { if (loud) toast(errText(e)); });
       return;
     }
@@ -2332,13 +2435,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   /* 첫 화면의 '재고 전체 (관리자)'로 들어오면(stock.html?admin=1) 로그인 창을 바로 엽니다. 주소의 ?admin=1 은 지웁니다. */
-  var WANT_LOGIN = /[?&]admin=1(&|$)/.test(location.search);
-  if (WANT_LOGIN) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
-
-  /* 시작: 관리자 열쇠가 있으면 재고 화면 전체, 없거나 지났으면 생산 입력만 */
-  function start() {
+  function start(quiet) {
     S.fatal = false;
     render();
+    if (!ADMIN_VIEW) {
+      formCall().then(function (r) { S.admin = false; applyForm(r); S.ready = true; render(); }, function () { S.fatal = true; render(); });
+      return;
+    }
     var tok = getToken();
     var first = tok ? call('apiInit').then(function (r) { if (!isAdminResp(r)) throw new Error('auth'); return r; }) : Promise.reject(new Error('auth'));
     first.then(function (r) {
@@ -2351,16 +2454,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }, function (e) {
       if (!isAuth(e)) { S.fatal = true; render(); return; }
       if (tok) { setToken(''); toast(ERR.expired); }
-      return formCall().then(function (r) {
-        S.admin = false;
-        applyForm(r);
-        S.ready = true;
-        render();
-        if (WANT_LOGIN) { WANT_LOGIN = false; openSheet({ kind: 'login', err: '' }); }
-      }, function () {
-        S.fatal = true;
-        render();
-      });
+      S.admin = false;
+      S.ready = true;
+      render();
+      if (!quiet) openSheet({ kind: 'login', err: '' });
     });
   }
 
