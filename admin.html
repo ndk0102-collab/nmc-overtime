@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#1E5AA8">
-<title>NMC 관리 (잔업·급여)</title>
+<title>NMC 잔업·급여 관리</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <style id="pageStyle">@page { size: A4 portrait; margin: 8mm; }</style>
 <style>
@@ -85,11 +85,14 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-siz
 /* login */
 .login { max-width: 380px; margin: 12vh auto; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; box-shadow: 0 8px 30px rgba(20,40,80,.08); }
 .login h1 { margin: 0 0 4px; font-size: 22px; color: var(--blue); }
-.login p { margin: 0 0 16px; color: var(--muted); }
+.login p { margin: 0 0 16px; color: var(--muted); word-break: keep-all; }
 .login input { width: 100%; padding: 12px 14px; border: 1px solid #B8C4D4; border-radius: 10px; font-size: 17px; }
 .login input:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
 .login .btn { width: 100%; margin-top: 12px; padding: 12px; font-size: 16px; }
 .login .err { color: var(--err); margin: 12px 0 0; }
+.login .back { margin: 18px 0 0; text-align: center; }
+.login .back a { color: var(--blue); font-weight: 700; text-decoration: none; display: inline-block; padding: 8px 10px; }
+.home-ic { vertical-align: -3px; margin-right: 3px; }
 
 /* forms */
 .form { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
@@ -356,13 +359,14 @@ table.pl.ot th { padding: .7mm .2mm; }
 
   function viewLogin() {
     return '<section class="login" aria-labelledby="lt">' +
-      '<h1 id="lt">NMC 관리</h1>' +
-      '<p>잔업 기록·급여와 손익(매입·매출)을 봅니다. 관리자 비밀번호를 넣어 주세요.</p>' +
+      '<h1 id="lt">잔업 · 급여 관리</h1>' +
+      '<p>직원 잔업 기록 확인·수정과 급여를 봅니다. 관리자 비밀번호를 넣어 주세요.</p>' +
       '<form id="loginForm" autocomplete="off">' +
       '<label class="hidden" for="pw">비밀번호</label>' +
       '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
       '<button class="btn primary" type="submit">들어가기</button>' +
-      '</form>' + (S.err ? '<p class="err" role="alert">' + esc(S.err) + '</p>' : '') + '</section>';
+      '</form>' + (S.err ? '<p class="err" role="alert">' + esc(S.err) + '</p>' : '') +
+      '<p class="back"><a href="./">← 홈 (첫 화면)</a></p></section>';
   }
   function bindLogin() {
     var f = document.getElementById('loginForm');
@@ -389,15 +393,15 @@ table.pl.ot th { padding: .7mm .2mm; }
     });
   }
 
+  var HOME_IC = '<svg class="home-ic" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>';
   function viewTop() {
     var m = S.month;
     return '<header class="top"><div class="top-in">' +
-      '<div class="brand">NMC 관리<small>잔업 · 급여 · ' + esc(m.config.company) + '</small></div>' +
+      '<a class="iconbtn" href="./" aria-label="홈 (첫 화면)">' + HOME_IC + '홈</a>' +
+      '<div class="brand">잔업 · 급여<small>' + esc(m.config.company) + '</small></div>' +
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
       '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +
       '<div class="paydate">지급일 ' + esc(m.payDate) + '</div>' +
-      '<a class="iconbtn" href="stock.html">재고</a>' +
-      '<a class="iconbtn" href="pnl.html">손익 (매입·매출)</a>' +
       '<button class="iconbtn" data-act="reload">새로 불러오기</button>' +
       '<button class="iconbtn" data-act="logout">로그아웃</button>' +
       '</div></header>';
@@ -498,7 +502,7 @@ table.pl.ot th { padding: .7mm .2mm; }
     var hist = S.data.history || [];
     function minTxt(s) { var n = Number(String(s || '').replace(/[^0-9]/g, '')); return n ? P.hrs(n) + '시간' : '—'; }
     return '<div class="toolbar"><h2>' + ymTitle(ym) + ' 잔업 기록</h2>' +
-      '<a class="btn" href="./">직원용 앱 화면</a>' +
+      '<a class="btn" href="overtime.html">직원용 잔업 입력 화면</a>' +
       '<button class="btn primary" data-act="printOt">잔업표 인쇄</button></div>' +
       '<div class="kv"><div><small>평일 잔업 합계</small><b>' + P.hrs(wk) + '시간</b></div>' +
       '<div><small>휴일 근무 합계</small><b>' + P.hrs(hol) + '시간</b></div>' +

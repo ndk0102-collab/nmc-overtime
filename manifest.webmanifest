@@ -1,7 +1,7 @@
 {
-  "name": "NMC 잔업",
-  "short_name": "NMC 잔업",
-  "description": "남명(NMC) 잔업 기록",
+  "name": "NMC 통합 관리",
+  "short_name": "NMC",
+  "description": "남명(NMC) 잔업 · 재고 · 손익",
   "id": "./",
   "start_url": "./",
   "scope": "./",

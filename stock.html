@@ -306,7 +306,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .ver{font-size:12px;color:#7B8590}
 .hbtns{display:flex;align-items:center;gap:8px}
 .instbtn{gap:4px;padding:0 12px;min-height:46px}
-.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;min-height:46px;text-decoration:none;color:inherit;font-weight:700;font-size:15px}
+.navbtn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 12px;min-height:46px;text-decoration:none;color:inherit;font-weight:700;font-size:15px}
 .top{flex-wrap:wrap}.top .hbtns{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 @media (max-width:430px){.top .hbtns{gap:6px}.navbtn{padding:0 9px;font-size:14px}}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -380,6 +380,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return '<svg aria-hidden="true" width="' + (size || 20) + '" height="' + (size || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
   }
   var ICON = {
+    home: svg('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>', 20),
     refresh: svg('<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>', 22),
     chevL: svg('<path d="M15 5l-7 7 7 7"/>', 22),
     chevR: svg('<path d="M9 5l7 7-7 7"/>', 22),
@@ -822,9 +823,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function header() {
     var sub = S.today ? fmtDateLong(S.today) : '칼라칩 재고 관리';
     if (S.ready && !S.admin) sub = '생산량 입력 · ' + sub;
-    var nav = '<a class="ghost sm navbtn" href="./index.html">잔업</a>';
-    if (S.admin) nav += '<a class="ghost sm navbtn" href="./pnl.html">손익</a><a class="ghost sm navbtn" href="./admin.html">관리자</a>' +
-      '<button type="button" class="ghost sm navbtn" data-act="logout">잠그기</button>';
+    var nav = '<a class="ghost sm navbtn" href="./" aria-label="홈 (첫 화면)">' + ICON.home + '<span>홈</span></a>';
+    if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
     else if (S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
     return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + esc(sub) + '</p></div>' +
       '<div class="hbtns">' + nav +
@@ -1006,7 +1006,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var t = getToken();
     if (t) postAction({ action: 'logout', token: t }).catch(function () {});
     lockDown();
-    toastOk('잠갔습니다 · 생산 입력만 열려 있습니다');
+    toastOk('로그아웃했습니다 · 생산량 입력만 열려 있습니다');
   }
   /* 관리자가 아닌 저장: 서버는 건수·kg만 돌려줍니다. 이 화면에서 넣은 것만 아래에 보여 줍니다. */
   function savedLocked(type, n, tot, ls) {
@@ -2289,6 +2289,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     Object.keys(S.qty).forEach(function (k) { if (!S.byKey[k]) delete S.qty[k]; });
   }
 
+  /* 첫 화면의 '재고 전체 (관리자)'로 들어오면(stock.html?admin=1) 로그인 창을 바로 엽니다. 주소의 ?admin=1 은 지웁니다. */
+  var WANT_LOGIN = /[?&]admin=1(&|$)/.test(location.search);
+  if (WANT_LOGIN) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
+
   /* 시작: 관리자 열쇠가 있으면 재고 화면 전체, 없거나 지났으면 생산 입력만 */
   function start() {
     S.fatal = false;
@@ -2310,6 +2314,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         applyForm(r);
         S.ready = true;
         render();
+        if (WANT_LOGIN) { WANT_LOGIN = false; openSheet({ kind: 'login', err: '' }); }
       }, function () {
         S.fatal = true;
         render();
