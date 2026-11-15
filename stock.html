@@ -111,6 +111,16 @@ select.text{padding-right:8px}
 .qname small{display:block;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .qname small.bad{color:var(--bad)}
 .qname small.warn{color:var(--warn)}
+.psum.next{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.psum-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 0 4px}
+.psum-h span{font-size:15px;font-weight:800;color:var(--ink2)}
+.psum-h b{font-size:28px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+.psum-h b small{font-size:14px;font-weight:700;color:var(--muted)}
+.psum-l{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted);word-break:keep-all}
+.psum-l b{color:var(--ink);font-variant-numeric:tabular-nums}
+.psum-s{margin-top:12px;font-size:14px;color:var(--muted);word-break:keep-all}
+.ptot{margin:10px 0 0;font-size:15px;color:var(--muted)}
+.ptot b{color:var(--ink);font-variant-numeric:tabular-nums}
 .qbox{display:flex;align-items:center;gap:6px}
 .qin{width:100%;min-width:0;height:48px;border:2px solid var(--line);border-radius:10px;padding:0 10px;font-size:19px;font-weight:800;text-align:right;background:var(--card)}
 .qin:focus{border-color:var(--accent);outline:none}
@@ -945,14 +955,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   /* 생산 입력 (관리자 로그인 전: 링크가 있으면 누구나). 재고·기록·금액은 보이지 않습니다. */
   function viewProd() {
     S.inType = '생산';
-    var h = '<div class="stack">';
+    var h = '<div class="stack">' + stockSummary();
     h += '<section class="card"><div class="daterow"><h2 class="label">생산 날짜</h2><p class="bigdate">' + esc(fmtDate(S.inDate)) + '</p></div>' +
       dateChips('indate', S.inDate, 'in-date') + '</section>';
     h += '<section class="card"><h2 class="label">제품별 생산량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
+    if (S.hasStock) {
+      var ptot = 0;
+      itemsOf(S.inProd).forEach(function (it) { ptot += stockOf(it.key); });
+      h += '<p class="ptot">' + esc(S.inProd) + ' 현재 재고 <b>' + fmt(ptot) + ' kg</b></p>';
+    }
     h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p><ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
-      h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b></span></label>';
+      var sub = '';
+      if (S.hasStock) {
+        var kg = stockOf(it.key), st = statusOf(it, kg);
+        sub = '<small class="' + st + '">재고 ' + fmt(kg) + ' kg' + (st === 'bad' ? ' · 긴급' : st === 'warn' ? ' · 생산준비' : '') + '</small>';
+      }
+      h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' + sub + '</span></label>';
       h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
       h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
@@ -971,7 +991,28 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return h;
   }
   function footLocked() {
-    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣을 수 있습니다. 현재고·출고·반입·예정·월별·연간·기록은 관리자 비밀번호로 로그인해야 보입니다.</p></footer>';
+    return '<footer class="foot"><p class="note">이 화면에서는 생산량 넣기와 현재 재고 보기만 됩니다. 출고·반입·예정·월별·연간·기록과 금액은 관리자 비밀번호로 로그인해야 보입니다.</p></footer>';
+  }
+  /* 생산 입력 화면 맨 위: 현재 재고 (분류별 합계, 제품별 합계, 긴급·생산준비 품목 수). 예정·금액은 넣지 않습니다. */
+  function stockSummary() {
+    if (!S.hasStock) return '';
+    var per = {}, total = 0, nb = 0, nw = 0;
+    S.items.forEach(function (it) {
+      var kg = stockOf(it.key), st = statusOf(it, kg);
+      per[it.prod] = (per[it.prod] || 0) + kg;
+      total += kg;
+      if (st === 'bad') nb++; else if (st === 'warn') nw++;
+    });
+    var multi = multiLine();
+    var h = '<section class="card" aria-labelledby="h-stock"><h2 class="label" id="h-stock">현재 재고 · ' + esc(fmtDate(S.today)) + ' 기준</h2>';
+    (S.lines.length ? S.lines : ['']).forEach(function (ln, gi) {
+      var ps = prodsOfLine(ln), gt = 0;
+      ps.forEach(function (p) { gt += per[p] || 0; });
+      h += '<div class="psum' + (gi ? ' next' : '') + '"><p class="psum-h"><span>' + esc(multi ? lineName(ln) : '전체') + '</span><b>' + fmt(multi ? gt : total) + '<small> kg</small></b></p>' +
+        '<p class="psum-l">' + ps.map(function (p) { return '<span>' + esc(p) + ' <b>' + fmt(per[p] || 0) + '</b></span>'; }).join('') + '</p></div>';
+    });
+    if (nb || nw) h += '<p class="psum-s"><span class="pill bad">긴급</span> ' + nb + '품목 &nbsp;<span class="pill warn">생산준비</span> ' + nw + '품목 · 색상별 재고는 아래 입력 칸에 있습니다.</p>';
+    return h + '</section>';
   }
   function sheetLogin() {
     var x = S.sheet;
@@ -1009,7 +1050,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     toastOk('로그아웃했습니다 · 생산량 입력만 열려 있습니다');
   }
   /* 관리자가 아닌 저장: 서버는 건수·kg만 돌려줍니다. 이 화면에서 넣은 것만 아래에 보여 줍니다. */
-  function savedLocked(type, n, tot, ls) {
+  function savedLocked(type, n, tot, ls, r) {
+    if (r && r.stock) { S.stock = r.stock; S.hasStock = true; }
     if (type === '생산') {
       S.saved.unshift({ date: curDate(), n: n, kg: tot, text: ls.slice(0, 6).map(function (l) { return l.it.prod + ' ' + l.it.color + ' ' + fmt(l.qty) + 'kg'; }).join(' · ') +
         (ls.length > 6 ? ' 외 ' + (ls.length - 6) + '건' : '') });
@@ -1174,7 +1216,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       lines: ls.map(function (l) { return { prod: l.it.prod, color: l.it.color, qty: l.qty, price: sale ? cleanNum(S.price[pkeyOf(l.it)]) : '' }; })
     }).then(function (r) {
       S.busy = false;
-      if (!isAdminResp(r)) { savedLocked(type, n, tot, ls); return; }
+      if (!isAdminResp(r)) { savedLocked(type, n, tot, ls, r); return; }
       apply(r);
       S.qty = {};
       S.inMemo = '';
@@ -2280,7 +2322,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.gen++;
     S.today = r.today;
     setItems(r.items || []);
-    S.stock = {}; S.customers = []; S.firstYm = r.today.slice(0, 7); S.badRows = []; S.ver = r.ver || '';
+    S.stock = r.stock || {}; S.hasStock = !!r.stock; S.customers = []; S.firstYm = r.today.slice(0, 7); S.badRows = []; S.ver = r.ver || '';
     S.money = false;
     S.plan = { lines: [], sum: {} };
     S.months = {}; S.mErr = {}; S.mLoading = {}; S.years = {}; S.yErr = {}; S.yLoading = {};
