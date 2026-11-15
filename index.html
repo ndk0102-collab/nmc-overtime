@@ -103,6 +103,8 @@ button{font:inherit;color:inherit}
 .primary:disabled{opacity:.55;cursor:default;box-shadow:none}
 .secondary{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:52px;margin:10px 0 0;border:2px solid #F3C5C0;border-radius:16px;background:#fff;color:var(--hol);font-size:16px;font-weight:700;cursor:pointer}
 .foot{color:var(--muted);font-size:14px}
+.adminlink{display:block;width:max-content;margin:18px 0 0 auto;padding:6px 10px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:8px}
+.adminlink:hover{background:#E2E8F0;color:var(--ink2)}
 .foot .wk{display:flex;align-items:center;gap:6px;margin:4px 4px 0}
 .help{background:#fff;border:1px solid var(--line);border-radius:16px;padding:2px 14px;margin-top:10px;color:var(--ink2)}
 .help summary{min-height:46px;display:flex;align-items:center;font-weight:700;cursor:pointer}
@@ -668,7 +670,12 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       });
       h += '</div>';
     }
-    return h + '<p class="hint">' + esc(tr('nameMissing')) + '</p></section>';
+    return h + '<p class="hint">' + esc(tr('nameMissing')) + '</p></section>' + adminLink();
+  }
+
+  /* 관리자(잔업 확인·수정, 급여) 화면으로 가는 작은 링크 — 비밀번호는 그 화면에서 묻습니다 */
+  function adminLink() {
+    return API ? '<a class="adminlink" href="admin.html">관리자</a>' : '';
   }
 
   function viewRec() {
@@ -722,7 +729,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
         (API ? '<button type="button" class="primary" data-act="install">' + ICON.phone + '<span>' + esc(tr('installBtn')) + '</span></button>' : '') +
         '<p>' + esc(tr('installAndroid')) + '</p><p>' + esc(tr('installSamsung')) + '</p><p>' + esc(tr('installIphone')) + '</p></details>';
     }
-    return h + '</div>';
+    return h + adminLink() + '</div>';
   }
 
   function installCard() {

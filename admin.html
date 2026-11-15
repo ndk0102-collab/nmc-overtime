@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#1E5AA8">
-<title>NMC 급여 관리</title>
+<title>NMC 관리 (잔업·급여)</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <style id="pageStyle">@page { size: A4 portrait; margin: 8mm; }</style>
 <style>
@@ -49,6 +49,7 @@ main { max-width: 1560px; margin: 0 auto; padding: 0 16px 40px; }
 .btn.primary { background: var(--blue); color: #fff; }
 .btn.primary:hover { background: var(--blue-d); }
 .btn.small { padding: 4px 10px; font-size: 13px; }
+a.btn { display: inline-block; text-decoration: none; }
 .btn.danger { border-color: var(--err); color: var(--err); }
 .btn:disabled { opacity: .5; cursor: default; }
 
@@ -183,6 +184,30 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
 .loading { position: fixed; inset: 0; background: rgba(238,242,247,.6); z-index: 60; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--blue); }
 .loading span { background: #fff; padding: 12px 20px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.12); }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #1B2430; color: #fff; padding: 10px 18px; border-radius: 10px; z-index: 70; font-size: 14px; }
+/* overtime grid */
+.grid.otgrid { font-size: 12.5px; }
+.grid.otgrid th, .grid.otgrid td { padding: 0; text-align: center; }
+.grid.otgrid thead th { padding: 5px 2px; line-height: 1.15; }
+.grid.otgrid thead th small { display: block; font-size: 10px; font-weight: 600; color: var(--muted); }
+.grid.otgrid th.hol, .grid.otgrid th.hol small { color: #B42318; }
+.grid.otgrid th.hol, .grid.otgrid td.hol { background: #FCEFEF; }
+.grid.otgrid td.name { padding: 6px 10px; text-align: left; }
+.grid.otgrid td:first-child, .grid.otgrid th:first-child { text-align: left; padding-left: 10px; }
+.grid.otgrid .sum1 { padding: 6px 8px; background: #F2F6FB; white-space: nowrap; }
+.grid.otgrid tfoot td { padding: 6px 2px; }
+.cellbtn { display: block; width: 100%; min-width: 30px; height: 30px; border: 0; background: transparent; cursor: pointer; font: inherit; font-variant-numeric: tabular-nums; color: var(--ink); }
+.cellbtn:hover, .cellbtn:focus-visible { background: var(--blue-l); outline: 2px solid var(--blue); outline-offset: -2px; }
+td.future { background: repeating-linear-gradient(135deg, #fff, #fff 4px, #F3F5F8 4px, #F3F5F8 8px); }
+.h3 { font-size: 16px; margin: 22px 0 10px; }
+.grid.hist { width: auto; min-width: 560px; }
+.grid.hist td, .grid.hist th { padding: 5px 12px; }
+details.more { margin-top: 10px; }
+details.more summary { cursor: pointer; color: var(--blue); font-weight: 600; font-size: 14px; margin-bottom: 8px; }
+.modal-box.small { width: min(440px, 100%); }
+.pl .hol { background: #FBEAEA; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+table.pl.ot td { text-align: center; padding: .9mm .3mm; }
+table.pl.ot td:first-child { text-align: left; padding-left: 1.2mm; }
+table.pl.ot th { padding: .7mm .2mm; }
 .kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin: 0 0 14px; }
 .kv div { background: #F5F8FC; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .kv small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; }
@@ -199,7 +224,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
 <div id="app"></div>
 <div id="print" aria-hidden="true"></div>
 <script>window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";</script>
-<script src="payroll.js?v=v8"></script>
+<script src="payroll.js?v=v9"></script>
 <script>
 (function () {
   'use strict';
@@ -207,7 +232,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
   var API = String(window.NMC_API || '');
   var app = document.getElementById('app');
   var TOKEN_KEY = 'nmc_pay_token';
-  var S = { token: '', data: null, month: null, tab: 'ledger', slip: '', busy: 0, err: '', edit: null, adjEdit: null };
+  var S = { token: '', data: null, month: null, tab: 'ot', slip: '', busy: 0, err: '', edit: null, adjEdit: null, cell: null };
   try { S.token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { S.token = ''; }
 
   var ERR = {
@@ -286,6 +311,18 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
       throw e;
     });
   }
+  /* 이 기기의 표시(비밀번호를 여러 번 틀리면 이 기기만 잠깁니다) */
+  function devId() {
+    var k = 'nmc_dev', v = '';
+    try { v = localStorage.getItem(k) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(v)) {
+      var a = new Uint8Array(16);
+      crypto.getRandomValues(a);
+      v = Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
   function setToken(t) {
     S.token = t || '';
     try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
@@ -312,14 +349,14 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
   /* ───────── 화면 ───────── */
   function render() {
     if (!S.token || !S.data) { app.innerHTML = viewLogin(); bindLogin(); return; }
-    app.innerHTML = viewTop() + viewBanners() + viewTabs() + '<main><section class="panel" id="panel">' + viewTab() + '</section></main>' + (S.edit ? viewEdit() : '');
+    app.innerHTML = viewTop() + viewBanners() + viewTabs() + '<main><section class="panel" id="panel">' + viewTab() + '</section></main>' + (S.edit ? viewEdit() : '') + (S.cell ? viewCell() : '');
     bindMain();
   }
 
   function viewLogin() {
     return '<section class="login" aria-labelledby="lt">' +
-      '<h1 id="lt">NMC 급여 관리</h1>' +
-      '<p>관리자 비밀번호를 넣어 주세요.</p>' +
+      '<h1 id="lt">NMC 관리</h1>' +
+      '<p>잔업 기록과 급여를 한 곳에서 봅니다. 관리자 비밀번호를 넣어 주세요.</p>' +
       '<form id="loginForm" autocomplete="off">' +
       '<label class="hidden" for="pw">비밀번호</label>' +
       '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
@@ -336,7 +373,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
       pw.value = '';
       if (!v) return;
       busy(true);
-      call('login', { pw: v }).then(function (r) {
+      call('login', { pw: v, dev: devId() }).then(function (r) {
         busy(false);
         setToken(r.token);
         S.err = '';
@@ -354,7 +391,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
   function viewTop() {
     var m = S.month;
     return '<header class="top"><div class="top-in">' +
-      '<div class="brand">NMC 급여 관리<small>' + esc(m.config.company) + '</small></div>' +
+      '<div class="brand">NMC 관리<small>잔업 · 급여 · ' + esc(m.config.company) + '</small></div>' +
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
       '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +
       '<div class="paydate">지급일 ' + esc(m.payDate) + '</div>' +
@@ -378,7 +415,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
     return '<div class="banners">' + out.map(function (b) { return '<div class="banner ' + b[0] + '">' + b[1] + '</div>'; }).join('') + '</div>';
   }
 
-  var TABS = [['ledger', '급여대장'], ['slips', '명세서'], ['staff', '직원 설정'], ['adjust', '추가·공제'], ['bank', '은행 이체 파일'], ['config', '기준·비밀번호']];
+  var TABS = [['ot', '잔업 기록'], ['ledger', '급여대장'], ['slips', '명세서'], ['staff', '직원 설정'], ['adjust', '추가·공제'], ['bank', '은행 이체 파일'], ['config', '기준·비밀번호']];
   function viewTabs() {
     return '<nav class="tabs" role="tablist">' + TABS.map(function (t) {
       return '<button class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '">' + t[1] + '</button>';
@@ -391,8 +428,130 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
       case 'adjust': return viewAdjust();
       case 'bank': return viewBank();
       case 'config': return viewConfig();
-      default: return viewLedger();
+      case 'ledger': return viewLedger();
+      default: return viewOt();
     }
+  }
+
+  /* 잔업 기록 */
+  function daysOf(ym) {
+    var y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7));
+    var n = new Date(Date.UTC(y, m, 0)).getUTCDate(), out = [];
+    for (var d = 1; d <= n; d++) out.push(ym + '-' + (d < 10 ? '0' : '') + d);
+    return out;
+  }
+  function isHol(date) {
+    var w = new Date(date + 'T00:00:00Z').getUTCDay();
+    return w === 0 || w === 6 || (S.data.holidays || []).indexOf(date) >= 0;
+  }
+  function otTable() {
+    var d = S.data, ym = S.month.ym, names = [], map = {};
+    (d.employees || []).forEach(function (n) { if (names.indexOf(n) < 0) names.push(n); });
+    (d.records || []).forEach(function (r) {
+      if (String(r.date).slice(0, 7) !== ym) return;
+      if (names.indexOf(r.name) < 0) names.push(r.name);
+      (map[r.name] = map[r.name] || {})[r.date] = Number(r.minutes) || 0;
+    });
+    var days = daysOf(ym);
+    var rows = names.map(function (n) {
+      var wk = 0, hol = 0;
+      var cells = days.map(function (dt) {
+        var v = (map[n] || {})[dt] || 0;
+        if (isHol(dt)) hol += v; else wk += v;
+        return v;
+      });
+      return { name: n, cells: cells, wk: wk, hol: hol };
+    });
+    var dayTot = days.map(function (dt, i) { return rows.reduce(function (s, r) { return s + r.cells[i]; }, 0); });
+    return { days: days, rows: rows, dayTot: dayTot };
+  }
+  function hTxt(min) { return min ? P.hrs(min) : ''; }
+  function dayHead(dt) {
+    return Number(dt.slice(8)) + '<small>' + WD[new Date(dt + 'T00:00:00Z').getUTCDay()] + '</small>';
+  }
+  function histLabel(a) {
+    a = String(a || '');
+    if (a.indexOf('관리자') === 0) return a;
+    if (a.indexOf('사진입력') === 0) return '사진 입력';
+    return '앱 ' + a;
+  }
+  function viewOt() {
+    var t = otTable(), today = S.data.today, ym = S.month.ym;
+    var wk = 0, hol = 0, cnt = 0;
+    t.rows.forEach(function (r) { wk += r.wk; hol += r.hol; r.cells.forEach(function (v) { if (v) cnt++; }); });
+    var head = '<tr><th scope="col">이름</th>' + t.days.map(function (dt) {
+      return '<th class="n' + (isHol(dt) ? ' hol' : '') + '" scope="col">' + dayHead(dt) + '</th>';
+    }).join('') + '<th class="sum1" scope="col">평일</th><th class="sum1" scope="col">휴일</th><th class="sum1" scope="col">합계</th></tr>';
+    var body = t.rows.map(function (r) {
+      return '<tr><td class="name">' + esc(r.name) + '</td>' + r.cells.map(function (v, i) {
+        var dt = t.days[i], cls = (isHol(dt) ? 'hol' : '');
+        if (dt > today) return '<td class="future ' + cls + '"></td>';
+        return '<td class="' + cls + '"><button class="cellbtn" data-cell="' + esc(r.name) + '|' + dt + '" aria-label="' +
+          esc(r.name + ' ' + md(dt) + (v ? ' ' + P.hrs(v) + '시간' : ' 기록 없음')) + '">' + hTxt(v) + '</button></td>';
+      }).join('') + '<td class="sum1">' + hTxt(r.wk) + '</td><td class="sum1">' + hTxt(r.hol) + '</td><td class="sum1"><b>' + hTxt(r.wk + r.hol) + '</b></td></tr>';
+    }).join('');
+    var foot = '<tr><td>합계</td>' + t.dayTot.map(function (v, i) { return '<td class="' + (isHol(t.days[i]) ? 'hol' : '') + '">' + hTxt(v) + '</td>'; }).join('') +
+      '<td class="sum1">' + P.hrs(wk) + '</td><td class="sum1">' + P.hrs(hol) + '</td><td class="sum1">' + P.hrs(wk + hol) + '</td></tr>';
+    var hist = S.data.history || [];
+    function minTxt(s) { var n = Number(String(s || '').replace(/[^0-9]/g, '')); return n ? P.hrs(n) + '시간' : '—'; }
+    return '<div class="toolbar"><h2>' + ymTitle(ym) + ' 잔업 기록</h2>' +
+      '<a class="btn" href="./">직원용 앱 화면</a>' +
+      '<button class="btn primary" data-act="printOt">잔업표 인쇄</button></div>' +
+      '<div class="kv"><div><small>평일 잔업 합계</small><b>' + P.hrs(wk) + '시간</b></div>' +
+      '<div><small>휴일 근무 합계</small><b>' + P.hrs(hol) + '시간</b></div>' +
+      '<div><small>기록 건수</small><b>' + cnt + '건</b></div>' +
+      '<div><small>마지막 기록 날짜</small><b>' + (S.month.lastRecord ? esc(md(S.month.lastRecord)) : '없음') + '</b></div></div>' +
+      '<div class="scroll"><table class="grid otgrid sticky1" id="otTable"><thead>' + head + '</thead><tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table></div>' +
+      '<ul class="note"><li>직원이 휴대폰 앱에서 넣은 기록입니다. <b>칸을 누르면 관리자가 고칠 수 있고</b>, 고친 내용은 급여 계산에 바로 반영됩니다.</li>' +
+      '<li>빨간 열은 토·일·공휴일(휴일 근무 시간), 나머지는 평일 17:30부터의 잔업 시간입니다. 빗금 칸은 아직 오지 않은 날입니다.</li>' +
+      '<li>관리자가 고친 내용은 구글 시트 「변경이력」에 「관리자 수정」으로 남습니다.</li></ul>' +
+      '<h3 class="h3">최근 변경 기록 (이 달)</h3>' +
+      (hist.length ? histTable(hist.slice(0, 10), minTxt) +
+        (hist.length > 10 ? '<details class="more"><summary>이전 기록 ' + (hist.length - 10) + '건 더 보기</summary>' + histTable(hist.slice(10), minTxt) + '</details>' : '')
+        : '<p class="muted">이 달의 변경 기록이 없습니다.</p>');
+  }
+  function histTable(list, minTxt) {
+    return '<div class="scroll"><table class="grid hist"><thead><tr><th>시각</th><th>구분</th><th>이름</th><th>날짜</th><th class="n">이전</th><th class="n">이후</th></tr></thead><tbody>' +
+      list.map(function (x) {
+        return '<tr><td>' + esc(String(x.at).slice(5, 16)) + '</td><td>' + esc(histLabel(x.action)) + '</td><td class="name">' + esc(x.name) + '</td><td>' + esc(md(x.date)) + '</td>' +
+          '<td class="n">' + minTxt(x.before) + '</td><td class="n">' + minTxt(x.after) + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  function endTime(min) {
+    var p = String(S.month.config.otStart || '17:30').split(':');
+    var t = Number(p[0]) * 60 + Number(p[1]) + min;
+    var h = Math.floor(t / 60) % 24, m = t % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  function viewCell() {
+    var c = S.cell, lim = S.data.otLimits || { step: 30, maxMin: 300, maxHolidayMin: 720 };
+    var hol = isHol(c.date), max = hol ? lim.maxHolidayMin : lim.maxMin;
+    var opts = ['<option value="0"' + (c.minutes ? '' : ' selected') + '>' + (c.minutes ? '기록 지우기' : '기록 없음') + '</option>'];
+    for (var m = lim.step; m <= max; m += lim.step) {
+      opts.push('<option value="' + m + '"' + (m === c.minutes ? ' selected' : '') + '>' + P.hrs(m) + '시간' + (hol ? '' : ' (17:30~' + endTime(m) + ')') + '</option>');
+    }
+    return '<div class="modal" role="dialog" aria-modal="true" aria-labelledby="ct"><form class="modal-box small" id="cellForm">' +
+      '<h3 id="ct">' + esc(c.name) + ' · ' + esc(md(c.date)) + (hol ? ' · 휴일 근무' : ' · 평일 잔업') + '</h3>' +
+      '<div class="field"><label for="c_min">시간</label><select id="c_min" name="minutes">' + opts.join('') + '</select>' +
+      '<div class="hint">' + (hol ? '휴일은 그날 일한 시간 전체 (최대 ' + P.hrs(max) + '시간)' : '평일은 17:30부터의 잔업 시간 (최대 ' + P.hrs(max) + '시간)') + '</div></div>' +
+      '<p class="note">지금 기록: ' + (c.minutes ? P.hrs(c.minutes) + '시간' : '없음') + '</p>' +
+      '<div class="modal-actions"><button type="button" class="btn" data-act="closeCell">닫기</button><button type="submit" class="btn primary">저장</button></div></form></div>';
+  }
+  function otPrintHtml() {
+    var t = otTable(), ym = S.month.ym;
+    var wk = 0, hol = 0;
+    t.rows.forEach(function (r) { wk += r.wk; hol += r.hol; });
+    return '<div class="pl-title"><span>' + ymTitle(ym) + ' 잔업 기록 · ' + esc(S.month.config.company) + '</span><small>평일 잔업 17:30부터 · 빨간 열은 휴일 근무 · 출력 ' +
+      esc(new Date().toLocaleString('ko-KR')) + '</small></div>' +
+      '<table class="pl ot"><thead><tr><th>이름</th>' + t.days.map(function (dt) {
+        return '<th class="' + (isHol(dt) ? 'hol' : '') + '">' + Number(dt.slice(8)) + '<br>' + WD[new Date(dt + 'T00:00:00Z').getUTCDay()] + '</th>';
+      }).join('') + '<th>평일</th><th>휴일</th><th>합계</th></tr></thead><tbody>' +
+      t.rows.map(function (r) {
+        return '<tr><td>' + esc(r.name) + '</td>' + r.cells.map(function (v, i) { return '<td class="' + (isHol(t.days[i]) ? 'hol' : '') + '">' + hTxt(v) + '</td>'; }).join('') +
+          '<td>' + hTxt(r.wk) + '</td><td>' + hTxt(r.hol) + '</td><td><b>' + hTxt(r.wk + r.hol) + '</b></td></tr>';
+      }).join('') + '</tbody><tfoot><tr><td>합계</td>' + t.dayTot.map(function (v, i) { return '<td class="' + (isHol(t.days[i]) ? 'hol' : '') + '">' + hTxt(v) + '</td>'; }).join('') +
+      '<td>' + P.hrs(wk) + '</td><td>' + P.hrs(hol) + '</td><td>' + P.hrs(wk + hol) + '</td></tr></tfoot></table>' +
+      '<div class="pl-sign"><span>담당</span><span>대표</span></div>';
   }
 
   /* 급여대장 */
@@ -687,6 +846,32 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
     app.querySelectorAll('[data-slip]').forEach(function (b) {
       b.addEventListener('click', function () { S.slip = b.getAttribute('data-slip'); S.tab = 'slips'; render(); });
     });
+    app.querySelectorAll('[data-cell]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var v = b.getAttribute('data-cell'), i = v.lastIndexOf('|');
+        var name = v.slice(0, i), date = v.slice(i + 1), cur = 0;
+        (S.data.records || []).forEach(function (r) { if (r.name === name && r.date === date) cur = Number(r.minutes) || 0; });
+        S.cell = { name: name, date: date, minutes: cur };
+        render();
+      });
+    });
+    var cform = document.getElementById('cellForm');
+    if (cform) {
+      cform.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var c = S.cell, m = Number(cform.elements.minutes.value) || 0;
+        if (m === c.minutes) { S.cell = null; render(); return; }
+        var req = m ? call('saveRecord', { name: c.name, date: c.date, minutes: m }) : call('deleteRecord', { name: c.name, date: c.date });
+        guard(req).then(function (r) {
+          S.data.records = r.records; S.data.holidays = r.holidays; S.data.history = r.history;
+          S.cell = null;
+          recompute();
+          toast(c.name + ' ' + md(c.date) + (m ? ' ' + P.hrs(m) + '시간으로 저장했습니다' : ' 기록을 지웠습니다'));
+        });
+      });
+      cform.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { S.cell = null; render(); } });
+      cform.elements.minutes.focus();
+    }
     app.querySelectorAll('[data-editemp]').forEach(function (b) {
       b.addEventListener('click', function () {
         var n = b.getAttribute('data-editemp');
@@ -805,6 +990,8 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
         logoutLocal('');
         break;
       case 'closeEdit': S.edit = null; render(); break;
+      case 'closeCell': S.cell = null; render(); break;
+      case 'printOt': printNow('ledger', otPrintHtml()); break;
       case 'cancelAdj': S.adjEdit = null; render(); break;
       case 'printLedger': printLedger(); break;
       case 'printSlips': printSlips(m.rows); break;
@@ -993,7 +1180,7 @@ table.pl { border-collapse: collapse; width: 100%; font-size: 7.3pt; }
   })();
 
   /* 시험용 */
-  window.__nmcAdmin = { state: function () { return S; }, slipsHtml: function () { return slipsPrintHtml(S.month.rows); }, ledgerHtml: function () { return ledgerPrintHtml(); } };
+  window.__nmcAdmin = { state: function () { return S; }, slipsHtml: function () { return slipsPrintHtml(S.month.rows); }, ledgerHtml: function () { return ledgerPrintHtml(); }, otHtml: function () { return otPrintHtml(); } };
 
   if (S.token) {
     load('').catch(function () {});
