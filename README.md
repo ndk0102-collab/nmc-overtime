@@ -3,7 +3,7 @@
 남명(NMC) 직원이 휴대폰에서 잔업·휴일 근무 시간을 직접 등록하고, 같은 앱에서 재고(생산·출고·반입)와 회사 손익(매입·매출)을 보는 설치형 웹 앱입니다.
 
 - 잔업 (직원): https://ndk0102-collab.github.io/nmc-overtime/
-- 재고 (링크가 있으면 누구나 입력, 매출 금액·기준 단가는 관리자만): https://ndk0102-collab.github.io/nmc-overtime/stock.html
+- 재고: https://ndk0102-collab.github.io/nmc-overtime/stock.html — 링크가 있으면 누구나 '생산량 입력'만 할 수 있고, 현재고·출고·반입·예정·월별·연간·기록·금액은 관리자 비밀번호로 로그인해야 열립니다 (서버에서도 막음).
 - 관리자 (잔업 확인·수정, 급여): https://ndk0102-collab.github.io/nmc-overtime/admin.html
 - 손익 (매입·매출, 관리자만): https://ndk0102-collab.github.io/nmc-overtime/pnl.html
 

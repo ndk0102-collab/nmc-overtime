@@ -675,9 +675,9 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     return h + '<p class="hint">' + esc(tr('nameMissing')) + '</p></section>' + adminLink();
   }
 
-  /* 재고 입력 화면과 관리자(잔업 확인·수정, 급여, 손익) 화면으로 가는 작은 링크 — 관리자 비밀번호는 그 화면에서 묻습니다 */
+  /* 생산량 입력 화면(누구나)과 관리자(잔업 확인·수정, 급여, 재고, 손익) 화면으로 가는 작은 링크 — 관리자 비밀번호는 그 화면에서 묻습니다 */
   function adminLink() {
-    return API ? '<p class="adminlinks"><a class="adminlink" href="stock.html">재고</a><a class="adminlink" href="admin.html">관리자</a></p>' : '';
+    return API ? '<p class="adminlinks"><a class="adminlink" href="stock.html">생산 입력</a><a class="adminlink" href="admin.html">관리자</a></p>' : '';
   }
 
   function viewRec() {

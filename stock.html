@@ -306,9 +306,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .ver{font-size:12px;color:#7B8590}
 .hbtns{display:flex;align-items:center;gap:8px}
 .instbtn{gap:4px;padding:0 12px;min-height:46px}
-a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;min-height:46px;text-decoration:none;color:inherit;font-weight:700;font-size:15px}
+.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0 12px;min-height:46px;text-decoration:none;color:inherit;font-weight:700;font-size:15px}
 .top{flex-wrap:wrap}.top .hbtns{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
-@media (max-width:430px){.top .hbtns{gap:6px}a.navbtn{padding:0 9px;font-size:14px}}
+@media (max-width:430px){.top .hbtns{gap:6px}.navbtn{padding:0 9px;font-size:14px}}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .foot .ghost.wide{gap:2px}
 .inst{margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px}
 .inst.big{border:2px solid var(--accent);background:var(--accent-soft)}
@@ -369,7 +370,10 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     bad_type: '이 기록은 구분을 바꿀 수 없습니다.',
     not_found: '그 사이에 지워졌거나 바뀐 기록입니다. 새로고침해 주세요.',
     bad_month: '달을 확인해 주세요.',
-    auth: '기준 단가는 관리자 화면에서 로그인한 뒤 바꿀 수 있습니다.'
+    auth: '관리자 로그인이 필요합니다.',
+    expired: '관리자 로그인 시간이 지나 잠겼습니다. 생산 입력만 할 수 있습니다.',
+    bad_pw: '비밀번호가 맞지 않습니다.',
+    locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다. 잠시 뒤 다시 해 주세요.'
   };
 
   function svg(d, size) {
@@ -386,7 +390,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false,
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [],
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
@@ -429,6 +433,58 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       }
     });
   }
+  /* ───────── 관리자 열쇠 (잔업·급여·손익 화면과 같은 열쇠) ───────── */
+  function getToken() { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
+  function setToken(t) { try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  /* 이 기기의 표시 (비밀번호를 여러 번 틀리면 이 기기만 잠깁니다) */
+  function devId() {
+    var k = 'nmc_dev', v = '';
+    try { v = localStorage.getItem(k) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(v)) {
+      var a = new Uint8Array(16);
+      crypto.getRandomValues(a);
+      v = Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
+  /* 로그인·로그아웃 (잔업·급여 관리자 서버로) */
+  function postAction(body) {
+    return new Promise(function (resolve, reject) {
+      if (LIVE) {
+        fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit' })
+          .then(function (res) { if (!res.ok) throw new Error('net'); return res.json(); })
+          .then(function (j) { if (j && j.ok) resolve(j.data); else reject(new Error((j && j.error) || 'server')); }, function () { reject(new Error('net')); });
+      } else if (DEMO && DEMO.__post) {
+        setTimeout(function () { try { resolve(DEMO.__post(body)); } catch (e) { reject(e); } }, 120);
+      } else {
+        reject(new Error('no_server'));
+      }
+    });
+  }
+  function isAuth(e) { return /auth/.test(String((e && e.message) || e || '')); }
+  /* 관리자 화면을 닫고 생산 입력 화면으로. 넣던 숫자는 지웁니다 (출고 등으로 넣던 것이 생산으로 저장되지 않게). */
+  function lockDown(msg) {
+    setToken('');
+    S.admin = false; S.money = false; S.ready = false; S.busy = false; S.sheet = null;
+    S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = '';
+    start();
+    if (msg) toast(msg);
+  }
+  function failed(e) { if (S.admin && isAuth(e)) { lockDown(ERR.expired); return; } toast(errText(e)); }
+  /* 관리자로 받은 자료인지 (예전 판 서버는 admin 없이 money만 보냅니다) */
+  function isAdminResp(r) { return !!r && (r.admin === true || r.money === true); }
+  /* 생산 입력 화면 자료. 서버가 예전 판이면(apiForm 없음) apiInit에서 제품 목록만 씁니다. */
+  function formCall() {
+    return call('apiForm').catch(function (e) {
+      if (!/bad_action/.test(String((e && e.message) || ''))) throw e;
+      return call('apiInit').then(function (r) {
+        return { ver: r.ver, today: r.today, admin: false, money: false,
+          items: (r.items || []).map(function (it) { return { prod: it.prod, color: it.color, line: it.line }; }) };
+      });
+    });
+  }
+
   function errText(e) {
     var m = String((e && e.message) || e || '');
     for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k];
@@ -644,8 +700,9 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       S.mLoading[ym] = false;
       S.months[m.ym] = m;
       render();
-    }, function () {
+    }, function (e) {
       if (gen !== S.gen) return;
+      if (isAuth(e)) { lockDown(ERR.expired); return; }
       S.mLoading[ym] = false;
       S.mErr[ym] = true;
       render();
@@ -725,6 +782,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     h += header();
     var bar = false;
     if (!S.ready) h += S.fatal ? viewFatal() : viewLoading();
+    else if (!S.admin) { h += viewProd(); bar = true; h += footLocked(); }
     else {
       h += tabsHtml();
       if (S.tab === 'in') { h += viewIn(); bar = true; }
@@ -756,13 +814,20 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       : S.sheet.kind === 'edit' ? sheetEdit()
       : S.sheet.kind === 'pline' ? sheetPlanLine()
       : S.sheet.kind === 'confirm' ? sheetConfirm()
+      : S.sheet.kind === 'login' ? sheetLogin()
       : S.sheet.kind === 'price' ? sheetPrice() : '';
     sheetEl.innerHTML = '<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title">' + inner + '</div></div>';
   }
 
   function header() {
-    return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + (S.today ? esc(fmtDateLong(S.today)) : '칼라칩 재고 관리') + '</p></div>' +
-      '<div class="hbtns"><a class="ghost sm navbtn" href="./index.html">잔업</a>' + (S.money ? '<a class="ghost sm navbtn" href="./pnl.html">손익</a>' : '') + '<a class="ghost sm navbtn" href="./admin.html">관리자</a>' +
+    var sub = S.today ? fmtDateLong(S.today) : '칼라칩 재고 관리';
+    if (S.ready && !S.admin) sub = '생산량 입력 · ' + sub;
+    var nav = '<a class="ghost sm navbtn" href="./index.html">잔업</a>';
+    if (S.admin) nav += '<a class="ghost sm navbtn" href="./pnl.html">손익</a><a class="ghost sm navbtn" href="./admin.html">관리자</a>' +
+      '<button type="button" class="ghost sm navbtn" data-act="logout">잠그기</button>';
+    else if (S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
+    return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + esc(sub) + '</p></div>' +
+      '<div class="hbtns">' + nav +
       '<button type="button" class="iconbtn" data-act="refresh" aria-label="새로고침"' + (S.ready ? '' : ' disabled') + '>' + ICON.refresh + '</button></div></header>';
   }
 
@@ -875,6 +940,87 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     h += '</section></div>';
     h += '<div class="bar" id="inbar">' + barInner() + '</div>';
     return h;
+  }
+
+  /* 생산 입력 (관리자 로그인 전: 링크가 있으면 누구나). 재고·기록·금액은 보이지 않습니다. */
+  function viewProd() {
+    S.inType = '생산';
+    var h = '<div class="stack">';
+    h += '<section class="card"><div class="daterow"><h2 class="label">생산 날짜</h2><p class="bigdate">' + esc(fmtDate(S.inDate)) + '</p></div>' +
+      dateChips('indate', S.inDate, 'in-date') + '</section>';
+    h += '<section class="card"><h2 class="label">제품별 생산량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
+    h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p><ul class="qlist">';
+    itemsOf(S.inProd).forEach(function (it) {
+      var v = S.qty[it.key] || '';
+      h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b></span></label>';
+      h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
+        '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
+      h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
+    });
+    h += '</ul><label class="label mt16" for="in-memo">메모 (선택)</label>';
+    h += '<input id="in-memo" class="text" type="text" data-in="memo" maxlength="200" value="' + esc(S.inMemo) + '" placeholder="예: 작업자 이름, 기계 번호">';
+    h += '</section>';
+    if (S.saved.length) {
+      h += '<section class="card"><h2 class="label">방금 저장한 생산 (이 화면에서)</h2><ul class="cflist">';
+      S.saved.forEach(function (x) {
+        h += '<li class="cfrow"><span class="cfname">' + esc(fmtDate(x.date)) + ' · ' + x.n + '건</span><b>' + fmt(x.kg) + ' kg</b><small>' + esc(x.text) + '</small></li>';
+      });
+      h += '</ul><p class="hint">잘못 넣었으면 관리자에게 알려 주세요. 고치기·지우기는 관리자만 할 수 있습니다.</p></section>';
+    }
+    h += '</div><div class="bar" id="inbar">' + barInner() + '</div>';
+    return h;
+  }
+  function footLocked() {
+    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣을 수 있습니다. 현재고·출고·반입·예정·월별·연간·기록은 관리자 비밀번호로 로그인해야 보입니다.</p></footer>';
+  }
+  function sheetLogin() {
+    var x = S.sheet;
+    return '<h2 class="h2" id="sh-title">관리자 로그인</h2><p class="muted">잔업·급여 관리자 비밀번호를 넣으면 재고 화면 전체가 열립니다.</p>' +
+      '<label class="vh" for="lg-pw">비밀번호</label><input id="lg-pw" class="text" type="password" autocomplete="current-password" maxlength="100" placeholder="비밀번호">' +
+      (x.err ? '<p class="bad mt8" role="alert">' + esc(x.err) + '</p>' : '') +
+      '<div class="two mt16"><button type="button" class="ghost" data-act="close">닫기</button>' +
+      '<button type="button" class="primary" data-act="dologin"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '확인 중…' : '들어가기') + '</button></div>';
+  }
+  function focusPw() { var x = document.getElementById('lg-pw'); if (x) { try { x.focus({ preventScroll: true }); } catch (e) { x.focus(); } } }
+  function doLogin() {
+    if (S.busy || !S.sheet) return;
+    var el = document.getElementById('lg-pw'), pw = el ? el.value : '';
+    if (!pw) { S.sheet.err = '비밀번호를 넣어 주세요.'; renderSheet(); focusPw(); return; }
+    S.busy = true;
+    S.sheet.err = '';
+    renderSheet();
+    postAction({ action: 'login', pw: pw, dev: devId() }).then(function (r) {
+      S.busy = false;
+      setToken(r && r.token);
+      S.qty = {}; S.inMemo = ''; S.price = {}; S.sheet = null; S.ready = false;
+      start();
+    }, function (e) {
+      S.busy = false;
+      if (!S.sheet) return;
+      S.sheet.err = errText(e);
+      renderSheet();
+      focusPw();
+    });
+  }
+  function doLogout() {
+    var t = getToken();
+    if (t) postAction({ action: 'logout', token: t }).catch(function () {});
+    lockDown();
+    toastOk('잠갔습니다 · 생산 입력만 열려 있습니다');
+  }
+  /* 관리자가 아닌 저장: 서버는 건수·kg만 돌려줍니다. 이 화면에서 넣은 것만 아래에 보여 줍니다. */
+  function savedLocked(type, n, tot, ls) {
+    if (type === '생산') {
+      S.saved.unshift({ date: curDate(), n: n, kg: tot, text: ls.slice(0, 6).map(function (l) { return l.it.prod + ' ' + l.it.color + ' ' + fmt(l.qty) + 'kg'; }).join(' · ') +
+        (ls.length > 6 ? ' 외 ' + (ls.length - 6) + '건' : '') });
+      S.saved = S.saved.slice(0, 5);
+    }
+    S.qty = {}; S.inMemo = ''; S.price = {}; S.sheet = null;
+    var msg = '저장했습니다 · ' + type + ' ' + n + '건 ' + fmt(tot) + ' kg';
+    if (S.admin) { lockDown(); toastOk(msg + ' · 관리자 로그인 시간이 지나 잠겼습니다'); return; }
+    render();
+    window.scrollTo(0, 0);
+    toastOk(msg);
   }
 
   /* 제품 탭. 분류가 둘 이상이면 분류 이름을 줄 머리로 넣습니다. badges = 입력 화면의 '넣은 줄 수' 표시 */
@@ -1028,6 +1174,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       lines: ls.map(function (l) { return { prod: l.it.prod, color: l.it.color, qty: l.qty, price: sale ? cleanNum(S.price[pkeyOf(l.it)]) : '' }; })
     }).then(function (r) {
       S.busy = false;
+      if (!isAdminResp(r)) { savedLocked(type, n, tot, ls); return; }
       apply(r);
       S.qty = {};
       S.inMemo = '';
@@ -1042,7 +1189,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     }, function (e) {
       S.busy = false;
       renderSheet();
-      toast(errText(e));
+      failed(e);
     });
   }
 
@@ -1400,7 +1547,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     }, function (e) {
       S.busy = false;
       renderSheet();
-      toast(errText(e));
+      failed(e);
     });
   }
 
@@ -1435,8 +1582,9 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       S.yLoading[y] = false;
       S.years[Y.y] = Y;
       render();
-    }, function () {
+    }, function (e) {
       if (gen !== S.gen) return;
+      if (isAuth(e)) { lockDown(ERR.expired); return; }
       S.yLoading[y] = false;
       S.yErr[y] = true;
       render();
@@ -1622,7 +1770,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     }, function (e) {
       S.busy = false;
       renderSheet();
-      toast(errText(e));
+      failed(e);
     });
   }
 
@@ -1881,7 +2029,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       }, function (e) {
         S.busy = false;
         renderSheet();
-        toast(errText(e));
+        failed(e);
       });
   }
 
@@ -1899,7 +2047,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     }, function (e) {
       S.busy = false;
       renderSheet();
-      toast(errText(e));
+      failed(e);
     });
   }
 
@@ -1920,7 +2068,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     }, function (e) {
       S.busy = false;
       renderSheet();
-      toast(errText(e));
+      failed(e);
     });
   }
 
@@ -1981,6 +2129,9 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
       case 'close': closeSheet(); return;
       case 'tab': S.tab = v; store('nmc_inv_tab', v); S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'refresh': refresh(true); return;
+      case 'login': openSheet({ kind: 'login', err: '' }); return;
+      case 'dologin': doLogin(); return;
+      case 'logout': doLogout(); return;
       case 'retry': start(); return;
       case 'intype': S.inType = v; store('nmc_inv_type', v); render(); return;
       case 'indate': S.inDate = v; render(); return;
@@ -2094,6 +2245,7 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
     var t = ev.target;
+    if (ev.key === 'Enter' && t && t.id === 'lg-pw') { ev.preventDefault(); doLogin(); return; }
     if (ev.key === 'Enter' && t && t.classList && t.classList.contains('qin')) {
       ev.preventDefault();
       var all = Array.prototype.slice.call(root.querySelectorAll('.qin'));
@@ -2104,13 +2256,17 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
   });
 
   function refresh(loud) {
-    if (S.busy) return;
+    if (S.busy || !S.ready) return;
+    if (!S.admin) {
+      formCall().then(function (r) { applyForm(r); render(); if (loud) toastOk('새로 불러왔습니다'); }, function (e) { if (loud) toast(errText(e)); });
+      return;
+    }
     call('apiInit').then(function (r) {
+      if (!isAdminResp(r)) { lockDown(ERR.expired); return; }
       apply(r);
-      S.ready = true;
       render();
       if (loud) toastOk('최신 기록을 불러왔습니다');
-    }, function (e) { if (loud) toast(errText(e)); });
+    }, function (e) { if (isAuth(e)) { lockDown(ERR.expired); return; } if (loud) toast(errText(e)); });
   }
 
   /* 다른 사람이 넣은 기록도 보이도록, 화면이 다시 보이면 새로 불러옵니다. */
@@ -2119,16 +2275,45 @@ a.navbtn{display:inline-flex;align-items:center;justify-content:center;padding:0
     refresh(false);
   });
 
+  /* 생산 입력 화면용 자료 (제품·색상 목록만) */
+  function applyForm(r) {
+    S.gen++;
+    S.today = r.today;
+    setItems(r.items || []);
+    S.stock = {}; S.customers = []; S.firstYm = r.today.slice(0, 7); S.badRows = []; S.ver = r.ver || '';
+    S.money = false;
+    S.plan = { lines: [], sum: {} };
+    S.months = {}; S.mErr = {}; S.mLoading = {}; S.years = {}; S.yErr = {}; S.yLoading = {};
+    S.inType = '생산';
+    if (!S.inDate || S.inDate > S.today) S.inDate = S.today;
+    Object.keys(S.qty).forEach(function (k) { if (!S.byKey[k]) delete S.qty[k]; });
+  }
+
+  /* 시작: 관리자 열쇠가 있으면 재고 화면 전체, 없거나 지났으면 생산 입력만 */
   function start() {
     S.fatal = false;
     render();
-    call('apiInit').then(function (r) {
+    var tok = getToken();
+    var first = tok ? call('apiInit').then(function (r) { if (!isAdminResp(r)) throw new Error('auth'); return r; }) : Promise.reject(new Error('auth'));
+    first.then(function (r) {
+      S.admin = true;
+      var t = stored('nmc_inv_type');
+      S.inType = ACT_TYPES.concat(PLAN_TYPES).indexOf(t) >= 0 ? t : '출고';
       apply(r);
       S.ready = true;
       render();
-    }, function () {
-      S.fatal = true;
-      render();
+    }, function (e) {
+      if (!isAuth(e)) { S.fatal = true; render(); return; }
+      if (tok) { setToken(''); toast(ERR.expired); }
+      return formCall().then(function (r) {
+        S.admin = false;
+        applyForm(r);
+        S.ready = true;
+        render();
+      }, function () {
+        S.fatal = true;
+        render();
+      });
     });
   }
 
