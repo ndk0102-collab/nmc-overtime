@@ -308,7 +308,58 @@ button.datebox{font-family:inherit}
 .pores.bad{color:var(--bad)}
 .pores.warn{color:var(--warn)}
 .poacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.poacts .primary.sm,.poacts .ghost.sm{min-height:42px;padding:0 14px;font-size:14.5px}
+.poacts .primary.sm,.poacts .ghost.sm,.poacts .danger.sm{min-height:42px;padding:0 14px;font-size:14.5px}
+.danger{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;border:0;border-radius:12px;background:var(--bad);color:#fff;font-size:16px;font-weight:800;cursor:pointer}
+.danger:disabled{opacity:.45;cursor:default}
+.poshow{border:2px solid var(--ok);background:#F0F8F3}
+.poshow .podh b{display:inline-flex;align-items:center;gap:6px}
+.poshow p{margin:6px 0 0;font-size:15px;line-height:1.55;overflow-wrap:anywhere}
+.pobig{font-size:18px!important;font-weight:800;color:var(--ink)}
+.pozs{display:flex;flex-wrap:wrap;gap:6px}
+.pozs span{padding:3px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);font-size:13.5px;font-weight:700}
+.pook{display:flex;align-items:center;gap:6px;margin:10px 0 0!important;color:var(--ok);font-weight:800}
+.pobad{margin:10px 0 0!important;color:var(--bad)}
+.powarn{margin:10px 0 0!important;color:var(--warn);font-weight:700}
+.poneed{list-style:none;margin:6px 0 0;padding:0}
+.poneed li{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:5px 0;font-size:14.5px;line-height:1.45;border-bottom:1px dashed var(--line)}
+.poneed li:last-child{border-bottom:0}
+.poneed small{color:var(--muted)}
+.sw{flex:none;display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid rgba(15,23,42,.25);vertical-align:-2px;margin-right:4px}
+.poask{margin-top:12px;padding:12px;border-radius:12px;background:var(--bad-soft)}
+.poask p{margin:0 0 10px}
+.poiss{margin:10px 0 0;padding:10px 12px 10px 28px;border-radius:12px;font-size:14.5px;line-height:1.55}
+.poiss li{margin:2px 0}
+.poiss.bad{background:var(--bad-soft);color:var(--bad)}
+.poiss.info{background:var(--soft);color:var(--ink2)}
+.poov{border:2px solid var(--warn);background:var(--warn-soft)}
+.poov p{margin:6px 0 0;font-size:15px;line-height:1.55}
+.potab{width:100%;margin-top:10px;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:10px;overflow:hidden}
+.potab th,.potab td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;font-variant-numeric:tabular-nums}
+.potab th{background:var(--soft);font-size:13px}
+.potab td:nth-child(n+2),.potab th:nth-child(n+2){text-align:right}
+.potab tr.df td{background:#FFF7E6;font-weight:700}
+.potab small{color:var(--muted);font-weight:600}
+.poopts{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.poopt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer}
+.poopt.on{border-color:var(--accent);background:var(--accent-soft)}
+.poopt.off{opacity:.5;cursor:default}
+.poopt input{margin-top:4px;width:20px;height:20px;flex:none}
+.poopt b{display:block;font-size:15.5px}
+.poopt small{display:block;margin-top:2px;font-size:13.5px;color:var(--ink2);line-height:1.45}
+.pozone{margin:14px 0 4px;font-size:16px;color:var(--accent-strong)}
+.pozone small{font-size:13px;color:var(--muted);font-weight:600}
+.polines{list-style:none;margin:0;padding:0}
+.poln{padding:9px 0;border-bottom:1px solid var(--line)}
+.poln:last-child{border-bottom:0}
+.poln.short{background:linear-gradient(90deg,var(--bad-soft),transparent 70%)}
+.poln.need .pl1{color:var(--bad)}
+.pl1{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15.5px}
+.pl2{margin-top:2px;font-size:14.5px;color:var(--ink2)}
+.pl3{margin-top:2px;font-size:14px}
+.pl3 .ok{color:var(--ok);font-weight:800}
+.posel{min-height:40px;padding:0 8px;border:2px solid var(--accent);border-radius:10px;background:#fff;font:inherit;font-weight:800;color:var(--accent-strong)}
+.pohow{flex-basis:100%;font-size:12.5px;color:var(--muted)}
+.poact .spinner{display:inline-block;width:16px;height:16px;border-width:3px;vertical-align:-3px;margin-right:6px}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
 .calhead h2{margin:0;font-size:21px;font-weight:800}
 .calhead .ghost{min-width:48px;min-height:44px}
@@ -656,7 +707,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     po_read: '파일을 읽지 못했습니다. 다시 골라 주세요.',
     po_heic: '이 사진 형식(HEIC)은 이 기기에서 바꿀 수 없습니다. 화면을 캡처하거나 JPG로 저장해서 올려 주세요.',
     po_done: '이미 넣은 발주서입니다. 고치려면 달력에서 그 날짜를 눌러 고치세요.',
-    po_busy: 'Claude가 지금 읽고 있습니다. 잠시 뒤 다시 해 주세요.'
+    po_busy: '지금 읽고 있습니다. 잠시 뒤 다시 해 주세요.',
+    po_moved: '그 사이에 기록이 바뀌었습니다(확정·삭제 등). 발주서를 다시 읽어 왔으니 한 번 더 봐 주세요.',
+    po_not_done: '넣은 발주서가 아니어서 되돌릴 것이 없습니다.'
   };
 
   function svg(d, size) {
@@ -674,7 +727,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
@@ -701,7 +754,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (ADMIN_VIEW) { try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {} }
       if (LIVE) {
         var ctl = window.AbortController ? new AbortController() : null;
-        var timer = setTimeout(function () { if (ctl) ctl.abort(); }, fn === 'apiPoUpload' ? 180000 : 60000);
+        var timer = setTimeout(function () { if (ctl) ctl.abort(); }, fn === 'apiPoUpload' ? 180000 : /^apiPo(Read|Apply|Undo)$/.test(fn) ? 120000 : 60000);
         fetch(API, { method: 'POST', body: JSON.stringify({ action: 'stock.call', fn: fn, args: args, token: token }), redirect: 'follow',
           cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
           .then(function (res) { if (!res.ok) throw new Error('net'); return res.json(); })
@@ -1843,7 +1896,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      · 파렛트 한 장에 최대 56포(바꿀 수 있음). 10포·20포만 따로 남는 일이 없게, 필요한 장 수 안에서 고르게 나눕니다.
        큰 색부터 넣고, 들어갈 자리가 있으면 한 색을 쪼개지 않으며, 표가 10줄이라 한 장에 10가지까지만 싣습니다.
      · 비고(메모)에 '놀이터1·놀이터2'처럼 따로 실어 달라는 구분이 있으면 그 구분끼리만 싣고,
-       비고 칸에 '유씨씨 / 놀이터1', 번호는 전체 장 수 기준(3/7)으로 씁니다. */
+       비고 칸에 '거래처 / 놀이터1', 번호는 전체 장 수 기준(3/7)으로 씁니다. */
   var LAB_CODE = { '로즈': 'NM-01', '분홍': 'NM-02', '주황': 'NM-03', '노랑': 'NM-04', '겨자': 'NM-05', '연두': 'NM-06', '녹색': 'NM-07', '진녹': 'NM-08',
     '카키': 'NM-09', '청녹': 'NM-10', '청록': 'NM-10', '하늘': 'NM-11', '하늘색': 'NM-11', '청색': 'NM-12', '진청': 'NM-13', '연보라': 'NM-14', '보라': 'NM-15',
     '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
@@ -1883,7 +1936,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      · '놀이터 1'·'놀이터A'·'놀이터①'·'1번 놀이터'·'제2놀이터'·'A구역'·'2공구'·'1단지'·'101동' 같은 말
      · '동·단지·지구'는 번호가 앞에 올 때만(101동·1단지). 바로 앞이 한글이면 주소로 보고 뺍니다(신당2동).
      · 수량을 뜻하는 말은 구분이 아닙니다(놀이터 2개소·코트 3면·놀이터 1차).
-     · [놀이터1]처럼 대괄호로 적어도 되지만, 대괄호 안에 위와 같은 말이 없으면 구분으로 보지 않습니다([유씨씨] 발주서 → 구분 없음).
+     · [놀이터1]처럼 대괄호로 적어도 되지만, 대괄호 안에 위와 같은 말이 없으면 구분으로 보지 않습니다([거래처이름] 발주서 → 구분 없음).
        그런 말이 없는 이름은 [구분 정문앞]처럼 '구분'을 붙여 적습니다.
      · 같은 곳을 다르게 적어도(놀이터 1 · 1번 놀이터 · [놀이터1]) 한 구분으로 묶고, 이름은 처음 적힌 대로 씁니다. */
   var ZONE_W = '놀이터|놀이시설|놀이공간|구역|공구|구간|코트|광장|산책로|운동장|트랙|섹터|블록|블럭';
@@ -2162,7 +2215,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
-    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>전화 주문처럼 파일이 없을 때 1 → 4 순서로 넣고 확인을 누르세요. 발주서 파일은 위의 ‘발주서 올리기’로 올리면 Claude가 넣습니다.</small></p>' : '');
+    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>전화 주문처럼 파일이 없을 때 1 → 4 순서로 넣고 확인을 누르세요. 발주서 파일은 달력 화면 맨 위 칸에 끌어다 놓으면 바로 읽어서 넣습니다.</small></p>' : '');
     else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
@@ -2334,35 +2387,42 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.outMode === 'add') {
       return '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="calback">← 달력으로</button></section></div>' + viewIn();
     }
+    if (S.outMode === 'porev') return poRevView();
     if (S.admin && !S.poList && !S.poLoading && !S.poErr) poLoad(false);
-    return '<div class="stack">' + poCard() + poMsgCard() + poDone() + calCard() + dayCard() + poInbox() + '</div>';
+    return '<div class="stack">' + poCard() + poShowCard() + poDone() + calCard() + dayCard() + poInbox() + '</div>';
   }
   /* ── 발주서 넣기 (2026-11-16) ── */
   var ICON_DOC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>';
   var ZONE_CHIPS = ['놀이터1', '놀이터2', '놀이터3', '놀이터4'];
   function step(n) { return '<span class="stepno" aria-hidden="true">' + n + '</span>'; }
-  /* ───────── 발주서함: 파일만 올리면 Claude가 읽어 넣음 (2026-11-16 지시, 무료) ─────────
+  /* ───────── 발주서: 올리면 프로그램이 바로 읽어 넣음 (2026-11-16 지시) ─────────
      "파일을 드래그해서 여기다 붙여넣는다" → 출고량 화면 어디에든 파일을 끌어다 놓거나, 맨 위 칸을 눌러 고르거나,
-     카톡 캡처를 Ctrl+V로 붙여넣으면 바로 올라갑니다('올리기'를 따로 누르지 않음).
-     올린 파일은 구글 드라이브 'NMC 발주서함'에 들어가고(서버 apiPoUpload), Claude 예약 작업이 근무 시간(월~토 8~18시)에
-     한 시간마다 읽어 출고예정으로 넣습니다. 아래 '받은 발주서'에서 상태(기다림 · 읽는 중 · 넣음 · 확인 필요 · 중복 · 취소)를 보고,
-     넣은 것은 그 날짜로 가서 물표를 뽑습니다. 한 번에 놓은 파일들은 한 발주서(여러 장 사진)로 읽습니다.
-     사진은 긴 변 2,400px JPG로 줄여 올립니다(아이폰 HEIC도 이 기기에서 열 수 있으면 JPG로 바꿈). */
+     카톡 캡처를 Ctrl+V로 붙여넣으면 바로 올라갑니다.
+     "넣자마자 바로 계산 돌려서 바로 해야지 … 프로그램 자체에서" → 서버가 올리는 그 자리에서 읽고(구글 글자 인식 · 무료)
+     재고 계산까지 해서 돌려줍니다. 모두 분명하면 바로 넣고('넣었습니다' 칸 · 물표 · 되돌리기),
+     제품이 안 적힌 칼라칩·처음 보는 거래처·이미 들어간 것 같은 예정이 있으면 읽은 내용을 채운 확인 화면이 바로 뜹니다.
+     한 번에 놓은 파일들은 한 발주서(여러 장 사진)로 읽습니다. 사진은 긴 변 2,400px JPG로 줄여 올립니다. */
   var PO_OK = /\.(pdf|xls|xlsx|csv|txt|jpe?g|png|gif)$/i;
   var PO_TO_JPG = /\.(heic|heif|webp|bmp)$/i;
   var PO_MAX_FILES = 6, PO_MAX_BYTES = 20 * 1024 * 1024, PO_SHOW = 8;
   var PO_ACCEPT = '.pdf,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.heic,.heif,.webp,image/*,application/pdf';
-  var PO_HOURS = '월~토 8시~18시';
   var PO_STATE = { '기다림': 'wait', '읽는 중': 'read', '넣음': 'done', '확인 필요': 'bad', '중복': 'dup', '취소': 'off' };
   var PO_TOUCH = (function () { try { return window.matchMedia && window.matchMedia('(hover: none)').matches; } catch (e) { return false; } })();
 
   function poSize(n) { return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
   function poWhen(at) { var m = /^\d{4}-(\d{2})-(\d{2}) (\d{2}):(\d{2})/.exec(String(at || '')); return m ? Number(m[1]) + '/' + Number(m[2]) + ' ' + m[3] + ':' + m[4] : String(at || ''); }
+  function poMd(d) { return d ? Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)) : ''; }
   function poCounts() {
     var c = { wait: 0, bad: 0 };
-    ((S.poList && S.poList.items) || []).forEach(function (x) { if (x.state === '기다림' || x.state === '읽는 중') c.wait++; else if (x.state === '확인 필요' || x.state === '중복') c.bad++; });
+    ((S.poList && S.poList.items) || []).forEach(function (x) { if (x.state === '기다림' || x.state === '읽는 중') c.wait++; else if (x.state === '확인 필요') c.bad++; });
     return c;
+  }
+  function poListPut(item) {
+    if (!item || !S.poList) return;
+    var hit = false;
+    S.poList.items = S.poList.items.map(function (x) { if (x.id === item.id) { hit = true; return item; } return x; });
+    if (!hit) S.poList.items.unshift(item);
   }
   /* 맨 위: 끌어다 놓는 칸 (누르면 파일 고르기) */
   function poCard() {
@@ -2370,24 +2430,80 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<section class="card pocard' + (S.poFlash ? ' flash' : '') + '" id="pocard">' +
       '<input type="file" id="po-file" class="vh" multiple accept="' + PO_ACCEPT + '" tabindex="-1" aria-hidden="true">' +
       '<button type="button" class="podrop' + (busy ? ' busy' : '') + '" id="podrop" data-act="pofile"' + (busy ? ' disabled' : '') + ' aria-label="발주서 파일 올리기">' +
-      (busy ? '<span class="spinner sm" aria-hidden="true"></span><b>' + esc(busy) + '</b>'
+      (busy ? '<span class="spinner sm" aria-hidden="true"></span><b>' + esc(busy) + '</b><small>올리고 · 글자로 바꾸고 · 읽고 · 재고 계산까지 합니다 (보통 10~30초)</small>'
         : ICON_DOC + '<b>' + (PO_TOUCH ? '눌러서 발주서 파일·사진 올리기' : '발주서 파일을 여기에 끌어다 놓으세요') + '</b>' +
           '<small>' + (PO_TOUCH ? 'PDF·엑셀·사진·카톡 캡처' : '또는 눌러서 고르기 · 카톡 캡처는 Ctrl+V로 붙여넣기 · PDF·엑셀·사진') + '</small>') +
       '</button>' +
-      '<p class="pohint">놓으면 바로 올라가고, Claude가 <b>' + PO_HOURS + '</b>에 한 시간마다 읽어 출고예정으로 넣습니다.</p>';
+      '<p class="pohint">놓으면 <b>바로 읽어서 출고예정으로 넣고</b>, 재고로 나갈 수 있는지 · 부족량 · 물표 장 수까지 바로 보여 줍니다. 애매한 것이 있으면 넣기 전에 확인 화면이 뜹니다.</p>';
     if (c.wait || c.bad) {
-      h += '<p class="postat">' + (c.wait ? '<span>읽기 기다림 ' + c.wait + '건</span>' : '') + (c.bad ? '<span class="bad">확인 필요 ' + c.bad + '건</span>' : '') +
+      h += '<p class="postat">' + (c.bad ? '<span class="bad">확인 필요 ' + c.bad + '건</span>' : '') + (c.wait ? '<span>아직 안 읽음 ' + c.wait + '건</span>' : '') +
         '<button type="button" class="link" data-act="pojump">받은 발주서 보기</button></p>';
     }
     h += '<button type="button" class="link pomanual" data-act="poadd">파일 없이 직접 넣기 (전화 주문 등)</button></section>';
     return h;
   }
-  function poMsgCard() {
-    var m = S.poMsg;
-    if (!m) return '';
-    return '<section class="card pomsg" role="status"><div class="podh"><b>올렸습니다</b><button type="button" class="link" data-act="pomsgx">닫기</button></div>' +
-      '<p>' + esc(m.name) + '</p>' + (m.skipped && m.skipped.length ? '<p class="bad">못 올린 파일: ' + esc(m.skipped.join(', ')) + '</p>' : '') + '<p class="hint">Claude가 다음 정시 무렵 읽어 넣습니다(' + PO_HOURS + '). 넣으면 아래 ‘받은 발주서’에 ‘넣음’으로 바뀝니다. ' +
-      '놀이터 구분·납품일처럼 문서에 없는 말은 ‘받은 발주서’에서 ‘메모 달기’로 남기세요. 급하면 Claude 채팅에 ‘발주서함 처리해라’라고 하세요.</p></section>';
+  /* 물표 장 수: 구분마다 앱의 물표 나누기와 같은 계산 */
+  function poZones(lines) {
+    var zs = [], by = {};
+    lines.forEach(function (l, i) {
+      var z = l.zone || '';
+      if (!by['k' + z]) { by['k' + z] = { zone: z, lines: [] }; zs.push(by['k' + z]); }
+      by['k' + z].lines.push({ l: l, i: i });
+    });
+    return zs;
+  }
+  function poPallets(lines) {
+    var cap = labCap(), bag = labBag();
+    return lines.filter(function (l) { return l.prod && l.kg > 0; }).length ? poZones(lines).reduce(function (s, g) {
+      return s + labPack(g.lines.filter(function (x) { return x.l.prod; }).map(function (x) { return { kg: x.l.kg, prod: x.l.prod, color: x.l.color }; }), cap, bag).length;
+    }, 0) : 0;
+  }
+  function poZoneName(z) { return z ? (/^\d+$/.test(z) ? '구분 ' + z : z) : '구분 없음'; }
+  /* 넣은 뒤 계산 한 덩어리: 생산 필요(부족 시작일 순) · 이 발주서 때문에 모자라게 되는 다른 예정 */
+  function poCalcHtml(sim, lines) {
+    if (!sim) return '';
+    var need = (sim.items || []).filter(function (it) { return it.need > 0; }).sort(function (a, b) { return String(a.shortEff).localeCompare(String(b.shortEff)); });
+    var mine = 0;
+    (sim.lines || []).forEach(function (x) { if (x.short > 0) mine++; });
+    var h = '';
+    if (!need.length) h += '<p class="pook">' + ICON.check + '<span>넣어도 모두 지금 재고로 나갑니다(부족 없음).</span></p>';
+    else {
+      h += '<p class="pobad"><b>생산 필요 ' + need.length + '품목</b>' + (mine ? ' · 이 발주서 줄 중 ' + mine + '줄이 모자랍니다' : ' · 이 발주서 줄은 모두 나가지만 다른 예정이 모자랍니다') + '</p><ul class="poneed">';
+      need.forEach(function (it) {
+        h += '<li><span class="sw" style="background:' + labTint(it.prod, it.color) + '"></span><b>' + esc(it.prod + ' ' + it.color) + '</b> — ' +
+          (it.shortEff ? (it.shortEff <= S.today ? '지금 바로 ' : esc(poMd(it.shortEff)) + '까지 ') : '') + '<b class="bad">' + fmt(it.need) + ' kg</b>' +
+          (it.was ? ' <small>(넣기 전 기록대로면 ' + fmt(it.was) + ' kg 모자람)</small>' : '') + '</li>';
+      });
+      h += '</ul>';
+    }
+    if (sim.hit && sim.hit.length) {
+      h += '<p class="powarn">이 발주서 때문에 새로 모자라게 되는 다른 예정:</p><ul class="poneed">' + sim.hit.slice(0, 6).map(function (x) {
+        return '<li>' + esc(poMd(x.date) + ' ' + (x.cust || '') + ' ' + x.prod + ' ' + x.color) + ' ' + fmt(x.qty) + ' kg → <b class="bad">' + fmt(x.short) + ' kg 부족</b></li>';
+      }).join('') + '</ul>';
+    }
+    return h;
+  }
+  /* 넣은 뒤 맨 위에 뜨는 칸 */
+  function poShowCard() {
+    var X = S.poShow;
+    if (!X || !X.item) return '';
+    var it = X.item, plan = X.plan || { lines: [] }, lines = (plan.lines || []).filter(function (l) { return l.prod; });
+    var kg = lines.reduce(function (s, l) { return s + l.kg; }, 0), pal = poPallets(lines);
+    var h = '<section class="card poshow" role="status"><div class="podh"><b>' + ICON.check + ' 발주서를 넣었습니다</b><button type="button" class="link" data-act="poshowx">닫기</button></div>' +
+      '<p class="pobig">' + esc(plan.date ? fmtDate(plan.date) : '') + ' · ' + esc(plan.cust || '') + (plan.site ? ' · ' + esc(plan.site) : '') + '</p>' +
+      '<p>' + lines.length + '줄 · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + (it.result && /바꿈/.test(it.result) ? ' · 기존 예정을 이 발주서 내용으로 바꿨습니다' : '') + '</p>';
+    var zs = poZones(lines).filter(function (g) { return g.zone; });
+    if (zs.length) h += '<p class="pozs">' + zs.map(function (g) { return '<span>' + esc(poZoneName(g.zone)) + ' ' + g.lines.length + '줄 ' + fmt(g.lines.reduce(function (s, x) { return s + x.l.kg; }, 0)) + ' kg</span>'; }).join('') + '</p>';
+    h += poCalcHtml(X.sim, lines);
+    if (S.poUndoAsk === it.id) {
+      h += '<div class="poask"><p><b>되돌릴까요?</b> 넣은 ' + (it.n || lines.length) + '줄을 지우고' + (it.result && /바꿈/.test(it.result) ? ', 바꿨던 기존 예정을 되살립니다.' : '.') + '</p>' +
+        '<div class="two"><button type="button" class="danger" data-act="poundo" data-v="' + esc(it.id) + '">되돌리기</button><button type="button" class="ghost" data-act="poundox">아니요</button></div></div>';
+    } else {
+      h += '<div class="two mt12"><button type="button" class="primary" data-act="poshowlab"' + ((it.ids || []).length ? '' : ' disabled') + '>물표 보기</button>' +
+        '<button type="button" class="ghost" data-act="pogoto" data-v="' + esc(plan.date || '') + '">' + esc(poMd(plan.date)) + ' 달력 보기</button></div>' +
+        (it.undo ? '<button type="button" class="link mt8" data-act="poundoask" data-v="' + esc(it.id) + '">잘못 넣었으면 되돌리기</button>' : '');
+    }
+    return h + '</section>';
   }
   function poInbox() {
     var L = S.poList, h = '<section class="card poinbox" id="poinbox"><div class="podh"><h2 class="label">받은 발주서</h2>' +
@@ -2401,50 +2517,43 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (all.length > show.length) h += '<button type="button" class="ghost wide mt8" data-act="pomoreall">' + (all.length - show.length) + '건 더 보기</button>';
     return h + '</section>';
   }
-  function poEditBox(x, label, btn) {
-    return '<label class="label mt8" for="po-edit">' + label + '</label><input id="po-edit" class="text" type="text" data-in="poedit" maxlength="200" autocomplete="off" value="' + esc(S.poEditNote || '') + '" placeholder="예: 놀이터1은 노랑·녹색, 놀이터2는 청색 · 납품 11/21">' +
-      '<div class="poacts"><button type="button" class="primary sm" data-act="poretry" data-v="' + esc(x.id) + '">' + btn + '</button><button type="button" class="ghost sm" data-act="poeditx">닫기</button></div>';
-  }
   function poRow(x) {
-    var st = PO_STATE[x.state] || 'off', h = '<li class="poitem st-' + st + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(x.state || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
+    var st = PO_STATE[x.state] || 'off', busy = S.poOpening === x.id;
+    var h = '<li class="poitem st-' + st + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(x.state || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
       '<small class="pometa">' + esc(poWhen(x.at)) + ' 올림' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>';
-    if (x.state === '기다림') {
-      h += '<p class="muted">Claude가 읽기를 기다리는 중입니다(' + PO_HOURS + ' 매시).</p>';
-      h += S.poEdit === x.id ? poEditBox(x, '메모 (Claude가 읽을 때 봅니다)', '메모 저장')
-        : '<div class="poacts"><button type="button" class="ghost sm" data-act="poedit" data-v="' + esc(x.id) + '">메모 달기</button><button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">취소</button></div>';
+    var readBtn = function (label, cls) { return '<button type="button" class="' + (cls || 'ghost') + ' sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '읽는 중…' : label) + '</button>'; };
+    if (x.state === '기다림' || (x.state === '읽는 중' && x.stale)) {
+      h += '<p class="muted">아직 읽지 않았습니다.</p><div class="poacts">' + readBtn('지금 읽기', 'primary') + '<button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">취소</button></div>';
     } else if (x.state === '읽는 중') {
-      h += '<p class="muted">Claude가 읽고 있습니다.</p>' + (x.stale ? '<div class="poacts"><button type="button" class="ghost sm" data-act="poretry" data-v="' + esc(x.id) + '">다시 맡기기</button></div>' : '');
+      h += '<p class="muted">읽고 있습니다.</p>';
     } else if (x.state === '넣음') {
-      h += '<p class="pores">' + esc(x.result || '') + '</p>';
-      if (x.dates.length) h += '<div class="poacts">' + x.dates.slice(0, 4).map(function (d) { return '<button type="button" class="primary sm" data-act="pogoto" data-v="' + esc(d) + '">' + esc(fmtDate(d)) + ' 보기 · 물표</button>'; }).join('') + '</div>';
-    } else if (x.state === '확인 필요' || x.state === '중복') {
-      h += '<p class="pores ' + (st === 'bad' ? 'bad' : 'warn') + '">' + esc(x.result || '') + '</p>';
-      h += S.poEdit === x.id ? poEditBox(x, '메모 고치기 (Claude가 다시 읽을 때 봅니다)', '다시 맡기기')
-        : '<div class="poacts"><button type="button" class="primary sm" data-act="poedit" data-v="' + esc(x.id) + '">' + (x.state === '중복' ? '새 주문 맞음 · 다시 맡기기' : '메모 고쳐 다시 맡기기') + '</button>' +
-          '<button type="button" class="ghost sm" data-act="poadd">직접 넣기</button><button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">취소</button></div>';
-    } else if (x.state === '취소') {
-      h += '<div class="poacts"><button type="button" class="ghost sm" data-act="poretry" data-v="' + esc(x.id) + '">다시 맡기기</button></div>';
+      h += '<p class="pores">' + esc(x.result || '') + '</p><div class="poacts">' +
+        (x.dates || []).slice(0, 3).map(function (d) { return '<button type="button" class="primary sm" data-act="pogoto" data-v="' + esc(d) + '">' + esc(fmtDate(d)) + ' 보기 · 물표</button>'; }).join('') +
+        ((x.ids || []).length ? '<button type="button" class="ghost sm" data-act="polabids" data-v="' + esc(x.id) + '">물표</button>' : '') +
+        (x.undo ? (S.poUndoAsk === x.id ? '<button type="button" class="danger sm" data-act="poundo" data-v="' + esc(x.id) + '">정말 되돌리기</button><button type="button" class="ghost sm" data-act="poundox">아니요</button>'
+          : '<button type="button" class="ghost sm" data-act="poundoask" data-v="' + esc(x.id) + '">되돌리기</button>') : '') + '</div>';
+    } else if (x.state === '확인 필요') {
+      h += '<p class="pores bad">' + esc(x.result || '') + '</p><div class="poacts">' + readBtn('읽은 내용 보고 넣기', 'primary') +
+        '<button type="button" class="ghost sm" data-act="poadd">직접 넣기</button><button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">넣지 않음</button></div>';
+    } else {
+      h += (x.result ? '<p class="pores' + (st === 'dup' ? ' warn' : '') + '">' + esc(x.result) + '</p>' : '') + '<div class="poacts">' + readBtn('다시 읽기') + '</div>';
     }
     return h + '</li>';
   }
-  /* 목록 불러오기. quiet = 화면에 '불러오는 중'을 띄우지 않음(자동 새로고침). 새로 '넣음'이 생겼으면 달력 자료도 새로 받음 */
+  /* 목록 불러오기. quiet = 화면에 '불러오는 중'을 띄우지 않음(자동 새로고침) */
   function poLoad(quiet) {
     if (S.poLoading || !S.admin) return;
     S.poLoading = true;
     S.poErr = false;
-    var before = {};
-    ((S.poList && S.poList.items) || []).forEach(function (x) { before[x.id] = x.state; });
     call('apiPoList').then(function (r) {
       S.poLoading = false;
       S.poList = { items: (r && r.items) || [] };
-      var fresh = S.poList.items.filter(function (x) { return x.state === '넣음' && before[x.id] && before[x.id] !== '넣음'; });
-      if (fresh.length) { toastOk('발주서를 넣었습니다 · ' + fresh[0].result); refresh(false); return; }
       render();
     }, function (e) {
       S.poLoading = false;
       if (isAuth(e)) { failed(e); return; }
       if (!S.poList) S.poErr = true;
-      render();
+      if (!quiet) render();
     });
   }
   /* 놓거나 고르거나 붙여넣은 파일 → 거를 것 거르고 바로 올림 */
@@ -2510,8 +2619,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function poUpload(files, skipped) {
     skipped = skipped || [];
     if (!files.length || S.poBusy) return;
-    S.poBusy = files.length > 1 ? '파일 ' + files.length + '개 올리는 중…' : '올리는 중… ' + files[0].name;
-    S.poMsg = null;
+    S.poBusy = files.length > 1 ? '파일 ' + files.length + '개 올리고 읽는 중…' : '올리고 읽는 중… ' + files[0].name;
+    S.poShow = null;
     render();
     var out = [], i = 0;
     function next() {
@@ -2524,11 +2633,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return call('apiPoUpload', { files: out, note: '' });
     }).then(function (r) {
       S.poBusy = '';
-      S.poMsg = { name: (r && r.item && r.item.name) || out.map(function (x) { return x.name; }).join(', '), skipped: skipped };
-      if (S.poList && r && r.item) S.poList.items.unshift(r.item);
-      render();
-      window.scrollTo(0, 0);
-      if (skipped.length) toast('올렸습니다 · 못 올린 파일: ' + skipped.join(', ')); else toastOk('올렸습니다 · Claude가 읽어 넣습니다');
+      var skip = skipped.length ? ' · 못 올린 파일: ' + skipped.join(', ') : '';
+      if (r && r.item) poListPut(r.item);
+      if (r && r.data && r.data.today) {          // 바로 넣었음
+        apply(r.data);
+        S.poShow = { item: r.data.item || r.item, plan: r.read && r.read.plan, sim: r.data.sim || (r.read && r.read.sim) };
+        if (S.poShow.item) poListPut(S.poShow.item);
+        S.outMode = 'cal'; S.sheet = null;
+        if (S.poShow.plan && S.poShow.plan.date) { S.calDay = S.poShow.plan.date; S.calYm = S.calDay.slice(0, 7); }
+        render();
+        window.scrollTo(0, 0);
+        toastOk('발주서를 읽어 출고예정으로 넣었습니다' + skip);
+      } else if (r && r.read && r.item) {          // 넣기 전에 볼 것이 있음 → 확인 화면
+        poOpen(r.item, r.read);
+        if (skip) toast('못 올린 파일: ' + skipped.join(', '));
+      } else {
+        render();
+        toast('올렸지만 읽지 못했습니다. 아래 받은 발주서에서 확인해 주세요.' + skip);
+      }
     }, function (e) {
       S.poBusy = '';
       render();
@@ -2537,18 +2659,181 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function poGoto(d) {
     if (!isYmd(d)) return;
-    S.outMode = 'cal';
+    S.outMode = 'cal'; S.sheet = null; S.poRev = null;
     S.calDay = d;
     S.calYm = d.slice(0, 7);
-    call('apiInit').then(function (r) {
-      if (!isAdminResp(r)) { lockDown(ERR.expired); return; }
-      apply(r);
-      S.calDay = d; S.calYm = d.slice(0, 7);
-      render();
-      var dc = document.getElementById('daycard');
-      if (dc && dc.scrollIntoView) { try { dc.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { dc.scrollIntoView(); } }
-    }, function (e) { failed(e); render(); });
+    render();
+    var dc = document.getElementById('daycard');
+    if (dc && dc.scrollIntoView) { try { dc.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { dc.scrollIntoView(); } }
   }
+
+  /* ───────── 확인 화면: 읽은 내용 · 이미 있는 예정 · 품목 · 계산 → 넣기 ───────── */
+  function poOpen(item, R) {
+    var plan = JSON.parse(JSON.stringify(R.plan || { lines: [] }));
+    S.poRev = { id: item.id, item: item, R: R, plan: plan, sim: R.sim || null, simBusy: false, busy: false, docDate: (R.draft && R.draft.date) || '' };
+    S.poOpening = '';
+    S.outMode = 'porev';
+    S.sheet = null;
+    render();
+    window.scrollTo(0, 0);
+  }
+  function poReadNow(id) {
+    if (S.poOpening) return;
+    S.poOpening = id;
+    render();
+    call('apiPoRead', id).then(function (R) {
+      S.poOpening = '';
+      if (R && R.item) poListPut(R.item);
+      poOpen(R.item || { id: id, name: '' }, R);
+    }, function (e) { S.poOpening = ''; render(); failed(e); });
+  }
+  var poSimTimer = null;
+  function poResim() {
+    var V = S.poRev;
+    if (!V) return;
+    V.sim = null;
+    V.simBusy = true;
+    clearTimeout(poSimTimer);
+    poSimTimer = setTimeout(function () {
+      var V2 = S.poRev;
+      if (!V2 || !poReady(V2.plan)) { if (V2) V2.simBusy = false; render(); return; }
+      var gen = (V2.simGen = (V2.simGen || 0) + 1);
+      call('apiPoSim', V2.id, poPlanOut(V2.plan)).then(function (r) {
+        if (S.poRev !== V2 || V2.simGen !== gen) return;
+        V2.sim = r && r.sim; V2.simBusy = false; render();
+      }, function (e) { if (S.poRev === V2) { V2.simBusy = false; render(); } if (isAuth(e)) failed(e); });
+    }, 450);
+    render();
+  }
+  function poReady(p) { return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }); }
+  function poPlanOut(p) {
+    return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', mode: p.mode === 'replace' ? 'replace' : 'add',
+      remove: p.mode === 'replace' ? (p.remove || []) : [],
+      lines: p.lines.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '' }; }) };
+  }
+  function poRevView() {
+    var V = S.poRev;
+    if (!V) { S.outMode = 'cal'; return viewOut(); }
+    var R = V.R || {}, d = R.draft || {}, p = V.plan, ov = R.overlap, iss = R.issues || [];
+    var h = '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="porevx">← 달력으로 (넣지 않고 닫기)</button></section>';
+    h += '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
+      ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다.</small></p>';
+    var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap'; }), inf = iss.filter(function (i) { return !i.block; });
+    if (bl.length) h += '<ul class="poiss bad">' + bl.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
+    if (inf.length) h += '<ul class="poiss info">' + inf.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
+    h += '</section>';
+    // 1. 날짜 · 거래처 · 현장
+    var odate = ov && ov.dates && ov.dates.length === 1 ? ov.dates[0] : '';
+    h += '<section class="card"><h2 class="label">' + step(1) + '출고 날짜</h2><div class="chips">';
+    if (V.docDate && V.docDate >= S.today) h += chip('발주서 ' + poMd(V.docDate), p.date === V.docDate, 'prvdate', V.docDate);
+    if (odate && odate !== V.docDate && odate >= S.today) h += chip('기존 예정 ' + poMd(odate), p.date === odate, 'prvdate', odate);
+    h += '</div><input id="prv-date" class="text mt8" type="date" data-in="prvdate" min="' + esc(S.today) + '" max="' + esc(planMax()) + '" value="' + esc(isYmd(p.date) ? p.date : '') + '" aria-label="출고 날짜">';
+    if (d.dateNote) h += '<p class="hint">발주서: ' + esc(poMd(V.docDate)) + ' ' + esc(d.dateNote) + '</p>';
+    if (!isYmd(p.date)) h += '<p class="bad">출고 날짜를 고르세요.</p>';
+    h += '<label class="label mt16" for="prv-cust">' + step(2) + '거래처</label><input id="prv-cust" class="text" type="text" data-in="prvcust" list="cust-list" maxlength="60" autocomplete="off" value="' + esc(p.cust || '') + '" placeholder="거래처 이름">';
+    if (p.cust && S.customers.indexOf(String(p.cust).trim()) < 0) h += '<p class="hint">처음 보는 거래처입니다. 이미 있는 거래처면 목록에서 고르세요(이름이 같아야 합계가 맞습니다).</p>';
+    h += '<label class="label mt12" for="prv-site">현장명</label><input id="prv-site" class="text" type="text" data-in="prvsite" maxlength="60" autocomplete="off" value="' + esc(p.site || '') + '" placeholder="물표의 현장명 칸에 찍힙니다">';
+    if (p.poNo) h += '<p class="hint">발주번호 ' + esc(p.poNo) + '</p>';
+    h += '</section>';
+    // 2. 이미 들어 있는 예정
+    if (ov) {
+      var oldKg = ov.rows.reduce(function (s, r) { return s + r.qty; }, 0);
+      h += '<section class="card poov"><h2 class="label">' + step(3) + '이미 들어 있는 출고예정</h2><p><b>' + esc(p.cust || d.cust || '') + ' ' + ov.dates.map(poMd).join('·') + '</b>에 이 발주서와 같은 품목 <b>' + ov.rows.length + '줄 ' + fmt(oldKg) + ' kg</b>이 이미 있습니다' +
+        (ov.diff ? ' (수량 다른 것 <b class="bad">' + ov.diff + '개</b>)' : ' (수량까지 모두 같음)') + '.</p>';
+      h += '<table class="potab"><thead><tr><th>품목</th><th>기존</th><th>발주서</th></tr></thead><tbody>' + ov.pairs.map(function (q) {
+        var df = q.kg !== q.old;
+        return '<tr' + (df ? ' class="df"' : '') + '><td><span class="sw" style="background:' + labTint(q.oldProd, q.color) + '"></span>' + esc(q.oldProd + ' ' + q.color) + '</td><td>' + fmt(q.old) + ' <small>' + esc(poMd(q.oldDate)) + '</small></td><td>' + fmt(q.kg) + (df ? ' <b class="bad">' + (q.kg > q.old ? '+' : '') + fmt(q.kg - q.old) + '</b>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+      if (ov.others) h += '<p class="hint">같은 무렵 이 거래처의 다른 예정 ' + ov.others + '줄은 그대로 둡니다.</p>';
+      var opt = function (v, title, sub, dis) {
+        return '<label class="poopt' + (p.mode === v ? ' on' : '') + (dis ? ' off' : '') + '"><input type="radio" name="pomode" data-in="pomode" value="' + v + '"' + (p.mode === v ? ' checked' : '') + (dis ? ' disabled' : '') + '>' +
+          '<span><b>' + title + '</b><small>' + sub + '</small></span></label>';
+      };
+      var nPlan = ov.rows.filter(function (r) { return r.type === '출고예정'; }).length;
+      h += '<div class="poopts">' + opt('replace', '같은 주문 — 기존 ' + nPlan + '줄을 지우고 이 발주서대로 넣기', '구분(따로 싣기)·현장명이 들어가 물표가 구분별로 나옵니다. 수량이 다른 것은 발주서 수량으로 바뀝니다.', ov.shipped || !nPlan) +
+        opt('add', '다른 주문 — 기존 것은 두고 따로 더 넣기', '같은 품목이 두 번 들어갑니다.', false) +
+        opt('skip', '넣지 않기 — 이미 들어가 있음', '이 발주서는 ‘중복’으로 표시만 합니다.', false) + '</div>';
+      if (ov.shipped) h += '<p class="bad">이미 출고로 확정한 줄이 있어 바꾸기는 할 수 없습니다.</p>';
+      h += '</section>';
+    }
+    // 3. 품목
+    if (p.mode !== 'skip') {
+      var kg = p.lines.reduce(function (s, l) { return s + (l.kg || 0); }, 0), pal = poPallets(p.lines);
+      var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
+      h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장</small></h2>';
+      if (!p.lines.length) h += '<p class="bad">읽은 품목 줄이 없습니다. ‘직접 넣기’로 넣어 주세요.</p>';
+      poZones(p.lines).forEach(function (g) {
+        if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + g.lines.length + '줄 · ' + fmt(g.lines.reduce(function (s, x) { return s + (x.l.kg || 0); }, 0)) + ' kg</small></h3>';
+        h += '<ul class="polines">' + g.lines.map(function (x) { return poLineHtml(x.l, x.i, V); }).join('') + '</ul>';
+      });
+      h += '</section>';
+    }
+    // 4. 계산 · 넣기
+    var ready = p.mode === 'skip' || poReady(p);
+    h += '<section class="card poact">';
+    if (p.mode !== 'skip') h += V.simBusy ? '<p class="muted"><span class="spinner sm" aria-hidden="true"></span> 다시 계산하는 중…</p>' : poCalcHtml(V.sim, p.lines);
+    var nRep = p.mode === 'replace' ? (p.remove || []).length : 0;
+    var label = p.mode === 'skip' ? '넣지 않기로 정하기' : nRep ? '기존 ' + nRep + '줄 바꾸고 넣기' : '넣기';
+    h += '<button type="button" class="primary wide mt12" data-act="poapply"' + (ready && !V.busy ? '' : ' disabled') + '>' + (V.busy ? '넣는 중…' : label) + '</button>';
+    if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고 날짜를 고르세요.' : !String(p.cust || '').trim() ? '거래처를 넣으세요.' : '제품을 고르지 않은 줄이 있습니다.') + '</p>';
+    h += '<button type="button" class="ghost wide mt8" data-act="porevx">닫기 (나중에 받은 발주서에서 다시 열 수 있음)</button></section></div>';
+    return h;
+  }
+  function poLineHtml(l, i, V) {
+    var x = V.sim && V.sim.lines ? V.sim.lines[i] : null;
+    var short = x && x.short > 0;
+    var h = '<li class="poln' + (short ? ' short' : '') + (!l.prod ? ' need' : '') + '"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span>';
+    if (l.stated || !(l.cands && l.cands.length > 1)) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
+    else {
+      h += '<select class="posel" data-in="poprod" data-i="' + i + '" aria-label="' + esc(l.color) + ' 제품">' + (l.prod ? '' : '<option value="">제품 고르기</option>') +
+        l.cands.map(function (c) { return '<option value="' + esc(c) + '"' + (c === l.prod ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select> <b>' + esc(l.color) + '</b>' +
+        '<small class="pohow">' + esc(l.how === 'old' ? '기존 예정과 같은 제품' : l.how === 'same' ? '이 거래처가 받던 제품' : l.how === 'mixed' ? '이 거래처가 둘 다 받음 · 최근 것' : l.how === 'cust' ? '이 거래처가 주로 받는 제품' : '칼라칩(제품 안 적힘)') + '</small>';
+    }
+    h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
+    if (V.simBusy || !l.prod) h += '<div class="pl3 muted">' + (l.prod ? '계산 중…' : '제품을 고르면 계산합니다') + '</div>';
+    else if (x) h += '<div class="pl3">' + (short ? '<b class="bad">부족 ' + fmt(x.short) + ' kg</b> · 그날 재고 ' + fmt(Math.max(0, x.before)) + ' kg' : '<span class="ok">재고로 나감</span> · 그날 재고 ' + fmt(x.before) + ' kg') + '</div>';
+    return h + '</li>';
+  }
+  function poApply() {
+    var V = S.poRev;
+    if (!V || V.busy) return;
+    var p = V.plan;
+    if (p.mode === 'skip') {
+      V.busy = true; render();
+      call('apiPoCancel', V.id, 'dup').then(function (r) {
+        if (r && r.item) poListPut(r.item);
+        S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0);
+        toastOk('넣지 않았습니다 · 중복으로 표시했습니다');
+      }, function (e) { V.busy = false; render(); failed(e); });
+      return;
+    }
+    if (!poReady(p)) { toast('날짜·거래처·제품을 확인해 주세요'); return; }
+    V.busy = true; render();
+    call('apiPoApply', V.id, poPlanOut(p)).then(function (r) {
+      apply(r);
+      if (r.item) poListPut(r.item);
+      S.poShow = { item: r.item, plan: p, sim: r.sim };
+      S.poRev = null; S.outMode = 'cal'; S.calDay = p.date; S.calYm = p.date.slice(0, 7);
+      render(); window.scrollTo(0, 0);
+      toastOk('넣었습니다 · ' + poMd(p.date) + ' ' + p.cust + ' ' + p.lines.length + '줄');
+    }, function (e) {
+      V.busy = false; render();
+      if (/po_moved|po_done/.test(String((e && e.message) || ''))) { toast(errText(e)); poReadNow(V.id); return; }
+      failed(e);
+    });
+  }
+  function poUndo(id) {
+    S.poUndoAsk = '';
+    call('apiPoUndo', id).then(function (r) {
+      apply(r);
+      if (r.item) poListPut(r.item);
+      if (S.poShow && S.poShow.item && S.poShow.item.id === id) S.poShow = null;
+      render();
+      toastOk('되돌렸습니다 · ' + ((r.item && r.item.result) || ''));
+    }, function (e) { render(); failed(e); });
+  }
+  function poItemOf(id) { return ((S.poList && S.poList.items) || []).filter(function (x) { return x.id === id; })[0] || (S.poShow && S.poShow.item && S.poShow.item.id === id ? S.poShow.item : null); }
+
   /* 끌어다 놓기·붙여넣기는 출고량 달력 화면(관리자)에서만 */
   function poCanTake() { return VIEW === 'out' && S.ready && S.admin && S.outMode === 'cal' && !S.sheet && !S.poBusy; }
   function poHasFiles(ev) {
@@ -2564,7 +2849,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       o = document.createElement('div');
       o.id = 'po-over';
       o.className = 'poover';
-      o.innerHTML = '<div><b>여기에 놓으면 발주서로 올립니다</b><small>PDF·엑셀·사진 · 한 번에 놓은 파일은 한 발주서</small></div>';
+      o.innerHTML = '<div><b>여기에 놓으면 발주서로 올리고 바로 읽습니다</b><small>PDF·엑셀·사진 · 한 번에 놓은 파일은 한 발주서</small></div>';
       document.body.appendChild(o);
     } else if (!on && o) {
       o.parentNode.removeChild(o);
@@ -2591,7 +2876,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     ev.preventDefault();          // 파일을 놓아도 브라우저가 파일을 열어 화면을 떠나지 않게
     poDragN = 0;
     poOverlay(false);
-    if (!poCanTake()) { if (VIEW === 'out' && S.poBusy) toast('앞의 파일을 올리는 중입니다. 잠시 뒤 다시 놓아 주세요.'); return; }
+    if (!poCanTake()) { if (VIEW === 'out' && S.poBusy) toast('앞의 파일을 읽는 중입니다. 잠시 뒤 다시 놓아 주세요.'); return; }
     poAddFiles(ev.dataTransfer.files, 'drop');
   });
   document.addEventListener('paste', function (ev) {
@@ -2605,11 +2890,24 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   });
   document.addEventListener('change', function (ev) {
     var el = ev.target;
-    if (el && el.id === 'po-file') { var fs = Array.prototype.slice.call(el.files || []); el.value = ''; poAddFiles(fs, 'pick'); }
+    if (!el) return;
+    if (el.id === 'po-file') { var fs = Array.prototype.slice.call(el.files || []); el.value = ''; poAddFiles(fs, 'pick'); return; }
+    var k = el.getAttribute && el.getAttribute('data-in'), V = S.poRev;
+    if (!V) return;
+    if (k === 'poprod') {
+      var l = V.plan.lines[Number(el.getAttribute('data-i'))];
+      if (l) { l.prod = el.value; l.how = 'pick'; poResim(); }
+    } else if (k === 'pomode') {
+      V.plan.mode = el.value;
+      V.plan.remove = el.value === 'replace' && V.R.overlap ? V.R.overlap.rows.filter(function (r) { return r.type === '출고예정'; }).map(function (r) { return r.id; }) : [];
+      poResim();
+    } else if (k === 'prvdate') {
+      if (isYmd(el.value) && el.value >= S.today && el.value <= planMax()) { V.plan.date = el.value; poResim(); }
+    }
   });
-  /* 기다리는 발주서가 있으면 3분마다 조용히 목록을 다시 봅니다(화면이 보일 때만) */
+  /* 아직 안 읽은 발주서가 있으면 3분마다 조용히 목록을 다시 봅니다(화면이 보일 때만) */
   setInterval(function () {
-    if (VIEW !== 'out' || !S.admin || !S.ready || document.hidden || S.busy || S.poLoading || !S.poList) return;
+    if (VIEW !== 'out' || !S.admin || !S.ready || document.hidden || S.busy || S.poLoading || !S.poList || S.poRev) return;
     if (S.poList.items.some(function (x) { return x.state === '기다림' || x.state === '읽는 중'; })) poLoad(true);
   }, 180000);
   function poIds(x) {
@@ -3957,33 +4255,25 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'polab': if (S.poLast) { var pids = poIds(S.poLast); if (pids.length) labOpen(pids); } return;
       case 'pox': S.poLast = null; render(); return;
       case 'pofile': var pfi = document.getElementById('po-file'); if (pfi && !S.poBusy) pfi.click(); return;
-      case 'pomsgx': S.poMsg = null; render(); return;
+      case 'poread': poReadNow(v); return;
+      case 'porevx': S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return;
+      case 'poapply': poApply(); return;
+      case 'prvdate': if (S.poRev && isYmd(v)) { S.poRev.plan.date = v; poResim(); } return;
+      case 'poshowx': S.poShow = null; S.poUndoAsk = ''; render(); return;
+      case 'poshowlab': if (S.poShow && S.poShow.item && (S.poShow.item.ids || []).length) labOpen(S.poShow.item.ids); return;
+      case 'polabids': var pli = poItemOf(v); if (pli && (pli.ids || []).length) labOpen(pli.ids); return;
+      case 'poundoask': S.poUndoAsk = v; render(); return;
+      case 'poundox': S.poUndoAsk = ''; render(); return;
+      case 'poundo': poUndo(v); return;
       case 'polist': poLoad(false); render(); return;
       case 'pomoreall': S.poMore = true; render(); return;
       case 'pojump': var pib = document.getElementById('poinbox'); if (pib && pib.scrollIntoView) { try { pib.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { pib.scrollIntoView(); } } return;
       case 'pogoto': poGoto(v); return;
-      case 'poedit':
-        var pit = ((S.poList && S.poList.items) || []).filter(function (x) { return x.id === v; })[0];
-        S.poEdit = v;
-        S.poEditNote = pit ? (pit.state === '중복' ? (pit.note ? pit.note + ' · ' : '') + '새 주문 맞음(중복 아님)' : (pit.note || '')) : '';
-        render();
-        var pe = document.getElementById('po-edit'); if (pe) { pe.focus(); try { pe.setSelectionRange(pe.value.length, pe.value.length); } catch (e) {} }
-        return;
-      case 'poeditx': S.poEdit = ''; S.poEditNote = ''; render(); return;
-      case 'poretry':
-        var pwas = (((S.poList && S.poList.items) || []).filter(function (x) { return x.id === v; })[0] || {}).state;
-        call('apiPoRetry', v, S.poEdit === v ? (S.poEditNote || '').trim() : null).then(function (r) {
-          S.poEdit = ''; S.poEditNote = '';
-          if (S.poList && r && r.item) S.poList.items = S.poList.items.map(function (x) { return x.id === r.item.id ? r.item : x; });
-          render();
-          toastOk(pwas === '기다림' ? '메모를 저장했습니다 · Claude가 읽을 때 봅니다' : '다시 맡겼습니다 · 다음 정시 무렵 Claude가 읽습니다');
-        }, failed);
-        return;
       case 'pocancel':
         call('apiPoCancel', v).then(function (r) {
           if (S.poList && r && r.item) S.poList.items = S.poList.items.map(function (x) { return x.id === r.item.id ? r.item : x; });
           render();
-          toastOk('취소했습니다');
+          toastOk(r && r.item && r.item.state === '중복' ? '넣지 않았습니다' : '넣지 않음으로 표시했습니다');
         }, failed);
         return;
       case 'pozone':
@@ -4077,6 +4367,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (k === 'zone') { S.inZone = el.value; return; }
     if (k === 'ponote') { S.poNote = el.value; return; }
     if (k === 'poedit') { S.poEditNote = el.value; return; }
+    if (k === 'prvcust') { if (S.poRev) S.poRev.plan.cust = el.value; return; }
+    if (k === 'prvsite') { if (S.poRev) S.poRev.plan.site = el.value; return; }
     if (k === 'price') {
       var p = el.getAttribute('data-p');
       S.price[p] = el.value;
