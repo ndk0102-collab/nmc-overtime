@@ -241,41 +241,15 @@ button.datebox{font-family:inherit}
 .labcap input{width:80px;flex:none;text-align:center;font-size:20px;font-weight:800}
 .labcap span{font-size:15px;font-weight:700;color:var(--ink2)}
 .labwrap{display:flex;flex-direction:column;align-items:center;gap:18px;margin:14px 0 24px}
-.lab{box-sizing:border-box;container-type:inline-size;width:100%;max-width:760px;aspect-ratio:210/297;background:#fff;color:#000;border:1px solid #C9CED6;box-shadow:0 2px 12px rgba(16,24,40,.08);display:flex;flex-direction:column;overflow:hidden}
-.lab-in{flex:1;box-sizing:border-box;padding:4.5cqw 4.5cqw 3cqw;display:flex;flex-direction:column;min-height:0}
-.lab h1{margin:0 0 1.6cqw;text-align:center;font-size:5.6cqw;font-weight:900;letter-spacing:.32em;line-height:1.2;color:#000}
-.lab h1 small{display:block;margin-top:.6cqw;font-size:2.6cqw;letter-spacing:.06em;font-weight:800}
-.lab-top{display:flex;justify-content:space-between;align-items:baseline;gap:2cqw;font-size:3.3cqw;font-weight:800;line-height:1.2;padding:1cqw 0;border-bottom:.35cqw solid #000}
-.lab-site{display:flex;gap:2cqw;align-items:baseline;font-size:3.3cqw;font-weight:800;line-height:1.2;padding:1.2cqw 0;border-bottom:.35cqw solid #000;min-height:5cqw}
-.lab-site b{font-size:4.2cqw;font-weight:900;min-width:0;overflow-wrap:anywhere}
-.lab-t{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:2cqw}
-.lab-t th,.lab-t td{border:.3cqw solid #000;text-align:center;vertical-align:middle;padding:.4cqw .4cqw;color:#000}
-.lab-t th{font-size:2.5cqw;font-weight:800;line-height:1.25;background:#EDEDED}
-.lab-t td{font-size:3.4cqw;font-weight:800;height:5.8cqw;line-height:1.1;word-break:keep-all;overflow-wrap:anywhere}
-.lab-t td.it .lcode{display:block;white-space:nowrap}
-.lab-t td.it .lcode.long{font-size:2.6cqw}
-.lab-t td.it small{display:block;font-size:1.8cqw;font-weight:700;color:#333;white-space:nowrap;overflow:hidden;text-overflow:clip}
-.lab-t td.qt .kgv{font-size:2.5cqw;white-space:nowrap}
-.lab-t td.qt{font-size:4cqw;font-weight:900}
-.lab-t td.tot{font-size:8cqw;font-weight:900}
-.lab-t td.tot small{display:block;font-size:2.3cqw;font-weight:700;margin-top:1cqw}
-.lab-t td.cu{font-size:4.6cqw;font-weight:900}
-.lab-t td.pn{font-size:8cqw;font-weight:900}
-.lab-sign{margin-top:auto;border:.3cqw solid #000}
-.lab-sign h2{margin:0;padding:1cqw;text-align:center;font-size:2.8cqw;font-weight:800;border-bottom:.3cqw solid #000;background:#EDEDED;color:#000}
-.lab-sign .sg{display:grid;grid-template-columns:1fr 1fr}
-.lab-sign .sg > div{border-right:.3cqw solid #000;text-align:center}
-.lab-sign .sg > div:last-child{border-right:0}
-.lab-sign .sg p{margin:0;padding:1cqw;font-size:2.5cqw;font-weight:800;line-height:1.3;border-bottom:.3cqw solid #000;color:#000}
-.lab-sign .sg p.sl{border-bottom:0;height:11cqw;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.6cqw;color:#666;font-weight:600}
+.labsvg{display:block;width:100%;max-width:760px;height:auto;aspect-ratio:595.28/841.89;background:#fff;border:1px solid #C9CED6;box-shadow:0 2px 12px rgba(16,24,40,.10)}
 @media print{
-  @page{size:A4 portrait;margin:8mm}
-  body.labmode{background:#fff !important}
+  @page{size:A4 portrait;margin:0}
+  body.labmode{background:#fff !important;margin:0 !important;padding:0 !important}
   body.labmode #app > *:not(.labwrap),body.labmode #sheet,body.labmode #toast{display:none !important}
   body.labmode #app{padding:0 !important;margin:0 !important;max-width:none !important;width:auto !important}
   body.labmode .labwrap{display:block;margin:0}
-  body.labmode .lab{width:194mm;height:279mm;max-width:none;aspect-ratio:auto;margin:0 auto;border:0;box-shadow:none;break-inside:avoid;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  body.labmode .lab:last-child{break-after:auto;page-break-after:auto}
+  body.labmode .labsvg{width:210mm;height:297mm;max-width:none;aspect-ratio:auto;border:0;box-shadow:none;break-inside:avoid;break-after:page;page-break-after:always}
+  body.labmode .labsvg:last-child{break-after:auto;page-break-after:auto}
 }
 .calback{padding:10px 12px}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
@@ -1071,6 +1045,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     root.className = 'wrap' + (bar ? ' with-bar' : '');
     document.body.className = (bar ? 'has-bar' : '') + (S.ready && S.admin && VIEW === 'out' && S.outMode === 'label' ? ' labmode' : '');
     root.innerHTML = h;
+    if (document.body.className.indexOf('labmode') >= 0) {
+      labFit();
+      try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(labFit); } catch (e) {}
+    }
     renderSheet();
     if (fid) {
       var el = document.getElementById(fid);
@@ -1787,27 +1765,37 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
   }
 
-  /* ───────── 물표 · 적재물 상세 내용 (2026-11-16 지시) ─────────
-     "발주서가 들어오면 그 발주서를 보고 물표를 만든다. 물표를 보고 파레트에 작업자들이 적재를 하고, 파렛트에 무엇이 있는지 알 수 있다.
-      니가 이거까지 다 정리해서 우리가 검토하고 출력만 할 수 있도록 만들어 줘."
-     출고량 달력의 거래처 묶음 → '물표' → 파렛트마다 한 장(A4)씩, 회사 양식(적재물 상세 내용 · CARGO DETAIL LABEL) 그대로.
-     물량은 포대 수. 한 포 무게(처음 25 kg)와 파렛트 한 장에 실을 포대 수(처음 40포)는 화면에서 바꿀 수 있고, 그 휴대폰·PC에 기억됩니다.
-     정해 두면 저절로 나눕니다:
-       한 색이 파렛트 한 장을 넘으면 그 색만으로 꽉 채운 파렛트를 먼저 만들고, 남은 양들은 큰 것부터 빈 자리에 함께 싣습니다(한 장에 10줄까지).
-     품번은 회사 색상 코드표(NM-01~22 · NMSBR · NMEPDM)를 따릅니다. 코드표에 없는 색은 품번 칸을 비워 둡니다. */
+  /* ───────── 물표 · 적재물 상세 내용 (2026-11-16 지시, 같은 날 다시 지시) ─────────
+     · 회사가 준 엑셀 양식 그대로: 로고·(주)남명·제목·날짜·현장명·10줄 표·총수량(빨강)·비고(거래처·n/N)·검수 및 승인·서명란,
+       아래 주소·(주)남명·e-mail·전화. A4 한 장에 파렛트 한 개. 칸 크기·글자 크기는 엑셀 파일의 값 그대로(인쇄 배율 99%).
+     · 파렛트 한 장에 최대 56포(바꿀 수 있음). 10포·20포만 따로 남는 일이 없게, 필요한 장 수 안에서 고르게 나눕니다.
+       큰 색부터 넣고, 들어갈 자리가 있으면 한 색을 쪼개지 않으며, 표가 10줄이라 한 장에 10가지까지만 싣습니다.
+     · 비고(메모)에 '놀이터1·놀이터2'처럼 따로 실어 달라는 구분이 있으면 그 구분끼리만 싣고,
+       비고 칸에 '유씨씨 / 놀이터1', 번호는 전체 장 수 기준(3/7)으로 씁니다. */
   var LAB_CODE = { '로즈': 'NM-01', '분홍': 'NM-02', '주황': 'NM-03', '노랑': 'NM-04', '겨자': 'NM-05', '연두': 'NM-06', '녹색': 'NM-07', '진녹': 'NM-08',
     '카키': 'NM-09', '청녹': 'NM-10', '청록': 'NM-10', '하늘': 'NM-11', '하늘색': 'NM-11', '청색': 'NM-12', '진청': 'NM-13', '연보라': 'NM-14', '보라': 'NM-15',
     '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
   var LAB_SIZE = { '타이어 고무분말|5-7mm': ['NMSBR-01', '검정5-7'], '타이어 고무분말|2-3mm': ['NMSBR-02', '검정2-3'], '타이어 고무분말|1-2mm': ['NMSBR-03', '검정1-2'], 'EPDM 재생|2-3mm': ['NMEPDM', '재생2-3'] };
+  var LAB_ROWS = 10;
   function labItem(prod, color) {
     var s = LAB_SIZE[prod + '|' + color];
-    if (s) return { code: s[0], color: s[1], sub: prod };
+    if (s) return { code: s[0], color: s[1], sub: '' };
     var kind = S.kind && S.kind[prod];
     if (kind && kind !== 'color') return { code: '', color: color, sub: prod };
     return { code: LAB_CODE[String(color).replace(/\s+/g, '')] || '', color: color, sub: prod };
   }
-  function labCap() { var n = Number(stored('nmc_lab_cap')); return n >= 1 && n <= 200 ? Math.round(n) : 40; }
+  function labCap() { var n = Number(stored('nmc_lab_cap2')); return n >= 1 && n <= 200 ? Math.round(n) : 56; }
   function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
+  /* 따로 싣는 구분: [놀이터1] 처럼 대괄호, 또는 '놀이터 1'·'1구역'·'A구역'·'2공구'·'101동' 같은 말 */
+  var ZONE_WORDS = '놀이터|놀이시설|구역|공구|단지|구간|코트|광장|산책로|운동장|트랙|섹터|존|동';
+  function zoneOf(memo) {
+    var s = String(memo || ''), m = s.match(/\[([^\]]{1,20})\]/) || s.match(/【([^】]{1,20})】/);
+    if (m) return m[1].replace(/\s+/g, '');
+    m = s.match(new RegExp('(' + ZONE_WORDS + ')\\s*[-#.]?\\s*(\\d{1,3}|[A-Za-z])(?![0-9A-Za-z])'));
+    if (m) return m[1] + m[2];
+    m = s.match(new RegExp('(\\d{1,4}|[A-Za-z])\\s*(번\\s*)?(' + ZONE_WORDS + ')(?![가-힣])'));
+    return m ? m[0].replace(/\s+/g, '') : '';
+  }
   function labOpen(ids) {
     var ls = ids.map(recOf).filter(Boolean);
     if (!ls.length) { toast(ERR.not_found); return; }
@@ -1819,77 +1807,216 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
     window.scrollTo(0, 0);
   }
-  /* 같은 제품·색은 합치고, 파렛트로 나눕니다 */
-  function labLines() {
-    var by = {}, order = [];
+  /* 구분(놀이터1…)마다 같은 제품·색은 합칩니다. 순서: 처음 나온 구분 순(구분 없는 줄은 맨 뒤), 그 안은 앱의 품목 순서 */
+  function labZones() {
+    var zs = [], by = {}, ord = {};
+    (S.items || []).forEach(function (it, i) { ord[it.key] = i; });
     (S.lab ? S.lab.ids : []).map(recOf).filter(Boolean).forEach(function (l) {
+      var z = zoneOf(l.memo), g = by[z];
+      if (!g) { g = by[z] = { zone: z, lines: [], map: {} }; zs.push(g); }
       var k = l.prod + '|' + l.color;
-      if (!by[k]) { by[k] = { key: k, prod: l.prod, color: l.color, kg: 0 }; order.push(k); }
-      by[k].kg += l.qty;
+      if (!g.map[k]) { g.map[k] = { key: k, prod: l.prod, color: l.color, kg: 0, ord: ord[k] == null ? 9999 + g.lines.length : ord[k] }; g.lines.push(g.map[k]); }
+      g.map[k].kg += l.qty;
     });
-    return order.map(function (k) { return by[k]; });
+    zs.forEach(function (g) { g.lines.sort(function (a, b) { return a.ord - b.ord; }); });
+    zs.sort(function (a, b) { return (a.zone ? 0 : 1) - (b.zone ? 0 : 1); });
+    return zs;
   }
-  function labPallets(lines, capKg) {
-    var full = [], rest = [];
-    lines.forEach(function (l, i) {
-      var n = Math.floor(l.kg / capKg), r = l.kg - n * capKg;
-      for (var k = 0; k < n; k++) full.push([{ l: l, kg: capKg, i: i }]);
-      if (r > 0) rest.push({ l: l, kg: r, i: i });
-    });
-    rest.sort(function (a, b) { return b.kg - a.kg || a.i - b.i; });
-    var mixed = [];
-    rest.forEach(function (x) {
-      for (var j = 0; j < mixed.length; j++) {
-        var used = mixed[j].reduce(function (s, y) { return s + y.kg; }, 0);
-        if (used + x.kg <= capKg && mixed[j].length < 10) { mixed[j].push(x); return; }
-      }
-      mixed.push([x]);
-    });
-    mixed.forEach(function (p) { p.sort(function (a, b) { return a.i - b.i; }); });
-    return full.concat(mixed);
-  }
-  function labQty(kg) { var b = labBag(); return kg % b === 0 ? fmt(kg / b) : '<span class="kgv">' + fmt(kg) + 'kg</span>'; }
-  function labDate(d) { var x = parseYmd(d); return x.getFullYear() + '. ' + (x.getMonth() + 1) + '. ' + x.getDate() + '. (' + WD[x.getDay()] + ')'; }
-  function labelPage(p, n, N) {
-    var tot = p.reduce(function (s, x) { return s + x.kg; }, 0), lab = S.lab;
-    var h = '<section class="lab" aria-label="물표 ' + n + ' / ' + N + '"><div class="lab-in"><h1>적 재 물 상 세 내 용<small>(CARGO DETAIL LABEL)</small></h1>' +
-      '<div class="lab-top"><b>(주)남명</b><span>날짜: ' + esc(labDate(lab.date)) + '</span></div>' +
-      '<div class="lab-site"><span>현장명(SITE NAME):</span><b>' + esc(lab.site) + '</b></div>' +
-      '<table class="lab-t"><colgroup><col style="width:7%"><col style="width:17%"><col style="width:16%"><col style="width:13%"><col style="width:20%"><col style="width:27%"></colgroup>' +
-      '<thead><tr><th>No.</th><th>품&nbsp;&nbsp;번<br>(ITEM)</th><th>색&nbsp;&nbsp;상<br>(COLOR)</th><th>물&nbsp;&nbsp;량<br>(QTY)</th><th>총&nbsp;수&nbsp;량<br>(TOTAL)</th><th>비&nbsp;&nbsp;&nbsp;&nbsp;고</th></tr></thead><tbody>';
-    for (var r = 0; r < 10; r++) {
-      var x = p[r], it = x ? labItem(x.l.prod, x.l.color) : null;
-      h += '<tr><td>' + (r + 1) + '</td>' +
-        '<td class="it">' + (it ? '<span class="lcode' + (it.code.length > 5 ? ' long' : '') + '">' + esc(it.code) + '</span><small>' + esc(it.sub) + '</small>' : '') + '</td>' +
-        '<td>' + (it ? esc(it.color) : '') + '</td>' +
-        '<td class="qt">' + (x ? labQty(x.kg) : '') + '</td>';
-      if (r === 0) h += '<td class="tot" rowspan="10">' + labQty(tot) + '<small>' + (tot % labBag() === 0 ? '포 · ' : '') + fmt(tot) + ' kg</small></td><td class="cu" rowspan="5">' + esc(lab.cust) + '</td>';
-      if (r === 5) h += '<td class="pn" rowspan="5">' + n + '/' + N + '</td>';
-      h += '</tr>';
+  /* 파렛트 나누기: 장 수 N = ⌈전체 포 ÷ 최대 포⌉(10줄이 모자라면 한 장씩 늘림), 장마다 목표 = 고르게(⌈T/N⌉ 또는 ⌊T/N⌋).
+     큰 색부터: 통째로 들어가는 장 중 남는 자리가 가장 작은 곳 → 없으면 목표를 조금(⌈목표×12%⌉, 최대 포 안) 넘겨 통째로 →
+     그래도 없으면 남는 자리가 가장 큰 장부터 채워 나눔. 포가 아닌 kg 우수리는 그 색의 마지막 한 포로 칩니다. */
+  function labUnits(kg, bag) { var w = Math.floor(kg / bag), r = kg - w * bag; return { units: w + (r > 0 ? 1 : 0), part: r }; }
+  function labPack(lines, cap, bag) {
+    var its = lines.map(function (l, i) { var u = labUnits(l.kg, bag); return { l: l, i: i, units: u.units, part: u.part }; }).filter(function (x) { return x.units > 0; });
+    var T = its.reduce(function (s, x) { return s + x.units; }, 0);
+    if (!T) return [];
+    for (var N = Math.max(1, Math.ceil(T / cap), Math.ceil(its.length / LAB_ROWS)); N <= T + its.length; N++) {
+      var res = labFill(its, T, N, cap, bag);
+      if (res) return res;
     }
-    return h + '</tbody></table><div class="lab-sign"><h2>검수 및 승인 (VERIFICATION &amp; APPROVAL)</h2><div class="sg">' +
-      '<div><p>남명 담당자<br>(NMC OFFICER)</p><p class="sl">(서명란)</p></div><div><p>발주처 확인<br>(ORDERER CONFIRMATION)</p><p class="sl">(서명란)</p></div></div></div></div></section>';
+    return [];
+  }
+  function labFill(its, T, N, cap, bag) {
+    var P = [], base = Math.floor(T / N), extra = T - base * N;
+    for (var p = 0; p < N; p++) P.push({ target: base + (p < extra ? 1 : 0), fill: 0, rows: [] });
+    var tol = Math.max(1, Math.ceil(Math.ceil(T / N) * 0.12));
+    var order = its.slice().sort(function (a, b) { return b.units - a.units || a.i - b.i; });
+    var space = function (q) { return q.target - q.fill; };
+    for (var k = 0; k < order.length; k++) {
+      var x = order[k], rem = x.units, guard = 0;
+      while (rem > 0 && guard++ < 1000) {
+        var open = P.filter(function (q) { return q.rows.length < LAB_ROWS || q.rows.some(function (r) { return r.x === x; }); });
+        if (!open.length) return null;
+        var fit = open.filter(function (q) { return space(q) >= rem; }).sort(function (a, b) { return space(a) - space(b); })[0];
+        if (!fit) fit = open.filter(function (q) { return rem - space(q) <= tol && q.fill + rem <= cap; }).sort(function (a, b) { return space(b) - space(a); })[0];
+        var put;
+        if (fit) put = rem;
+        else {
+          fit = open.slice().sort(function (a, b) { return space(b) - space(a); })[0];
+          put = Math.min(rem, space(fit));
+          if (put <= 0) { put = Math.min(rem, cap - fit.fill); if (put <= 0) return null; }
+        }
+        var row = fit.rows.filter(function (r) { return r.x === x; })[0];
+        if (row) row.units += put; else fit.rows.push({ x: x, units: put });
+        fit.fill += put;
+        rem -= put;
+      }
+      if (rem > 0) return null;
+    }
+    if (P.some(function (q) { return q.fill > cap || !q.rows.length; })) return null;
+    P.forEach(function (q) { q.rows.sort(function (a, b) { return a.x.i - b.x.i; }); });
+    P.sort(function (a, b) { return a.rows[0].x.i - b.rows[0].x.i || b.fill - a.fill; });
+    // 한 색이 여러 장에 나뉘면 kg 우수리는 마지막 장에만
+    var last = {};
+    P.forEach(function (q) { q.rows.forEach(function (r) { last[r.x.i] = r; }); });
+    return P.map(function (q) {
+      return q.rows.map(function (r) {
+        var withPart = last[r.x.i] === r && r.x.part > 0;
+        return { l: r.x.l, i: r.x.i, kg: withPart ? (r.units - 1) * bag + r.x.part : r.units * bag };
+      });
+    });
+  }
+  function labPlan() {
+    var cap = labCap(), bag = labBag(), out = [];
+    labZones().forEach(function (g) {
+      labPack(g.lines, cap, bag).forEach(function (rows) { out.push({ zone: g.zone, rows: rows }); });
+    });
+    return out;
+  }
+  function labQty(kg) { var b = labBag(); return kg % b === 0 ? fmt(kg / b) : fmt(kg) + 'kg'; }
+
+  /* ── 엑셀 양식 그대로 그린 A4 한 장 (단위 pt, 595.28 × 841.89) ──
+     칸 너비(엑셀 열 너비 비율)·줄 높이(pt)·글자 크기(pt)·테두리·로고 위치·바닥글은 양식 파일 값 그대로, 인쇄 배율 99%. */
+  var LAB_FONT = "'맑은 고딕','Malgun Gothic','Noto Sans KR','Apple SD Gothic Neo',sans-serif";
+  var LG = (function () {
+    var W = [7.75, 12.125, 14, 11.25, 9, 11.125, 9.125, 16.875], sw = 91.25, tot = 542, x = [18];
+    W.forEach(function (w, i) { x.push(x[i] + w / sw * tot); });
+    var y = {}, cur = 54 + 7 * 16.5 * 0.99;
+    for (var r = 8; r <= 31; r++) {
+      y[r] = cur;
+      cur += (r <= 10 ? 33 : r === 11 ? 29.25 : r <= 22 ? 32.25 : r === 24 ? 12.75 : 16.5) * 0.99;
+    }
+    return { x: x, y: y };
+  })();
+  function svgT(x, y, text, o) {
+    o = o || {};
+    return '<text xml:space="preserve" x="' + x.toFixed(2) + '" y="' + y.toFixed(2) + '" font-size="' + (o.size || 11) + '"' + (o.bold ? ' font-weight="700"' : '') +
+      ' text-anchor="' + (o.anchor || 'middle') + '" dominant-baseline="' + (o.base || 'central') + '"' + (o.fill ? ' fill="' + o.fill + '"' : '') +
+      (o.w ? ' data-w="' + o.w.toFixed(1) + '"' : '') + (o.g ? ' data-g="' + o.g + '"' : '') + (o.cls ? ' class="' + o.cls + '"' : '') + '>' + esc(text) + '</text>';
+  }
+  function labelPage(p, n, N) {
+    var X = LG.x, Y = LG.y, lab = S.lab, rows = p.rows, h = '';
+    var tot = rows.reduce(function (s, r) { return s + r.kg; }, 0);
+    var f2 = function (v) { return v.toFixed(2); };
+    var line = function (x1, y1, x2, y2) { return '<line x1="' + f2(x1) + '" y1="' + f2(y1) + '" x2="' + f2(x2) + '" y2="' + f2(y2) + '"/>'; };
+    var box = function (x1, y1, x2, y2, fill) { return '<rect x="' + f2(x1) + '" y="' + f2(y1) + '" width="' + f2(x2 - x1) + '" height="' + f2(y2 - y1) + '"' + (fill ? ' fill="' + fill + '"' : '') + '/>'; };
+    var cx = function (a, b) { return (X[a] + X[b]) / 2; }, cy = function (a, b) { return (Y[a] + Y[b]) / 2; };
+    h += '<svg class="labsvg" viewBox="0 0 595.28 841.89" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="물표 ' + n + ' / ' + N + '" font-family="' + LAB_FONT.replace(/"/g, '') + '">';
+    h += box(0, 0, 595.28, 841.89, '#fff');
+    // 칠한 칸: 머리글 회색(엑셀 흰색 −15%), 품번 검정(양식의 채운 줄과 같게)
+    h += box(X[0], Y[12], X[8], Y[13], '#D9D9D9');
+    rows.forEach(function (r, i) { h += box(X[1], Y[13 + i], X[2], Y[14 + i], '#000'); });
+    // 테두리 (엑셀 칸 테두리 그대로: 로고 칸은 (주)남명까지 한 칸, 총수량·비고는 세로로 합친 칸, 서명 칸은 제목과 한 칸)
+    h += '<g fill="none" stroke="#000" stroke-width="0.75">' +
+      box(X[0], Y[8], X[2], Y[11]) + box(X[2], Y[8], X[8], Y[10]) + box(X[2], Y[10], X[8], Y[11]) +
+      box(X[0], Y[11], X[2], Y[12]) + box(X[2], Y[11], X[8], Y[12]) + box(X[0], Y[12], X[8], Y[23]) + line(X[0], Y[13], X[8], Y[13]);
+    for (var r = 14; r <= 22; r++) h += line(X[0], Y[r], X[4], Y[r]);
+    [1, 2, 3, 4, 6].forEach(function (c) { h += line(X[c], Y[12], X[c], Y[23]); });
+    h += box(X[0], Y[23], X[8], Y[25]) + box(X[0], Y[25], X[4], Y[31]) + box(X[4], Y[25], X[8], Y[31]) +
+      line(X[0] + 28.2, Y[30] + 8.17, X[3] + 33.4, Y[30] + 8.17) + line(X[4] + 24.5, Y[30] + 7.4, X[7] + 75.5, Y[30] + 7.4) + '</g>';
+    // 로고 · (주)남명 · 제목 · 날짜 · 현장명
+    h += '<image href="icons/nmc-logo.png" x="' + f2(X[0] + 18.56) + '" y="' + f2(Y[8] + 6.16) + '" width="85.4" height="59.8" preserveAspectRatio="xMidYMid meet"/>';
+    h += svgT(cx(0, 2), cy(10, 11), '(주)남명', { size: 14, bold: true, w: X[2] - X[0] - 6 });
+    h += svgT(cx(2, 8), cy(8, 10) - 11.5, '적 재 물 상 세 내 용', { size: 18, bold: true });
+    h += svgT(cx(2, 8), cy(8, 10) + 12.5, '(CARGO DETAIL LABEL)', { size: 18, bold: true });
+    h += svgT(X[7] - 3, cy(10, 11), '날짜:', { size: 12, bold: true, anchor: 'end' });
+    h += svgT(X[7] + 3, cy(10, 11), lab.date || '', { size: 12, bold: true, anchor: 'start', w: X[8] - X[7] - 6, cls: 'lab-date' });
+    h += svgT(cx(0, 2), cy(11, 12), '현장명(SITE NAME):', { size: 12, bold: true, w: X[2] - X[0] - 6 });
+    h += svgT(cx(2, 8), cy(11, 12), lab.site || '', { size: 12, bold: true, w: X[8] - X[2] - 10, cls: 'lab-site' });
+    // 머리글
+    var hd = function (a, b, t1, t2) {
+      return t2 ? svgT(cx(a, b), cy(12, 13) - 7, t1, { size: 12, bold: true }) + svgT(cx(a, b), cy(12, 13) + 7.5, t2, { size: 12, bold: true }) : svgT(cx(a, b), cy(12, 13), t1, { size: 12, bold: true });
+    };
+    h += hd(0, 1, 'No.') + hd(1, 2, '품   번', '(ITEM)') + hd(2, 3, '색   상', '(COLOR)') + hd(3, 4, '물  량', '(QTY)') + hd(4, 6, '총  수  량', '(TOTAL)') + hd(6, 8, '비    고');
+    // 10줄: 번호 · 품번(검정 칸 흰 글씨, 칩은 밑에 제품 이름) · 색상 · 물량(포)
+    for (var i = 0; i < LAB_ROWS; i++) {
+      var r0 = 13 + i, my = cy(r0, r0 + 1), x0 = rows[i];
+      h += svgT(cx(0, 1), my, String(i + 1), { size: 11 });
+      if (!x0) continue;
+      var it = labItem(x0.l.prod, x0.l.color), main = it.code || it.sub, sub = it.code ? it.sub : '';
+      if (sub) h += svgT(cx(1, 2), my - 5, main, { size: 11, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-code' }) + svgT(cx(1, 2), my + 8, sub, { size: 7.5, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-prod' });
+      else h += svgT(cx(1, 2), my, main, { size: 11, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-code' });
+      h += svgT(cx(2, 3), my, it.color, { size: 18, bold: true, w: X[3] - X[2] - 6, cls: 'lab-color' });
+      h += svgT(cx(3, 4), my, labQty(x0.kg), { size: 18, bold: true, w: X[4] - X[3] - 6, cls: 'lab-qty' });
+    }
+    // 총수량(빨강) · 비고(거래처, 따로 싣는 구분 / 몇 번째/전체)
+    h += svgT(cx(4, 6), cy(13, 23), labQty(tot), { size: 72, bold: true, fill: '#FF0000', w: X[6] - X[4] - 8, cls: 'lab-tot' });
+    var bw = X[8] - X[6] - 8, cust = lab.cust || '';
+    if (p.zone) {
+      h += svgT(cx(6, 8), Y[18] - 64, cust, { size: 48, bold: true, base: 'alphabetic', w: bw, g: 'bi', cls: 'lab-cust' });
+      h += svgT(cx(6, 8), Y[18] - 12, p.zone, { size: 48, bold: true, base: 'alphabetic', w: bw, g: 'bi', cls: 'lab-zone' });
+    } else h += svgT(cx(6, 8), Y[18] - 12, cust, { size: 48, bold: true, base: 'alphabetic', w: bw, cls: 'lab-cust' });
+    h += svgT(cx(6, 8), Y[18] + 46, n + '/' + N, { size: 48, bold: true, base: 'alphabetic', w: bw, cls: 'lab-no' });
+    // 검수 및 승인 · 서명란
+    h += svgT(cx(0, 8), cy(23, 25), '검수 및 승인 (VERIFICATION & APPROVAL)', { size: 14, bold: true });
+    h += svgT(cx(0, 4), cy(25, 27) - 6.5, '남명 담당자', { size: 11, bold: true }) + svgT(cx(0, 4), cy(25, 27) + 7.5, '(NMC OFFICER)', { size: 11, bold: true });
+    h += svgT(cx(4, 8), cy(25, 27) - 6.5, '발주처 확인', { size: 11, bold: true }) + svgT(cx(4, 8), cy(25, 27) + 7.5, '(ORDERER CONFIRMATION)', { size: 11, bold: true });
+    h += svgT(cx(0, 4), cy(27, 31) - 4, '(서명란)', { size: 11, fill: '#BFBFBF' }) + svgT(cx(4, 8), cy(27, 31) - 4, '(서명란)', { size: 11, fill: '#BFBFBF' });
+    // 바닥글 (양식의 엑셀 바닥글 그대로)
+    h += svgT(18, 806, '주  소 : 경북 상주시 선상서로 2389-103', { size: 10, bold: true, anchor: 'start', base: 'alphabetic' });
+    h += svgT(297.64, 810, '(주)남명', { size: 18, bold: true, base: 'alphabetic' });
+    h += svgT(577.28, 801, 'e-mail : nmg2119@daum.net', { size: 10, bold: true, anchor: 'end', base: 'alphabetic' });
+    h += svgT(577.28, 815, '전  화 : 054)531-3798', { size: 10, bold: true, anchor: 'end', base: 'alphabetic' });
+    return h + '</svg>';
+  }
+  /* 글자가 칸보다 길면 줄입니다(그린 뒤 실제 글자 폭으로 재서). 같은 묶음(data-g, 비고 두 줄)은 같은 크기로. */
+  function labFit() {
+    var svgs = Array.prototype.slice.call(document.querySelectorAll('.labsvg'));
+    svgs.forEach(function (sv) {
+      var groups = {};
+      Array.prototype.forEach.call(sv.querySelectorAll('text[data-w]'), function (t) {
+        if (!t.getAttribute('data-fs')) t.setAttribute('data-fs', t.getAttribute('font-size'));
+        t.setAttribute('font-size', t.getAttribute('data-fs'));
+        var w = Number(t.getAttribute('data-w')), len = 0;
+        try { len = t.getComputedTextLength(); } catch (e) { return; }
+        var k = len > w && len > 0 ? Math.max(0.3, w / len) : 1, g = t.getAttribute('data-g');
+        if (g) (groups[g] = groups[g] || []).push([t, k]);
+        else if (k < 1) t.setAttribute('font-size', (Number(t.getAttribute('data-fs')) * k).toFixed(2));
+      });
+      Object.keys(groups).forEach(function (g) {
+        var k = Math.min.apply(null, groups[g].map(function (x) { return x[1]; }));
+        if (k < 1) groups[g].forEach(function (x) { x[0].setAttribute('font-size', (Number(x[0].getAttribute('data-fs')) * k).toFixed(2)); });
+      });
+    });
   }
   function labelView() {
     var lab = S.lab;
     if (!lab) { S.outMode = 'cal'; return viewOut(); }
-    var lines = labLines(), cap = labCap(), bag = labBag(), pallets = lines.length ? labPallets(lines, cap * bag) : [];
-    var kg = lines.reduce(function (s, l) { return s + l.kg; }, 0), odd = lines.filter(function (l) { return l.kg % bag; });
-    var noCode = lines.filter(function (l) { return !labItem(l.prod, l.color).code; });
+    var cap = labCap(), bag = labBag(), plan = labPlan(), zs = labZones();
+    var all = zs.reduce(function (a, g) { return a.concat(g.lines); }, []);
+    var kg = all.reduce(function (s, l) { return s + l.kg; }, 0), odd = all.filter(function (l) { return l.kg % bag; });
+    var noCode = [], seenNc = {};
+    all.forEach(function (l) { if (!labItem(l.prod, l.color).code && !seenNc[l.prod + '|' + l.color]) { seenNc[l.prod + '|' + l.color] = 1; noCode.push(l); } });
+    var sizes = plan.map(function (p) { return p.rows.reduce(function (s, r) { return s + r.kg; }, 0) / bag; });
+    var lo = sizes.length ? Math.floor(Math.min.apply(null, sizes)) : 0, hi = sizes.length ? Math.ceil(Math.max.apply(null, sizes)) : 0;
+    var zsum = zs.filter(function (g) { return g.zone; }).map(function (g) { return esc(g.zone) + ' ' + plan.filter(function (p) { return p.zone === g.zone; }).length + '장'; });
+    if (zsum.length && zs.some(function (g) { return !g.zone; })) zsum.push('구분 없음 ' + plan.filter(function (p) { return !p.zone; }).length + '장');
     var h = '<div class="stack noprint"><section class="card"><button type="button" class="ghost wide" data-act="labback">← 달력으로</button>' +
       '<h2 class="h2 mt12">물표 · 적재물 상세 내용</h2>' +
-      '<p class="muted">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + lines.length + '가지 ' + fmt(kg) + ' kg' +
-      (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + pallets.length + '장</b></p>' +
+      '<p class="muted labsum">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + all.length + '가지 ' + fmt(kg) + ' kg' +
+      (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + plan.length + '장</b>' + (plan.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') +
+      (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' +
       '<label class="label mt12" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다">' +
       '<p class="label mt12">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div>' +
-      '<p class="label mt12">파렛트 1장에 싣는 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
-      '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 포대 수"><span>포 = ' + fmt(cap * bag) + ' kg</span>' +
+      '<p class="label mt12">파렛트 1장 최대 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
+      '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 최대 포대 수"><span>포 = ' + fmt(cap * bag) + ' kg</span>' +
       '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button></div>' +
-      '<p class="note">처음 값(한 포 25 kg · 파렛트 40포)이 실제와 다르면 고쳐 주세요. 이 기기에 기억됩니다. 한 색이 파렛트 한 장을 넘으면 그 색만으로 꽉 채운 파렛트를 먼저 만들고, 남은 양은 큰 것부터 다른 색과 함께 싣습니다(한 장 10줄까지). 품번 밑 작은 글씨는 제품 이름입니다.' +
+      '<p class="note">필요한 장 수(전체 포 ÷ 최대 ' + cap + '포, 올림) 안에서 고르게 나눕니다. 큰 색부터 싣고, 자리가 있으면 한 색을 쪼개지 않습니다. 양식 표가 10줄이라 한 장에 10가지까지입니다. ' +
+      '메모(비고)에 놀이터1·놀이터2 같은 구분이 있으면 그 구분끼리 따로 싣고, 번호는 전체 장 수로 매깁니다.' +
       (odd.length ? ' 한 포 무게로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
-      (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번이 빈 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '. 인쇄 뒤 손으로 적거나 비워 두세요.</p>' : '') +
-      '<button type="button" class="primary wide mt12" data-act="labprint"' + (pallets.length ? '' : ' disabled') + '>물표 ' + pallets.length + '장 인쇄하기</button></section></div>';
-    h += '<div class="labwrap">' + pallets.map(function (p, i) { return labelPage(p, i + 1, pallets.length); }).join('') + '</div>';
+      (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번 칸에 제품 이름을 적은 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '.</p>' : '') +
+      '<button type="button" class="primary wide mt12" data-act="labprint"' + (plan.length ? '' : ' disabled') + '>물표 ' + plan.length + '장 인쇄하기</button></section></div>';
+    h += '<div class="labwrap">' + plan.map(function (p, i) { return labelPage(p, i + 1, plan.length); }).join('') + '</div>';
     return h;
   }
 
@@ -3379,7 +3506,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'mvsave': moveSave(); return;
       case 'labopen': labOpen(String(v || '').split(',').filter(Boolean)); return;
       case 'labback': S.outMode = 'cal'; render(); var dc0 = document.getElementById('daycard'); if (dc0 && dc0.scrollIntoView) { try { dc0.scrollIntoView({ block: 'nearest' }); } catch (e) { dc0.scrollIntoView(); } } return;
-      case 'labcap': store('nmc_lab_cap', String(Math.max(1, Math.min(200, labCap() + Number(v))))); render(); return;
+      case 'labcap': store('nmc_lab_cap2', String(Math.max(1, Math.min(200, labCap() + Number(v))))); render(); return;
       case 'labprint': try { window.print(); } catch (e) { toast('인쇄 창을 열지 못했습니다'); } return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
@@ -3450,7 +3577,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     if (k === 'labsite' && S.lab) {
       S.lab.site = el.value;
-      Array.prototype.forEach.call(document.querySelectorAll('.lab-site b'), function (b) { b.textContent = el.value; });
+      Array.prototype.forEach.call(document.querySelectorAll('.labsvg text.lab-site'), function (t) { t.textContent = el.value; });
+      labFit();
       return;
     }
     if (k === 'adj' && S.sheet) { S.sheet.val = el.value; var dd = document.getElementById('adj-diff'); if (dd) dd.textContent = adjDiffText(); return; }
@@ -3488,7 +3616,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
     if (a === 'labcap') {
       var nc = Number(String(el.value).replace(/[^0-9]/g, ''));
-      if (nc >= 1 && nc <= 200) store('nmc_lab_cap', String(nc)); else toast('파렛트 1장 포대 수는 1~200 사이로 넣어 주세요');
+      if (nc >= 1 && nc <= 200) store('nmc_lab_cap2', String(nc)); else toast('파렛트 1장 포대 수는 1~200 사이로 넣어 주세요');
       render();
       return;
     }
