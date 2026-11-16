@@ -208,6 +208,32 @@ select.text{padding-right:8px}
 .mvchk{display:flex;align-items:center;gap:10px;min-height:40px;min-width:0;cursor:pointer}
 .mvchk input{width:22px;height:22px;flex:none;margin:0;accent-color:var(--accent)}
 .mvrow > small{grid-column:1 / 3;padding-left:32px;font-size:13px}
+/* 작은 달력 (다른 날짜 · 옮길 날짜) */
+button.datebox{font-family:inherit}
+.mcal{margin-top:10px;border:1px solid var(--line);border-radius:14px;padding:8px;background:var(--card)}
+.mcal.pop{box-shadow:0 6px 18px rgba(16,24,40,.10)}
+.mchead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.mchead b{font-size:16px;font-weight:800;color:var(--ink)}
+.mchead .ghost.sm{flex:none;min-width:44px}
+.mcgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.mcw{text-align:center;font-size:12px;font-weight:700;color:var(--muted);padding:2px 0}
+.mcw.sun,.mcd.sun .mn{color:#C62828}
+.mcw.sat,.mcd.sat .mn{color:#1E5AA8}
+.mcd{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:1px;min-width:0;min-height:44px;padding:5px 0 3px;border:2px solid transparent;border-radius:10px;background:var(--soft);font:inherit;color:var(--ink);cursor:pointer}
+.mcd .mn{font-size:15px;font-weight:700;line-height:1.2}
+.mcd .mq{font-size:10.5px;font-weight:800;line-height:1.1;color:var(--accent-strong);letter-spacing:-0.02em}
+.mcd.today{border-color:var(--accent)}
+.mcd.mark{background:#FFF1CC}
+.mcd.sel{background:var(--accent);border-color:var(--accent)}
+.mcd.sel .mn,.mcd.sel .mq{color:#fff}
+.mcd:disabled{background:transparent;cursor:default}
+.mcd:disabled .mn,.mcd:disabled .mq{color:#C4CAD3}
+.mcleg{display:flex;flex-wrap:wrap;gap:4px 12px;margin:8px 2px 0;font-size:12.5px;color:var(--muted)}
+.mcleg .lg::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.mcleg .mk::before{background:#FFF1CC;border:1px solid #E5C46A}
+.mcleg .sl::before{background:var(--accent)}
+.mcleg .q::before{display:none}
+.mvsel{color:var(--accent-strong)}
 .calback{padding:10px 12px}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
 .calhead h2{margin:0;font-size:21px;font-weight:800}
@@ -555,7 +581,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
@@ -1537,12 +1563,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     ls.forEach(function (l) { pick[l.id] = true; });
     openSheet({ kind: 'move', ids: ls.map(function (l) { return l.id; }), pick: pick, date: '', from: ls[0].date });
   }
-  /* 날짜 단추: 예정은 오늘부터 8일, 실제 출고는 사흘 전~사흘 뒤 (지금 날짜는 빼고) */
-  function moveDates(from, plan) {
-    var out = [], d = plan ? S.today : addDays(S.today, -3), end = addDays(S.today, plan ? 9 : 3);
-    for (; d <= end && out.length < 8; d = addDays(d, 1)) if (d !== from) out.push(d);
-    return out;
-  }
   function mvShort(d) { var x = parseYmd(d), t = parseYmd(S.today); return x.getMonth() === t.getMonth() ? x.getDate() + '일' : (x.getMonth() + 1) + '.' + x.getDate(); }
   function mvLabel(d) {
     var x = parseYmd(d), t = parseYmd(S.today);
@@ -1582,10 +1602,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return '<li class="cfrow mvrow"><label class="mvchk"><input type="checkbox" data-in="mvpick" data-v="' + esc(l.id) + '"' + (sh.pick[l.id] ? ' checked' : '') + '>' +
         '<span class="cfname">' + sw(l.color, l.prod) + '<span>' + ptxt(l.prod) + ' · ' + esc(l.color) + '</span></span></label><b>' + fmt(l.qty) + ' kg</b>' + line + '</li>';
     }).join('') + '</ul>';
-    var ds = moveDates(sh.from, plan), other = sh.date && ds.indexOf(sh.date) < 0;
-    h += '<p class="label mt16">옮길 날짜</p><div class="chips">' + ds.map(function (d) { return chip(mvLabel(d), sh.date === d, 'mvdate', d); }).join('') +
-      '<label class="datebox" data-on="' + !!other + '">' + ICON.cal + '<span>' + (other ? esc(fmtDate(sh.date)) : '다른 날짜') + '</span>' +
-      '<input type="date" id="mv-date" data-ch="mvdate"' + (plan ? ' min="' + S.today + '"' : '') + ' max="' + planMax() + '" value="' + esc(sh.date || '') + '" aria-label="옮길 날짜 고르기"></label></div>';
+    /* 옮길 날짜: 달력 (2026-11-16 지시 "옮길 날짜를 저런 식으로 하지 말고 그냥 달력처럼") — 칸 숫자는 그날 이미 잡힌 출고예정 */
+    var dayKg = {};
+    S.plan.lines.forEach(function (l) { if (l.type === '출고예정' && !sh.pick[l.id]) dayKg[l.date] = (dayKg[l.date] || 0) + l.qty; });
+    var calYm = sh.calYm || (sh.date || (sh.from > S.today ? sh.from : S.today)).slice(0, 7);
+    h += '<p class="label mt16">옮길 날짜' + (sh.date ? ' · <b class="mvsel">' + esc(fmtDate(sh.date)) + '</b>' : ' · 달력에서 누르세요') + '</p>' +
+      miniCal('mvdate', calYm, sh.date, plan ? S.today : null, planMax(), {
+        mark: sh.from,
+        note: function (ds) { return dayKg[ds] ? '<small class="mq">' + calAmt(dayKg[ds]) + '</small>' : ''; },
+        foot: '<p class="mcleg"><span class="lg mk">지금 날짜 (' + esc(mvShort(sh.from)) + ')</span><span class="lg sl">옮길 날짜</span><span class="lg q">칸의 숫자 = 그날 잡힌 출고예정</span></p>'
+      });
     if (sh.date) {
       if (!plan && sh.date > S.today) h += '<p class="warnbox mt12">' + esc(fmtDate(sh.date)) + '은 앞날이라 아직 안 나간 출고입니다. 옮기면 출고예정으로 바뀌고, 그만큼 현재고가 다시 늘어납니다.</p>';
       if (prev && prev.newShort > 0) h += '<p class="warnbox mt12">이렇게 옮기면 다른 출고예정에 ' + fmt(prev.newShort) + ' kg 부족이 새로 생깁니다.</p>';
@@ -1626,6 +1652,71 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
   }
 
+  /* ───────── 작은 달력으로 날짜 고르기 (2026-11-16 지시) ─────────
+     "생산날짜 기입에 다른 날짜를 누르면 날짜들이 안 뜬다" — 숨겨 둔 날짜 칸(input type=date)은 컴퓨터 크롬에서 눌러도
+     고르는 창이 뜨지 않았습니다. 그래서 휴대폰·컴퓨터 어디서나 똑같이 보이는, 화면 안의 작은 달력으로 고릅니다.
+     key: indate(실제 날짜) · inpdate(예정 날짜) · day(기록 화면 날짜) · cfdate(확정 창) · mvdate(날짜 바꾸기 창) */
+  var WD_SHORT = ['일', '월', '화', '수', '목', '금', '토'];
+  function miniCal(key, ym, sel, min, max, opt) {
+    opt = opt || {};
+    var y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)), n = new Date(y, m, 0).getDate(), lead = new Date(y, m - 1, 1).getDay();
+    var pm = addMonths(ym, -1), nm = addMonths(ym, 1);
+    var h = '<div class="mcal' + (opt.cls ? ' ' + opt.cls : '') + '"><div class="mchead">' +
+      '<button type="button" class="ghost sm" data-act="mcnav" data-v="' + key + '|' + pm + '"' + (min && pm < min.slice(0, 7) ? ' disabled' : '') + ' aria-label="이전 달">◀</button>' +
+      '<b>' + esc(fmtYm(ym)) + '</b>' +
+      '<button type="button" class="ghost sm" data-act="mcnav" data-v="' + key + '|' + nm + '"' + (max && nm > max.slice(0, 7) ? ' disabled' : '') + ' aria-label="다음 달">▶</button></div>' +
+      '<div class="mcgrid">' + WD_SHORT.map(function (w, i) { return '<span class="mcw' + (i === 0 ? ' sun' : i === 6 ? ' sat' : '') + '">' + w + '</span>'; }).join('');
+    for (var i = 0; i < lead; i++) h += '<span></span>';
+    for (var d = 1; d <= n; d++) {
+      var ds = ym + '-' + pad(d), dow = (lead + d - 1) % 7, off = (min && ds < min) || (max && ds > max);
+      var cls = 'mcd' + (dow === 0 ? ' sun' : dow === 6 ? ' sat' : '') + (ds === S.today ? ' today' : '') + (ds === sel ? ' sel' : '') + (opt.mark === ds ? ' mark' : '');
+      h += '<button type="button" class="' + cls + '" data-act="mcpick" data-v="' + key + '|' + ds + '"' + (off ? ' disabled' : '') +
+        ' aria-label="' + esc(fmtDateLong(ds)) + '" aria-pressed="' + (ds === sel) + '"><span class="mn">' + d + '</span>' + (opt.note ? opt.note(ds) : '') + '</button>';
+    }
+    return h + '</div>' + (opt.foot || '') + '</div>';
+  }
+  /* '다른 날짜' 단추: 누르면 바로 밑에 달력이 열리고, 날짜를 누르면 닫힙니다 */
+  function otherBtn(key, cur, isOther, open) {
+    return '<button type="button" class="datebox" data-on="' + !!(isOther || open) + '" data-act="pickopen" data-v="' + key + '" aria-expanded="' + !!open + '">' +
+      ICON.cal + '<span>' + (isOther ? esc(fmtDate(cur)) : '다른 날짜') + '</span></button>';
+  }
+  function pickOpenNow(key) { return !!(S.pick && S.pick.key === key); }
+  function pickPanel(key, cur, min, max) {
+    return pickOpenNow(key) ? miniCal(key, S.pick.ym, cur, min, max, { cls: 'pop' }) : '';
+  }
+  function pickCur(key) { return key === 'indate' ? S.inDate : key === 'inpdate' ? S.inPDate : key === 'day' ? S.day : ''; }
+  function pickOpen(key) {
+    if (key === 'cfdate') {
+      if (!S.sheet || S.sheet.kind !== 'confirm') return;
+      S.sheet.calOpen = !S.sheet.calOpen;
+      S.sheet.calYm = (S.sheet.dmode === 'date' ? S.sheet.date : S.today).slice(0, 7);
+      renderSheet();
+      return;
+    }
+    S.pick = pickOpenNow(key) ? null : { key: key, ym: (pickCur(key) || S.today).slice(0, 7) };
+    render();
+  }
+  function mcNav(v) {
+    var i = v.indexOf('|'), key = v.slice(0, i), ym = v.slice(i + 1);
+    if (!/^\d{4}-\d{2}$/.test(ym)) return;
+    if (key === 'cfdate' || key === 'mvdate') { if (S.sheet) { S.sheet.calYm = ym; renderSheet(); } return; }
+    if (pickOpenNow(key)) { S.pick.ym = ym; render(); }
+  }
+  function mcPick(v) {
+    var i = v.indexOf('|'), key = v.slice(0, i), d = v.slice(i + 1);
+    if (!isYmd(d)) return;
+    if (key === 'mvdate') { if (S.sheet && S.sheet.kind === 'move') { S.sheet.date = d; renderSheet(); } return; }
+    if (key === 'cfdate') {
+      if (S.sheet && S.sheet.kind === 'confirm' && d <= S.today) { S.sheet.dmode = 'date'; S.sheet.date = d; S.sheet.calOpen = false; renderSheet(); }
+      return;
+    }
+    S.pick = null;
+    if (key === 'indate') { if (d <= S.today) S.inDate = d; render(); return; }
+    if (key === 'inpdate') { if (d >= S.today && d <= planMax()) S.inPDate = d; render(); return; }
+    if (key === 'day') { setDay(d); return; }
+    render();
+  }
+
   function viewLoading() {
     return '<div class="center"><div class="spinner" aria-hidden="true"></div><p>불러오는 중…</p></div>';
   }
@@ -1639,9 +1730,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<div class="chips">';
     h += '<button type="button" class="chip" aria-pressed="' + (cur === S.today) + '" data-act="' + act + '" data-v="' + S.today + '">오늘</button>';
     h += '<button type="button" class="chip" aria-pressed="' + (cur === y) + '" data-act="' + act + '" data-v="' + y + '">어제</button>';
-    h += '<label class="datebox" data-on="' + other + '">' + ICON.cal + '<span>' + (other ? esc(fmtDate(cur)) : '다른 날짜') + '</span>' +
-      '<input type="date" id="' + idFor + '" data-ch="' + act + '" max="' + S.today + '" value="' + cur + '" aria-label="다른 날짜 고르기"></label>';
-    return h + '</div>';
+    h += otherBtn(act, cur, other, pickOpenNow(act));
+    return h + '</div>' + pickPanel(act, cur, null, S.today);
   }
 
   /* 입력 */
@@ -1649,9 +1739,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var cur = S.inPDate, t1 = addDays(S.today, 1), t2 = addDays(S.today, 2);
     var other = [S.today, t1, t2].indexOf(cur) < 0;
     var h = '<div class="chips">' + chip('오늘', cur === S.today, 'inpdate', S.today) + chip('내일', cur === t1, 'inpdate', t1) + chip('모레', cur === t2, 'inpdate', t2);
-    h += '<label class="datebox" data-on="' + other + '">' + ICON.cal + '<span>' + (other ? esc(fmtDate(cur)) : '다른 날짜') + '</span>' +
-      '<input type="date" id="in-pdate" data-ch="inpdate" min="' + S.today + '" max="' + planMax() + '" value="' + cur + '" aria-label="예정 날짜 고르기"></label>';
-    return h + '</div>';
+    h += otherBtn('inpdate', cur, other, pickOpenNow('inpdate'));
+    return h + '</div>' + pickPanel('inpdate', cur, S.today, planMax());
   }
 
   function viewIn() {
@@ -2109,6 +2198,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (sale) { S.inCust = ''; S.inPo = ''; }
       S.sheet = null;
       if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab2', 'plan'); }
+      S.pick = null;
       if (VIEW === 'out') { S.outMode = 'cal'; S.calDay = d0; S.calYm = d0.slice(0, 7); }
       if (VIEW === 'all' && S.allAdd) { S.tab = S.allAddFrom === 'stock' ? 'stock' : 'plan'; store('nmc_inv_tab2', S.tab); S.allAdd = ''; }
       render();
@@ -2429,8 +2519,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (allPast) h += chip('예정 날짜대로' + (single ? ' (' + fmtDate(l.date) + ')' : ''), sh.dmode === 'keep', 'cfkeep', 'keep');
     var y = addDays(S.today, -1), isDate = sh.dmode === 'date', other = isDate && sh.date !== S.today && sh.date !== y;
     h += chip('오늘', isDate && sh.date === S.today, 'cfdate', S.today) + chip('어제', isDate && sh.date === y, 'cfdate', y);
-    h += '<label class="datebox" data-on="' + other + '">' + ICON.cal + '<span>' + (other ? esc(fmtDate(sh.date)) : '다른 날짜') + '</span>' +
-      '<input type="date" id="cf-date" data-ch="cfdate" max="' + S.today + '" value="' + sh.date + '" aria-label="실제 날짜 고르기"></label></div>';
+    h += otherBtn('cfdate', sh.date, other, !!sh.calOpen) + '</div>' +
+      (sh.calOpen ? miniCal('cfdate', sh.calYm || sh.date.slice(0, 7), isDate ? sh.date : '', null, S.today, { cls: 'pop' }) : '');
     if (single) {
       h += '<label class="label mt16" for="cf-qty">실제 수량 (kg)</label><input id="cf-qty" class="text" type="text" inputmode="numeric" autocomplete="off" data-in="cfqty" value="' + esc(sh.qty) + '" placeholder="' + fmt(l.qty) + '">';
       h += '<div class="hint" id="cf-rest">' + restHtml() + '</div>';
@@ -2839,9 +2929,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var d = S.day, ym = d.slice(0, 7), m = S.months[ym];
     var first = S.firstYm + '-01';
     var h = '<div class="stack"><div class="daybar"><button type="button" class="iconbtn" data-act="dprev" aria-label="전날"' + (d <= first ? ' disabled' : '') + '>' + ICON.chevL + '</button>' +
-      '<label class="datebox">' + ICON.cal + '<span>' + esc(fmtDate(d)) + '</span><input type="date" id="log-date" data-ch="day" min="' + first + '" max="' + S.today + '" value="' + d + '" aria-label="날짜 고르기"></label>' +
+      '<button type="button" class="datebox" data-act="pickopen" data-v="day" aria-expanded="' + pickOpenNow('day') + '">' + ICON.cal + '<span>' + esc(fmtDate(d)) + '</span></button>' +
       '<span class="mgroup">' + (d !== S.today ? '<button type="button" class="chip" data-act="dtoday">오늘</button>' : '') +
-      '<button type="button" class="iconbtn" data-act="dnext" aria-label="다음날"' + (d >= S.today ? ' disabled' : '') + '>' + ICON.chevR + '</button></span></div>';
+      '<button type="button" class="iconbtn" data-act="dnext" aria-label="다음날"' + (d >= S.today ? ' disabled' : '') + '>' + ICON.chevR + '</button></span></div>' +
+      pickPanel('day', d, first, S.today);
     if (!m) { ensureMonth(ym); return h + pendingCard(ym) + '</div>'; }
     var recs = m.records.filter(function (r) { return r.date === d; });
     var zt = function () { return { '생산': 0, '출고': 0, '반입': 0, '조정': 0, '기초': 0 }; };
@@ -3044,19 +3135,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function setDay(d) {
+    S.pick = null;
     if (!isYmd(d) || d > S.today) { toast(ERR.future_date); render(); return; }
     S.day = d;
     render();
   }
 
   document.addEventListener('click', function (ev) {
+    if (ev.target && ev.target.id === 'ed-date' && ev.target.showPicker) { try { ev.target.showPicker(); } catch (e) { /* 이미 열림 등 */ } }
     var el = ev.target.closest ? ev.target.closest('[data-act]') : null;
     if (!el || el.disabled) return;
     var act = el.getAttribute('data-act'), v = el.getAttribute('data-v');
     switch (act) {
       case 'overlay': if (ev.target === el) closeSheet(); return;
       case 'close': closeSheet(); return;
-      case 'tab': S.tab = v; store('nmc_inv_tab2', v); S.allAdd = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'tab': S.tab = v; store('nmc_inv_tab2', v); S.allAdd = ''; S.pick = null; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'refresh': S.pnl = null; S.pnlErr = false; refresh(true); return;
       case 'login': openSheet({ kind: 'login', err: '' }); return;
       case 'dologin': doLogin(); return;
@@ -3073,20 +3166,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'anaper': S.anaPer = v; render(); return;
       case 'statsretry': S.sErr = {}; S.pnlErr = false; render(); return;
       case 'retry': start(); return;
-      case 'intype': S.inType = v; store('nmc_inv_type', v); render(); return;
-      case 'indate': S.inDate = v; render(); return;
-      case 'inpdate': S.inPDate = v; render(); return;
+      case 'intype': S.pick = null; S.inType = v; store('nmc_inv_type', v); render(); return;
+      case 'indate': S.pick = null; S.inDate = v; render(); return;
+      case 'inpdate': S.pick = null; S.inPDate = v; render(); return;
+      case 'pickopen': pickOpen(v); return;
+      case 'mcnav': mcNav(v); return;
+      case 'mcpick': mcPick(v); return;
       case 'newplan': S.allAddFrom = S.tab; S.allAdd = v; S.inType = v; store('nmc_inv_type', v); S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'planprod': goPlanProd(v); return;
       case 'pline': openSheet({ kind: 'pline', id: v }); return;
       case 'confirm1': openConfirm([v]); return;
       case 'mvopen': openMove(String(v || '').split(',').filter(Boolean)); return;
-      case 'mvdate': if (S.sheet && S.sheet.kind === 'move') { S.sheet.date = v; renderSheet(); } return;
       case 'mvsave': moveSave(); return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
-      case 'cfkeep': S.sheet.dmode = 'keep'; renderSheet(); return;
-      case 'cfdate': S.sheet.dmode = 'date'; S.sheet.date = v; renderSheet(); return;
+      case 'cfkeep': S.sheet.dmode = 'keep'; S.sheet.calOpen = false; renderSheet(); return;
+      case 'cfdate': S.sheet.dmode = 'date'; S.sheet.date = v; S.sheet.calOpen = false; renderSheet(); return;
       case 'cfsave': confirmSave(); return;
       case 'stprod': S.stProd = v; render(); return;
       case 'yprev': if (S.yv > S.yMin) { S.yv = String(Number(S.yv) - 1); render(); } return;
@@ -3173,15 +3268,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return;
     }
     if (el.getAttribute('data-in') === 'cfrest' && S.sheet) { S.sheet.keepRest = el.checked; return; }
-    if (a === 'mvdate' && S.sheet && S.sheet.kind === 'move') {
-      var mplan = S.sheet.ids.map(recOf).filter(Boolean).every(function (l) { return isPlan(l.type); });
-      if (!isYmd(el.value)) toast(ERR.bad_date);
-      else if (mplan && el.value < S.today) toast(ERR.past_plan);
-      else if (el.value > planMax()) toast(ERR.bad_date);
-      else S.sheet.date = el.value;
-      renderSheet();
-      return;
-    }
     if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
     if (a === 'day') { if (el.value) setDay(el.value); return; }
     var e2 = el.getAttribute('data-ed');
