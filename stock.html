@@ -234,6 +234,49 @@ button.datebox{font-family:inherit}
 .mcleg .sl::before{background:var(--accent)}
 .mcleg .q::before{display:none}
 .mvsel{color:var(--accent-strong)}
+/* 묶음 단추 · 물표 */
+.dgb{display:inline-flex;gap:6px;flex:none}
+.labcap{display:flex;align-items:center;gap:8px}
+.labcap .ghost{flex:none;width:48px;min-width:48px;font-size:22px;padding:0}
+.labcap input{width:80px;flex:none;text-align:center;font-size:20px;font-weight:800}
+.labcap span{font-size:15px;font-weight:700;color:var(--ink2)}
+.labwrap{display:flex;flex-direction:column;align-items:center;gap:18px;margin:14px 0 24px}
+.lab{box-sizing:border-box;container-type:inline-size;width:100%;max-width:760px;aspect-ratio:210/297;background:#fff;color:#000;border:1px solid #C9CED6;box-shadow:0 2px 12px rgba(16,24,40,.08);display:flex;flex-direction:column;overflow:hidden}
+.lab-in{flex:1;box-sizing:border-box;padding:4.5cqw 4.5cqw 3cqw;display:flex;flex-direction:column;min-height:0}
+.lab h1{margin:0 0 1.6cqw;text-align:center;font-size:5.6cqw;font-weight:900;letter-spacing:.32em;line-height:1.2;color:#000}
+.lab h1 small{display:block;margin-top:.6cqw;font-size:2.6cqw;letter-spacing:.06em;font-weight:800}
+.lab-top{display:flex;justify-content:space-between;align-items:baseline;gap:2cqw;font-size:3.3cqw;font-weight:800;line-height:1.2;padding:1cqw 0;border-bottom:.35cqw solid #000}
+.lab-site{display:flex;gap:2cqw;align-items:baseline;font-size:3.3cqw;font-weight:800;line-height:1.2;padding:1.2cqw 0;border-bottom:.35cqw solid #000;min-height:5cqw}
+.lab-site b{font-size:4.2cqw;font-weight:900;min-width:0;overflow-wrap:anywhere}
+.lab-t{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:2cqw}
+.lab-t th,.lab-t td{border:.3cqw solid #000;text-align:center;vertical-align:middle;padding:.4cqw .4cqw;color:#000}
+.lab-t th{font-size:2.5cqw;font-weight:800;line-height:1.25;background:#EDEDED}
+.lab-t td{font-size:3.4cqw;font-weight:800;height:5.8cqw;line-height:1.1;word-break:keep-all;overflow-wrap:anywhere}
+.lab-t td.it .lcode{display:block;white-space:nowrap}
+.lab-t td.it .lcode.long{font-size:2.6cqw}
+.lab-t td.it small{display:block;font-size:1.8cqw;font-weight:700;color:#333;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.lab-t td.qt .kgv{font-size:2.5cqw;white-space:nowrap}
+.lab-t td.qt{font-size:4cqw;font-weight:900}
+.lab-t td.tot{font-size:8cqw;font-weight:900}
+.lab-t td.tot small{display:block;font-size:2.3cqw;font-weight:700;margin-top:1cqw}
+.lab-t td.cu{font-size:4.6cqw;font-weight:900}
+.lab-t td.pn{font-size:8cqw;font-weight:900}
+.lab-sign{margin-top:auto;border:.3cqw solid #000}
+.lab-sign h2{margin:0;padding:1cqw;text-align:center;font-size:2.8cqw;font-weight:800;border-bottom:.3cqw solid #000;background:#EDEDED;color:#000}
+.lab-sign .sg{display:grid;grid-template-columns:1fr 1fr}
+.lab-sign .sg > div{border-right:.3cqw solid #000;text-align:center}
+.lab-sign .sg > div:last-child{border-right:0}
+.lab-sign .sg p{margin:0;padding:1cqw;font-size:2.5cqw;font-weight:800;line-height:1.3;border-bottom:.3cqw solid #000;color:#000}
+.lab-sign .sg p.sl{border-bottom:0;height:11cqw;display:flex;align-items:flex-end;justify-content:center;padding-bottom:1.6cqw;color:#666;font-weight:600}
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  body.labmode{background:#fff !important}
+  body.labmode #app > *:not(.labwrap),body.labmode #sheet,body.labmode #toast{display:none !important}
+  body.labmode #app{padding:0 !important;margin:0 !important;max-width:none !important;width:auto !important}
+  body.labmode .labwrap{display:block;margin:0}
+  body.labmode .lab{width:194mm;height:279mm;max-width:none;aspect-ratio:auto;margin:0 auto;border:0;box-shadow:none;break-inside:avoid;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body.labmode .lab:last-child{break-after:auto;page-break-after:auto}
+}
 .calback{padding:10px 12px}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
 .calhead h2{margin:0;font-size:21px;font-weight:800}
@@ -1000,7 +1043,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += footer();
     }
     root.className = 'wrap' + (bar ? ' with-bar' : '');
-    document.body.className = bar ? 'has-bar' : '';
+    document.body.className = (bar ? 'has-bar' : '') + (S.ready && S.admin && VIEW === 'out' && S.outMode === 'label' ? ' labmode' : '');
     root.innerHTML = h;
     renderSheet();
     if (fid) {
@@ -1552,7 +1595,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return order.map(function (k) {
       var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음');
       return '<div class="dgrp"><div class="dgh"><span><b>' + esc(name) + '</b>' + (x.po ? ' · ' + esc(x.po) : '') + ' · ' + x.rows.length + '줄 · ' + fmt(x.kg) + ' kg</span>' +
-        (S.admin ? '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button>' : '') + '</div>' +
+        (S.admin ? '<span class="dgb">' + (x.type !== '생산예정' ? '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>' : '') +
+          '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button></span>' : '') + '</div>' +
         '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
     }).join('');
   }
@@ -1715,6 +1759,112 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (key === 'inpdate') { if (d >= S.today && d <= planMax()) S.inPDate = d; render(); return; }
     if (key === 'day') { setDay(d); return; }
     render();
+  }
+
+  /* ───────── 물표 · 적재물 상세 내용 (2026-11-16 지시) ─────────
+     "발주서가 들어오면 그 발주서를 보고 물표를 만든다. 물표를 보고 파레트에 작업자들이 적재를 하고, 파렛트에 무엇이 있는지 알 수 있다.
+      니가 이거까지 다 정리해서 우리가 검토하고 출력만 할 수 있도록 만들어 줘."
+     출고량 달력의 거래처 묶음 → '물표' → 파렛트마다 한 장(A4)씩, 회사 양식(적재물 상세 내용 · CARGO DETAIL LABEL) 그대로.
+     물량은 포대 수. 한 포 무게(처음 25 kg)와 파렛트 한 장에 실을 포대 수(처음 40포)는 화면에서 바꿀 수 있고, 그 휴대폰·PC에 기억됩니다.
+     정해 두면 저절로 나눕니다:
+       한 색이 파렛트 한 장을 넘으면 그 색만으로 꽉 채운 파렛트를 먼저 만들고, 남은 양들은 큰 것부터 빈 자리에 함께 싣습니다(한 장에 10줄까지).
+     품번은 회사 색상 코드표(NM-01~22 · NMSBR · NMEPDM)를 따릅니다. 코드표에 없는 색은 품번 칸을 비워 둡니다. */
+  var LAB_CODE = { '로즈': 'NM-01', '분홍': 'NM-02', '주황': 'NM-03', '노랑': 'NM-04', '겨자': 'NM-05', '연두': 'NM-06', '녹색': 'NM-07', '진녹': 'NM-08',
+    '카키': 'NM-09', '청녹': 'NM-10', '청록': 'NM-10', '하늘': 'NM-11', '하늘색': 'NM-11', '청색': 'NM-12', '진청': 'NM-13', '연보라': 'NM-14', '보라': 'NM-15',
+    '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
+  var LAB_SIZE = { '타이어 고무분말|5-7mm': ['NMSBR-01', '검정5-7'], '타이어 고무분말|2-3mm': ['NMSBR-02', '검정2-3'], '타이어 고무분말|1-2mm': ['NMSBR-03', '검정1-2'], 'EPDM 재생|2-3mm': ['NMEPDM', '재생2-3'] };
+  function labItem(prod, color) {
+    var s = LAB_SIZE[prod + '|' + color];
+    if (s) return { code: s[0], color: s[1], sub: prod };
+    var kind = S.kind && S.kind[prod];
+    if (kind && kind !== 'color') return { code: '', color: color, sub: prod };
+    return { code: LAB_CODE[String(color).replace(/\s+/g, '')] || '', color: color, sub: prod };
+  }
+  function labCap() { var n = Number(stored('nmc_lab_cap')); return n >= 1 && n <= 200 ? Math.round(n) : 40; }
+  function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
+  function labOpen(ids) {
+    var ls = ids.map(recOf).filter(Boolean);
+    if (!ls.length) { toast(ERR.not_found); return; }
+    var po = '';
+    ls.forEach(function (l) { if (!po && l.po) po = l.po; });
+    S.lab = { ids: ls.map(function (l) { return l.id; }), site: po, date: ls[0].date, cust: ls[0].cust || '', type: ls[0].type };
+    S.outMode = 'label';
+    S.sheet = null;
+    render();
+    window.scrollTo(0, 0);
+  }
+  /* 같은 제품·색은 합치고, 파렛트로 나눕니다 */
+  function labLines() {
+    var by = {}, order = [];
+    (S.lab ? S.lab.ids : []).map(recOf).filter(Boolean).forEach(function (l) {
+      var k = l.prod + '|' + l.color;
+      if (!by[k]) { by[k] = { key: k, prod: l.prod, color: l.color, kg: 0 }; order.push(k); }
+      by[k].kg += l.qty;
+    });
+    return order.map(function (k) { return by[k]; });
+  }
+  function labPallets(lines, capKg) {
+    var full = [], rest = [];
+    lines.forEach(function (l, i) {
+      var n = Math.floor(l.kg / capKg), r = l.kg - n * capKg;
+      for (var k = 0; k < n; k++) full.push([{ l: l, kg: capKg, i: i }]);
+      if (r > 0) rest.push({ l: l, kg: r, i: i });
+    });
+    rest.sort(function (a, b) { return b.kg - a.kg || a.i - b.i; });
+    var mixed = [];
+    rest.forEach(function (x) {
+      for (var j = 0; j < mixed.length; j++) {
+        var used = mixed[j].reduce(function (s, y) { return s + y.kg; }, 0);
+        if (used + x.kg <= capKg && mixed[j].length < 10) { mixed[j].push(x); return; }
+      }
+      mixed.push([x]);
+    });
+    mixed.forEach(function (p) { p.sort(function (a, b) { return a.i - b.i; }); });
+    return full.concat(mixed);
+  }
+  function labQty(kg) { var b = labBag(); return kg % b === 0 ? fmt(kg / b) : '<span class="kgv">' + fmt(kg) + 'kg</span>'; }
+  function labDate(d) { var x = parseYmd(d); return x.getFullYear() + '. ' + (x.getMonth() + 1) + '. ' + x.getDate() + '. (' + WD[x.getDay()] + ')'; }
+  function labelPage(p, n, N) {
+    var tot = p.reduce(function (s, x) { return s + x.kg; }, 0), lab = S.lab;
+    var h = '<section class="lab" aria-label="물표 ' + n + ' / ' + N + '"><div class="lab-in"><h1>적 재 물 상 세 내 용<small>(CARGO DETAIL LABEL)</small></h1>' +
+      '<div class="lab-top"><b>(주)남명</b><span>날짜: ' + esc(labDate(lab.date)) + '</span></div>' +
+      '<div class="lab-site"><span>현장명(SITE NAME):</span><b>' + esc(lab.site) + '</b></div>' +
+      '<table class="lab-t"><colgroup><col style="width:7%"><col style="width:17%"><col style="width:16%"><col style="width:13%"><col style="width:20%"><col style="width:27%"></colgroup>' +
+      '<thead><tr><th>No.</th><th>품&nbsp;&nbsp;번<br>(ITEM)</th><th>색&nbsp;&nbsp;상<br>(COLOR)</th><th>물&nbsp;&nbsp;량<br>(QTY)</th><th>총&nbsp;수&nbsp;량<br>(TOTAL)</th><th>비&nbsp;&nbsp;&nbsp;&nbsp;고</th></tr></thead><tbody>';
+    for (var r = 0; r < 10; r++) {
+      var x = p[r], it = x ? labItem(x.l.prod, x.l.color) : null;
+      h += '<tr><td>' + (r + 1) + '</td>' +
+        '<td class="it">' + (it ? '<span class="lcode' + (it.code.length > 5 ? ' long' : '') + '">' + esc(it.code) + '</span><small>' + esc(it.sub) + '</small>' : '') + '</td>' +
+        '<td>' + (it ? esc(it.color) : '') + '</td>' +
+        '<td class="qt">' + (x ? labQty(x.kg) : '') + '</td>';
+      if (r === 0) h += '<td class="tot" rowspan="10">' + labQty(tot) + '<small>' + (tot % labBag() === 0 ? '포 · ' : '') + fmt(tot) + ' kg</small></td><td class="cu" rowspan="5">' + esc(lab.cust) + '</td>';
+      if (r === 5) h += '<td class="pn" rowspan="5">' + n + '/' + N + '</td>';
+      h += '</tr>';
+    }
+    return h + '</tbody></table><div class="lab-sign"><h2>검수 및 승인 (VERIFICATION &amp; APPROVAL)</h2><div class="sg">' +
+      '<div><p>남명 담당자<br>(NMC OFFICER)</p><p class="sl">(서명란)</p></div><div><p>발주처 확인<br>(ORDERER CONFIRMATION)</p><p class="sl">(서명란)</p></div></div></div></div></section>';
+  }
+  function labelView() {
+    var lab = S.lab;
+    if (!lab) { S.outMode = 'cal'; return viewOut(); }
+    var lines = labLines(), cap = labCap(), bag = labBag(), pallets = lines.length ? labPallets(lines, cap * bag) : [];
+    var kg = lines.reduce(function (s, l) { return s + l.kg; }, 0), odd = lines.filter(function (l) { return l.kg % bag; });
+    var noCode = lines.filter(function (l) { return !labItem(l.prod, l.color).code; });
+    var h = '<div class="stack noprint"><section class="card"><button type="button" class="ghost wide" data-act="labback">← 달력으로</button>' +
+      '<h2 class="h2 mt12">물표 · 적재물 상세 내용</h2>' +
+      '<p class="muted">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + lines.length + '가지 ' + fmt(kg) + ' kg' +
+      (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + pallets.length + '장</b></p>' +
+      '<label class="label mt12" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다">' +
+      '<p class="label mt12">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div>' +
+      '<p class="label mt12">파렛트 1장에 싣는 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
+      '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 포대 수"><span>포 = ' + fmt(cap * bag) + ' kg</span>' +
+      '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button></div>' +
+      '<p class="note">처음 값(한 포 25 kg · 파렛트 40포)이 실제와 다르면 고쳐 주세요. 이 기기에 기억됩니다. 한 색이 파렛트 한 장을 넘으면 그 색만으로 꽉 채운 파렛트를 먼저 만들고, 남은 양은 큰 것부터 다른 색과 함께 싣습니다(한 장 10줄까지). 품번 밑 작은 글씨는 제품 이름입니다.' +
+      (odd.length ? ' 한 포 무게로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
+      (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번이 빈 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '. 인쇄 뒤 손으로 적거나 비워 두세요.</p>' : '') +
+      '<button type="button" class="primary wide mt12" data-act="labprint"' + (pallets.length ? '' : ' disabled') + '>물표 ' + pallets.length + '장 인쇄하기</button></section></div>';
+    h += '<div class="labwrap">' + pallets.map(function (p, i) { return labelPage(p, i + 1, pallets.length); }).join('') + '</div>';
+    return h;
   }
 
   function viewLoading() {
@@ -1908,6 +2058,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewOut() {
     if (!S.calYm) S.calYm = S.today.slice(0, 7);
     if (!S.calDay) S.calDay = S.today;
+    if (S.outMode === 'label') return labelView();
     if (S.outMode === 'add') {
       return '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="calback">← 달력으로</button></section></div>' + viewIn();
     }
@@ -3178,6 +3329,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'confirm1': openConfirm([v]); return;
       case 'mvopen': openMove(String(v || '').split(',').filter(Boolean)); return;
       case 'mvsave': moveSave(); return;
+      case 'labopen': labOpen(String(v || '').split(',').filter(Boolean)); return;
+      case 'labback': S.outMode = 'cal'; render(); var dc0 = document.getElementById('daycard'); if (dc0 && dc0.scrollIntoView) { try { dc0.scrollIntoView({ block: 'nearest' }); } catch (e) { dc0.scrollIntoView(); } } return;
+      case 'labcap': store('nmc_lab_cap', String(Math.max(1, Math.min(200, labCap() + Number(v))))); render(); return;
+      case 'labprint': try { window.print(); } catch (e) { toast('인쇄 창을 열지 못했습니다'); } return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
       case 'cfkeep': S.sheet.dmode = 'keep'; S.sheet.calOpen = false; renderSheet(); return;
@@ -3236,6 +3391,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (pa) pa.textContent = amtText(p, Number(el.getAttribute('data-k')) || 0);
       return;
     }
+    if (k === 'labsite' && S.lab) {
+      S.lab.site = el.value;
+      Array.prototype.forEach.call(document.querySelectorAll('.lab-site b'), function (b) { b.textContent = el.value; });
+      return;
+    }
     if (k === 'adj' && S.sheet) { S.sheet.val = el.value; var dd = document.getElementById('adj-diff'); if (dd) dd.textContent = adjDiffText(); return; }
     if (k === 'adjmemo' && S.sheet) { S.sheet.memo = el.value; return; }
     if (k === 'cfqty' && S.sheet) { S.sheet.qty = el.value; var cr = document.getElementById('cf-rest'); if (cr) cr.innerHTML = restHtml(); return; }
@@ -3269,6 +3429,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     if (el.getAttribute('data-in') === 'cfrest' && S.sheet) { S.sheet.keepRest = el.checked; return; }
     if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
+    if (a === 'labcap') {
+      var nc = Number(String(el.value).replace(/[^0-9]/g, ''));
+      if (nc >= 1 && nc <= 200) store('nmc_lab_cap', String(nc)); else toast('파렛트 1장 포대 수는 1~200 사이로 넣어 주세요');
+      render();
+      return;
+    }
+    if (a === 'labbag') {
+      var nb = Number(String(el.value).replace(/[^0-9]/g, ''));
+      if (nb >= 1 && nb <= 2000) store('nmc_lab_bag', String(nb)); else toast('한 포 무게는 1~2,000 kg 사이로 넣어 주세요');
+      render();
+      return;
+    }
     if (a === 'day') { if (el.value) setDay(el.value); return; }
     var e2 = el.getAttribute('data-ed');
     if (!e2 || !S.sheet || S.sheet.kind !== 'edit') return;
