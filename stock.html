@@ -662,7 +662,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var ADMIN_VIEW = VIEW !== 'prod';
   var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);   // 첫 화면 '발주서 올리기'로 들어오면 맨 위 올리기 칸을 잠깐 강조
   var QUICK = VIEW === 'out' || VIEW === 'in';
-  var VIEW_NAME = { prod: '생산량 입력', out: '출고량', 'in': '반입량', all: '전체관리' }[VIEW];
+  var VIEW_NAME = { prod: '생산', out: '출고', 'in': '반입', all: '전체관리' }[VIEW];
 
   /* 화면 표시용 색 (실제 제품 색과 똑같지는 않습니다) */
   var SWATCH = {
@@ -1930,6 +1930,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var L = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
     return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#000' : '#fff';
   }
+  /* 제품 표시 (2026-11-16 지시: "일반 EPDM인지 NM-CHIP인지 LOK-CHIP인지 저렇게 만들면 작업자들이 못 보고 혼동하기 쉽다.
+     완벽하게 그냥 멀리서 봐도 알 수 있도록") — 줄마다 품번 칸에 제품 이름을 크게(색 번호는 밑에 작게),
+     비고 칸 아래에 그 파렛트에 실린 제품을 큰 상자로. 상자 모양이 제품마다 달라 흑백으로 뽑아도 구별됩니다:
+     LOK-CHIP = 검은 상자에 흰 글씨 · NM-CHIP = 흰 상자에 굵은 검은 테두리 · 일반 EPDM = 회색 상자 · 그 밖 = 가는 테두리. */
+  var LAB_PSTYLE = { 'LOK-CHIP': { fill: '#000', ink: '#fff', stroke: '#000', sw: 0 }, 'NM-CHIP': { fill: '#fff', ink: '#000', stroke: '#000', sw: 5 },
+    '일반 EPDM': { fill: '#BDBDBD', ink: '#000', stroke: '#000', sw: 1.2 } };
+  function labPStyle(prod) { return LAB_PSTYLE[prod] || { fill: '#fff', ink: '#000', stroke: '#000', sw: 1.2 }; }
+  function labPName(prod) { return String(prod || ''); }
   function labCap() { var n = Number(stored('nmc_lab_cap2')); return n >= 1 && n <= 200 ? Math.round(n) : 56; }
   function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
   /* 따로 싣는 구분 — 메모(비고)에서 읽습니다.
@@ -2110,8 +2118,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += svgT(cx(0, 1), my, String(i + 1), { size: 11 });
       if (!x0) continue;
       var it = labItem(x0.l.prod, x0.l.color), main = it.code || it.sub, sub = it.code ? it.sub : '', ink = labInk(labTint(x0.l.prod, x0.l.color));
-      if (sub) h += svgT(cx(1, 2), my - 5, main, { size: 11, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' }) + svgT(cx(1, 2), my + 8, sub, { size: 7.5, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-prod' });
-      else h += svgT(cx(1, 2), my, main, { size: 11, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' });
+      // 칩은 제품 이름을 크게(멀리서도 LOK-CHIP·NM-CHIP·일반 EPDM이 보이게), 색 번호(NM-04)는 그 밑에 작게
+      if (sub) h += svgT(cx(1, 2), my + 10.5, main, { size: 8.5, bold: true, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' }) + svgT(cx(1, 2), my - 4, labPName(sub), { size: 15, bold: true, fill: ink, w: X[2] - X[1] - 5, cls: 'lab-prod' });
+      else h += svgT(cx(1, 2), my, it.code ? main : labPName(main), { size: it.code ? 11 : 13, bold: !it.code, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' });
       h += svgT(cx(2, 3), my, it.color, { size: 18, bold: true, w: X[3] - X[2] - 6, cls: 'lab-color' });
       h += svgT(cx(3, 4), my, labQty(x0.kg), { size: 18, bold: true, w: X[4] - X[3] - 6, cls: 'lab-qty' });
     }
@@ -2123,6 +2132,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += svgT(cx(6, 8), Y[18] - 12, p.zone, { size: 48, bold: true, base: 'alphabetic', w: bw, g: 'bi', cls: 'lab-zone' });
     } else h += svgT(cx(6, 8), Y[18] - 12, cust, { size: 48, bold: true, base: 'alphabetic', w: bw, cls: 'lab-cust' });
     h += svgT(cx(6, 8), Y[18] + 46, n + '/' + N, { size: 48, bold: true, base: 'alphabetic', w: bw, cls: 'lab-no' });
+    // 이 파렛트의 제품 — 비고 칸 아래에 큰 상자 (제품마다 모양이 달라 흑백 인쇄에서도 구별: LOK 검정 · NM 굵은 테두리 · 일반 회색)
+    var pk = [], pkg = {};
+    rows.forEach(function (r) { var k = r.l.prod; if (!pkg[k]) { pkg[k] = 0; pk.push(k); } pkg[k] += r.kg; });
+    var bx0 = X[6] + 7, bx1 = X[8] - 7, by0 = Y[18] + 62, by1 = Y[23] - 7, show = pk.length > 3 ? pk.slice(0, 2) : pk;
+    var gap = 4, bh = show.length === 1 ? Math.min(58, by1 - by0) : Math.min(30, (by1 - by0 - gap * (show.length - (pk.length > 3 ? 0 : 1))) / (show.length + (pk.length > 3 ? 1 : 0)));
+    var top = by0 + (by1 - by0 - (bh * show.length + gap * (show.length - 1) + (pk.length > 3 ? bh + gap : 0))) / 2;
+    show.forEach(function (k, i) {
+      var st = labPStyle(k), y0 = top + i * (bh + gap), half = st.sw / 2;
+      h += '<rect class="lab-pbox" x="' + f2(bx0 + half) + '" y="' + f2(y0 + half) + '" width="' + f2(bx1 - bx0 - st.sw) + '" height="' + f2(bh - st.sw) + '" rx="6" fill="' + st.fill + '"' +
+        (st.sw ? ' stroke="' + st.stroke + '" stroke-width="' + st.sw + '"' : '') + '/>';
+      var label = show.length === 1 && pk.length === 1 ? labPName(k) : labPName(k) + ' ' + labQty(pkg[k]) + (pkg[k] % labBag() ? '' : '포');
+      h += svgT((bx0 + bx1) / 2, y0 + bh / 2, label, { size: show.length === 1 && pk.length === 1 ? 30 : 15, bold: true, fill: st.ink, w: bx1 - bx0 - 14, cls: 'lab-pname' });
+    });
+    if (pk.length > 3) h += svgT((bx0 + bx1) / 2, top + show.length * (bh + gap) + bh / 2, '외 ' + (pk.length - 2) + '가지 제품', { size: 14, bold: true, w: bx1 - bx0 - 14, cls: 'lab-pname' });
     // 검수 및 승인 · 서명란
     h += svgT(cx(0, 8), cy(23, 25), '검수 및 승인 (VERIFICATION & APPROVAL)', { size: 14, bold: true });
     h += svgT(cx(0, 4), cy(25, 27) - 6.5, '남명 담당자', { size: 11, bold: true }) + svgT(cx(0, 4), cy(25, 27) + 7.5, '(NMC OFFICER)', { size: 11, bold: true });
@@ -2215,7 +2238,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
-    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>전화 주문처럼 파일이 없을 때 1 → 4 순서로 넣고 확인을 누르세요. 발주서 파일은 달력 화면 맨 위 칸에 끌어다 놓으면 바로 읽어서 넣습니다.</small></p>' : '');
+    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>전화 주문처럼 파일이 없을 때 1 → 4 순서로 넣고 확인을 누르세요. 발주서 파일은 출고 화면 맨 위 칸에 끌어다 놓으면 바로 읽어서 넣습니다.</small></p>' : '');
     else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
@@ -2299,7 +2322,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<div class="stack">';
     h += '<section class="card"><div class="daterow"><h2 class="label">생산 날짜</h2><p class="bigdate">' + esc(fmtDate(S.inDate)) + '</p></div>' +
       dateChips('indate', S.inDate, 'in-date') + '</section>';
-    h += '<section class="card"><h2 class="label">제품별 생산량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
+    h += '<section class="card"><h2 class="label">제품별 생산 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
     if (S.hasStock) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p>' +
       '<p class="hint minushint"><b>재고가 실제보다 많게 나오면</b> 칸 왼쪽 <b>−</b> 를 누르고 뺄 양을 넣으세요. 예: 화면 1,000 kg · 실제 900 kg → <b>−100</b>. 재고조정으로 저장되고 생산량에는 들어가지 않습니다.</p><ul class="qlist">';
@@ -2325,7 +2348,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return h;
   }
   function footLocked() {
-    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣습니다. 색상마다 지금 재고(kg)가 보이고, 수량을 넣으면 넣은 뒤 재고로 바뀝니다. 실제 재고가 화면보다 적으면 − 로 뺄 수 있습니다(재고조정으로 저장).</p></footer>';
+    return '<footer class="foot"><p class="note">이 화면에서는 생산만 넣습니다. 색상마다 지금 재고(kg)가 보이고, 수량을 넣으면 넣은 뒤 재고로 바뀝니다. 실제 재고가 화면보다 적으면 − 로 뺄 수 있습니다(재고조정으로 저장).</p></footer>';
   }
   /* 생산량 입력: 색상마다 현재고. 수량을 넣으면 넣은 뒤 재고를 같이 보여 줍니다 (저장하면 서버의 새 현재고로 바뀜). */
   function addedKg(it) { var n = qtyOf(S.qty[it.key]); return n && Math.abs(n) <= 1000000 && (n > 0 || -n <= stockOf(it.key)) ? n : 0; }
@@ -2458,7 +2481,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return s + labPack(g.lines.filter(function (x) { return x.l.prod; }).map(function (x) { return { kg: x.l.kg, prod: x.l.prod, color: x.l.color }; }), cap, bag).length;
     }, 0) : 0;
   }
-  function poZoneName(z) { return z ? (/^\d+$/.test(z) ? '구분 ' + z : z) : '구분 없음'; }
+  function poZoneName(z) { return z ? (/^\d+$/.test(z) ? '놀이터' + Number(z) : z) : '구분 없음'; }
   /* 넣은 뒤 계산 한 덩어리: 생산 필요(부족 시작일 순) · 이 발주서 때문에 모자라게 되는 다른 예정 */
   function poCalcHtml(sim, lines) {
     if (!sim) return '';
@@ -2932,10 +2955,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (m && m.length === 1) return z.replace(/[A-Ya-y]/, function (c) { return String.fromCharCode(c.charCodeAt(0) + 1); });
     return '';
   }
-  /* 저장할 메모: 따로 싣기를 고르면 맨 앞에 [놀이터1] (놀이터·구역 같은 말이 없는 이름은 [구분 정문앞]) */
+  /* 저장할 메모: 따로 싣기를 고르면 맨 앞에 [놀이터1] (놀이터·구역 같은 말이 없는 이름은 [구분 정문앞]).
+     숫자만 쓰면(1 · 2 · 1번) 놀이터1 · 놀이터2 (2026-11-16 지시) */
   function zoneTag() {
     var z = String(S.inZone || '').replace(/[\[\]【】]/g, '').replace(/\s+/g, '');
     if (!z) return '';
+    var zn = z.match(/^(\d{1,2})번?$/);
+    if (zn) z = '놀이터' + Number(zn[1]);
     return zoneParse('[' + z + ']').key ? '[' + z + ']' : '[구분 ' + z + ']';
   }
   function zoneName() { var t = zoneTag(); return t ? zoneParse(t).name : ''; }
@@ -3042,7 +3068,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return '<div class="stack"><section class="card"><h2 class="label">' + esc(VIEW_NAME) + ' · 관리자</h2>' +
       '<p class="gate">' + esc(what) + ' 관리자 비밀번호로 엽니다.</p>' +
       '<button type="button" class="primary wide mt12" data-act="login">관리자 로그인</button>' +
-      '<p class="hint mt12"><a href="stock.html">생산량 입력으로 가기</a></p></section></div>';
+      '<p class="hint mt12"><a href="stock.html">생산 화면으로 가기</a></p></section></div>';
   }
   function sheetLogin() {
     var x = S.sheet;
