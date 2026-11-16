@@ -252,6 +252,21 @@ button.datebox{font-family:inherit}
   body.labmode .labsvg:last-child{break-after:auto;page-break-after:auto}
 }
 .calback{padding:10px 12px}
+.pocard{padding:14px 14px 12px}
+.primary.pobtn{gap:10px;min-height:64px;font-size:21px}
+.pobtn svg{flex:none}
+.pohint{margin:12px 2px 0;font-size:15px;line-height:1.55;color:var(--ink)}
+.pofile{margin:6px 2px 0;font-size:13.5px;line-height:1.5;color:var(--muted)}
+.pofile a{color:var(--accent);font-weight:800}
+.podone{border:2px solid var(--ok);background:#F0F8F3}
+.podh{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:17px;color:var(--ok)}
+.podone p{margin:6px 0 0;font-size:15px;line-height:1.55;color:var(--ink)}
+.podone .hint{font-size:13.5px;color:var(--muted)}
+.potitle{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--accent-strong)}
+.potitle small{flex-basis:100%;font-size:13.5px;font-weight:600;line-height:1.5;color:var(--muted)}
+.stepno{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin-right:8px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;font-weight:800;vertical-align:1px}
+.daterow .label small{font-weight:600}
+.bigdate.need{color:var(--bad)}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
 .calhead h2{margin:0;font-size:21px;font-weight:800}
 .calhead .ghost{min-width:48px;min-height:44px}
@@ -552,6 +567,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return /[?&]admin=1(?:&|$)/.test(location.search) ? 'all' : 'prod';
   })();
   var ADMIN_VIEW = VIEW !== 'prod';
+  var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);   // 첫 화면 '발주서 넣기'로 들어오면 넣는 화면을 바로 엶
   var QUICK = VIEW === 'out' || VIEW === 'in';
   var VIEW_NAME = { prod: '생산량 입력', out: '출고량', 'in': '반입량', all: '전체관리' }[VIEW];
 
@@ -608,7 +624,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
@@ -1016,6 +1032,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var toastEl = document.getElementById('toast');
 
   function render() {
+    if (PO_AUTO && S.ready && S.admin && VIEW === 'out' && S.outMode === 'cal' && !S.sheet) {
+      PO_AUTO = false;
+      try { history.replaceState(null, '', location.pathname + '?view=out'); } catch (e) {}
+      startPo();
+      return;
+    }
     var ae = document.activeElement, fid = ae && ae.id, s1 = null, s2 = null;
     try { s1 = ae.selectionStart; s2 = ae.selectionEnd; } catch (e) {}
     var h = '';
@@ -1760,7 +1782,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     S.pick = null;
     if (key === 'indate') { if (d <= S.today) S.inDate = d; render(); return; }
-    if (key === 'inpdate') { if (d >= S.today && d <= planMax()) S.inPDate = d; render(); return; }
+    if (key === 'inpdate') { if (d >= S.today && d <= planMax()) { S.inPDate = d; S.poNeedDate = false; } render(); return; }
     if (key === 'day') { setDay(d); return; }
     render();
   }
@@ -1783,6 +1805,27 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var kind = S.kind && S.kind[prod];
     if (kind && kind !== 'color') return { code: '', color: color, sub: prod };
     return { code: LAB_CODE[String(color).replace(/\s+/g, '')] || '', color: color, sub: prod };
+  }
+  /* 품번 칸 색 = 그 칩의 색 (2026-11-16 지시 "노랑이면 품번에도 노랑색, 녹색이면 녹색").
+     색은 앱 화면의 색 견본(SWATCH)과 같은 색입니다. 타이어 고무분말·EPDM 재생·분철처럼 색 칩이 아닌 것은
+     양식 견본 줄(NMSBR-02 검정2-3)처럼 검정. 글씨는 칸 색이 밝으면 검정, 어두우면 흰색(더 잘 보이는 쪽). */
+  var LAB_ALIAS = { '하늘': '하늘색', '연갈': '연갈색', '진갈': '진갈색', '청녹': '청록' };
+  var LAB_EXTRA = { '적갈': '#8B3A2B', '적갈색': '#8B3A2B' };
+  function labTint(prod, color) {
+    if (LAB_SIZE[prod + '|' + color]) return '#000';
+    var kind = S.kind && S.kind[prod];
+    if (kind && kind !== 'color') return '#000';
+    var c = String(color || '').replace(/\s+/g, '');
+    c = LAB_ALIAS[c] || c;
+    return (typeof SWATCH !== 'undefined' && SWATCH[c]) || LAB_EXTRA[c] || '#000';
+  }
+  function labInk(hex) {
+    var v = /^#([0-9a-f]{6})$/i.exec(hex);
+    if (!v) return '#fff';
+    var n = parseInt(v[1], 16);
+    var ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (x) { x /= 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
+    var L = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
+    return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#000' : '#fff';
   }
   function labCap() { var n = Number(stored('nmc_lab_cap2')); return n >= 1 && n <= 200 ? Math.round(n) : 56; }
   function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
@@ -1933,9 +1976,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var cx = function (a, b) { return (X[a] + X[b]) / 2; }, cy = function (a, b) { return (Y[a] + Y[b]) / 2; };
     h += '<svg class="labsvg" viewBox="0 0 595.28 841.89" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="물표 ' + n + ' / ' + N + '" font-family="' + LAB_FONT.replace(/"/g, '') + '">';
     h += box(0, 0, 595.28, 841.89, '#fff');
-    // 칠한 칸: 머리글 회색(엑셀 흰색 −15%), 품번 검정(양식의 채운 줄과 같게)
+    // 칠한 칸: 머리글 회색(엑셀 흰색 −15%), 품번 칸은 그 칩의 색
     h += box(X[0], Y[12], X[8], Y[13], '#D9D9D9');
-    rows.forEach(function (r, i) { h += box(X[1], Y[13 + i], X[2], Y[14 + i], '#000'); });
+    rows.forEach(function (r, i) { h += box(X[1], Y[13 + i], X[2], Y[14 + i], labTint(r.l.prod, r.l.color)).replace('<rect ', '<rect class="lab-cc" '); });
     // 테두리 (엑셀 칸 테두리 그대로: 로고 칸은 (주)남명까지 한 칸, 총수량·비고는 세로로 합친 칸, 서명 칸은 제목과 한 칸)
     h += '<g fill="none" stroke="#000" stroke-width="0.75">' +
       box(X[0], Y[8], X[2], Y[11]) + box(X[2], Y[8], X[8], Y[10]) + box(X[2], Y[10], X[8], Y[11]) +
@@ -1958,14 +2001,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return t2 ? svgT(cx(a, b), cy(12, 13) - 7, t1, { size: 12, bold: true }) + svgT(cx(a, b), cy(12, 13) + 7.5, t2, { size: 12, bold: true }) : svgT(cx(a, b), cy(12, 13), t1, { size: 12, bold: true });
     };
     h += hd(0, 1, 'No.') + hd(1, 2, '품   번', '(ITEM)') + hd(2, 3, '색   상', '(COLOR)') + hd(3, 4, '물  량', '(QTY)') + hd(4, 6, '총  수  량', '(TOTAL)') + hd(6, 8, '비    고');
-    // 10줄: 번호 · 품번(검정 칸 흰 글씨, 칩은 밑에 제품 이름) · 색상 · 물량(포)
+    // 10줄: 번호 · 품번(칩 색 칸, 칩은 밑에 제품 이름) · 색상 · 물량(포)
     for (var i = 0; i < LAB_ROWS; i++) {
       var r0 = 13 + i, my = cy(r0, r0 + 1), x0 = rows[i];
       h += svgT(cx(0, 1), my, String(i + 1), { size: 11 });
       if (!x0) continue;
-      var it = labItem(x0.l.prod, x0.l.color), main = it.code || it.sub, sub = it.code ? it.sub : '';
-      if (sub) h += svgT(cx(1, 2), my - 5, main, { size: 11, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-code' }) + svgT(cx(1, 2), my + 8, sub, { size: 7.5, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-prod' });
-      else h += svgT(cx(1, 2), my, main, { size: 11, fill: '#fff', w: X[2] - X[1] - 6, cls: 'lab-code' });
+      var it = labItem(x0.l.prod, x0.l.color), main = it.code || it.sub, sub = it.code ? it.sub : '', ink = labInk(labTint(x0.l.prod, x0.l.color));
+      if (sub) h += svgT(cx(1, 2), my - 5, main, { size: 11, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' }) + svgT(cx(1, 2), my + 8, sub, { size: 7.5, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-prod' });
+      else h += svgT(cx(1, 2), my, main, { size: 11, fill: ink, w: X[2] - X[1] - 6, cls: 'lab-code' });
       h += svgT(cx(2, 3), my, it.color, { size: 18, bold: true, w: X[3] - X[2] - 6, cls: 'lab-color' });
       h += svgT(cx(3, 4), my, labQty(x0.kg), { size: 18, bold: true, w: X[4] - X[3] - 6, cls: 'lab-qty' });
     }
@@ -2069,7 +2112,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
-    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : '');
+    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>발주서 넣기</span><small>발주서에 적힌 대로 1 → 4 순서로 넣고 확인을 누르세요. 출고예정으로 저장됩니다.</small></p>' : '');
     else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
@@ -2081,8 +2124,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     h += '</div></div>';
     }
+    if (S.po) h += '<div class="daterow"><h2 class="label">' + step(1) + '출고 날짜 <small>(발주서의 납품일)</small></h2><p class="bigdate' + (S.poNeedDate ? ' need' : '') + '">' + (S.poNeedDate ? '고르세요' : esc(fmtDate(S.inPDate))) + '</p></div>' + poDateChips() + '</section>';
+    else {
     h += '<div class="daterow"><h2 class="label">' + (plan ? '예정 날짜' : '날짜') + '</h2><p class="bigdate">' + esc(fmtDate(curDate())) + '</p></div>';
     h += (VIEW === 'out' ? '<p class="hint">날짜는 달력에서 고른 날입니다. 바꾸려면 ‘← 달력으로’를 누르세요.</p>' : plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
+    }
 
     if (t === '출고' || t === '생산') {
       var pt = t + '예정';
@@ -2094,7 +2140,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
 
     if (sale) {
-      h += '<section class="card"><label class="label" for="in-cust">거래처</label>';
+      h += '<section class="card"><label class="label" for="in-cust">' + (S.po ? step(2) : '') + '거래처</label>';
       h += '<input id="in-cust" class="text" type="text" data-in="cust" list="cust-list" autocomplete="off" maxlength="60" placeholder="거래처 이름" value="' + esc(S.inCust) + '">';
       var top = S.customers.slice(0, 8);
       if (top.length) {
@@ -2105,13 +2151,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         h += '</div>';
       }
       if (t === '출고예정') {
-        h += '<label class="label mt12" for="in-po">발주번호·현장 (선택)</label>';
-        h += '<input id="in-po" class="text" type="text" data-in="po" maxlength="60" autocomplete="off" value="' + esc(S.inPo) + '" placeholder="예: 발주서 번호, 현장 이름">';
+        h += '<label class="label mt12" for="in-po">현장명 · 발주번호 (선택)</label>';
+        h += '<input id="in-po" class="text" type="text" data-in="po" maxlength="60" autocomplete="off" value="' + esc(S.inPo) + '" placeholder="예: 수성 근린공원">';
+        h += '<p class="hint">여기 쓴 것이 물표의 ‘현장명’ 칸에 찍힙니다. 현장명이 없으면 발주번호를 쓰세요.</p>';
       }
       h += '</section>';
+      if (t === '출고예정') h += zoneCard();
     }
 
-    h += '<section class="card"><h2 class="label">제품별 수량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
+    h += '<section class="card"><h2 class="label">' + (S.po ? step(4) : '') + '제품별 수량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
     if (QUICK || S.allAdd) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     var vl = vlabel(S.inProd);
     var hint = {
@@ -2236,7 +2284,81 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.outMode === 'add') {
       return '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="calback">← 달력으로</button></section></div>' + viewIn();
     }
-    return '<div class="stack">' + calCard() + dayCard() + '</div>';
+    return '<div class="stack">' + poCard() + poDone() + calCard() + dayCard() + '</div>';
+  }
+  /* ── 발주서 넣기 (2026-11-16) ── */
+  var ICON_DOC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>';
+  var ZONE_CHIPS = ['놀이터1', '놀이터2', '놀이터3', '놀이터4'];
+  function step(n) { return '<span class="stepno" aria-hidden="true">' + n + '</span>'; }
+  function poCard() {
+    return '<section class="card pocard"><button type="button" class="primary wide pobtn" data-act="poadd">' + ICON_DOC + '<span>발주서 넣기</span></button>' +
+      '<p class="pohint">받은 발주서는 <b>여기서</b> 넣습니다. 저장하면 출고예정이 되고, 달력 그 날짜에서 <b>물표</b>를 뽑습니다.</p>' +
+      '<p class="pofile">엑셀·PDF·사진·카톡 캡처 파일은 Claude 채팅에 올려도 읽어서 넣어 드립니다. <a href="https://claude.ai/new" target="_blank" rel="noopener">Claude 열기</a></p></section>';
+  }
+  function poIds(x) {
+    return S.plan.lines.filter(function (l) { return !l.fut && l.type === '출고예정' && l.date === x.date && (l.cust || '') === x.cust && (l.po || '') === x.po; })
+      .map(function (l) { return l.id; });
+  }
+  function poDone() {
+    var x = S.poLast;
+    if (!x) return '';
+    var ids = poIds(x);
+    return '<section class="card podone" role="status"><div class="podh"><b>발주서를 넣었습니다</b><button type="button" class="link" data-act="pox">닫기</button></div>' +
+      '<p>' + esc(fmtDate(x.date)) + ' · ' + esc(x.cust || '거래처 없음') + (x.po ? ' · ' + esc(x.po) : '') + (x.zone ? ' · <b>' + esc(x.zone) + '</b>' : '') + ' · ' + x.n + '줄 ' + fmt(x.kg) + ' kg</p>' +
+      '<div class="two mt12"><button type="button" class="primary" data-act="polab"' + (ids.length ? '' : ' disabled') + '>물표 보기</button>' +
+      '<button type="button" class="ghost" data-act="pomore">' + (x.next ? esc(x.next) + ' 이어서 넣기' : '이어서 넣기') + '</button></div>' +
+      '<p class="hint">같은 발주서에 다른 놀이터 물건이 있으면 ‘이어서 넣기’를 누르세요. 날짜·거래처·현장명이 그대로 들어갑니다.</p></section>';
+  }
+  /* 다음 놀이터 이름: 마지막 숫자 +1 (놀이터1 → 놀이터2, 1단지 → 2단지), 숫자가 없으면 영문 한 글자 다음(A구역 → B구역) */
+  function nextZone(z) {
+    z = String(z || '');
+    if (/\d/.test(z)) return z.replace(/(\d+)(?!.*\d)/, function (d) { return String(Number(d) + 1); });
+    var m = z.match(/[A-Ya-y]/g);
+    if (m && m.length === 1) return z.replace(/[A-Ya-y]/, function (c) { return String.fromCharCode(c.charCodeAt(0) + 1); });
+    return '';
+  }
+  /* 저장할 메모: 따로 싣기를 고르면 맨 앞에 [놀이터1] (놀이터·구역 같은 말이 없는 이름은 [구분 정문앞]) */
+  function zoneTag() {
+    var z = String(S.inZone || '').replace(/[\[\]【】]/g, '').replace(/\s+/g, '');
+    if (!z) return '';
+    return zoneParse('[' + z + ']').key ? '[' + z + ']' : '[구분 ' + z + ']';
+  }
+  function zoneName() { var t = zoneTag(); return t ? zoneParse(t).name : ''; }
+  function memoOut(type) {
+    var m = S.inMemo.trim(), t = type === '출고예정' ? zoneTag() : '';
+    return (t ? t + (m ? ' ' + m : '') : m).slice(0, 200);
+  }
+  function startPo(o) {
+    o = o || {};
+    S.po = true;
+    S.inType = '출고예정';
+    S.poNeedDate = !o.date;
+    S.inPDate = o.date || S.today;
+    S.qty = {}; S.price = {}; S.inMemo = '';
+    S.inCust = o.cust || ''; S.inPo = o.po || '';
+    S.inZone = o.zone || ''; S.zoneOwn = !!(o.zone && ZONE_CHIPS.indexOf(o.zone) < 0);
+    S.outMode = 'add'; S.sheet = null;
+    S.pick = S.poNeedDate ? { key: 'inpdate', ym: S.today.slice(0, 7) } : null;
+    render();
+    window.scrollTo(0, 0);
+  }
+  function poDateChips() {
+    var cur = S.poNeedDate ? '' : S.inPDate, t1 = addDays(S.today, 1), t2 = addDays(S.today, 2);
+    var other = !!cur && [S.today, t1, t2].indexOf(cur) < 0;
+    var h = '<div class="chips">' + chip('오늘', cur === S.today, 'inpdate', S.today) + chip('내일', cur === t1, 'inpdate', t1) + chip('모레', cur === t2, 'inpdate', t2);
+    h += otherBtn('inpdate', cur, other, pickOpenNow('inpdate'));
+    return h + '</div>' + pickPanel('inpdate', cur, S.today, planMax());
+  }
+  function zoneCard() {
+    var z = S.inZone, own = S.zoneOwn || (!!z && ZONE_CHIPS.indexOf(z) < 0);
+    var h = '<section class="card zonecard"><h2 class="label">' + (S.po ? step(3) : '') + '따로 싣기 (놀이터 구분)</h2>' +
+      '<p class="hint">발주서 비고에 ‘놀이터 1’, ‘놀이터 2’처럼 따로 실어 달라는 말이 있으면 고르세요. 물표가 놀이터별로 따로 나오고, 비고 칸에 놀이터가 찍힙니다. 놀이터마다 한 번씩 저장합니다.</p><div class="chips">';
+    h += '<button type="button" class="chip" aria-pressed="' + (!z && !own) + '" data-act="pozone" data-v="">없음</button>';
+    ZONE_CHIPS.forEach(function (c) { h += '<button type="button" class="chip" aria-pressed="' + (!own && z === c) + '" data-act="pozone" data-v="' + c + '">' + c + '</button>'; });
+    h += '<button type="button" class="chip" aria-pressed="' + own + '" data-act="pozone" data-v="#own">직접 쓰기</button></div>';
+    if (own) h += '<input id="in-zone" class="text mt8" type="text" data-in="zone" maxlength="20" autocomplete="off" value="' + esc(z) + '" placeholder="예: 놀이터5, A구역, 101동, 정문 앞" aria-label="따로 싣기 이름">';
+    return h + '</section>';
   }
   function calCard() {
     var ym = S.calYm, cur = S.today.slice(0, 7);
@@ -2281,7 +2403,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (x.pin.length) h += '<h3 class="dsec">생산예정 ' + x.pin.length + '건</h3>' + dayGroups(x.pin);
     h += '<div class="dadd">';
     if (!fut) h += '<button type="button" class="primary" data-act="caladd" data-v="출고">＋ 출고 넣기</button>';
-    if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 출고예정 넣기</button>';
+    if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 발주서 넣기</button>';
     h += '</div>';
     if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">날짜가 바뀌면 거래처 옆 ‘날짜 바꾸기’로 그 줄들을 한꺼번에 옮깁니다. 줄을 누르면 고치거나 지울 수 있고, 예정은 실제로 나간 날 ‘확정’을 누르면 출고가 됩니다.</p>';
     return h + '</section>';
@@ -2379,6 +2501,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function barInner() {
     var ls = validLines(), bl = badLines(), bad = bl.length, sk = sumKg(ls);
     var h = '<div class="bar-in"><p class="barinfo">';
+    var needDate = S.po && S.poNeedDate && S.inType === '출고예정';
+    if (needDate) h += '<span class="bad">1번 출고 날짜를 먼저 고르세요</span><br>';
     if (sk.np) h += esc(S.inType) + ' <b>' + sk.np + '건</b> · <b>' + fmt(sk.p) + '</b> kg';
     if (sk.nm) h += (sk.np ? '<br>' : '') + '<span class="minusinfo">재고 빼기 <b>' + sk.nm + '건</b> · <b>' + fmt(sk.m) + '</b> kg</span>';
     if (!ls.length) h += '수량을 넣으면 합계가 여기 나옵니다';
@@ -2387,7 +2511,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (nOver) h += '<br><span class="bad">재고보다 많이 빼는 칸 ' + nOver + '개</span>';
     h += '</p>';
     if (ls.length || bad) h += '<button type="button" class="link" data-act="clearin">비우기</button>';
-    h += '<button type="button" class="primary" data-act="review"' + (ls.length ? '' : ' disabled') + '>확인</button></div>';
+    h += '<button type="button" class="primary" data-act="review"' + (ls.length && !needDate ? '' : ' disabled') + '>확인</button></div>';
     return h;
   }
 
@@ -2414,6 +2538,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function review() {
+    if (S.po && S.poNeedDate && S.inType === '출고예정') { toast('출고 날짜를 먼저 고르세요'); window.scrollTo(0, 0); return; }
     var bad = badLines();
     if (bad.length) {
       S.inProd = bad[0].it.prod;
@@ -2458,7 +2583,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var mine = {};
     P.lines.forEach(function (x) { if (x.x) mine[x.l.prod + '|' + x.l.color] = x; });
     var h = '<h2 class="h2" id="sh-title">' + esc(fmtDate(date)) + ' · ' + esc(t) + (sale ? ' · ' + esc(S.inCust.trim()) : '') + '</h2>';
-    if (t === '출고예정' && S.inPo.trim()) h += '<p class="muted">발주번호·현장: ' + esc(S.inPo.trim()) + '</p>';
+    if (t === '출고예정' && S.inPo.trim()) h += '<p class="muted">현장명·발주번호: ' + esc(S.inPo.trim()) + '</p>';
+    if (t === '출고예정' && zoneTag()) h += '<p class="muted">따로 싣기: <b>' + esc(zoneName()) + '</b></p>';
     var groups = [], by = {};
     ls.forEach(function (l) { if (!by[l.it.prod]) { by[l.it.prod] = []; groups.push(l.it.prod); } by[l.it.prod].push(l); });
     groups.forEach(function (p, gi) {
@@ -2529,10 +2655,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       }
     }
     var d0 = curDate();
+    var poInfo = S.po && type === '출고예정' ? { date: d0, cust: S.inCust.trim(), po: S.inPo.trim(), zone: zoneName(), n: n, kg: tot } : null;
     S.busy = true;
     renderSheet();
     call('apiSave', {
-      type: type, date: curDate(), cust: sale ? S.inCust.trim() : '', memo: S.inMemo.trim(), po: type === '출고예정' ? S.inPo.trim() : '',
+      type: type, date: curDate(), cust: sale ? S.inCust.trim() : '', memo: memoOut(type), po: type === '출고예정' ? S.inPo.trim() : '',
       lines: ls.map(function (l) { return { prod: l.it.prod, color: l.it.color, qty: l.qty, price: sale ? cleanNum(S.price[pkeyOf(l.it)]) : '' }; })
     }).then(function (r) {
       S.busy = false;
@@ -2545,6 +2672,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       S.sheet = null;
       if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab2', 'plan'); }
       S.pick = null;
+      if (poInfo) { poInfo.next = nextZone(poInfo.zone); S.poLast = poInfo; }
+      S.po = false; S.poNeedDate = false; S.inZone = ''; S.zoneOwn = false;
       if (VIEW === 'out') { S.outMode = 'cal'; S.calDay = d0; S.calYm = d0.slice(0, 7); }
       if (VIEW === 'all' && S.allAdd) { S.tab = S.allAddFrom === 'stock' ? 'stock' : 'plan'; store('nmc_inv_tab2', S.tab); S.allAdd = ''; }
       render();
@@ -3503,8 +3632,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'calprev': S.calYm = addMonths(S.calYm, -1); render(); return;
       case 'calnext': S.calYm = addMonths(S.calYm, 1); render(); return;
       case 'calday': S.calDay = v; render(); var dc = document.getElementById('daycard'); if (dc && dc.scrollIntoView) dc.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
-      case 'caladd': S.inType = v === '출고예정' ? '출고예정' : '출고'; if (S.inType === '출고') S.inDate = S.calDay; else S.inPDate = S.calDay; S.qty = {}; S.price = {}; S.inCust = ''; S.inPo = ''; S.inMemo = ''; S.outMode = 'add'; S.sheet = null; render(); window.scrollTo(0, 0); return;
-      case 'calback': S.outMode = 'cal'; S.qty = {}; S.price = {}; S.sheet = null; render(); return;
+      case 'caladd': if (v === '출고예정') { S.poLast = null; startPo({ date: S.calDay }); return; }
+        S.po = false; S.inZone = ''; S.zoneOwn = false;
+        S.inType = '출고'; S.inDate = S.calDay; S.qty = {}; S.price = {}; S.inCust = ''; S.inPo = ''; S.inMemo = ''; S.outMode = 'add'; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'calback': S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return;
+      case 'poadd': S.poLast = null; startPo(); return;
+      case 'pomore': if (S.poLast) startPo({ date: S.poLast.date, cust: S.poLast.cust, po: S.poLast.po, zone: S.poLast.next || '' }); return;
+      case 'polab': if (S.poLast) { var pids = poIds(S.poLast); if (pids.length) labOpen(pids); } return;
+      case 'pox': S.poLast = null; render(); return;
+      case 'pozone':
+        if (v === '#own') { S.zoneOwn = true; if (ZONE_CHIPS.indexOf(S.inZone) >= 0) S.inZone = ''; } else { S.zoneOwn = false; S.inZone = v; }
+        render();
+        if (v === '#own') { var zi = document.getElementById('in-zone'); if (zi) zi.focus(); }
+        return;
       case 'alladdback': S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'sumprev': S.sumYm = addMonths(S.sumYm, -1); render(); return;
       case 'sumnext': S.sumYm = addMonths(S.sumYm, 1); render(); return;
@@ -3514,11 +3654,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'retry': start(); return;
       case 'intype': S.pick = null; S.inType = v; store('nmc_inv_type', v); render(); return;
       case 'indate': S.pick = null; S.inDate = v; render(); return;
-      case 'inpdate': S.pick = null; S.inPDate = v; render(); return;
+      case 'inpdate': S.pick = null; S.inPDate = v; S.poNeedDate = false; render(); return;
       case 'pickopen': pickOpen(v); return;
       case 'mcnav': mcNav(v); return;
       case 'mcpick': mcPick(v); return;
-      case 'newplan': S.allAddFrom = S.tab; S.allAdd = v; S.inType = v; store('nmc_inv_type', v); S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
+      case 'newplan': S.po = false; S.inZone = ''; S.zoneOwn = false; S.allAddFrom = S.tab; S.allAdd = v; S.inType = v; store('nmc_inv_type', v); S.qty = {}; S.price = {}; S.inMemo = ''; S.inCust = ''; S.inPo = ''; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'planprod': goPlanProd(v); return;
       case 'pline': openSheet({ kind: 'pline', id: v }); return;
       case 'confirm1': openConfirm([v]); return;
@@ -3588,6 +3728,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     if (k === 'memo') { S.inMemo = el.value; return; }
     if (k === 'po') { S.inPo = el.value; return; }
+    if (k === 'zone') { S.inZone = el.value; return; }
     if (k === 'price') {
       var p = el.getAttribute('data-p');
       S.price[p] = el.value;
@@ -3621,7 +3762,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return;
     }
     if (a === 'inpdate') {
-      if (isYmd(el.value) && el.value >= S.today && el.value <= planMax()) S.inPDate = el.value;
+      if (isYmd(el.value) && el.value >= S.today && el.value <= planMax()) { S.inPDate = el.value; S.poNeedDate = false; }
       else toast(el.value < S.today ? ERR.past_plan : ERR.bad_date);
       render();
       return;

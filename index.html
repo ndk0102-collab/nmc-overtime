@@ -75,6 +75,9 @@ button{font:inherit;color:inherit}
 .go.adm b{font-size:17px}
 .go.adm small{color:var(--muted)}
 .go.adm .chev{color:var(--muted)}
+.go.po{border-color:var(--c);background:var(--soft)}
+.go.po b{color:var(--c)}
+.go.po .pi{display:inline-flex;flex-shrink:0;color:var(--c)}
 .lock{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;min-height:28px;padding:0 9px;border-radius:999px;background:#EEF1F5;color:var(--ink2);font-size:12.5px;font-weight:800;white-space:nowrap}
 .go:focus-visible,.adminbar button:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go.main:hover{filter:brightness(1.07)}.go.adm:hover{border-color:var(--c)}}
@@ -138,6 +141,12 @@ button{font:inherit;color:inherit}
       </div>
       <a class="go main" href="stock.html">
         <span class="t"><b>생산량</b></span>
+        <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+      <a class="go adm po" href="stock.html?view=out&amp;po=1">
+        <span class="pi" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg></span>
+        <span class="t"><b>발주서 넣기</b><small>출고예정 · 물표</small></span>
+        <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>
       <a class="go adm" href="stock.html?view=out">
