@@ -1786,16 +1786,35 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function labCap() { var n = Number(stored('nmc_lab_cap2')); return n >= 1 && n <= 200 ? Math.round(n) : 56; }
   function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
-  /* 따로 싣는 구분: [놀이터1] 처럼 대괄호, 또는 '놀이터 1'·'1구역'·'A구역'·'2공구'·'101동' 같은 말 */
-  var ZONE_WORDS = '놀이터|놀이시설|구역|공구|단지|구간|코트|광장|산책로|운동장|트랙|섹터|존|동';
-  function zoneOf(memo) {
-    var s = String(memo || ''), m = s.match(/\[([^\]]{1,20})\]/) || s.match(/【([^】]{1,20})】/);
-    if (m) return m[1].replace(/\s+/g, '');
-    m = s.match(new RegExp('(' + ZONE_WORDS + ')\\s*[-#.]?\\s*(\\d{1,3}|[A-Za-z])(?![0-9A-Za-z])'));
-    if (m) return m[1] + m[2];
-    m = s.match(new RegExp('(\\d{1,4}|[A-Za-z])\\s*(번\\s*)?(' + ZONE_WORDS + ')(?![가-힣])'));
-    return m ? m[0].replace(/\s+/g, '') : '';
+  /* 따로 싣는 구분 — 메모(비고)에서 읽습니다.
+     · '놀이터 1'·'놀이터A'·'놀이터①'·'1번 놀이터'·'제2놀이터'·'A구역'·'2공구'·'1단지'·'101동' 같은 말
+     · '동·단지·지구'는 번호가 앞에 올 때만(101동·1단지). 바로 앞이 한글이면 주소로 보고 뺍니다(신당2동).
+     · 수량을 뜻하는 말은 구분이 아닙니다(놀이터 2개소·코트 3면·놀이터 1차).
+     · [놀이터1]처럼 대괄호로 적어도 되지만, 대괄호 안에 위와 같은 말이 없으면 구분으로 보지 않습니다([유씨씨] 발주서 → 구분 없음).
+       그런 말이 없는 이름은 [구분 정문앞]처럼 '구분'을 붙여 적습니다.
+     · 같은 곳을 다르게 적어도(놀이터 1 · 1번 놀이터 · [놀이터1]) 한 구분으로 묶고, 이름은 처음 적힌 대로 씁니다. */
+  var ZONE_W = '놀이터|놀이시설|놀이공간|구역|공구|구간|코트|광장|산책로|운동장|트랙|섹터|블록|블럭';
+  var ZONE_RE1 = new RegExp('(' + ZONE_W + ')\\s*[-#.]?\\s*(\\d{1,3}(?![0-9A-Za-z]|개|곳|식|면|회|차|포|톤|㎡|%)|[A-Za-z](?![0-9A-Za-z가-힣]))');
+  var ZONE_RE2 = new RegExp('(^|[^가-힣0-9A-Za-z]|제)(\\d{1,4}|[A-Za-z])\\s*(번\\s*)?(' + ZONE_W + '|단지|지구|동)(?![가-힣])');
+  function zoneKey(word, id) { return word.replace('블럭', '블록') + '|' + (/^\d+$/.test(id) ? String(Number(id)) : id.toUpperCase()); }
+  function zoneFind(s) {
+    var m = s.match(ZONE_RE1);
+    if (m) return { name: m[1] + m[2], key: zoneKey(m[1], m[2]) };
+    m = s.match(ZONE_RE2);
+    if (m) return { name: m[0].slice(m[1] === '제' ? 0 : m[1].length).replace(/\s+/g, ''), key: zoneKey(m[4], m[2]) };
+    return null;
   }
+  function zoneParse(memo) {
+    var s = String(memo || '').replace(/[①-⑳]/g, function (c) { return ' ' + (c.charCodeAt(0) - 0x245F); });
+    var re = /[\[【]([^\]】]{1,20})[\]】]/g, m, z, e;
+    while ((m = re.exec(s))) {
+      var c = m[1].replace(/\s+/g, ' ').trim();
+      if ((e = c.match(/^구분\s*[:：]?\s*(.+)$/))) { var nm = e[1].replace(/\s+/g, ''); z = zoneFind(e[1]); return { name: nm, key: z ? z.key : '#' + nm }; }
+      if ((z = zoneFind(c))) return { name: c.replace(/\s+/g, ''), key: z.key };
+    }
+    return zoneFind(s) || { name: '', key: '' };
+  }
+  function zoneOf(memo) { return zoneParse(memo).name; }
   function labOpen(ids) {
     var ls = ids.map(recOf).filter(Boolean);
     if (!ls.length) { toast(ERR.not_found); return; }
@@ -1807,19 +1826,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
     window.scrollTo(0, 0);
   }
-  /* 구분(놀이터1…)마다 같은 제품·색은 합칩니다. 순서: 처음 나온 구분 순(구분 없는 줄은 맨 뒤), 그 안은 앱의 품목 순서 */
+  /* 구분(놀이터1…)마다 같은 제품·색은 합칩니다. 줄 순서는 앱의 품목 순서 */
   function labZones() {
     var zs = [], by = {}, ord = {};
     (S.items || []).forEach(function (it, i) { ord[it.key] = i; });
     (S.lab ? S.lab.ids : []).map(recOf).filter(Boolean).forEach(function (l) {
-      var z = zoneOf(l.memo), g = by[z];
-      if (!g) { g = by[z] = { zone: z, lines: [], map: {} }; zs.push(g); }
+      var z = zoneParse(l.memo), g = by['k' + z.key];
+      if (!g) { g = by['k' + z.key] = { zone: z.name, key: z.key, lines: [], map: {} }; zs.push(g); }
       var k = l.prod + '|' + l.color;
       if (!g.map[k]) { g.map[k] = { key: k, prod: l.prod, color: l.color, kg: 0, ord: ord[k] == null ? 9999 + g.lines.length : ord[k] }; g.lines.push(g.map[k]); }
       g.map[k].kg += l.qty;
     });
     zs.forEach(function (g) { g.lines.sort(function (a, b) { return a.ord - b.ord; }); });
-    zs.sort(function (a, b) { return (a.zone ? 0 : 1) - (b.zone ? 0 : 1); });
+    // 구분 있는 것 먼저, 그 안은 이름 순(놀이터1 → 놀이터2 → 놀이터10), 구분 없는 줄은 맨 뒤
+    zs.sort(function (a, b) { return (a.key ? 0 : 1) - (b.key ? 0 : 1) || (a.key && b.key ? a.key.localeCompare(b.key, 'ko', { numeric: true }) : 0); });
     return zs;
   }
   /* 파렛트 나누기: 장 수 N = ⌈전체 포 ÷ 최대 포⌉(10줄이 모자라면 한 장씩 늘림), 장마다 목표 = 고르게(⌈T/N⌉ 또는 ⌊T/N⌋).
