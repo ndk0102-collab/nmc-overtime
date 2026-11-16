@@ -2325,7 +2325,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<section class="card"><h2 class="label">제품별 생산 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
     if (S.hasStock) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p>' +
-      '<p class="hint minushint"><b>재고가 실제보다 많게 나오면</b> 칸 왼쪽 <b>−</b> 를 누르고 뺄 양을 넣으세요. 예: 화면 1,000 kg · 실제 900 kg → <b>−100</b>. 재고조정으로 저장되고 생산량에는 들어가지 않습니다.</p><ul class="qlist">';
+      '<p class="hint minushint"><b>재고가 실제보다 많게 나오면</b> 칸 왼쪽 <b>−</b> 를 누르고 뺄 양을 넣으세요. 예: 화면 1,000 kg · 실제 900 kg → <b>−100</b>. 재고조정으로 저장되고 생산에는 들어가지 않습니다.</p><ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
       var sub = S.hasStock ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '';
