@@ -324,6 +324,15 @@ button.datebox{font-family:inherit}
 .dadd{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px;margin-top:14px}
 .gate{color:var(--ink2);word-break:keep-all}
 .qbox{display:flex;align-items:center;gap:6px}
+.qrow.hasneg{grid-template-columns:minmax(0,1fr) 192px}
+.qneg{flex:none;width:42px;height:48px;padding:0;border:2px solid var(--line);border-radius:10px;background:var(--card);color:var(--muted);font-size:26px;font-weight:800;line-height:1}
+.qneg[aria-pressed="true"]{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.qin.minus{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.qname small.stk .aft.minus{color:var(--bad)}
+.minusinfo,.minusv{color:var(--bad)}
+.cftotal.minus{color:var(--bad)}
+small.minusn{color:var(--bad)}
+.minushint{color:var(--ink2)}
 .qin{width:100%;min-width:0;height:48px;border:2px solid var(--line);border-radius:10px;padding:0 10px;font-size:19px;font-weight:800;text-align:right;background:var(--card)}
 .qin:focus{border-color:var(--accent);outline:none}
 .qin.filled{border-color:var(--accent);background:var(--accent-soft)}
@@ -599,6 +608,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     bad_qty: '수량은 kg 단위 숫자로 넣어 주세요.',
     dup_item: '같은 품목이 두 번 들어갔습니다.',
     no_lines: '수량을 넣은 칸이 없습니다.',
+    over_stock: '지금 재고보다 많이 뺄 수 없습니다. 수량을 확인해 주세요.',
     bad_lines: '한 번에 너무 많은 줄입니다. 나눠서 저장해 주세요.',
     bad_type: '이 기록은 구분을 바꿀 수 없습니다.',
     not_found: '그 사이에 지워졌거나 바뀐 기록입니다. 새로고침해 주세요.',
@@ -778,6 +788,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!/^\d+$/.test(s)) return null;
     return Number(s);
   }
+  /* 생산 '빼기' (2026-11-16): 실제보다 재고가 많게 나오면 −100 처럼 넣어 뺌. 생산일 때만, 저장은 서버에서 '재고조정'으로. */
+  function minusOk() { return S.inType === '생산'; }
+  function qtyOf(v) {
+    var s = String(v == null ? '' : v).replace(/[,\s]/g, '').replace(/^[\u2212\u2013\u2014]/, '-');
+    if (minusOk() && /^-\d+$/.test(s)) return -Number(s.slice(1));
+    if (minusOk() && s === '-') return 0;
+    return parseKg(s);
+  }
+  function isMinus(v) { return minusOk() && /^\s*[-\u2212\u2013\u2014]/.test(String(v == null ? '' : v)); }
+  function negBtn(it) {
+    if (!minusOk()) return '';
+    return '<button type="button" class="qneg" data-act="qneg" data-v="' + esc(it.key) + '" aria-pressed="' + isMinus(S.qty[it.key]) + '" aria-label="' +
+      esc(it.prod + ' ' + it.color) + ' 재고에서 빼기(−)">−</button>';
+  }
+  function sumKg(ls) { var p = 0, m = 0, np = 0, nm = 0; ls.forEach(function (l) { if (l.qty < 0) { m -= l.qty; nm++; } else { p += l.qty; np++; } }); return { p: p, m: m, np: np, nm: nm }; }
   function isPlan(t) { return t === '출고예정' || t === '생산예정'; }
   function isSale(t) { return t === '출고' || t === '출고예정'; }
   function signed(l) { return isSale(l.type) ? -l.qty : l.qty; }
@@ -985,19 +1010,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.items.forEach(function (it) {
       var v = S.qty[it.key];
       if (v == null || String(v).trim() === '') return;
-      out.push({ it: it, qty: parseKg(v) });
+      out.push({ it: it, qty: qtyOf(v) });
     });
     return out;
   }
-  function validLines() { return enteredLines().filter(function (l) { return l.qty !== null && l.qty > 0 && l.qty <= 1000000; }); }
-  function badLines() { return enteredLines().filter(function (l) { return l.qty === null || l.qty > 1000000; }); }
+  function validLines() { return enteredLines().filter(function (l) { return l.qty !== null && l.qty !== 0 && Math.abs(l.qty) <= 1000000 && (l.qty > 0 || -l.qty <= stockOf(l.it.key)); }); }
+  function badLines() { return enteredLines().filter(function (l) { return l.qty === null || Math.abs(l.qty) > 1000000 || (l.qty < 0 && -l.qty > stockOf(l.it.key)); }); }
   function countIn(p) { return validLines().filter(function (l) { return l.it.prod === p; }).length; }
   function warnFor(it) {
     var v = S.qty[it.key];
     if (v == null || String(v).trim() === '') return '';
-    var n = parseKg(v);
-    if (n === null) return '숫자만 넣어 주세요';
-    if (n > 1000000) return '수량이 너무 큽니다';
+    var n = qtyOf(v);
+    if (n === null) return minusOk() ? '숫자만 넣어 주세요 (뺄 때는 앞에 −)' : '숫자만 넣어 주세요';
+    if (Math.abs(n) > 1000000) return '수량이 너무 큽니다';
+    if (n < 0 && -n > stockOf(it.key)) return '지금 재고 ' + fmt(stockOf(it.key)) + ' kg보다 많이 뺄 수 없습니다';
     if (n <= 0 || (S.inType !== '출고' && S.inType !== '출고예정')) return '';
     if (S.inType === '출고' && n > stockOf(it.key)) return '현재 재고 ' + fmt(stockOf(it.key)) + ' kg보다 많습니다';
     var p = project([{ type: S.inType, prod: it.prod, color: it.color, qty: n, date: curDate() }]);
@@ -1942,7 +1968,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (QUICK || S.allAdd) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
     var vl = vlabel(S.inProd);
     var hint = {
-      '생산': '생산한 양을 ' + vl + '별로 넣으세요.',
+      '생산': '생산한 양을 ' + vl + '별로 넣으세요. 재고가 실제보다 많게 나오면 칸 왼쪽 − 를 누르고 뺄 양을 넣으세요(재고조정으로 저장).',
       '출고': '나간 양을 ' + vl + '별로 넣으세요.',
       '반입': '반입된 양을 ' + vl + '별로 넣으세요.',
       '출고예정': '발주 받은 양을 ' + vl + '별로 넣으세요. 예정 화면에서 날짜별로 재고가 모자라는지 계산합니다. 실제로 나가는 날 \'확정\'을 누르면 출고가 됩니다.',
@@ -1955,9 +1981,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var kg = stockOf(it.key), st = statusOf(it, kg), ps = S.plan.sum[it.key];
       var sub = '재고 ' + fmt(kg) + ' kg';
       if (ps) sub += ps.need > 0 ? ' · <span class="bad">예정 반영 시 ' + fmt(ps.need) + ' 부족</span>' : ' · 예정 후 ' + fmt(ps.final);
-      h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' +
+      h += '<li class="qrow' + (minusOk() ? ' hasneg' : '') + '"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' +
         (QUICK || S.allAdd ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '<small class="' + st + '">' + sub + '</small>') + '</span></label>';
-      h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
+      h += '<span class="qbox">' + negBtn(it) + '<input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + (isMinus(v) ? ' minus' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
       h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
     });
@@ -1977,12 +2003,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       dateChips('indate', S.inDate, 'in-date') + '</section>';
     h += '<section class="card"><h2 class="label">제품별 생산량 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
     if (S.hasStock) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
-    h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p><ul class="qlist">';
+    h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p>' +
+      '<p class="hint minushint"><b>재고가 실제보다 많게 나오면</b> 칸 왼쪽 <b>−</b> 를 누르고 뺄 양을 넣으세요. 예: 화면 1,000 kg · 실제 900 kg → <b>−100</b>. 재고조정으로 저장되고 생산량에는 들어가지 않습니다.</p><ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
       var sub = S.hasStock ? '<small class="stk" id="s-' + it.idx + '">' + stkHtml(it) + '</small>' : '';
-      h += '<li class="qrow"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' + sub + '</span></label>';
-      h += '<span class="qbox"><input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
+      h += '<li class="qrow' + (minusOk() ? ' hasneg' : '') + '"><label class="qname" for="q-' + it.idx + '">' + sw(it.color, it.prod) + '<span><b>' + esc(it.color) + '</b>' + sub + '</span></label>';
+      h += '<span class="qbox">' + negBtn(it) + '<input id="q-' + it.idx + '" class="qin' + (v ? ' filled' : '') + (isMinus(v) ? ' minus' : '') + '" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="next" data-in="qty" data-k="' + esc(it.key) +
         '" value="' + esc(v) + '" placeholder="0" aria-describedby="w-' + it.idx + '"><span class="unit">kg</span></span>';
       h += '<p class="qwarn" id="w-' + it.idx + '">' + esc(warnFor(it)) + '</p></li>';
     });
@@ -1992,7 +2019,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.saved.length) {
       h += '<section class="card"><h2 class="label">방금 저장한 생산 (이 화면에서)</h2><ul class="cflist">';
       S.saved.forEach(function (x) {
-        h += '<li class="cfrow"><span class="cfname">' + esc(fmtDate(x.date)) + ' · ' + x.n + '건</span><b>' + fmt(x.kg) + ' kg</b><small>' + paintProds(esc(x.text)) + '</small></li>';
+        h += '<li class="cfrow"><span class="cfname">' + esc(fmtDate(x.date)) + ' · ' + x.n + '건</span><b>' + (x.kg || !x.minus ? fmt(x.kg) + ' kg' : '') + (x.minus ? '<span class="minusv">' + (x.kg ? ' · ' : '') + '빼기 ' + fmt(x.minus) + ' kg</span>' : '') + '</b><small>' + paintProds(esc(x.text)) + '</small></li>';
       });
       h += '</ul><p class="hint">잘못 넣었으면 관리자에게 알려 주세요. 고치기·지우기는 관리자만 할 수 있습니다.</p></section>';
     }
@@ -2000,10 +2027,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return h;
   }
   function footLocked() {
-    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣습니다. 색상마다 지금 재고(kg)가 보이고, 수량을 넣으면 넣은 뒤 재고로 바뀝니다.</p></footer>';
+    return '<footer class="foot"><p class="note">이 화면에서는 생산량만 넣습니다. 색상마다 지금 재고(kg)가 보이고, 수량을 넣으면 넣은 뒤 재고로 바뀝니다. 실제 재고가 화면보다 적으면 − 로 뺄 수 있습니다(재고조정으로 저장).</p></footer>';
   }
   /* 생산량 입력: 색상마다 현재고. 수량을 넣으면 넣은 뒤 재고를 같이 보여 줍니다 (저장하면 서버의 새 현재고로 바뀜). */
-  function addedKg(it) { var n = parseKg(S.qty[it.key]); return n && n > 0 && n <= 1000000 ? n : 0; }
+  function addedKg(it) { var n = qtyOf(S.qty[it.key]); return n && Math.abs(n) <= 1000000 && (n > 0 || -n <= stockOf(it.key)) ? n : 0; }
   /* 출고예정: 그날 쓸 수 있는 재고 (앞선 예정까지 반영) → 넣은 양을 빼고 남는지, 모자라는지 */
   function planAt(it, q) {
     var pr = project([{ type: '출고예정', prod: it.prod, color: it.color, qty: q, date: S.inPDate }]);
@@ -2019,7 +2046,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     var out = S.inType === '출고', after = out ? kg - n : kg + n;
     return '<span class="k">현재고</span> <b class="now">' + fmt(kg) + '</b> kg' +
-      (n ? '<span class="aft' + (after < 0 ? ' neg' : '') + '">' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : '넣은 뒤 ') + '<b>' + fmt(after) + '</b> kg</span>' : '');
+      (n ? '<span class="aft' + (after < 0 ? ' neg' : '') + (n < 0 ? ' minus' : '') + '">' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : n < 0 ? fmt(-n) + ' kg 뺀 뒤 ' : '넣은 뒤 ') + '<b>' + fmt(after) + '</b> kg</span>' : '');
   }
   function ptotHtml(prod) {
     if (S.inType === '출고예정') {
@@ -2027,9 +2054,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       itemsOf(prod).forEach(function (it) { var x = addedKg(it), pa = planAt(it, x); b += Math.max(pa.before, 0); q += x; sh += pa.short; });
       return ptxt(prod) + ' 그날 재고 합계 <b>' + fmt(b) + '</b> kg' + (q ? (sh ? ' → <span class="bad">부족 <b>' + fmt(sh) + '</b> kg</span>' : ' → 남는 재고 <b>' + fmt(b - q) + '</b> kg') : '');
     }
-    var kg = 0, n = 0, out = S.inType === '출고';
-    itemsOf(prod).forEach(function (it) { kg += stockOf(it.key); n += addedKg(it); });
-    return ptxt(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (n ? ' → ' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
+    var kg = 0, n = 0, out = S.inType === '출고', anyM = false, anyP = false;
+    itemsOf(prod).forEach(function (it) { var a = addedKg(it); kg += stockOf(it.key); n += a; if (a < 0) anyM = true; if (a > 0) anyP = true; });
+    return ptxt(prod) + ' 현재고 합계 <b>' + fmt(kg) + '</b> kg' + (anyM || anyP ? ' → ' + (out ? '출고 후 ' : S.inType === '생산예정' ? '예정대로 생산하면 ' : anyM ? (anyP ? '넣고 뺀 뒤 ' : '뺀 뒤 ') : '넣은 뒤 ') + '<b>' + fmt(out ? kg - n : kg + n) + '</b> kg' : '');
   }
 
   /* 출고량 = 달력 (2026-11-15 지시). 날짜마다 출고(실제)·출고예정 양, 예정 때문에 재고가 모자라는 날은 빨강.
@@ -2170,15 +2197,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     toastOk('로그아웃했습니다');
   }
   /* 관리자가 아닌 저장: 서버는 건수·kg만 돌려줍니다. 이 화면에서 넣은 것만 아래에 보여 줍니다. */
+  /* 저장 알림 글: 생산 n건 X kg · 재고 빼기 m건 Y kg */
+  function savedText(type, ls) {
+    var k = sumKg(ls);
+    return (k.np ? type + ' ' + k.np + '건 ' + fmt(k.p) + ' kg' : '') + (k.np && k.nm ? ' · ' : '') + (k.nm ? '재고 빼기 ' + k.nm + '건 ' + fmt(k.m) + ' kg' : '');
+  }
   function savedLocked(type, n, tot, ls, r) {
     if (r && r.stock) { S.stock = r.stock; S.hasStock = true; }
     if (type === '생산') {
-      S.saved.unshift({ date: curDate(), n: n, kg: tot, text: ls.slice(0, 6).map(function (l) { return l.it.prod + ' ' + l.it.color + ' ' + fmt(l.qty) + 'kg'; }).join(' · ') +
+      var sk = sumKg(ls);
+      S.saved.unshift({ date: curDate(), n: n, kg: sk.p, minus: sk.m, text: ls.slice(0, 6).map(function (l) { return l.it.prod + ' ' + l.it.color + ' ' + (l.qty < 0 ? '빼기 ' + fmt(-l.qty) : fmt(l.qty)) + 'kg'; }).join(' · ') +
         (ls.length > 6 ? ' 외 ' + (ls.length - 6) + '건' : '') });
       S.saved = S.saved.slice(0, 5);
     }
     S.qty = {}; S.inMemo = ''; S.price = {}; S.sheet = null;
-    var msg = '저장했습니다 · ' + type + ' ' + n + '건 ' + fmt(tot) + ' kg';
+    var msg = '저장했습니다 · ' + savedText(type, ls);
     if (S.admin) { lockDown(); toastOk(msg + ' · 관리자 로그인 시간이 지나 잠겼습니다'); return; }
     render();
     window.scrollTo(0, 0);
@@ -2197,12 +2230,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function barInner() {
-    var ls = validLines(), bad = badLines().length, tot = 0;
-    ls.forEach(function (l) { tot += l.qty; });
+    var ls = validLines(), bl = badLines(), bad = bl.length, sk = sumKg(ls);
     var h = '<div class="bar-in"><p class="barinfo">';
-    if (ls.length) h += esc(S.inType) + ' <b>' + ls.length + '건</b> · <b>' + fmt(tot) + '</b> kg';
-    else h += '수량을 넣으면 합계가 여기 나옵니다';
-    if (bad) h += '<br><span class="bad">숫자가 아닌 칸 ' + bad + '개</span>';
+    if (sk.np) h += esc(S.inType) + ' <b>' + sk.np + '건</b> · <b>' + fmt(sk.p) + '</b> kg';
+    if (sk.nm) h += (sk.np ? '<br>' : '') + '<span class="minusinfo">재고 빼기 <b>' + sk.nm + '건</b> · <b>' + fmt(sk.m) + '</b> kg</span>';
+    if (!ls.length) h += '수량을 넣으면 합계가 여기 나옵니다';
+    var nOver = bl.filter(function (l) { return l.qty !== null && l.qty < 0 && Math.abs(l.qty) <= 1000000; }).length;
+    if (bad - nOver) h += '<br><span class="bad">숫자가 아닌 칸 ' + (bad - nOver) + '개</span>';
+    if (nOver) h += '<br><span class="bad">재고보다 많이 빼는 칸 ' + nOver + '개</span>';
     h += '</p>';
     if (ls.length || bad) h += '<button type="button" class="link" data-act="clearin">비우기</button>';
     h += '<button type="button" class="primary" data-act="review"' + (ls.length ? '' : ' disabled') + '>확인</button></div>';
@@ -2216,6 +2251,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var v = el.value.trim();
     if (v) S.qty[k] = v; else delete S.qty[k];
     el.classList.toggle('filled', !!v);
+    el.classList.toggle('minus', isMinus(v));
+    var qb = el.parentNode && el.parentNode.querySelector ? el.parentNode.querySelector('.qneg') : null;
+    if (qb) qb.setAttribute('aria-pressed', String(isMinus(v)));
     var w = document.getElementById('w-' + it.idx);
     if (w) w.textContent = warnFor(it);
     var sk = document.getElementById('s-' + it.idx);
@@ -2235,7 +2273,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       render();
       var el = document.getElementById('q-' + bad[0].it.idx);
       if (el) { el.focus(); el.scrollIntoView({ block: 'center' }); }
-      toast('숫자가 아닌 칸이 있습니다 · ' + bad[0].it.prod + ' ' + bad[0].it.color);
+      var b0 = bad[0];
+      toast((b0.qty !== null && b0.qty < 0 && Math.abs(b0.qty) <= 1000000 ? '지금 재고 ' + fmt(stockOf(b0.it.key)) + ' kg보다 많이 뺄 수 없습니다' : '숫자가 아닌 칸이 있습니다') +
+        ' · ' + b0.it.prod + ' ' + b0.it.color);
       return;
     }
     if (!validLines().length) { toast(ERR.no_lines); return; }
@@ -2276,8 +2316,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     ls.forEach(function (l) { if (!by[l.it.prod]) { by[l.it.prod] = []; groups.push(l.it.prod); } by[l.it.prod].push(l); });
     groups.forEach(function (p, gi) {
       var gl = by[p], gk = 0, perLine = sale && S.kind[p] && S.kind[p] !== 'color';
-      gl.forEach(function (l) { gk += l.qty; });
-      h += '<div class="rgroup"><p class="rghead">' + ptag(p) + '<span>' + gl.length + '건 · ' + fmt(gk) + ' kg</span></p>';
+      var gs = sumKg(gl);
+      gk = gs.p;
+      h += '<div class="rgroup"><p class="rghead">' + ptag(p) + '<span>' + (gs.nm ? (gs.np ? gs.np + '건 · ' + fmt(gs.p) + ' kg · ' : '') + '빼기 ' + gs.nm + '건 · ' + fmt(gs.m) + ' kg' : gl.length + '건 · ' + fmt(gk) + ' kg') + '</span></p>';
       if (sale && !perLine) h += priceRow(p, p, gk, String(gi));
       h += '<ul class="cflist">';
       gl.forEach(function (l) {
@@ -2296,7 +2337,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
           if (nb > 0 && na < nb) { note = '부족 ' + fmt(nb) + ' kg → ' + (na ? fmt(na) + ' kg' : '없음'); cls = na ? 'bad' : 'okc'; }
           else if (nb > 0) { note = '이 날짜로는 부족 ' + fmt(nb) + ' kg이 줄지 않습니다 · 부족 시작 ' + fmtDate(S.plan.sum[k] ? S.plan.sum[k].shortEff : S.today); cls = 'bad'; }
         }
-        h += '<li class="cfrow"><span class="cfname">' + sw(l.it.color, l.it.prod) + esc(l.it.color) + '</span><b>' + fmt(l.qty) + ' kg</b>' +
+        if (l.qty < 0) { note = '재고에서 뺌 · 지금 ' + fmt(stockOf(k)) + ' kg → ' + fmt(stockOf(k) + l.qty) + ' kg'; cls = 'minusn'; }
+        h += '<li class="cfrow"><span class="cfname">' + sw(l.it.color, l.it.prod) + esc(l.it.color) + '</span>' +
+          (l.qty < 0 ? '<b class="minusv">−' + fmt(-l.qty) + ' kg</b>' : '<b>' + fmt(l.qty) + ' kg</b>') +
           (note ? '<small class="' + cls + '">' + esc(note) + '</small>' : '') + '</li>';
       });
       h += '</ul>';
@@ -2304,7 +2347,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (perLine) gl.forEach(function (l, li) { h += priceRow(l.it.key, l.it.color, l.qty, gi + '-' + li); });
       h += '</div>';
     });
-    h += '<p class="cftotal"><span>합계 ' + ls.length + '건</span><span>' + fmt(tot) + ' kg</span></p>';
+    var ts = sumKg(ls);
+    if (ts.nm) {
+      if (ts.np) h += '<p class="cftotal"><span>' + esc(t) + ' 합계 ' + ts.np + '건</span><span>' + fmt(ts.p) + ' kg</span></p>';
+      h += '<p class="cftotal minus"><span>재고 빼기 ' + ts.nm + '건</span><span>−' + fmt(ts.m) + ' kg</span></p>';
+      h += '<p class="note">빼는 줄은 생산이 아니라 \'재고조정\'으로 저장됩니다. 생산 합계는 그대로이고 재고만 줄어듭니다.</p>';
+    } else h += '<p class="cftotal"><span>합계 ' + ls.length + '건</span><span>' + fmt(tot) + ' kg</span></p>';
     if (S.inMemo.trim()) h += '<p class="muted">메모: ' + esc(S.inMemo.trim()) + '</p>';
     if (t === '출고' && over) h += '<p class="warnbox mt8">재고보다 많이 나가는 줄이 ' + over + '개 있습니다. 제품과 색상·규격이 맞는지 확인해 주세요. 맞으면 그대로 저장하면 됩니다.</p>';
     if (t === '출고예정' && (over || worse)) h += '<p class="warnbox mt8">재고가 모자라는 줄이 있어도 저장할 수 있습니다. 저장하면 예정 화면에서 언제까지 얼마를 생산해야 하는지 볼 수 있습니다.</p>';
@@ -2355,7 +2403,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       render();
       window.scrollTo(0, 0);
       var ps = planStats();
-      toastOk('저장했습니다 · ' + type + ' ' + n + '건 ' + fmt(tot) + ' kg' + (isPlan(type) ? (ps.shortItems ? ' · 부족 ' + ps.shortItems + '품목' : ' · 부족 없음') : ''));
+      toastOk('저장했습니다 · ' + savedText(type, ls) + (isPlan(type) ? (ps.shortItems ? ' · 부족 ' + ps.shortItems + '품목' : ' · 부족 없음') : ''));
     }, function (e) {
       S.busy = false;
       renderSheet();
@@ -3348,6 +3396,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'cust': S.inCust = v; render(); return;
       case 'inprod': S.inProd = v; render(); return;
       case 'clearin': S.qty = {}; render(); return;
+      case 'qneg':
+        var qi = S.byKey[v], qe = qi ? document.getElementById('q-' + qi.idx) : null;
+        if (!qe) return;
+        var qv = String(qe.value || '').trim();
+        qv = isMinus(qv) ? qv.replace(/^[-\u2212\u2013\u2014]\s*/, '') : '-' + qv;
+        qe.value = qv;
+        onQty(qe);
+        try { qe.focus(); qe.setSelectionRange(qv.length, qv.length); } catch (e) {}
+        return;
       case 'review': review(); return;
       case 'save': save(); return;
       case 'low': S.low = v === '1'; render(); return;
