@@ -197,6 +197,17 @@ select.text{padding-right:8px}
 .trend text{font-size:11px;fill:var(--muted)}
 .calleg .lg.tm::before{background:#9DB3CF}
 .calleg .lg.to::before{background:var(--accent)}
+/* 출고량 달력: 거래처별 묶음과 날짜 바꾸기 */
+.dgrp{margin-top:6px}
+.dgh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:6px 0 0;padding:6px 6px 6px 10px;background:var(--soft);border-radius:10px;font-size:14px;color:var(--ink2)}
+.dgh b{color:var(--ink)}
+.dgh > span{min-width:0}
+.dgh .ghost.sm{white-space:nowrap;flex:none;background:var(--card)}
+.mvlist{margin-top:6px}
+.mvrow{align-items:center}
+.mvchk{display:flex;align-items:center;gap:10px;min-height:40px;min-width:0;cursor:pointer}
+.mvchk input{width:22px;height:22px;flex:none;margin:0;accent-color:var(--accent)}
+.mvrow > small{grid-column:1 / 3;padding-left:32px;font-size:13px}
 .calback{padding:10px 12px}
 .calhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 2px}
 .calhead h2{margin:0;font-size:21px;font-weight:800}
@@ -745,15 +756,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   /* 예정 계산 (서버 planOf_와 같은 규칙). extra = 아직 저장하지 않은 줄 [{type, prod, color, qty, date}]
      날짜 순, 같은 날은 들어오는 것(생산예정) 먼저, 날짜가 지난 예정은 오늘로. */
-  function project(extra) {
+  function ordOf(e) { return e.l.row != null ? e.l.row : e.idx; }
+  function project(extra, skip) {
     var ev = [];
-    S.plan.lines.forEach(function (l, i) { ev.push({ l: l, eff: l.eff, inb: signed(l) > 0 ? 0 : 1, idx: i }); });
+    S.plan.lines.forEach(function (l, i) { if (skip && skip[l.id]) return; ev.push({ l: l, eff: l.eff, inb: signed(l) > 0 ? 0 : 1, idx: i }); });
     (extra || []).forEach(function (l, i) {
       ev.push({ l: l, eff: l.date < S.today ? S.today : l.date, inb: signed(l) > 0 ? 0 : 1, idx: 1e9 + i, x: true });
     });
     ev.sort(function (a, b) {
       return (a.eff < b.eff ? -1 : a.eff > b.eff ? 1 : 0) || (a.inb - b.inb) ||
-        (a.l.date < b.l.date ? -1 : a.l.date > b.l.date ? 1 : 0) || (a.idx - b.idx);
+        (a.l.date < b.l.date ? -1 : a.l.date > b.l.date ? 1 : 0) || (ordOf(a) - ordOf(b));
     });
     var bal = {}, sum = {}, out = [];
     ev.forEach(function (e) {
@@ -982,6 +994,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       : S.sheet.kind === 'edit' ? sheetEdit()
       : S.sheet.kind === 'pline' ? sheetPlanLine()
       : S.sheet.kind === 'confirm' ? sheetConfirm()
+      : S.sheet.kind === 'move' ? sheetMove()
       : S.sheet.kind === 'login' ? sheetLogin()
       : S.sheet.kind === 'price' ? sheetPrice() : '';
     sheetEl.innerHTML = '<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title">' + inner + '</div></div>';
@@ -1497,6 +1510,122 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<p class="note">이 앱의 출고·생산 기록, 현재고, 예정, 손익 설정에서 바로 계산한 것입니다. ‘추정’은 원가표·고정비를 나눈 계산값이라 실제와 다를 수 있습니다. 한 달 출고는 이 기간 출고를 한 달로 환산한 값입니다.</p></section>';
   }
 
+  /* ───────── 날짜 바꾸기 (2026-11-16 지시: "16일에 등록한 4톤이 18일로 바뀌면 날짜만 쉽게 바꿀 수 있게") ─────────
+     출고량 달력에서 날짜를 누르면 그날 줄이 거래처별로 묶여 나오고, 묶음마다 '날짜 바꾸기'가 있습니다.
+     옮길 줄(처음엔 모두)과 날짜를 고르면 한 번에 옮깁니다. 수량·거래처·단가·발주번호·메모는 그대로입니다 (서버 apiMove).
+     예정은 오늘부터의 날짜로, 실제 출고는 날짜를 고칠 수 있고, 실제 출고를 앞날로 옮기면 아직 안 나간 것이라 출고예정이 됩니다. */
+  function recOf(id) { return findPlan(id) || findRecord(id); }
+  function dayGroups(list) {
+    var g = {}, order = [];
+    list.forEach(function (r) {
+      var k = r.type + '|' + (r.cust || '') + '|' + (r.po || '');
+      if (!g[k]) { g[k] = { cust: r.cust || '', po: r.po || '', type: r.type, rows: [], kg: 0 }; order.push(k); }
+      g[k].rows.push(r);
+      g[k].kg += r.qty;
+    });
+    return order.map(function (k) {
+      var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음');
+      return '<div class="dgrp"><div class="dgh"><span><b>' + esc(name) + '</b>' + (x.po ? ' · ' + esc(x.po) : '') + ' · ' + x.rows.length + '줄 · ' + fmt(x.kg) + ' kg</span>' +
+        (S.admin ? '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button>' : '') + '</div>' +
+        '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
+    }).join('');
+  }
+  function openMove(ids) {
+    var ls = ids.map(recOf).filter(Boolean);
+    if (!ls.length) { toast(ERR.not_found); return; }
+    var pick = {};
+    ls.forEach(function (l) { pick[l.id] = true; });
+    openSheet({ kind: 'move', ids: ls.map(function (l) { return l.id; }), pick: pick, date: '', from: ls[0].date });
+  }
+  /* 날짜 단추: 예정은 오늘부터 8일, 실제 출고는 사흘 전~사흘 뒤 (지금 날짜는 빼고) */
+  function moveDates(from, plan) {
+    var out = [], d = plan ? S.today : addDays(S.today, -3), end = addDays(S.today, plan ? 9 : 3);
+    for (; d <= end && out.length < 8; d = addDays(d, 1)) if (d !== from) out.push(d);
+    return out;
+  }
+  function mvShort(d) { var x = parseYmd(d), t = parseYmd(S.today); return x.getMonth() === t.getMonth() ? x.getDate() + '일' : (x.getMonth() + 1) + '.' + x.getDate(); }
+  function mvLabel(d) {
+    var x = parseYmd(d), t = parseYmd(S.today);
+    return (x.getMonth() === t.getMonth() ? x.getDate() + '일' : (x.getMonth() + 1) + '.' + x.getDate()) + ' (' + WD[x.getDay()] + ')';
+  }
+  /* 옮긴 뒤 예정 계산: 옮길 예정 줄을 빼고 새 날짜로 다시 넣어 봅니다 */
+  function movePreview(ls, date) {
+    var sh = S.sheet, skip = {}, extra = [];
+    ls.forEach(function (l) {
+      if (!sh.pick[l.id] || !isPlan(l.type)) return;
+      skip[l.id] = true;
+      extra.push({ id: l.id, type: l.type, prod: l.prod, color: l.color, qty: l.qty, date: date, row: l.row });
+    });
+    if (!extra.length) return null;
+    var base = project(), after = project(extra, skip), byId = {};
+    var othersBefore = 0, othersAfter = 0, mvBefore = 0, mvAfter = 0;
+    base.lines.forEach(function (x) { if (skip[x.l.id]) mvBefore += x.short; else othersBefore += x.short; });
+    after.lines.forEach(function (x) { if (x.x) { byId[x.l.id] = x; mvAfter += x.short; } else othersAfter += x.short; });
+    return { byId: byId, newShort: Math.max(0, othersAfter - othersBefore), solved: Math.max(0, othersBefore - othersAfter) + Math.max(0, mvBefore - mvAfter), mvShort: mvAfter };
+  }
+  function sheetMove() {
+    var sh = S.sheet, ls = sh.ids.map(recOf).filter(Boolean);
+    if (!ls.length) return '<p>그 사이에 바뀌었거나 지워진 기록입니다.</p><button type="button" class="ghost wide mt16" data-act="close">닫기</button>';
+    var first = ls[0], plan = ls.every(function (l) { return isPlan(l.type); });
+    var picked = ls.filter(function (l) { return sh.pick[l.id]; }), kg = picked.reduce(function (s, l) { return s + l.qty; }, 0);
+    var all = ls.reduce(function (s, l) { return s + l.qty; }, 0);
+    var name = first.type === '생산예정' ? '생산예정' : (first.cust || '거래처 없음');
+    var prev = sh.date ? movePreview(ls, sh.date) : null;
+    var h = '<h2 class="h2" id="sh-title">날짜 바꾸기</h2>' +
+      '<p class="muted">' + esc(name) + ' · ' + esc(fmtDate(sh.from)) + ' ' + esc(first.type) + ' · ' + ls.length + '줄 ' + fmt(all) + ' kg<br>수량·거래처·단가는 그대로 두고 날짜만 옮깁니다. 빼고 싶은 줄은 체크를 풀어 주세요.</p>';
+    h += '<ul class="cflist mvlist">' + ls.map(function (l) {
+      var p = prev && prev.byId[l.id], line = '';
+      if (p && l.type === '출고예정' && sh.pick[l.id]) {
+        line = '<small class="' + (p.short > 0 ? 'bad' : 'muted') + '">' + esc(mvLabel(sh.date)) + '에 쓸 수 있는 재고 ' + fmt(Math.max(p.before, 0)) + ' kg · ' +
+          (p.short > 0 ? '부족 ' + fmt(p.short) + ' kg' : '남음 ' + fmt(Math.max(p.after, 0)) + ' kg') + '</small>';
+      }
+      return '<li class="cfrow mvrow"><label class="mvchk"><input type="checkbox" data-in="mvpick" data-v="' + esc(l.id) + '"' + (sh.pick[l.id] ? ' checked' : '') + '>' +
+        '<span class="cfname">' + sw(l.color, l.prod) + '<span>' + ptxt(l.prod) + ' · ' + esc(l.color) + '</span></span></label><b>' + fmt(l.qty) + ' kg</b>' + line + '</li>';
+    }).join('') + '</ul>';
+    var ds = moveDates(sh.from, plan), other = sh.date && ds.indexOf(sh.date) < 0;
+    h += '<p class="label mt16">옮길 날짜</p><div class="chips">' + ds.map(function (d) { return chip(mvLabel(d), sh.date === d, 'mvdate', d); }).join('') +
+      '<label class="datebox" data-on="' + !!other + '">' + ICON.cal + '<span>' + (other ? esc(fmtDate(sh.date)) : '다른 날짜') + '</span>' +
+      '<input type="date" id="mv-date" data-ch="mvdate"' + (plan ? ' min="' + S.today + '"' : '') + ' max="' + planMax() + '" value="' + esc(sh.date || '') + '" aria-label="옮길 날짜 고르기"></label></div>';
+    if (sh.date) {
+      if (!plan && sh.date > S.today) h += '<p class="warnbox mt12">' + esc(fmtDate(sh.date)) + '은 앞날이라 아직 안 나간 출고입니다. 옮기면 출고예정으로 바뀌고, 그만큼 현재고가 다시 늘어납니다.</p>';
+      if (prev && prev.newShort > 0) h += '<p class="warnbox mt12">이렇게 옮기면 다른 출고예정에 ' + fmt(prev.newShort) + ' kg 부족이 새로 생깁니다.</p>';
+      else if (prev && prev.mvShort > 0) h += '<p class="warnbox mt12">옮긴 날에도 ' + fmt(prev.mvShort) + ' kg이 모자랍니다. 생산을 잡아야 합니다.</p>';
+      else if (prev && prev.solved > 0) h += '<p class="okbox mt12">옮기면 부족 ' + fmt(prev.solved) + ' kg이 풀립니다.</p>';
+      var there = S.plan.lines.filter(function (l) { return l.date === sh.date && l.type === '출고예정' && !sh.pick[l.id]; });
+      if (there.length) h += '<p class="hint mt8">' + esc(fmtDate(sh.date)) + '에는 이미 출고예정 ' + there.length + '건 · ' + fmt(there.reduce(function (s, l) { return s + l.qty; }, 0)) + ' kg이 있습니다.</p>';
+    }
+    h += '<div class="two mt16"><button type="button" class="ghost" data-act="close">취소</button><button type="button" class="primary" data-act="mvsave"' +
+      (S.busy || !sh.date || !picked.length ? ' disabled' : '') + '>' +
+      (S.busy ? '옮기는 중…' : !picked.length ? '옮길 줄을 고르세요' : !sh.date ? '날짜를 고르세요' : esc(mvShort(sh.date)) + '로 옮기기' + (picked.length < ls.length ? ' · ' + picked.length + '줄' : '')) + '</button></div>';
+    return h;
+  }
+  function moveSave() {
+    if (S.busy || !S.sheet) return;
+    var sh = S.sheet, ls = sh.ids.map(recOf).filter(Boolean), picked = ls.filter(function (l) { return sh.pick[l.id]; });
+    var d = sh.date;
+    if (!picked.length || !isYmd(d)) return;
+    var plan = picked.every(function (l) { return isPlan(l.type); });
+    if (plan && d < S.today) { toast(ERR.past_plan); return; }
+    if (d > planMax()) { toast(ERR.bad_date); return; }
+    var kg = picked.reduce(function (s, l) { return s + l.qty; }, 0);
+    S.busy = true;
+    renderSheet();
+    call('apiMove', { ids: picked.map(function (l) { return l.id; }), date: d }).then(function (r) {
+      S.busy = false;
+      apply(r);
+      S.sheet = null;
+      if (VIEW === 'out') { S.outMode = 'cal'; S.calDay = d; S.calYm = d.slice(0, 7); }
+      render();
+      toastOk(mvLabel(d) + '로 옮겼습니다 · ' + picked.length + '줄 ' + fmt(kg) + ' kg');
+      var dc = document.getElementById('daycard');
+      if (dc && dc.scrollIntoView) { try { dc.scrollIntoView({ block: 'nearest' }); } catch (e) { dc.scrollIntoView(); } }
+    }, function (e) {
+      S.busy = false;
+      renderSheet();
+      failed(e);
+    });
+  }
+
   function viewLoading() {
     return '<div class="center"><div class="spinner" aria-hidden="true"></div><p>불러오는 중…</p></div>';
   }
@@ -1730,17 +1859,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var past = d < S.today, fut = d > S.today;
     var h = '<section class="card day" id="daycard"><div class="dayhead"><h2>' + esc(fmtDate(d)) + '</h2><span class="dtag">' + (d === S.today ? '오늘' : past ? '지난 날' : '앞날 (예정)') + '</span></div>';
     h += '<h3 class="dsec">출고 ' + (x.out.length ? x.out.length + '건 · ' + fmt(x.outKg) + ' kg' : '없음') + '</h3>';
-    if (x.out.length) h += '<ul class="dlist">' + x.out.map(function (r) { return dayRow(r); }).join('') + '</ul>';
+    if (x.out.length) h += dayGroups(x.out);
     if (!past || x.plan.length) {
       h += '<h3 class="dsec">출고예정 ' + (x.plan.length ? x.plan.length + '건 · ' + fmt(x.planKg) + ' kg' : '없음') + '</h3>';
-      if (x.plan.length) h += '<ul class="dlist">' + x.plan.map(function (l) { return dayRow(l); }).join('') + '</ul>';
+      if (x.plan.length) h += dayGroups(x.plan);
     }
-    if (x.pin.length) h += '<h3 class="dsec">생산예정 ' + x.pin.length + '건</h3><ul class="dlist">' + x.pin.map(function (l) { return dayRow(l); }).join('') + '</ul>';
+    if (x.pin.length) h += '<h3 class="dsec">생산예정 ' + x.pin.length + '건</h3>' + dayGroups(x.pin);
     h += '<div class="dadd">';
     if (!fut) h += '<button type="button" class="primary" data-act="caladd" data-v="출고">＋ 출고 넣기</button>';
     if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 출고예정 넣기</button>';
     h += '</div>';
-    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">줄을 누르면 고치거나 지울 수 있습니다. 예정은 실제로 나간 날 ‘확정’을 누르면 출고가 됩니다.</p>';
+    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">날짜가 바뀌면 거래처 옆 ‘날짜 바꾸기’로 그 줄들을 한꺼번에 옮깁니다. 줄을 누르면 고치거나 지울 수 있고, 예정은 실제로 나간 날 ‘확정’을 누르면 출고가 됩니다.</p>';
     return h + '</section>';
   }
   function dayRow(r) {
@@ -2951,6 +3080,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'planprod': goPlanProd(v); return;
       case 'pline': openSheet({ kind: 'pline', id: v }); return;
       case 'confirm1': openConfirm([v]); return;
+      case 'mvopen': openMove(String(v || '').split(',').filter(Boolean)); return;
+      case 'mvdate': if (S.sheet && S.sheet.kind === 'move') { S.sheet.date = v; renderSheet(); } return;
+      case 'mvsave': moveSave(); return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
       case 'cfkeep': S.sheet.dmode = 'keep'; renderSheet(); return;
@@ -3041,6 +3173,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return;
     }
     if (el.getAttribute('data-in') === 'cfrest' && S.sheet) { S.sheet.keepRest = el.checked; return; }
+    if (a === 'mvdate' && S.sheet && S.sheet.kind === 'move') {
+      var mplan = S.sheet.ids.map(recOf).filter(Boolean).every(function (l) { return isPlan(l.type); });
+      if (!isYmd(el.value)) toast(ERR.bad_date);
+      else if (mplan && el.value < S.today) toast(ERR.past_plan);
+      else if (el.value > planMax()) toast(ERR.bad_date);
+      else S.sheet.date = el.value;
+      renderSheet();
+      return;
+    }
+    if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
     if (a === 'day') { if (el.value) setDay(el.value); return; }
     var e2 = el.getAttribute('data-ed');
     if (!e2 || !S.sheet || S.sheet.kind !== 'edit') return;
