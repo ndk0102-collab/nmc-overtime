@@ -424,6 +424,11 @@ body.labmode .wrap{max-width:1480px}
 .ppick .pp small.bad{color:var(--bad);font-weight:600}
 .ppick .pp.on{border-color:var(--accent);background:var(--accent-soft)}
 .ppick .pp.on b{color:var(--accent-strong)}
+.mixw{margin:8px 0 4px;padding:9px 11px;border-radius:10px;font-size:13.5px;line-height:1.5;font-weight:600}
+.mixw.bad{background:var(--bad-soft);color:var(--bad)}
+.mixw.warn{background:#fff4d6;color:#6b4a00}
+.mixw.note{background:var(--soft);color:var(--ink2);font-weight:500}
+.toast .tw{display:block;margin-top:4px;font-weight:600;color:#ffd666;font-size:14px;line-height:1.45}
 .poov{border:2px solid var(--warn);background:var(--warn-soft)}
 .poov p{margin:6px 0 0;font-size:15px;line-height:1.55}
 .potab{width:100%;margin-top:10px;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:10px;overflow:hidden}
@@ -803,7 +808,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     po_done: '이미 넣은 발주서입니다. 고치려면 달력에서 그 날짜를 눌러 고치세요.',
     po_busy: '지금 읽고 있습니다. 잠시 뒤 다시 해 주세요.',
     po_moved: '그 사이에 기록이 바뀌었습니다(확정·삭제 등). 발주서를 다시 읽어 왔으니 한 번 더 봐 주세요.',
-    po_not_done: '넣은 발주서가 아니어서 되돌릴 것이 없습니다.'
+    po_not_done: '넣은 발주서가 아니어서 되돌릴 것이 없습니다.',
+    mixed_prod: '같은 날 같은 현장에서 같은 색은 한 제품으로만 나갑니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색이 조금씩 다릅니다). 제품을 맞춰 주세요.'
   };
 
   function svg(d, size) {
@@ -920,6 +926,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   function errText(e) {
     var m = String((e && e.message) || e || '');
+    if (m.indexOf('mixed_prod') >= 0) { var md = (m.split('mixed_prod:')[1] || '').trim(); return ERR.mixed_prod + (md ? ' (' + md + ')' : ''); }
     for (var k in ERR) if (m.indexOf(k) >= 0) return ERR[k];
     return '연결이 원활하지 않습니다. 잠시 뒤 다시 해 주세요.';
   }
@@ -1107,6 +1114,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   function apply(r) {
+    S.mixWarnNext = (r && r.mixWarn) || '';
     S.gen++;
     S.today = r.today;
     setItems(r.items || []);
@@ -1871,7 +1879,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         (S.admin ? '<span class="dgb">' + (isPlan(x.type) && x.rows.length > 1 ? '<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">전체 확정</button>' : '') +
           (x.type !== '생산예정' ? '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>' : '') +
           '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button></span>' : '') + '</div>' +
-        '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
+        mixWarnHtml(x) + '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
     }).join('');
   }
   function openMove(ids) {
@@ -3824,7 +3832,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }, 450);
     render();
   }
-  function poReady(p) { return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }); }
+  function poReady(p) { return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }) && !poMixList(p).known.length; }
   function poPlanOut(p) {
     return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', mode: p.mode === 'replace' ? 'replace' : 'add',
       remove: p.mode === 'replace' ? (p.remove || []) : [],
@@ -3839,7 +3847,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       ' · 출고 날짜를 고르면 그날 기준으로 재고를 계산합니다. 맞으면 맨 아래 ‘넣기’.</small></p>'
       : '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
       ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다. 날짜가 아직 안 정해졌으면 ‘대기열에 두기’.</small></p>';
-    var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap'; }), inf = iss.filter(function (i) { return !i.block; });
+    var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap' && i.k !== 'prod_mix'; }), inf = iss.filter(function (i) { return !i.block; });
     if (bl.length) h += '<ul class="poiss bad">' + bl.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
     if (inf.length) h += '<ul class="poiss info">' + inf.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
     h += '</section>';
@@ -3885,7 +3893,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
       h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장</small></h2>';
       if (!p.lines.length) h += '<p class="bad">읽은 품목 줄이 없습니다. ‘직접 넣기’로 넣어 주세요.</p>';
-      if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추를 누르면 일반 EPDM · NM-CHIP · 락칩으로 바뀝니다. 현재고 = 지금 있는 양 · 그날 = 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg.</p>';
+      if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추를 누르면 일반 EPDM · NM-CHIP · 락칩으로 바뀝니다. 같은 색은 한 제품으로만 나가므로 같은 색 줄은 함께 바뀝니다. 현재고 = 지금 있는 양 · 그날 = 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg.</p>';
+      var pmx = poMixList(p);
+      if (pmx.known.length) h += '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(pmx.known.join(', ')) + ' — 같은 색은 한 제품으로만 나갑니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색이 조금씩 다름). 제품 단추로 하나를 고르세요.</p>';
+      if (pmx.unknown.length) h += '<p class="mixw warn">같은 날 이 거래처에 같은 색이 다른 제품으로 있습니다: ' + esc(pmx.unknown.join(', ')) + ' — 현장명이 없어 같은 현장인지 모릅니다. 같은 현장이면 섞여 나가니 맞추고, 다른 현장이면 위 현장명 칸에 적어 주세요.</p>';
       poZones(p.lines).forEach(function (g) {
         if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + g.lines.length + '줄 · ' + fmt(g.lines.reduce(function (s, x) { return s + (x.l.kg || 0); }, 0)) + ' kg</small></h3>';
         h += '<ul class="polines">' + g.lines.map(function (x) { return poLineHtml(x.l, x.i, V); }).join('') + '</ul>';
@@ -3899,7 +3910,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var nRep = p.mode === 'replace' ? (p.remove || []).length : 0;
     var label = p.mode === 'skip' ? '넣지 않기로 정하기' : nRep ? '기존 ' + nRep + '줄 바꾸고 넣기' : '넣기';
     h += '<button type="button" class="primary wide mt12" data-act="poapply"' + (ready && !V.busy ? '' : ' disabled') + '>' + (V.busy ? '넣는 중…' : label) + '</button>';
-    if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고 날짜를 고르세요.' : !String(p.cust || '').trim() ? '거래처를 넣으세요.' : '제품을 고르지 않은 줄이 있습니다.') + '</p>';
+    if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고 날짜를 고르세요.' : !String(p.cust || '').trim() ? '거래처를 넣으세요.' :
+      !p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }) ? '제품을 고르지 않은 줄이 있습니다.' : '같은 색이 다른 제품으로 섞여 넣을 수 없습니다. 제품 단추로 하나를 고르세요.') + '</p>';
     if (p.mode !== 'skip') {
       var rw = poReadyWait(p);
       h += '<button type="button" class="ghost wide mt8 poqbtn" data-act="poqsave"' + (rw && !V.busy ? '' : ' disabled') + '>' + (V.wait ? '대기열에 그대로 두기 (고친 내용 저장)' : '날짜 미정 — 대기열에 두기') + '</button>';
@@ -3910,7 +3922,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   // 제품이 안 적힌 줄을 어떻게 골랐나 (2026-11-17 16:45 다시 지시: 안 적히면 일반 EPDM 먼저(재고 소진), 일반 EPDM이 모자라면 NM-CHIP. 락칩은 적혀 있을 때만)
   var PO_HOW = { old: '기존 예정과 같은 제품', ep1: '제품 안 적힘 → 일반 EPDM(먼저 소진)', ep2nm: '일반 EPDM 재고 부족 → NM-CHIP', epboth: '둘 다 부족 → 일반 EPDM(생산 필요)',
     nm: '제품 안 적힘 → NM-CHIP', epdm: 'NM-CHIP 재고 부족 → 일반 EPDM', nmshort: '둘 다 부족 → NM-CHIP(생산 필요)',
-    only: '이 색은 이 제품만 있음', pick: '직접 고름', same: '이 거래처가 받던 제품', mixed: '이 거래처가 둘 다 받음 · 최근 것', cust: '이 거래처가 주로 받는 제품' };
+    only: '이 색은 이 제품만 있음', pick: '직접 고름', same: '이 거래처가 받던 제품', mixed: '이 거래처가 둘 다 받음 · 최근 것', cust: '이 거래처가 주로 받는 제품',
+    stated: '같은 색 다른 줄에 적힌 제품(섞이지 않게)', grp: '같은 날 같은 현장의 같은 색 제품(섞이지 않게)' };
   /* 제품 바꾸기 + 재고 보기 (2026-11-17 지시: "nm chip 으로 바꾸던지 일반으로 바꿀건지 락칩으로 바꿀건지 그리고 현재고가 얼마나 있는지도 다 알수있도록 보여줘라")
      칩 줄마다 일반 EPDM · NM-CHIP · 락칩 단추. 단추마다 현재고(지금 있는 양)와 그날(그 출고 날짜에 쓸 수 있는 양 = 먼저 잡힌 출고예정을 뺀 것).
      발주서 확인 화면과 출고예정 고치기 화면에서 같이 씁니다. */
@@ -3929,6 +3942,50 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if ((l.eff || l.date) <= date) day = l.after + adj;
     });
     return { cur: cur, day: date ? day : null };
+  }
+  /* 같은 색은 한 제품으로만 (2026-11-17 17:18 지시: "그리고 절대 섞여나가지않는다. 같은색이더라도 일반epdm 과 nm chip 락칩은 전부 색상이 조금씩 다다르다.")
+     묶음 = 같은 날 · 같은 거래처 · 같은 현장(발주번호·현장 칸). 현장이 적힌 묶음은 섞이면 못 넣고, 안 적힌 묶음은 같은 현장인지 몰라 알림만. */
+  function uniqOf(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+  function iga(w) { var c = String(w || '').charCodeAt(String(w || '').length - 1); return c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 ? '이' : '가'; }   // 받침 있으면 '이'
+  function mixColors(rows) {
+    var by = {}, order = [];
+    rows.forEach(function (r) {
+      if (PROD3.indexOf(r.prod) < 0 || !r.color) return;
+      if (!by[r.color]) { by[r.color] = []; order.push(r.color); }
+      if (by[r.color].indexOf(r.prod) < 0) by[r.color].push(r.prod);
+    });
+    return order.filter(function (c) { return by[c].length > 1; }).map(function (c) { return c + '(' + by[c].map(function (p) { return PROD3_NAME[p] || p; }).join('·') + ')'; });
+  }
+  /* 발주서 확인 화면: 이 발주서 줄 + 같은 날 · 같은 거래처 · 같은 현장에 이미 잡힌 출고예정 → { known: 현장 적힘, unknown: 현장 없음 } */
+  function poMixList(p) {
+    var out = { known: [], unknown: [] };
+    if (!p || !isYmd(p.date)) return out;
+    var site = String(p.site || p.poNo || '').trim(), cust = String(p.cust || '').trim(), drop = {};
+    if (p.mode === 'replace') (p.remove || []).forEach(function (id) { drop[id] = true; });
+    var mine = p.lines.filter(function (l) { return l.prod && l.color; }), cols = {};
+    mine.forEach(function (l) { cols[l.color] = true; });
+    var ex = ((S.plan && S.plan.lines) || []).filter(function (r) {
+      return !drop[r.id] && r.type === '출고예정' && r.date === p.date && cols[r.color] && String(r.cust || '').trim() === cust && String(r.po || '').trim() === site;
+    });
+    out[site ? 'known' : 'unknown'] = mixColors(mine.concat(ex));
+    return out;
+  }
+  /* 출고예정 고치기 화면: 같은 날 · 같은 거래처 · 같은 현장의 같은 색 다른 제품 줄 */
+  function editSibs(orig, d) {
+    var po = String(d.po || '').trim(), cust = String(d.cust || '').trim();
+    var ls = ((S.plan && S.plan.lines) || []).filter(function (l) {
+      return l.id !== orig.id && l.type === '출고예정' && l.date === d.date && l.color === d.color && String(l.cust || '').trim() === cust &&
+        String(l.po || '').trim() === po && PROD3.indexOf(l.prod) >= 0 && l.prod !== d.prod;
+    });
+    return { po: po, rows: ls, prods: uniqOf(ls.map(function (l) { return PROD3_NAME[l.prod] || l.prod; })) };
+  }
+  /* 출고 날 묶음(같은 날 · 거래처 · 현장)에 같은 색이 다른 제품이면 알림 */
+  function mixWarnHtml(x) {
+    if (x.type !== '출고예정' && x.type !== '출고') return '';
+    var mx = mixColors(x.rows);
+    if (!mx.length) return '';
+    return x.po ? '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(mx.join(', ')) + ' — 같은 색은 한 제품으로만 나갑니다. 줄을 눌러 제품을 맞추세요(같은 현장의 같은 색 줄이 함께 바뀝니다).</p>'
+      : '<p class="mixw warn">같은 색이 다른 제품으로 있습니다: ' + esc(mx.join(', ')) + ' — 현장 칸이 비어 같은 현장인지 모릅니다. 같은 현장이면 섞여 나가니 맞추고, 다른 현장이면 줄을 눌러 ‘발주번호·현장’에 현장명을 적어 주세요.</p>';
   }
   /* o = { prods, cur(고른 제품), color, date, kg, act, i, skip, own: {prod, before}(고치는 줄의 지금 제품과 그날 재고) } */
   function prodPick(o) {
@@ -3982,7 +4039,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       S.poShow = { item: r.item, plan: p, sim: r.sim };
       S.poRev = null; S.outMode = 'cal'; S.calDay = p.date; S.calYm = p.date.slice(0, 7);
       render(); window.scrollTo(0, 0);
-      toastOk('넣었습니다 · ' + poMd(p.date) + ' ' + p.cust + ' ' + p.lines.length + '줄');
+      toastOk('넣었습니다 · ' + poMd(p.date) + ' ' + p.cust + ' ' + ((r.item && r.item.n) || p.lines.length) + '줄');   // 같은 제품·색은 한 줄로 합쳐 넣으므로 넣은 줄 수
     }, function (e) {
       V.busy = false; render();
       if (/po_moved|po_done/.test(String((e && e.message) || ''))) { toast(errText(e)); poReadNow(V.id); return; }
@@ -4464,6 +4521,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         toastOk('대기열에 넣었습니다 · ' + qc + ' ' + n + '줄 ' + fmt(tot) + ' kg · 날짜가 정해지면 ‘날짜 정해 넣기’');
       }, function (e) { S.busy = false; renderSheet(); failed(e); });
       return;
+    }
+    if (type === '출고예정' && S.inPo.trim()) {   // 같은 날 같은 현장에서 같은 색은 한 제품으로만 (2026-11-17)
+      var mxi = mixColors(ls.map(function (l) { return { prod: l.it.prod, color: l.it.color }; }).concat(((S.plan && S.plan.lines) || []).filter(function (r) {
+        return r.type === '출고예정' && r.date === d0 && String(r.cust || '').trim() === S.inCust.trim() && String(r.po || '').trim() === S.inPo.trim() &&
+          ls.some(function (l) { return l.it.color === r.color; });
+      })));
+      if (mxi.length) { toast(ERR.mixed_prod + ' (' + poMd(d0) + ' ' + S.inCust.trim() + ' · ' + S.inPo.trim() + ' ' + mxi.join(', ') + ')'); return; }
     }
     var poInfo = S.po && type === '출고예정' ? { date: d0, cust: S.inCust.trim(), po: S.inPo.trim(), zone: zoneName(), n: n, kg: tot } : null;
     S.busy = true;
@@ -5304,6 +5368,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         kg: Number(String(d.qty).replace(/[,\s]/g, '')) || 0, act: 'edprod', skip: sk, own: own }) +
         '<p class="hint">현재고 = 지금 있는 양 · 그날 = 이 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg. 고른 뒤 아래 ‘저장’을 누르세요.</p>';
     }
+    // 같은 날 · 같은 거래처 · 같은 현장의 같은 색은 한 제품으로만 (2026-11-17 지시: "절대 섞여나가지 않는다")
+    if (orig.type === '출고예정' && d.type === '출고예정' && PROD3.indexOf(d.prod) >= 0) {
+      var sib = editSibs(orig, d);
+      if (sib.rows.length && sib.po && d.prod !== orig.prod) h += '<p class="mixw note">같은 날 같은 현장의 ' + esc(d.color) + ' ' + sib.rows.length + '줄(' + esc(sib.prods.join('·')) + ')도 함께 ' +
+        esc(PROD3_NAME[d.prod] || d.prod) + '(으)로 바뀝니다 — 같은 색은 한 제품으로만 나갑니다.</p>';
+      else if (sib.rows.length && sib.po) h += '<p class="mixw bad">같은 날 같은 현장에 ' + esc(d.color) + iga(d.color) + ' ' + esc(sib.prods.join('·')) + '(으)로도 있어 섞여 나갑니다. 위 제품 단추로 하나를 고르면 같은 색 줄이 함께 맞춰집니다.</p>';
+      else if (sib.rows.length) h += '<p class="mixw warn">같은 날 이 거래처에 ' + esc(d.color) + ' ' + esc(sib.prods.join('·')) + ' ' + sib.rows.length + '줄이 있습니다(현장 칸이 비어 같은 현장인지 모름). 같은 현장이면 그 줄도 같은 제품으로 바꾸세요. 다른 현장이면 아래 ‘발주번호·현장’ 칸에 현장명을 적어 두면 구분됩니다.</p>';
+    }
     h += '<label class="label" for="ed-color">' + vlabel(d.prod) + '</label><select id="ed-color" class="text" data-ed="color">' +
       colors.map(function (c) { return '<option value="' + esc(c) + '"' + (c === d.color ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>';
     h += '<label class="label" for="ed-qty">수량 (kg)' + (orig.type === '조정' ? ' · 줄인 경우 앞에 -' : '') + '</label>' +
@@ -5344,7 +5416,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         apply(r);
         S.sheet = null;
         render();
-        toastOk('고쳤습니다');
+        toastOk(r && r.also ? '고쳤습니다 · 같은 현장의 ' + body.color + ' ' + r.also + '줄도 함께 ' + (PROD3_NAME[body.prod] || body.prod) + '(으)로 바꿨습니다' : '고쳤습니다');
       }, function (e) {
         S.busy = false;
         renderSheet();
@@ -5401,13 +5473,22 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   /* ───────── 동작 ───────── */
-  function showToast(html) {
+  function showToast(html, ms) {
     toastEl.innerHTML = '<div class="toast" role="status">' + html + '</div>';
     clearTimeout(showToast.t);
-    showToast.t = setTimeout(function () { toastEl.innerHTML = ''; }, 2800);
+    showToast.t = setTimeout(function () { toastEl.innerHTML = ''; }, ms || 2800);
   }
-  function toast(text) { showToast('<span>' + esc(text) + '</span>'); }
-  function toastOk(text) { showToast(ICON.check + '<span>' + esc(text) + '</span>'); }
+  function toast(text) { showToast('<span>' + esc(text) + '</span>', String(text || '').length > 60 ? 7000 : 0); }
+  function toastOk(text) {
+    var w = S.mixWarnNext;   // 현장 칸이 비어 막지 않고 넘긴 '같은 색 다른 제품' (2026-11-17)
+    S.mixWarnNext = '';
+    if (w) {
+      showToast(ICON.check + '<span>' + esc(text) + '<b class="tw">확인: 같은 날 같은 거래처에 같은 색이 다른 제품으로 있습니다 — ' + esc(w) +
+        '. 같은 현장이면 섞여 나갑니다(다른 현장이면 ‘발주번호·현장’ 칸에 현장명을 적어 구분하세요).</b></span>', 9000);
+      return;
+    }
+    showToast(ICON.check + '<span>' + esc(text) + '</span>');
+  }
 
   function openSheet(s) {
     S.sheet = s;
@@ -5468,7 +5549,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'pofile': var pfi = document.getElementById('po-file'); if (pfi && !S.poBusy) pfi.click(); return;
       case 'poread': poReadNow(v); return;
       case 'porevx': S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return;
-      case 'poprodset': if (S.poRev) { var ppl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))]; if (ppl && v && ppl.prod !== v) { ppl.prod = v; ppl.how = 'pick'; poResim(); } } return;
+      case 'poprodset': if (S.poRev) {   // 같은 색은 한 제품으로만 나가므로 같은 색 줄을 모두 함께 (2026-11-17)
+        var ppl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))], nchg = 0;
+        if (ppl && v) S.poRev.plan.lines.forEach(function (x) { if (x.color === ppl.color && x.prod !== v && prodCands(x.prod, x.color).indexOf(v) >= 0) { x.prod = v; x.how = 'pick'; nchg++; } });
+        if (nchg) poResim();
+      } return;
       case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
       case 'poqopen': poWaitOpen(v); return;
       case 'poqsave': poWaitSave(); return;
