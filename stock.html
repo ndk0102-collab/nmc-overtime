@@ -417,6 +417,13 @@ body.labmode .wrap{max-width:1480px}
 .poiss li{margin:2px 0}
 .poiss.bad{background:var(--bad-soft);color:var(--bad)}
 .poiss.info{background:var(--soft);color:var(--ink2)}
+.ppick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 2px}
+.ppick .pp{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:48px;padding:7px 9px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.ppick .pp b{font-size:14px;line-height:1.25}
+.ppick .pp small{font-size:12.5px;line-height:1.35;color:var(--ink2)}
+.ppick .pp small.bad{color:var(--bad);font-weight:600}
+.ppick .pp.on{border-color:var(--accent);background:var(--accent-soft)}
+.ppick .pp.on b{color:var(--accent-strong)}
 .poov{border:2px solid var(--warn);background:var(--warn-soft)}
 .poov p{margin:6px 0 0;font-size:15px;line-height:1.55}
 .potab{width:100%;margin-top:10px;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:10px;overflow:hidden}
@@ -3878,6 +3885,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
       h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장</small></h2>';
       if (!p.lines.length) h += '<p class="bad">읽은 품목 줄이 없습니다. ‘직접 넣기’로 넣어 주세요.</p>';
+      if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추를 누르면 일반 EPDM · NM-CHIP · 락칩으로 바뀝니다. 현재고 = 지금 있는 양 · 그날 = 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg.</p>';
       poZones(p.lines).forEach(function (g) {
         if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + g.lines.length + '줄 · ' + fmt(g.lines.reduce(function (s, x) { return s + (x.l.kg || 0); }, 0)) + ' kg</small></h3>';
         h += '<ul class="polines">' + g.lines.map(function (x) { return poLineHtml(x.l, x.i, V); }).join('') + '</ul>';
@@ -3899,20 +3907,56 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<button type="button" class="ghost wide mt8" data-act="porevx">' + (V.wait ? '닫기 (대기열에 그대로 있음)' : '닫기 (나중에 받은 발주서에서 다시 열 수 있음)') + '</button></section></div>';
     return h;
   }
-  // 제품이 안 적힌 줄을 어떻게 골랐나 (2026-11-17 지시: 안 적히면 NM-CHIP, 재고가 모자라면 일반 EPDM. 락칩은 적혀 있을 때만)
-  var PO_HOW = { old: '기존 예정과 같은 제품', nm: '제품 안 적힘 → NM-CHIP', epdm: 'NM-CHIP 재고 부족 → 일반 EPDM', nmshort: '둘 다 부족 → NM-CHIP(생산 필요)',
+  // 제품이 안 적힌 줄을 어떻게 골랐나 (2026-11-17 16:45 다시 지시: 안 적히면 일반 EPDM 먼저(재고 소진), 일반 EPDM이 모자라면 NM-CHIP. 락칩은 적혀 있을 때만)
+  var PO_HOW = { old: '기존 예정과 같은 제품', ep1: '제품 안 적힘 → 일반 EPDM(먼저 소진)', ep2nm: '일반 EPDM 재고 부족 → NM-CHIP', epboth: '둘 다 부족 → 일반 EPDM(생산 필요)',
+    nm: '제품 안 적힘 → NM-CHIP', epdm: 'NM-CHIP 재고 부족 → 일반 EPDM', nmshort: '둘 다 부족 → NM-CHIP(생산 필요)',
     only: '이 색은 이 제품만 있음', pick: '직접 고름', same: '이 거래처가 받던 제품', mixed: '이 거래처가 둘 다 받음 · 최근 것', cust: '이 거래처가 주로 받는 제품' };
+  /* 제품 바꾸기 + 재고 보기 (2026-11-17 지시: "nm chip 으로 바꾸던지 일반으로 바꿀건지 락칩으로 바꿀건지 그리고 현재고가 얼마나 있는지도 다 알수있도록 보여줘라")
+     칩 줄마다 일반 EPDM · NM-CHIP · 락칩 단추. 단추마다 현재고(지금 있는 양)와 그날(그 출고 날짜에 쓸 수 있는 양 = 먼저 잡힌 출고예정을 뺀 것).
+     발주서 확인 화면과 출고예정 고치기 화면에서 같이 씁니다. */
+  var PROD3 = ['일반 EPDM', 'NM-CHIP', 'LOK-CHIP'];
+  var PROD3_NAME = { '일반 EPDM': '일반 EPDM', 'NM-CHIP': 'NM-CHIP', 'LOK-CHIP': '락칩(LOK)' };
+  function prodCands(prod, color) {
+    if (prod && PROD3.indexOf(prod) < 0) return [];
+    return PROD3.filter(function (p) { return !!S.byKey[p + '|' + color]; });
+  }
+  /* 그 날짜 끝에 쓸 수 있는 양: 예정 계산 줄(S.plan.lines, 날짜 순)에서 그 품목의 그날까지 마지막 잔량. skip = 빼고 볼 줄 번호(고치는 줄 · 바꿀 기존 예정) */
+  function stockAt(prod, color, date, skip) {
+    var k = prod + '|' + color, cur = stockOf(k), day = cur, adj = 0;
+    ((S.plan && S.plan.lines) || []).forEach(function (l) {
+      if (l.prod + '|' + l.color !== k) return;
+      if (skip && skip[l.id]) { adj += l.type === '생산예정' ? -l.qty : l.qty; return; }
+      if ((l.eff || l.date) <= date) day = l.after + adj;
+    });
+    return { cur: cur, day: date ? day : null };
+  }
+  /* o = { prods, cur(고른 제품), color, date, kg, act, i, skip, own: {prod, before}(고치는 줄의 지금 제품과 그날 재고) } */
+  function prodPick(o) {
+    var h = '<div class="ppick" role="radiogroup" aria-label="' + esc(o.color) + ' 제품 바꾸기">';
+    o.prods.forEach(function (p) {
+      var s = o.own && o.own.prod === p ? { cur: stockOf(p + '|' + o.color), day: o.own.before } : stockAt(p, o.color, o.date, o.skip);
+      var short = o.date && s.day != null && s.day < o.kg;
+      h += '<button type="button" class="pp' + (p === o.cur ? ' on' : '') + '" role="radio" aria-checked="' + (p === o.cur) + '" data-act="' + o.act + '"' +
+        (o.i != null ? ' data-i="' + o.i + '"' : '') + ' data-v="' + esc(p) + '"><b>' + esc(PROD3_NAME[p] || p) + '</b>' +
+        '<small>현재고 ' + fmt(Math.max(s.cur, 0)) + '</small>' +
+        (o.date ? '<small' + (short ? ' class="bad"' : '') + '>그날 ' + fmt(Math.max(s.day, 0)) + (short ? ' 부족' : '') + '</small>' : '') + '</button>';
+    });
+    return h + '</div>';
+  }
   function poLineHtml(l, i, V) {
     var x = V.sim && V.sim.lines ? V.sim.lines[i] : null;
     var short = x && x.short > 0;
     var h = '<li class="poln' + (short ? ' short' : '') + (!l.prod ? ' need' : '') + '"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span>';
-    if (l.stated || !(l.cands && l.cands.length > 1)) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
-    else {
-      h += '<select class="posel" data-in="poprod" data-i="' + i + '" aria-label="' + esc(l.color) + ' 제품">' + (l.prod ? '' : '<option value="">제품 고르기</option>') +
-        l.cands.map(function (c) { return '<option value="' + esc(c) + '"' + (c === l.prod ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select> <b>' + esc(l.color) + '</b>' +
-        '<small class="pohow">' + esc(PO_HOW[l.how] || '칼라칩(제품 안 적힘)') + '</small>';
-    }
+    var cands = prodCands(l.prod, l.color);
+    if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
+    else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 고르기') + '</b> <b>' + esc(l.color) + '</b>' +
+      '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
     h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
+    if (cands.length > 1) {
+      var skip = {};
+      if (V.plan.mode === 'replace') (V.plan.remove || []).forEach(function (id) { skip[id] = true; });
+      h += prodPick({ prods: cands, cur: l.prod, color: l.color, date: isYmd(V.plan.date) ? V.plan.date : '', kg: l.kg, act: 'poprodset', i: i, skip: skip });
+    }
     if (V.simBusy || !l.prod) h += '<div class="pl3 muted">' + (l.prod ? '계산 중…' : '제품을 고르면 계산합니다') + '</div>';
     else if (x) h += '<div class="pl3">' + (short ? '<b class="bad">부족 ' + fmt(x.short) + ' kg</b> · 그날 재고 ' + fmt(Math.max(0, x.before)) + ' kg' : '<span class="ok">재고로 나감</span> · 그날 재고 ' + fmt(x.before) + ' kg') + '</div>';
     return h + '</li>';
@@ -5246,6 +5290,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     h += '<label class="label" for="ed-prod">제품</label><select id="ed-prod" class="text" data-ed="prod">' +
       prods.map(function (p) { return '<option value="' + esc(p) + '"' + (p === d.prod ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>';
+    // 출고예정 칩: 일반 EPDM · NM-CHIP · 락칩으로 바꾸기 + 재고 보기 (2026-11-17 지시)
+    var pcs = orig.type === '출고예정' && d.type === '출고예정' ? prodCands(d.prod, d.color) : [];
+    if (pcs.length > 1) {
+      var own = null;
+      if (d.date === orig.date && d.color === orig.color) {
+        var me = ((S.plan && S.plan.lines) || []).filter(function (l) { return l.id === orig.id; })[0];
+        if (me) own = { prod: orig.prod, before: me.before };
+      }
+      var sk = {};
+      sk[orig.id] = true;
+      h += '<span class="label">제품 바꾸기 · 재고 보기</span>' + prodPick({ prods: pcs, cur: d.prod, color: d.color, date: isYmd(d.date) ? d.date : '',
+        kg: Number(String(d.qty).replace(/[,\s]/g, '')) || 0, act: 'edprod', skip: sk, own: own }) +
+        '<p class="hint">현재고 = 지금 있는 양 · 그날 = 이 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg. 고른 뒤 아래 ‘저장’을 누르세요.</p>';
+    }
     h += '<label class="label" for="ed-color">' + vlabel(d.prod) + '</label><select id="ed-color" class="text" data-ed="color">' +
       colors.map(function (c) { return '<option value="' + esc(c) + '"' + (c === d.color ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>';
     h += '<label class="label" for="ed-qty">수량 (kg)' + (orig.type === '조정' ? ' · 줄인 경우 앞에 -' : '') + '</label>' +
@@ -5410,6 +5468,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'pofile': var pfi = document.getElementById('po-file'); if (pfi && !S.poBusy) pfi.click(); return;
       case 'poread': poReadNow(v); return;
       case 'porevx': S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return;
+      case 'poprodset': if (S.poRev) { var ppl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))]; if (ppl && v && ppl.prod !== v) { ppl.prod = v; ppl.how = 'pick'; poResim(); } } return;
       case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
       case 'poqopen': poWaitOpen(v); return;
       case 'poqsave': poWaitSave(); return;
@@ -5513,6 +5572,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'adjsave': adjSave(); return;
       case 'edit': openEdit(v); return;
       case 'edtype': S.sheet.draft.type = v; renderSheet(); return;
+      case 'edprod': if (S.sheet && S.sheet.kind === 'edit' && v) { S.sheet.draft.prod = v; renderSheet(); } return;
       case 'edsave': editSave(); return;
       case 'eddel': editDelete(); return;
       case 'mprev': if (S.ym > S.firstYm) { S.ym = addMonths(S.ym, -1); S.custOpen = null; render(); } return;
@@ -5607,8 +5667,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       d.prod = el.value;
       if (!S.byKey[d.prod + '|' + d.color]) { var cs = itemsOf(d.prod); if (cs.length) d.color = cs[0].color; }
       renderSheet();
-    } else if (e2 === 'color') d.color = el.value;
-    else if (e2 === 'date') d.date = el.value;
+    } else if (e2 === 'color') { d.color = el.value; renderSheet(); }
+    else if (e2 === 'date') { d.date = el.value; renderSheet(); }
   });
 
   document.addEventListener('keydown', function (ev) {
