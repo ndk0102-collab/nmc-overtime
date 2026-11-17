@@ -93,6 +93,28 @@ button{font:inherit;color:inherit}
   .go.adm b{font-size:16px}
   .lock{padding:0 7px}
 }
+
+/* 앱 설치 안내 (2026-11-17 다시 넣음) */
+.inst{margin:0 0 14px;padding:16px;border:2px solid #BFD3F0;border-radius:20px;background:#F5F9FF}
+.inst[hidden],.instlink[hidden]{display:none!important}
+.inst-head{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-size:18px;font-weight:800;line-height:1.35;color:#174A8C}
+.inst-head svg,.inst-btn svg,.instlink svg{flex-shrink:0}
+.inst-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-size:18px;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(30,90,168,.25)}
+.inst-langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:12px 0 0}
+.inst-langs button{min-height:36px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink2);font-size:14px;font-weight:700;cursor:pointer}
+.inst-langs button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:#fff}
+.inst-later{display:block;width:100%;min-height:44px;margin:6px 0 0;border:0;background:none;color:var(--muted);font-size:15px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.instlink{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;margin:14px auto 0;padding:0 18px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--ink2);font-size:15px;font-weight:700;cursor:pointer}
+.inst-ov{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.45)}
+.inst-sheet{width:100%;max-width:560px;max-height:88vh;overflow:auto;padding:20px 16px 24px;border-radius:22px 22px 0 0;background:#fff;box-shadow:0 -8px 30px rgba(15,23,42,.25)}
+@media (min-width:600px){.inst-ov{align-items:center;padding:16px}.inst-sheet{border-radius:22px}}
+.inst-h2{margin:0 0 12px;font-size:20px;font-weight:800}
+.inst-main{margin:0 0 14px;padding:14px;border-radius:14px;background:#E6EFFB;color:#174A8C;font-size:18px;font-weight:800;line-height:1.6}
+.inst-sec{margin:16px 0 8px;font-size:15px;font-weight:800;color:var(--ink2)}
+.inst-steps{margin:0;padding:0;list-style:none}
+.inst-steps li{margin:0 0 8px;padding:10px 12px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:15px;line-height:1.5}
+.inst-close{width:100%;min-height:50px;margin-top:8px;border:2px solid var(--line);border-radius:14px;background:#fff;font-size:16px;font-weight:800;cursor:pointer}
+.inst-btn:focus-visible,.inst-langs button:focus-visible,.inst-later:focus-visible,.instlink:focus-visible,.inst-close:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 </style>
 </head>
 <body>
@@ -108,6 +130,7 @@ button{font:inherit;color:inherit}
 </header>
 
 <main class="wrap">
+  <section class="inst" id="inst" aria-label="앱 설치" hidden></section>
   <div class="grid">
 
     <section class="sect ot" aria-labelledby="h-ot">
@@ -177,7 +200,9 @@ button{font:inherit;color:inherit}
     <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
     <span>‘관리자’ 표시가 있는 곳은 관리자 비밀번호를 넣어야 열립니다. 한 번 로그인하면 다른 관리자 화면도 바로 열리고, 창을 닫거나 시간이 지나면 다시 로그인해야 합니다.</span>
   </p>
+  <button type="button" class="instlink" id="instLink" data-inst="go" hidden></button>
 </main>
+<div id="instSheet"></div>
 <p class="toast" id="toast" role="status" hidden></p>
 
 <script>
@@ -224,6 +249,104 @@ button{font:inherit;color:inherit}
 
   check();
   window.addEventListener('pageshow', function (e) { if (e.persisted) check(); });
+})();
+</script>
+<script>
+/* 앱 설치(다운로드) 안내 — 2026-11-17 지시 "처음 쓰는 사람 다운로드 어떻게 하는지 모르는데 … 여기는 없어졌나?"
+   2026-11-15 첫 화면을 새로 만들 때 이 안내가 잔업 화면(overtime.html)에만 남고 첫 화면에서 빠졌던 것을 되살림.
+   · 앱으로 열려 있지 않으면 맨 위에 '휴대폰에 앱으로 설치하세요' + [앱 설치] (나중에 → 맨 아래 '앱 설치 방법' 단추로)
+   · 크롬이 설치 창을 허락하면 바로 설치 창, 아니면 이 휴대폰·인터넷 앱에 맞는 방법(카카오톡 안이면 '인터넷 앱으로 열기')
+   · 문구는 잔업 화면과 같은 5개 언어. 처음엔 잔업 화면에서 고른 언어 → 휴대폰 언어 → 한국어 */
+(function () {
+  var TX = {"ko": {"installCard": "휴대폰에 앱으로 설치하세요", "installBtn": "앱 설치", "later": "나중에", "installHow": "앱 설치 방법", "installAndroid": "안드로이드(크롬): 오른쪽 위 ⋮ → \"앱 설치\" 또는 \"홈 화면에 추가\"", "installSamsung": "갤럭시(삼성 인터넷): 오른쪽 아래 ≡ → \"현재 페이지 추가\" → \"홈 화면\"", "installIphone": "아이폰(사파리): 아래쪽 공유 버튼 → \"홈 화면에 추가\"", "iosOther": "아이폰은 사파리(Safari)에서 설치합니다. 이 링크를 사파리로 연 다음: 아래쪽 공유 버튼 → \"홈 화면에 추가\"", "kakaoTip": "카카오톡 안에서는 설치가 안 됩니다. 아래 버튼을 눌러 인터넷 앱에서 연 다음 [앱 설치]를 다시 누르세요.", "inappTip": "이 화면에서는 설치가 안 됩니다. 아래 버튼을 누르거나, 오른쪽 위 ⋮ → \"다른 브라우저로 열기\"를 누르세요.", "desktopTip": "PC에서는 크롬 주소창 오른쪽의 설치 아이콘을 누르면 됩니다. 휴대폰에 설치하려면 이 링크를 휴대폰에서 여세요.", "otherPhones": "다른 휴대폰이면", "closeBtn": "닫기", "openOutside": "인터넷 앱으로 열기", "installed": "설치되었습니다. 이제 바탕화면 아이콘으로 여세요.", "installTitle": "휴대폰 홈 화면에 추가하기"}, "en": {"installCard": "Install it on your phone as an app", "installBtn": "Install app", "later": "Later", "installHow": "How to install", "installAndroid": "Android (Chrome): tap ⋮ at the top right → \"Install app\" or \"Add to Home screen\"", "installSamsung": "Galaxy (Samsung Internet): tap ≡ at the bottom right → \"Add page to\" → \"Home screen\"", "installIphone": "iPhone (Safari): tap the Share button → \"Add to Home Screen\"", "iosOther": "On iPhone, install from Safari. Open this link in Safari, then: Share button → \"Add to Home Screen\"", "kakaoTip": "You can’t install inside KakaoTalk. Tap the button below to open it in your browser, then tap [Install app] again.", "inappTip": "You can’t install from this screen. Tap the button below, or tap ⋮ at the top right → \"Open in browser\".", "desktopTip": "On a PC, click the install icon at the right end of the Chrome address bar. To install on a phone, open this link on the phone.", "otherPhones": "Other phones", "closeBtn": "Close", "openOutside": "Open in browser", "installed": "Installed. Open it from the icon on your home screen.", "installTitle": "Add to your phone’s home screen"}, "th": {"installCard": "ติดตั้งเป็นแอปในโทรศัพท์", "installBtn": "ติดตั้งแอป", "later": "ไว้ทีหลัง", "installHow": "วิธีติดตั้ง", "installAndroid": "Android (Chrome): แตะ ⋮ มุมขวาบน → \"ติดตั้งแอป\" หรือ \"เพิ่มลงในหน้าจอหลัก\"", "installSamsung": "Galaxy (Samsung Internet): แตะ ≡ มุมขวาล่าง → \"Add page to / 현재 페이지 추가\" → \"Home screen / 홈 화면\"", "installIphone": "iPhone (Safari): แตะปุ่มแชร์ → \"เพิ่มไปยังหน้าจอโฮม\"", "iosOther": "บน iPhone ให้ติดตั้งจาก Safari เปิดลิงก์นี้ใน Safari แล้ว: ปุ่มแชร์ → \"เพิ่มไปยังหน้าจอโฮม\"", "kakaoTip": "ติดตั้งในคาเคาทอล์กไม่ได้ แตะปุ่มด้านล่างเพื่อเปิดในเบราว์เซอร์ แล้วแตะ [ติดตั้งแอป] อีกครั้ง", "inappTip": "ติดตั้งจากหน้านี้ไม่ได้ แตะปุ่มด้านล่าง หรือแตะ ⋮ มุมขวาบน → \"เปิดในเบราว์เซอร์\"", "desktopTip": "บนคอมพิวเตอร์ ให้คลิกไอคอนติดตั้งทางขวาของแถบที่อยู่ใน Chrome หากจะติดตั้งในโทรศัพท์ ให้เปิดลิงก์นี้ในโทรศัพท์", "otherPhones": "โทรศัพท์รุ่นอื่น", "closeBtn": "ปิด", "openOutside": "เปิดในเบราว์เซอร์", "installed": "ติดตั้งแล้ว เปิดจากไอคอนบนหน้าจอหลัก", "installTitle": "เพิ่มไว้ที่หน้าจอหลักของโทรศัพท์"}, "vi": {"installCard": "Cài vào điện thoại như một ứng dụng", "installBtn": "Cài đặt ứng dụng", "later": "Để sau", "installHow": "Cách cài đặt", "installAndroid": "Android (Chrome): bấm ⋮ ở góc trên bên phải → \"Cài đặt ứng dụng\" hoặc \"Thêm vào màn hình chính\"", "installSamsung": "Galaxy (Samsung Internet): bấm ≡ ở góc dưới bên phải → \"Add page to / 현재 페이지 추가\" → \"Home screen / 홈 화면\"", "installIphone": "iPhone (Safari): bấm nút Chia sẻ → \"Thêm vào MH chính\"", "iosOther": "Trên iPhone, hãy cài bằng Safari. Mở link này bằng Safari, rồi: nút Chia sẻ → \"Thêm vào MH chính\"", "kakaoTip": "Không thể cài trong KakaoTalk. Bấm nút bên dưới để mở bằng trình duyệt, rồi bấm [Cài đặt ứng dụng] lần nữa.", "inappTip": "Không thể cài từ màn hình này. Bấm nút bên dưới, hoặc bấm ⋮ ở góc trên bên phải → \"Mở bằng trình duyệt\".", "desktopTip": "Trên máy tính, bấm biểu tượng cài đặt ở cuối thanh địa chỉ Chrome. Để cài trên điện thoại, hãy mở link này trên điện thoại.", "otherPhones": "Điện thoại khác", "closeBtn": "Đóng", "openOutside": "Mở bằng trình duyệt", "installed": "Đã cài đặt. Hãy mở bằng biểu tượng trên màn hình chính.", "installTitle": "Thêm vào màn hình chính của điện thoại"}, "my": {"installCard": "ဖုန်းထဲတွင် အက်ပ်အဖြစ် ထည့်သွင်းပါ", "installBtn": "အက်ပ် ထည့်သွင်းရန်", "later": "နောက်မှ", "installHow": "ထည့်သွင်းနည်း", "installAndroid": "Android (Chrome): ညာဘက်အပေါ် ⋮ ကိုနှိပ် → \"Install app\" သို့မဟုတ် \"Add to Home screen\"", "installSamsung": "Galaxy (Samsung Internet): ညာဘက်အောက် ≡ ကိုနှိပ် → \"Add page to / 현재 페이지 추가\" → \"Home screen / 홈 화면\"", "installIphone": "iPhone (Safari): မျှဝေရန် ခလုတ်ကိုနှိပ် → \"Add to Home Screen\"", "iosOther": "iPhone တွင် Safari မှ ထည့်သွင်းပါ။ ဤလင့်ခ်ကို Safari ဖြင့်ဖွင့်ပြီး မျှဝေရန် ခလုတ် → \"Add to Home Screen\"", "kakaoTip": "KakaoTalk ထဲတွင် ထည့်သွင်း၍ မရပါ။ အောက်ပါခလုတ်ကိုနှိပ်ပြီး ဘရောက်ဇာဖြင့်ဖွင့်ကာ [အက်ပ် ထည့်သွင်းရန်] ကို ထပ်နှိပ်ပါ။", "inappTip": "ဤစာမျက်နှာမှ ထည့်သွင်း၍ မရပါ။ အောက်ပါခလုတ်ကိုနှိပ်ပါ (သို့) ညာဘက်အပေါ် ⋮ → \"Open in browser\" ကိုနှိပ်ပါ။", "desktopTip": "ကွန်ပျူတာတွင် Chrome လိပ်စာဘား၏ ညာဘက်ရှိ ထည့်သွင်းရန် အိုင်ကွန်ကို နှိပ်ပါ။ ဖုန်းတွင် ထည့်သွင်းရန် ဤလင့်ခ်ကို ဖုန်းဖြင့် ဖွင့်ပါ။", "otherPhones": "အခြားဖုန်းများ", "closeBtn": "ပိတ်ရန်", "openOutside": "ဘရောက်ဇာဖြင့် ဖွင့်ရန်", "installed": "ထည့်သွင်းပြီးပါပြီ။ ပင်မစာမျက်နှာရှိ အိုင်ကွန်မှ ဖွင့်ပါ။", "installTitle": "ဖုန်း ပင်မစာမျက်နှာတွင် ထည့်ရန်"}};
+  var LANGS = [['ko', '한국어'], ['en', 'English'], ['th', 'ภาษาไทย'], ['vi', 'Tiếng Việt'], ['my', 'မြန်မာ']];
+  var PHONE = '<svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2" width="11" height="20" rx="2.5"/><path d="M12 6.5v7M9 10.5l3 3 3-3"/><path d="M10.5 18h3"/></svg>';
+  function stored(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function pickLang() {
+    var l = stored('nmc_home_lang') || stored('nmc_ot_lang');
+    if (l && TX[l]) return l;
+    var ls = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || ''];
+    for (var i = 0; i < ls.length; i++) { var c = String(ls[i] || '').toLowerCase().slice(0, 2); if (TX[c]) return c; }
+    return 'ko';
+  }
+  var lang = pickLang(), evt = null;
+  function t(k) { return (TX[lang] && TX[lang][k]) || TX.ko[k] || ''; }
+  function standalone() {
+    try { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; } catch (e) { return false; }
+  }
+  /* 어느 휴대폰·인터넷 앱에서 열었는지 (잔업 화면과 같은 기준) */
+  function envOf() {
+    var ua = navigator.userAgent || '';
+    if (/KAKAOTALK/i.test(ua)) return 'kakao';
+    if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) {
+      return /CriOS|FxiOS|EdgiOS|NAVER|Line\/|FBAN|FBAV|Instagram/i.test(ua) ? 'iosother' : 'ios';
+    }
+    if (/Android/i.test(ua)) {
+      if (/SamsungBrowser/i.test(ua)) return 'samsung';
+      if (/NAVER|Line\/|FBAN|FBAV|Instagram|DaumApps|; wv\)/i.test(ua)) return 'inapp';
+      return 'chrome';
+    }
+    return 'desktop';
+  }
+  var card = document.getElementById('inst'), link = document.getElementById('instLink'), sheet = document.getElementById('instSheet'), toastEl = document.getElementById('toast');
+  function paint() {
+    if (standalone()) { card.hidden = true; link.hidden = true; return; }
+    var hide = stored('nmc_home_inst_hide') === '1';
+    card.hidden = hide; link.hidden = !hide;
+    card.setAttribute('lang', lang);
+    card.innerHTML = '<p class="inst-head">' + PHONE + '<span>' + esc(t('installCard')) + '</span></p>' +
+      '<button type="button" class="inst-btn" data-inst="go">' + PHONE + '<span>' + esc(t('installBtn')) + '</span></button>' +
+      '<div class="inst-langs" role="group" aria-label="Language">' + LANGS.map(function (l) {
+        return '<button type="button" data-inst="lang" data-v="' + l[0] + '" lang="' + l[0] + '" aria-pressed="' + (l[0] === lang) + '">' + esc(l[1]) + '</button>';
+      }).join('') + '</div>' +
+      '<button type="button" class="inst-later" data-inst="later">' + esc(t('later')) + '</button>';
+    link.setAttribute('lang', lang);
+    link.innerHTML = PHONE.replace('width="26" height="26"', 'width="20" height="20"') + '<span>' + esc(t('installHow')) + '</span>';
+  }
+  function openSheet() {
+    var env = envOf();
+    var main = { chrome: 'installAndroid', samsung: 'installSamsung', ios: 'installIphone', iosother: 'iosOther', kakao: 'kakaoTip', inapp: 'inappTip', desktop: 'desktopTip' }[env];
+    var h = '<div class="inst-ov" data-inst="close"><div class="inst-sheet" role="dialog" aria-modal="true" aria-label="' + esc(t('installHow')) + '" lang="' + lang + '">' +
+      '<p class="inst-h2">' + esc(t('installHow')) + '</p><p class="inst-main">' + esc(t(main)) + '</p>';
+    if (env === 'kakao' || env === 'inapp') h += '<button type="button" class="inst-btn" data-inst="ext">' + esc(t('openOutside')) + '</button>';
+    h += '<p class="inst-sec">' + esc(t('otherPhones')) + '</p><ul class="inst-steps">';
+    ['installAndroid', 'installSamsung', 'installIphone'].forEach(function (k) { if (k !== main) h += '<li>' + esc(t(k)) + '</li>'; });
+    sheet.innerHTML = h + '</ul><button type="button" class="inst-close" data-inst="close">' + esc(t('closeBtn')) + '</button></div></div>';
+    var c = sheet.querySelector('.inst-close');
+    if (c) { try { c.focus({ preventScroll: true }); } catch (e) { c.focus(); } }
+  }
+  function closeSheet() { sheet.innerHTML = ''; }
+  function go() {
+    if (evt) {
+      try { evt.prompt(); evt.userChoice.then(function () { evt = null; paint(); }, function () {}); return; } catch (e) { evt = null; }
+    }
+    openSheet();
+  }
+  function note(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(note.tm); note.tm = setTimeout(function () { toastEl.hidden = true; }, 3500);
+  }
+  document.addEventListener('click', function (ev) {
+    var b = ev.target && ev.target.closest ? ev.target.closest('[data-inst]') : null;
+    if (!b) return;
+    var a = b.getAttribute('data-inst');
+    if (a === 'close') { if (b.classList.contains('inst-ov') && ev.target !== b) return; closeSheet(); return; }
+    if (a === 'go') { go(); return; }
+    if (a === 'later') { store('nmc_home_inst_hide', '1'); paint(); try { link.focus({ preventScroll: true }); } catch (e) {} return; }
+    if (a === 'lang') { lang = b.getAttribute('data-v'); store('nmc_home_lang', lang); paint(); return; }
+    if (a === 'ext') {
+      if (envOf() === 'kakao') location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(location.href);
+      else location.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end';
+    }
+  });
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && sheet.innerHTML) closeSheet(); });
+  /* 크롬이 '앱 설치'를 허락하면 [앱 설치]가 바로 설치 창을 엽니다 */
+  window.addEventListener('beforeinstallprompt', function (ev) { ev.preventDefault(); evt = ev; });
+  window.addEventListener('appinstalled', function () { evt = null; store('nmc_home_inst_hide', '1'); paint(); closeSheet(); note(t('installed')); });
+  paint();
 })();
 </script>
 </body>
