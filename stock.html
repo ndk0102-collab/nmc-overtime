@@ -654,6 +654,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .hbtns{display:flex;align-items:center;gap:8px}
 .instbtn{gap:4px;padding:0 12px;min-height:46px}
 .navbtn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 12px;min-height:46px;text-decoration:none;color:inherit;font-weight:700;font-size:15px}
+.navbtn.backbtn{border-color:var(--accent);color:var(--accent);padding-left:6px}
 .top{flex-wrap:wrap}.top .hbtns{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
 @media (max-width:430px){.top .hbtns{gap:6px}.navbtn{padding:0 9px;font-size:14px}}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -1192,7 +1193,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     else if (VIEW === 'in') { S.inType = '반입'; h += viewIn(); bar = true; }
     else if (VIEW === 'out') { h += viewOut(); bar = S.outMode === 'add'; }
     else if (S.allAdd) {
-      h += '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="alladdback">← ' + (S.allAddFrom === 'stock' ? '현재고' : '예정') + '으로 돌아가기</button></section></div>' + viewIn();
+      h += viewIn();
       bar = true;
     }
     else {
@@ -1221,7 +1222,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
   }
 
-  function renderSheet() {
+  function renderSheet() { renderSheet0(); navSync(); }
+  function renderSheet0() {
     if (!S.sheet || !S.ready) { sheetEl.innerHTML = ''; return; }
     var inner = S.sheet.kind === 'review' ? sheetReview()
       : S.sheet.kind === 'item' ? sheetItem()
@@ -1235,10 +1237,59 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     sheetEl.innerHTML = '<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title">' + inner + '</div></div>';
   }
 
+  /* ── 뒤로 (2026-11-17) ── */
+  function subLevel() {
+    if (!S.ready || !S.admin) return false;
+    if (VIEW === 'out') return S.outMode === 'label' || S.outMode === 'porev' || S.outMode === 'add';
+    if (VIEW === 'all') return !!S.allAdd;
+    return false;
+  }
+  function backTo() {
+    if (VIEW === 'all') return S.allAddFrom === 'stock' ? '현재고' : '예정';
+    return '출고 달력';
+  }
+  /** 한 단계 전으로. 돌아갈 곳이 없으면 false */
+  function goBack() {
+    if (S.sheet && S.ready) { S.sheet = null; render(); return true; }
+    if (VIEW === 'out' && S.outMode === 'label') {
+      S.outMode = 'cal'; render();
+      var y = S.labFromY;
+      if (y != null) window.scrollTo(0, y);
+      else { var dc0 = document.getElementById('daycard'); if (dc0 && dc0.scrollIntoView) { try { dc0.scrollIntoView({ block: 'nearest' }); } catch (e) { dc0.scrollIntoView(); } } }
+      return true;
+    }
+    if (VIEW === 'out' && S.outMode === 'porev') { S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return true; }
+    if (VIEW === 'out' && S.outMode === 'add') { S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return true; }
+    if (VIEW === 'all' && S.allAdd) { S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
+    render();
+    return false;
+  }
+  /* 브라우저 기록: 안쪽 화면 1칸 + 시트 1칸. 앱 안에서 닫으면 그만큼 기록도 되돌림(그때 오는 popstate는 건너뜀) */
+  var NAV_DEPTH = 0, NAV_SKIP = 0;
+  function navDepth() { return (subLevel() ? 1 : 0) + (S.sheet && S.ready ? 1 : 0); }
+  function navSync() {
+    var want = navDepth();
+    try {
+      while (NAV_DEPTH < want) { history.pushState({ nmcNav: NAV_DEPTH + 1 }, ''); NAV_DEPTH++; }
+      if (NAV_DEPTH > want) { var n = NAV_DEPTH - want; NAV_DEPTH = want; NAV_SKIP++; history.go(-n); }
+    } catch (e) { /* 기록을 못 쓰는 곳: 단추로만 */ }
+  }
+  window.addEventListener('popstate', function () {
+    if (NAV_SKIP > 0) { NAV_SKIP--; return; }
+    if (NAV_DEPTH > 0) NAV_DEPTH--;
+    if (S.busy) {
+      try { history.pushState({ nmcNav: NAV_DEPTH + 1 }, ''); NAV_DEPTH++; } catch (e) { /* 그대로 */ }
+      toast('저장하는 중입니다. 끝난 뒤 다시 눌러 주세요');
+      return;
+    }
+    goBack();
+  });
+
   function header() {
     var sub = VIEW_NAME + (S.today ? ' · ' + fmtDateLong(S.today) : '');
     if (ADMIN_VIEW && S.ready && !S.admin) sub = VIEW_NAME + ' · 관리자';
-    var nav = '<a class="ghost sm navbtn" href="./" aria-label="홈 (첫 화면)">' + ICON.home + '<span>홈</span></a>';
+    var nav = (subLevel() ? '<button type="button" class="ghost sm navbtn backbtn" data-act="back" aria-label="뒤로 (' + esc(backTo()) + ')">' + ICON.chevL + '<span>뒤로</span></button>' : '') +
+      '<a class="ghost sm navbtn" href="./" aria-label="홈 (첫 화면)">' + ICON.home + '<span>홈</span></a>';
     if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
     else if (ADMIN_VIEW && S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
     return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + esc(sub) + '</p></div>' +
@@ -2015,6 +2066,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var po = '';
     ls.forEach(function (l) { if (!po && l.po) po = l.po; });
     S.lab = { ids: ls.map(function (l) { return l.id; }), site: po, site0: po, po: ls[0].po || '', date: ls[0].date, cust: ls[0].cust || '', type: ls[0].type };
+    S.labFromY = window.scrollY || window.pageYOffset || 0;   // 뒤로 누르면 이 자리로
     S.outMode = 'label';
     S.sheet = null;
     labLoad();
@@ -2292,8 +2344,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     plan.forEach(function (p) { var z = p.zone || ''; if (!(z in zc)) { zc[z] = 0; zo.push(z); } zc[z]++; });
     var zsum = zo.some(function (z) { return z; }) ? zo.filter(function (z) { return z; }).map(function (z) { return esc(z) + ' ' + zc[z] + '장'; }).concat('' in zc ? ['구분 없음 ' + zc[''] + '장'] : []) : [];
     var day = (lab.lay && lab.lay.date) || lab.date;
-    var h = '<div class="stack noprint"><section class="card"><button type="button" class="ghost wide" data-act="labback">← 달력으로</button>' +
-      '<h2 class="h2 mt12">물표 · 적재물 상세 내용</h2>' +
+    var h = '<div class="stack noprint"><section class="card">' +
+      '<h2 class="h2">물표 · 적재물 상세 내용</h2>' +
       '<p class="muted labsum">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + all.length + '가지 ' + fmt(kg) + ' kg' +
       (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + plan.length + '장</b>' + (plan.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') +
       (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' +
@@ -3048,7 +3100,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.po) h += '<div class="daterow"><h2 class="label">' + step(1) + '출고 날짜 <small>(발주서의 납품일)</small></h2><p class="bigdate' + (S.poNeedDate ? ' need' : '') + '">' + (S.poNeedDate ? '고르세요' : esc(fmtDate(S.inPDate))) + '</p></div>' + poDateChips() + '</section>';
     else {
     h += '<div class="daterow"><h2 class="label">' + (plan ? '예정 날짜' : '날짜') + '</h2><p class="bigdate">' + esc(fmtDate(curDate())) + '</p></div>';
-    h += (VIEW === 'out' ? '<p class="hint">날짜는 달력에서 고른 날입니다. 바꾸려면 ‘← 달력으로’를 누르세요.</p>' : plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
+    h += (VIEW === 'out' ? '<p class="hint">날짜는 달력에서 고른 날입니다. 바꾸려면 위쪽 ‘뒤로’를 눌러 달력에서 다른 날을 고르세요.</p>' : plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
     }
 
     if (t === '출고' || t === '생산') {
@@ -3056,7 +3108,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var due = S.plan.lines.filter(function (l) { return !l.fut && l.type === pt && l.date <= S.today; });
       if (due.length) {
         h += '<div class="warnbox">오늘까지 날짜인 ' + pt + ' ' + due.length + '건이 아직 확정되지 않았습니다. 그 ' + t + '이라면 여기서 새로 넣지 말고 ' + (VIEW === 'out' ? '달력에서 그 날짜를 눌러' : '예정 화면에서') + ' \'확정\'을 누르세요. 두 번 들어가면 재고가 틀어집니다.' +
-          '<br>' + (VIEW === 'out' ? '<button type="button" class="link" data-act="calback">← 달력으로</button>' : QUICK ? '<a class="link" href="stock.html?view=all">전체관리의 예정 화면으로</a>' : '<button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button>') + '</div>';
+          '<br>' + (VIEW === 'out' ? '<button type="button" class="link" data-act="back">뒤로 (달력에서 그 날짜 확정하기)</button>' : QUICK ? '<a class="link" href="stock.html?view=all">전체관리의 예정 화면으로</a>' : '<button type="button" class="link" data-act="tab" data-v="plan">예정 화면으로</button>') + '</div>';
       }
     }
 
@@ -3202,9 +3254,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!S.calYm) S.calYm = S.today.slice(0, 7);
     if (!S.calDay) S.calDay = S.today;
     if (S.outMode === 'label') return labelView();
-    if (S.outMode === 'add') {
-      return '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="calback">← 달력으로</button></section></div>' + viewIn();
-    }
+    if (S.outMode === 'add') return viewIn();
     if (S.outMode === 'porev') return poRevView();
     if (S.admin && !S.poList && !S.poLoading && !S.poErr) poLoad(false);
     return '<div class="stack">' + poCard() + poShowCard() + poDone() + calCard() + dayCard() + poInbox() + '</div>';
@@ -3533,7 +3583,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var V = S.poRev;
     if (!V) { S.outMode = 'cal'; return viewOut(); }
     var R = V.R || {}, d = R.draft || {}, p = V.plan, ov = R.overlap, iss = R.issues || [];
-    var h = '<div class="stack"><section class="card calback"><button type="button" class="ghost wide" data-act="porevx">← 달력으로 (넣지 않고 닫기)</button></section>';
+    var h = '<div class="stack">';   // 돌아가기는 위쪽 '뒤로' (넣지 않고 닫음)
     h += '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
       ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다.</small></p>';
     var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap'; }), inf = iss.filter(function (i) { return !i.block; });
@@ -5059,6 +5109,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     switch (act) {
       case 'overlay': if (ev.target === el) closeSheet(); return;
       case 'close': closeSheet(); return;
+      case 'back': if (!S.busy) goBack(); return;
       case 'tab': S.tab = v; store('nmc_inv_tab2', v); S.allAdd = ''; S.pick = null; S.sheet = null; render(); window.scrollTo(0, 0); return;
       case 'refresh': S.pnl = null; S.pnlErr = false; refresh(true); return;
       case 'login': openSheet({ kind: 'login', err: '' }); return;
