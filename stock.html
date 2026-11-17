@@ -2039,7 +2039,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
        비고 칸에 '거래처 / 놀이터1', 번호는 전체 장 수 기준(3/7)으로 씁니다. */
   var LAB_CODE = { '로즈': 'NM-01', '분홍': 'NM-02', '주황': 'NM-03', '노랑': 'NM-04', '겨자': 'NM-05', '연두': 'NM-06', '녹색': 'NM-07', '진녹': 'NM-08',
     '카키': 'NM-09', '청녹': 'NM-10', '청록': 'NM-10', '하늘': 'NM-11', '하늘색': 'NM-11', '청색': 'NM-12', '진청': 'NM-13', '연보라': 'NM-14', '보라': 'NM-15',
-    '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
+    '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '적색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
   var LAB_SIZE = { '타이어 고무분말|5-7mm': ['NMSBR-01', '검정5-7'], '타이어 고무분말|2-3mm': ['NMSBR-02', '검정2-3'], '타이어 고무분말|1-2mm': ['NMSBR-03', '검정1-2'], 'EPDM 재생|2-3mm': ['NMEPDM', '재생2-3'] };
   var LAB_ROWS = 10;
   function labItem(prod, color) {
@@ -2429,7 +2429,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
        열쇠 = 날짜 + 그날 묶음(구분·거래처·현장). 그 뒤 주문(출고예정)이 바뀌면 바뀐 양만 맞춰 넣고 무엇을 맞췄는지 알려 줍니다. */
   var LAB_NUMW = { '한': 1, '하나': 1, '두': 2, '둘': 2, '세': 3, '셋': 3, '네': 4, '넷': 4, '다섯': 5, '여섯': 6, '일곱': 7, '여덟': 8, '아홉': 9, '열': 10 };
   var LAB_SYN = { '청색': ['파랑', '파란', '블루'], '진청': ['남색', '네이비'], '하늘색': ['하늘'], '청록': ['청녹'], '녹색': ['초록', '그린'], '진녹': ['진초록'],
-    '노랑': ['노란', '옐로'], '주황': ['오렌지'], '분홍': ['핑크'], '적색': ['빨강', '빨간', '레드'], '검정': ['검은', '블랙'], '회색': ['그레이'], '보라': ['퍼플'],
+    '노랑': ['노란', '옐로'], '주황': ['오렌지'], '분홍': ['핑크'], '적색': ['빨강', '빨간', '레드', '적갈'], '검정': ['검은', '블랙'], '회색': ['그레이'], '보라': ['퍼플'],
     '연갈색': ['연갈'], '진갈색': ['진갈', '고동'], '적갈색': ['적갈'] };
   var LAB_PW = '(?:파렛트|팔레트|파레트|빠렛트|팔렛트|빠레트|파렛|팔렛)';
   var LAB_EG = ['청색 한 파렛트로', '2번 청색 2포 1번으로', '1번 2번 합치기', '3번 반으로', '파렛트당 40포', '취소', '처음대로'];
@@ -3535,6 +3535,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<p>' + lines.length + '줄 · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + (it.result && /바꿈/.test(it.result) ? ' · 기존 예정을 이 발주서 내용으로 바꿨습니다' : '') + '</p>';
     var zs = poZones(lines).filter(function (g) { return g.zone; });
     if (zs.length) h += '<p class="pozs">' + zs.map(function (g) { return '<span>' + esc(poZoneName(g.zone)) + ' ' + g.lines.length + '줄 ' + fmt(g.lines.reduce(function (s, x) { return s + x.l.kg; }, 0)) + ' kg</span>'; }).join('') + '</p>';
+    if (X.notes && X.notes.length) h += '<ul class="poiss info">' + X.notes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
     h += poCalcHtml(X.sim, lines);
     if (S.poUndoAsk === it.id) {
       h += '<div class="poask"><p><b>되돌릴까요?</b> 넣은 ' + (it.n || lines.length) + '줄을 지우고' + (it.result && /바꿈/.test(it.result) ? ', 바꿨던 기존 예정을 되살립니다.' : '.') + '</p>' +
@@ -3747,7 +3748,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (r && r.item) poListPut(r.item);
       if (r && r.data && r.data.today) {          // 바로 넣었음
         apply(r.data);
-        S.poShow = { item: r.data.item || r.item, plan: r.read && r.read.plan, sim: r.data.sim || (r.read && r.read.sim) };
+        S.poShow = { item: r.data.item || r.item, plan: r.read && r.read.plan, sim: r.data.sim || (r.read && r.read.sim),
+          notes: ((r.read && r.read.issues) || []).filter(function (i) { return !i.block; }).map(function (i) { return i.t; }) };
         if (S.poShow.item) poListPut(S.poShow.item);
         S.outMode = 'cal'; S.sheet = null;
         if (S.poShow.plan && S.poShow.plan.date) { S.calDay = S.poShow.plan.date; S.calYm = S.calDay.slice(0, 7); }
@@ -3895,6 +3897,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<button type="button" class="ghost wide mt8" data-act="porevx">' + (V.wait ? '닫기 (대기열에 그대로 있음)' : '닫기 (나중에 받은 발주서에서 다시 열 수 있음)') + '</button></section></div>';
     return h;
   }
+  // 제품이 안 적힌 줄을 어떻게 골랐나 (2026-11-17 지시: 안 적히면 NM-CHIP, 재고가 모자라면 일반 EPDM. 락칩은 적혀 있을 때만)
+  var PO_HOW = { old: '기존 예정과 같은 제품', nm: '제품 안 적힘 → NM-CHIP', epdm: 'NM-CHIP 재고 부족 → 일반 EPDM', nmshort: '둘 다 부족 → NM-CHIP(생산 필요)',
+    only: '이 색은 이 제품만 있음', pick: '직접 고름', same: '이 거래처가 받던 제품', mixed: '이 거래처가 둘 다 받음 · 최근 것', cust: '이 거래처가 주로 받는 제품' };
   function poLineHtml(l, i, V) {
     var x = V.sim && V.sim.lines ? V.sim.lines[i] : null;
     var short = x && x.short > 0;
@@ -3903,7 +3908,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     else {
       h += '<select class="posel" data-in="poprod" data-i="' + i + '" aria-label="' + esc(l.color) + ' 제품">' + (l.prod ? '' : '<option value="">제품 고르기</option>') +
         l.cands.map(function (c) { return '<option value="' + esc(c) + '"' + (c === l.prod ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select> <b>' + esc(l.color) + '</b>' +
-        '<small class="pohow">' + esc(l.how === 'old' ? '기존 예정과 같은 제품' : l.how === 'same' ? '이 거래처가 받던 제품' : l.how === 'mixed' ? '이 거래처가 둘 다 받음 · 최근 것' : l.how === 'cust' ? '이 거래처가 주로 받는 제품' : '칼라칩(제품 안 적힘)') + '</small>';
+        '<small class="pohow">' + esc(PO_HOW[l.how] || '칼라칩(제품 안 적힘)') + '</small>';
     }
     h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
     if (V.simBusy || !l.prod) h += '<div class="pl3 muted">' + (l.prod ? '계산 중…' : '제품을 고르면 계산합니다') + '</div>';
