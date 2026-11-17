@@ -2046,8 +2046,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   /* ───────── 물표 · 적재물 상세 내용 (2026-11-16 지시, 같은 날 다시 지시) ─────────
      · 회사가 준 엑셀 양식 그대로: 로고·(주)남명·제목·날짜·현장명·10줄 표·총수량(빨강)·비고(거래처·n/N)·검수 및 승인·서명란,
        아래 주소·(주)남명·e-mail·전화. A4 한 장에 파렛트 한 개. 칸 크기·글자 크기는 엑셀 파일의 값 그대로(인쇄 배율 99%).
-     · 파렛트 한 장에 최대 56포(바꿀 수 있음). 파렛트 한 장에 들어가는 색은 쪼개지 않습니다(2026-11-17 지시:
-       "청색이 40개인데 2개는 다른 파레트에 있고 38개는 따로"). 최대 포보다 많은 색만 같은 크기로 나누고,
+     · 파렛트 한 장에 최대 56포(바꿀 수 있음). 같은 색은 한 장에 통째로 — 한 장에 들어가는 색은 절대 쪼개지 않고, 안 들어가면 장을 늘립니다
+       (2026-11-17 지시: "청색이 40개인데 2개는 다른 파레트에 있고 38개는 따로" · 17:48 다시: "같은색상은 다른파레트에 쌓지마라.
+       같은색상은 같은색상끼리 다 싸라 … 놀이터 1에 락칩 청색 40포면 40포 다 한꺼번에 한파레트에"). 최대 포보다 많은 색만 같은 크기로 나누고,
        장 수는 쪼개지 않고 실을 수 있는 가장 적은 수, 그 안에서 가장 가벼운 장부터 채워 고르게 합니다. 표가 10줄이라 한 장에 10가지까지.
        나눈 뒤에는 '말로 고치기'·'파렛트 고치기'(label_edit.js)로 마음대로 고칩니다.
      · 비고(메모)에 '놀이터1·놀이터2'처럼 따로 실어 달라는 구분이 있으면 그 구분끼리만 싣고,
@@ -2124,6 +2125,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return zoneFind(s) || { name: '', key: '' };
   }
   function zoneOf(memo) { return zoneParse(memo).name; }
+  /* 구분 이름 보이기: 숫자만이면 놀이터 (2026-11-16 지시 "1이라고 되어 있으면 놀이터 1", 17:48 다시: "1 2 3 이라고 왔으면 놀이터 1 놀이터 2라고 표기")
+     1 · 1번 · 놀이터1 → 놀이터 1. 그 밖의 이름(유아 · A구역 …)은 적힌 그대로 */
+  function zoneShow(z) {
+    var s = String(z == null ? '' : z).trim(), m = s.match(/^(?:놀이터\s*)?(\d{1,2})\s*번?$/);
+    return m ? '놀이터 ' + Number(m[1]) : s;
+  }
   function labOpen(ids) {
     var ls = ids.map(recOf).filter(Boolean);
     if (!ls.length) { toast(ERR.not_found); return; }
@@ -2144,7 +2151,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     (S.items || []).forEach(function (it, i) { ord[it.key] = i; });
     (S.lab ? S.lab.ids : []).map(recOf).filter(Boolean).forEach(function (l) {
       var z = zoneParse(l.memo), g = by['k' + z.key];
-      if (!g) { g = by['k' + z.key] = { zone: z.name, key: z.key, lines: [], map: {} }; zs.push(g); }
+      if (!g) { g = by['k' + z.key] = { zone: zoneShow(z.name), key: z.key, lines: [], map: {} }; zs.push(g); }
       var k = l.prod + '|' + l.color;
       if (!g.map[k]) { g.map[k] = { key: k, prod: l.prod, color: l.color, kg: 0, ord: ord[k] == null ? 9999 + g.lines.length : ord[k] }; g.lines.push(g.map[k]); }
       g.map[k].kg += l.qty;
@@ -2159,10 +2166,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      ② 장 수 N = ⌈전체 포 ÷ 최대 포⌉(10줄이 모자라면 늘림). 조각을 큰 것부터 통째로 '지금 가장 가벼운 장'에(고르게), 안 되면 '꽉 차는 장'에.
      ③ N장에 통째로 안 들어갈 때만 색을 나눠 실음: 나누는 색 수가 가장 적고, 나눈 조각이 고르게(38+6 대신 22+22) 되는 것을 고름.
         단, 한 색을 한 번 넘게 더 나누거나 5포 미만 조각이 생기면 그렇게 하지 않고 한 장 늘림("2개는 다른 파레트" 같은 일 없게).
-        whole = true 이면 ③ 대신 장을 늘림(색을 쪼개지 않고 다시 나누기).
+        (2026-11-17 17:48 지시 "같은색상은 다른파레트에 쌓지마라 … 40포면 40포 다 한꺼번에 한파레트에" → ③은 쓰지 않고 늘 장을 늘림.
+         한 장에 들어가는 색은 장 수가 늘어도 절대 쪼개지 않습니다.)
      ④ kg 우수리는 그 색의 마지막 줄에서 뺌. */
   function labUnits(kg, bag) { var w = Math.floor(kg / bag), r = kg - w * bag; return { units: w + (r > 0 ? 1 : 0), part: r }; }
-  function labPack(lines, cap, bag, whole) {
+  function labPack(lines, cap, bag) {
     var its = [];
     lines.forEach(function (l, i) {
       var u = labUnits(l.kg, bag).units;
@@ -2174,8 +2182,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var T = its.reduce(function (s, x) { return s + x.u; }, 0);
     var order = its.slice().sort(function (a, b) { return b.u - a.u || a.i - b.i; });
     for (var N = Math.max(1, Math.ceil(T / cap), Math.ceil(its.length / LAB_ROWS)); N < its.length; N++) {
-      var P = labPut(order, N, cap, true) || labPut(order, N, cap, false);
-      if (!P && !whole) P = labSplitBest(order, N, cap);
+      var P = labPut(order, N, cap, true) || labPut(order, N, cap, false);   // 색(조각)은 통째로만 — 안 되면 장을 늘림
       if (P) return labOut(P, bag);
     }
     return labOut(order.map(function (x) { return { fill: x.u, ps: [{ x: x, u: x.u }] }; }), bag);
@@ -2195,66 +2202,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       q.ps.push({ x: x, u: x.u }); q.fill += x.u;
     }
     return !keepEmpty && P.some(function (q) { return !q.ps.length; }) ? null : P;
-  }
-  /** 조각 x를 남는 자리가 큰 장부터 같은 높이로 나눠 실음(물 채우듯: 44포를 38·38 자리에 → 22·22) */
-  function labWater(P, x, cap) {
-    var sp = P.filter(function (q) { return q.fill < cap && q.ps.length < LAB_ROWS && !labHas(q, x.l); })
-      .map(function (q) { return { q: q, s: cap - q.fill }; }).sort(function (a, b) { return b.s - a.s; });
-    var tot = 0, k = 0;
-    while (k < sp.length && tot < x.u) tot += sp[k++].s;
-    if (tot < x.u) return false;
-    var use = sp.slice(0, k), lo = 1, hi = x.u;
-    while (lo < hi) { var mid = (lo + hi) >> 1; if (use.reduce(function (a, o) { return a + Math.min(o.s, mid); }, 0) >= x.u) hi = mid; else lo = mid + 1; }
-    var ps = use.map(function (o) { return { q: o.q, u: Math.min(o.s, lo) }; }), over = ps.reduce(function (a, p) { return a + p.u; }, 0) - x.u;
-    ps.sort(function (a, b) { return b.u - a.u; });
-    for (var g = 0; over > 0 && g < 100000; g++) { var p = ps[g % ps.length]; if (p.u > 0) { p.u--; over--; } }
-    ps.forEach(function (p) { if (p.u > 0) { p.q.ps.push({ x: x, u: p.u }); p.q.fill += p.u; } });
-    return true;
-  }
-  /** N장에 통째로 안 될 때: 여러 방법으로 나눠 실어 보고 '나눈 색이 가장 적고 · 조각이 작지 않고 · 고른' 것 */
-  function labSplitBest(order, N, cap) {
-    var cands = [];
-    var greedy = function (light) {
-      var P = labEmpty(N);
-      for (var k = 0; k < order.length; k++) {
-        var x = order[k], fit = P.filter(function (q) { return q.fill + x.u <= cap && q.ps.length < LAB_ROWS && !labHas(q, x.l); });
-        if (fit.length) { var q = fit.sort(light ? labLighter : labFuller)[0]; q.ps.push({ x: x, u: x.u }); q.fill += x.u; }
-        else if (!labWater(P, x, cap)) return;
-      }
-      if (!P.some(function (q) { return !q.ps.length; })) cands.push(P);
-    };
-    greedy(true); greedy(false);
-    var tryOut = function (out) {
-      var rest = order.filter(function (x) { return out.indexOf(x) < 0; });
-      [true, false].forEach(function (light) {
-        var P = labPut(rest, N, cap, light, true);
-        if (!P) return;
-        for (var j = 0; j < out.length; j++) if (!labWater(P, out[j], cap)) return;
-        if (!P.some(function (q) { return !q.ps.length; })) cands.push(P);
-      });
-    };
-    var seen = {}, uniq = order.filter(function (x) { var key = x.i + ':' + x.u; if (seen[key]) return false; seen[key] = 1; return true; });
-    uniq.forEach(function (x) { tryOut([x]); });
-    if (!cands.some(function (P) { return labCost(P) < 2000; }) && uniq.length <= 24) {
-      for (var a = 0; a < uniq.length; a++) for (var b = a + 1; b < uniq.length; b++) tryOut([uniq[a], uniq[b]]);
-    }
-    cands = cands.filter(labFair);
-    if (!cands.length) return null;
-    return cands.sort(function (p, q) { return labCost(p) - labCost(q); })[0];
-  }
-  /** 받아들일 만한 나누기: 색마다 (꼭 나눠야 하는 조각 수 + 1) 이하로, 더 나눈 색은 가장 작은 조각이 5포 이상 */
-  function labFair(P) {
-    var by = {};
-    P.forEach(function (q) { q.ps.forEach(function (p) { var b = by[p.x.i] || (by[p.x.i] = { n: 0, min: Infinity, k: p.x.k }); b.n++; b.min = Math.min(b.min, p.u); }); });
-    return Object.keys(by).every(function (i) { var b = by[i]; return b.n <= b.k || (b.n === b.k + 1 && b.min >= 5); });
-  }
-  function labCost(P) {
-    var by = {}, cost = 0;
-    P.forEach(function (q) { q.ps.forEach(function (p) { var b = by[p.x.i] || (by[p.x.i] = { n: 0, min: Infinity, k: p.x.k }); b.n++; b.min = Math.min(b.min, p.u); }); });
-    Object.keys(by).forEach(function (i) { var b = by[i]; if (b.n > b.k) cost += 1000 * (b.n - b.k) + Math.max(0, 10 - b.min) * 40; });
-    var f = P.map(function (q) { return q.fill; }), mx = Math.max.apply(null, f);
-    f.forEach(function (v) { if (v < mx / 2) cost += (mx / 2 - v) * 2; });
-    return cost + (mx - Math.min.apply(null, f)) * 0.2;
   }
   function labOut(P, bag) {
     P.forEach(function (q) { q.ps.sort(function (a, b) { return a.x.i - b.x.i; }); });
@@ -2420,7 +2367,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<div><p class="label">파렛트 1장 최대 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
       '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 최대 포대 수">' +
       '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button><span>포 = ' + fmt(cap * bag) + ' kg</span></div></div></div>' +
-      '<p class="note">파렛트 한 장에 들어가는 색은 쪼개지 않습니다(최대 ' + cap + '포보다 많은 색만 같은 크기로 나눔). 한 장에 10가지까지, 놀이터1·놀이터2 같은 구분은 따로 싣습니다. ' +
+      '<p class="note">같은 색은 한 장에 통째로 싣습니다 — 한 장에 들어가는 색은 장 수가 늘어도 쪼개지 않습니다(최대 ' + cap + '포보다 많은 색만 같은 크기로 나눔). 한 장에 10가지까지, 놀이터 1·놀이터 2 같은 구분은 따로 싣습니다. ' +
       '최대 포를 바꾸면 처음부터 다시 나눕니다. 발주목록에서 물표에 다 들어갔는지 보면서 파렛트마다 포 수를 직접 쓰거나 옮기세요. 고친 것은 저장되어 다른 기기에서도 같게 나옵니다.' +
       (odd.length ? ' 한 포 무게로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
       (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번 칸에 제품 이름을 적은 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '.</p>' : '') +
@@ -2477,7 +2424,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         pals.push({ zk: g.key, z: g.zone, cust: null, ztx: null, rows: rows.map(function (r) { return { k: r.l.key, zk: g.key, kg: r.kg }; }) });
       });
     });
-    return { v: 1, cap: cap, bag: bag, site: null, date: null, pals: pals, edited: false };
+    return { v: 2, cap: cap, bag: bag, site: null, date: null, pals: pals, edited: false };
   }
   function labBags(p) { var b = labBag(); return p.rows.reduce(function (s, r) { return s + Math.ceil(r.kg / b); }, 0); }
   function labKgOf(p) { return p.rows.reduce(function (s, r) { return s + r.kg; }, 0); }
@@ -2490,6 +2437,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var host = null;
     lay.pals.forEach(function (p) { p.rows.forEach(function (r) { if (r.k === m.k && r.zk === m.zk && (!host || r.kg > host.r.kg)) host = { p: p, r: r }; }); });
     if (host && labBags(host.p) - need(host.r.kg) + need(host.r.kg + kg) <= cap) { host.r.kg += kg; return; }
+    // 같은 색은 한 장에 (2026-11-17 17:48 지시) — 원래 장에 다 안 들어가면 그 색을 통째로 들어가는 장(같은 구분)이나 새 장으로 옮김
+    var tot = kg + (host ? host.r.kg : 0);
+    if (need(tot) <= cap) {
+      if (host) host.p.rows.splice(host.p.rows.indexOf(host.r), 1);
+      var to = lay.pals.filter(function (p) { return p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + need(tot) <= cap; })
+        .sort(function (a, b) { return labBags(b) - labBags(a); })[0];
+      if (to) to.rows.push({ k: m.k, zk: m.zk, kg: tot });
+      else lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, rows: [{ k: m.k, zk: m.zk, kg: tot }] });
+      return;
+    }
     while (kg > 0) {
       var u = need(kg), fit = lay.pals.filter(function (p) { return p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + u <= cap; })
         .sort(function (a, b) { return labBags(b) - labBags(a); })[0];
@@ -2498,6 +2455,30 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, rows: [{ k: m.k, zk: m.zk, kg: t }] });
       kg -= t;
     }
+  }
+  /* 같은 색은 한 장에 (2026-11-17 17:48 지시: "같은색상은 다른파레트에 쌓지마라. 같은색상은 같은색상끼리 다 싸라 … 40포면 40포 다 한꺼번에 한파레트에")
+     전에 저장한 물표에서 한 장에 다 들어가는 색이 여러 장에 나뉘어 있으면 한 장으로 모음:
+     가장 많이 실린 장 → 같은 구분의 들어가는 장(가장 찬 장부터) → 새 장. 한 장보다 많은 색은 그대로. */
+  function labUnsplit(lay) {
+    var bag = labBag(), cap = labCapNow(), need = function (x) { return Math.ceil(x / bag); }, notes = [], by = {}, order = [];
+    lay.pals.forEach(function (p) { p.rows.forEach(function (r) { var id = r.zk + '#' + r.k; if (!by[id]) { by[id] = []; order.push(id); } by[id].push({ p: p, r: r }); }); });
+    order.forEach(function (id) {
+      var xs = by[id];
+      if (xs.length < 2) return;
+      var tot = xs.reduce(function (s, x) { return s + x.r.kg; }, 0);
+      if (need(tot) > cap) return;
+      xs.sort(function (a, b) { return b.r.kg - a.r.kg; });
+      var r0 = xs[0].r, zk = r0.zk;
+      var mine = function (r) { return r.zk + '#' + r.k === id; };
+      var fits = function (p) { return p.rows.filter(function (r) { return !mine(r); }).length < LAB_ROWS && labBags({ rows: p.rows.filter(function (r) { return !mine(r); }) }) + need(tot) <= cap; };
+      var to = fits(xs[0].p) ? xs[0].p : lay.pals.filter(function (p) { return p.zk === zk && fits(p); }).sort(function (a, b) { return labBags(b) - labBags(a); })[0];
+      lay.pals.forEach(function (p) { p.rows = p.rows.filter(function (r) { return !mine(r); }); });
+      if (!to) { to = { zk: zk, z: xs[0].p.z, cust: null, ztx: null, rows: [] }; lay.pals.push(to); }
+      to.rows.push({ k: r0.k, zk: zk, kg: tot });
+      notes.push(labNm(r0.k) + ' ' + labQU(tot));
+    });
+    lay.pals = lay.pals.filter(function (p) { return p.rows.length; });
+    return notes;
   }
   /* 저장한 물표를 지금 주문에 맞춤: 없어진 줄은 빼고, 늘어난 양은 labPlace, 줄어든 양은 작은 줄부터 뺌 */
   function labAdapt(lay) {
@@ -2528,7 +2509,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labPagesOf(lay) {
     var cur = labCur();
     return lay.pals.map(function (p) {
-      return { zone: p.ztx != null ? p.ztx : p.z, cust: p.cust, rows: p.rows.slice().sort(function (a, b) {
+      return { zone: zoneShow(p.ztx != null ? p.ztx : p.z), cust: p.cust, rows: p.rows.slice().sort(function (a, b) {
         var ma = cur.map[a.zk + '#' + a.k], mb = cur.map[b.zk + '#' + b.k];
         return (ma ? ma.ord : 9999) - (mb ? mb.ord : 9999);
       }).map(function (r) { var q = String(r.k).split('|'); return { l: { prod: q[0], color: q.slice(1).join('|') }, kg: r.kg }; }) };
@@ -2596,11 +2577,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var lay = null;
       if (r && r.lay) { try { lay = JSON.parse(r.lay); } catch (e) { lay = null; } }
       if (lay && Array.isArray(lay.pals)) {
-        L.notes = labAdapt(lay);
+        var ad = labAdapt(lay), un = [];
         lay.edited = true;
         L.lay = lay; L.savedAt = r.at || '';
+        if (!(lay.v >= 2)) { un = labUnsplit(lay); lay.v = 2; }   // 전에 저장한 물표: 나뉜 같은 색을 한 장으로 (2026-11-17 17:48)
+        L.notes = ad.concat(un);
         if (lay.site != null) L.site = lay.site;
-        if (L.notes.length) labTouched('저장해 둔 물표 뒤로 주문이 바뀌어 맞췄습니다: ' + L.notes.join(', ') + '.');
+        if (L.notes.length) labTouched([ad.length ? '저장해 둔 물표 뒤로 주문이 바뀌어 맞췄습니다: ' + ad.join(', ') + '.' : '',
+          un.length ? '같은 색은 한 장에 싣도록 여러 장에 나뉘어 있던 것을 모았습니다: ' + un.join(', ') + '.' : ''].filter(String).join(' '));
         else render();
       } else render();
     }, function (e) {
@@ -3147,7 +3131,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<span class="lostat ' + (sm.ok ? 'ok' : 'bad') + '">' + (sm.ok ? '✓ 물표에 다 들어감' : '맞지 않음') + '</span></div>' +
       '<table class="lotab"><thead><tr><th>품목</th><th>주문</th><th>물표</th><th>상태</th></tr></thead><tbody>';
     rows.forEach(function (o) {
-      if (zoned && o.z !== lastZ) { lastZ = o.z; h += '<tr class="loz"><th colspan="4">' + esc(o.z || '구분 없음') + '</th></tr>'; }
+      if (zoned && o.z !== lastZ) { lastZ = o.z; h += '<tr class="loz"><th colspan="4">' + esc(zoneShow(o.z) || '구분 없음') + '</th></tr>'; }
       var d = o.got - o.want, cls = o.extra ? 'extra' : d < 0 ? 'rest' : d > 0 ? 'over' : 'ok', q = o.k.split('|');
       var st = o.extra ? '<b>주문에 없음</b>' : d < 0 ? '<b>' + sm.u(-d) + ' 남음</b><select class="lmove" data-ch="labrest" data-v="' + esc(o.id) + '" aria-label="' + esc(labNm(o.k)) + ' 남은 것 넣을 곳"' + (busy ? ' disabled' : '') + '><option value="">넣을 곳</option>' + dests + '</select>'
         : d > 0 ? '<b>' + sm.u(d) + ' 넘침</b>' : '✓';
@@ -3172,7 +3156,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function labPalCard(p, i, page, N) {
     var L = S.lab, lay = L.lay, cap = labCapNow(), busy = L.loading, n = i + 1;
-    var bags = labBags(p), kg = labKgOf(p), zt = p.ztx != null ? p.ztx : p.z, mixZ = p.rows.some(function (r) { return r.zk !== p.zk; });
+    var bags = labBags(p), kg = labKgOf(p), zt = zoneShow(p.ztx != null ? p.ztx : p.z), mixZ = p.rows.some(function (r) { return r.zk !== p.zk; });
     var dis = busy ? ' disabled' : '';
     var h = '<section class="card lpal' + (bags > cap ? ' over' : '') + '" id="lpal-' + n + '"><div class="lph"><b class="lpn">' + n + '번</b>' + (zt ? '<span class="lpz">' + esc(zt) + '</span>' : '') +
       '<span class="lpq">' + fmt(bags) + '포 · ' + fmt(kg) + ' kg</span>' + (bags > cap ? '<b class="bad">최대 ' + cap + '포 넘음</b>' : '') + (mixZ ? '<b class="bad">구분 섞임</b>' : '') + '</div>' +
@@ -3189,7 +3173,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     var a = (L.add && L.add[n]) || {}, ord = labOrder().filter(function (o) { return !o.extra; });
     h += '</ul><div class="lpadd"><span class="lpaddt">＋ 줄 넣기</span><select class="lmove" data-ch="labaddk" data-v="' + n + '" aria-label="' + n + '번에 넣을 품목"' + dis + '><option value="">품목</option>' +
-      ord.map(function (o) { var rest = o.want - o.got; return '<option value="' + esc(o.id) + '"' + (a.id === o.id ? ' selected' : '') + '>' + esc((o.z ? o.z + ' · ' : '') + labNm(o.k) + (rest > 0 ? ' (남음 ' + labQU(rest) + ')' : '')) + '</option>'; }).join('') + '</select>' +
+      ord.map(function (o) { var rest = o.want - o.got; return '<option value="' + esc(o.id) + '"' + (a.id === o.id ? ' selected' : '') + '>' + esc((o.z ? zoneShow(o.z) + ' · ' : '') + labNm(o.k) + (rest > 0 ? ' (남음 ' + labQU(rest) + ')' : '')) + '</option>'; }).join('') + '</select>' +
       '<input class="text lmq" type="text" inputmode="numeric" autocomplete="off" data-in="labaddq" data-v="' + n + '" value="' + esc(a.q || '') + '" placeholder="포" aria-label="' + n + '번에 넣을 포 수 (비우면 남은 것 전부)"' + dis + '><span>포</span>' +
       '<button type="button" class="ghost sm" data-act="labadd" data-v="' + n + '"' + dis + '>넣기</button></div>' +
       '<div class="lpa"><label><span>비고</span><input class="text" type="text" maxlength="30" data-ch="labnote" data-v="' + n + '" value="' + esc(p.cust != null ? p.cust : (L.cust || '')) + '" aria-label="' + n + '번 비고 첫 줄"' + dis + '></label>' +
@@ -3514,7 +3498,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return s + labPack(g.lines.filter(function (x) { return x.l.prod; }).map(function (x) { return { kg: x.l.kg, prod: x.l.prod, color: x.l.color }; }), cap, bag).length;
     }, 0) : 0;
   }
-  function poZoneName(z) { return z ? (/^\d+$/.test(z) ? '놀이터' + Number(z) : z) : '구분 없음'; }
+  function poZoneName(z) { return z ? zoneShow(z) : '구분 없음'; }   // 1 · 놀이터1 → 놀이터 1 (label_views.js zoneShow)
   /* 넣은 뒤 계산 한 덩어리: 생산 필요(부족 시작일 순) · 이 발주서 때문에 모자라게 되는 다른 예정 */
   function poCalcHtml(sim, lines) {
     if (!sim) return '';
