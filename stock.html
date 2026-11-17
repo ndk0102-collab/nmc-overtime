@@ -429,6 +429,24 @@ body.labmode .wrap{max-width:1480px}
 .mixw.warn{background:#fff4d6;color:#6b4a00}
 .mixw.note{background:var(--soft);color:var(--ink2);font-weight:500}
 .toast .tw{display:block;margin-top:4px;font-weight:600;color:#ffd666;font-size:14px;line-height:1.45}
+.labsk{display:block;width:100%;margin:10px 0 2px;padding:9px 11px;border:0;border-radius:10px;text-align:left;font:inherit;font-size:14px;font-weight:700;line-height:1.45;cursor:pointer}
+.labsk small{font-weight:600;text-decoration:underline;margin-left:4px;white-space:nowrap}
+.labsk.ok{background:var(--soft);color:var(--ok)}
+.labsk.warn{background:#fff4d6;color:#6b4a00}
+.labsk.bad{background:var(--bad-soft);color:var(--bad)}
+.lsk{list-style:none;margin:8px 0 0;padding:0}
+.lsk li{padding:9px 0;border-top:1px solid var(--line)}
+.lsk li:first-child{border-top:0}
+.lskh{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.lskh b{font-size:15px}
+.lskq{margin-left:auto;font-size:13.5px;color:var(--ink2)}
+.lskn{display:flex;gap:14px;flex-wrap:wrap;margin-top:3px;font-size:13.5px;color:var(--ink2)}
+.lskn b{color:var(--ink);font-size:15px}
+.lskn b.neg{color:var(--bad)}
+.lskw{margin:6px 0 0;padding:6px 9px;border-radius:8px;font-size:13px;font-weight:600;line-height:1.45}
+.lskw.bad{background:var(--bad-soft);color:var(--bad)}
+.lskw.warn{background:#fff4d6;color:#6b4a00}
+.lsko{margin:4px 0 0;font-size:12.5px;color:var(--ink2)}
 .poov{border:2px solid var(--warn);background:var(--warn-soft)}
 .poov p{margin:6px 0 0;font-size:15px;line-height:1.55}
 .potab{width:100%;margin-top:10px;border-collapse:collapse;font-size:14.5px;background:#fff;border-radius:10px;overflow:hidden}
@@ -2220,6 +2238,61 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return out;
   }
+  /* 재고 같이 보기 (2026-11-17 지시: "그러면 다음엔 재고를 어떻게 알수있나? 일반 물표 확인할때 재고를 같이 보고있어야 모든게 감이 잡힐것같은데")
+     물표 화면에서 이 출고의 품목마다(구분이 달라도 같은 제품·색은 합침):
+       이번 양 · 현재고(지금 창고) · 그날(이 출고 날짜에 쓸 수 있는 양 = 예정 계산에서 이 출고 바로 앞의 재고, 먼저 잡힌 출고예정·생산예정 반영) ·
+       출고 뒤(그날 − 이번) · 이번 출고에서 모자라는 양 · 뒤 출고예정까지 보면 모자라는 양(처음 모자라는 날) ·
+       같은 색 다른 제품(일반 EPDM · NM-CHIP · 락칩)의 현재고. 단위 kg. 이미 나간 출고는 그날 계산이 없어 현재고만. */
+  function labStock() {
+    var L = S.lab;
+    if (!L) return [];
+    var idx = {}, ord = {}, by = {}, keys = [];
+    ((S.plan && S.plan.lines) || []).forEach(function (l, i) { idx[l.id] = i; });
+    (S.items || []).forEach(function (it, i) { ord[it.key] = i; });
+    (L.ids || []).forEach(function (id) {
+      var r = recOf(id);
+      if (!r) return;
+      var k = r.prod + '|' + r.color, x = by[k];
+      if (!x) { x = by[k] = { k: k, prod: r.prod, color: r.color, kg: 0, first: null }; keys.push(k); }
+      x.kg += Number(r.qty) || 0;
+      if (id in idx && (!x.first || idx[id] < idx[x.first.id])) x.first = S.plan.lines[idx[id]];
+    });
+    return keys.sort(function (a, b) { return (ord[a] == null ? 9999 : ord[a]) - (ord[b] == null ? 9999 : ord[b]); }).map(function (k) {
+      var x = by[k], day = x.first ? x.first.before : null, sm = (S.plan && S.plan.sum && S.plan.sum[k]) || null;
+      var others = PROD3.indexOf(x.prod) >= 0 ? PROD3.filter(function (p) { return p !== x.prod && S.byKey[p + '|' + x.color]; })
+        .map(function (p) { return { p: p, cur: stockOf(p + '|' + x.color) }; }) : [];
+      return { k: k, prod: x.prod, color: x.color, kg: x.kg, cur: stockOf(k), day: day, after: day == null ? null : day - x.kg,
+        short: day == null ? 0 : Math.max(0, x.kg - Math.max(day, 0)), need: sm ? sm.need || 0 : 0, shortEff: sm ? sm.shortEff || '' : '', others: others };
+    });
+  }
+  function labStockLine() {
+    var xs = labStock();
+    if (!xs.length) return '';
+    var now = xs.filter(function (x) { return x.short > 0; }), later = xs.filter(function (x) { return !(x.short > 0) && x.need > 0; });
+    var t = now.length ? '재고: 이번 출고에서 모자람 ' + now.map(function (x) { return labNm(x.k) + ' ' + fmt(x.short) + ' kg'; }).join(', ')
+      : xs.some(function (x) { return x.day == null; }) ? '재고: 이미 나간 출고 — 아래에 지금 재고' : '재고: ✓ 이번 출고분은 모두 재고로 나갑니다';
+    if (later.length) t += ' · 뒤 출고예정까지 보면 모자람 ' + later.map(function (x) { return labNm(x.k) + ' ' + fmt(x.need) + ' kg'; }).join(', ');
+    return '<button type="button" class="labsk ' + (now.length ? 'bad' : later.length ? 'warn' : 'ok') + '" data-act="labtostock">' + esc(t) + ' <small>재고 자세히</small></button>';
+  }
+  function labStockCard() {
+    var L = S.lab, xs = labStock();
+    if (!xs.length) return '';
+    var nNow = xs.filter(function (x) { return x.short > 0; }).length;
+    var h = '<section class="card labstock" id="labstock"><div class="podh"><h2 class="label">재고 <small>' + esc(fmtDate(L.date)) + ' ' + esc(L.type) + ' 기준 · kg</small></h2>' +
+      '<span class="lostat ' + (nNow ? 'bad' : 'ok') + '">' + (nNow ? '모자람 ' + nNow + '가지' : '✓ 재고 있음') + '</span></div><ul class="lsk">';
+    xs.forEach(function (x) {
+      var w = '';
+      if (x.short > 0) w = '<p class="lskw bad">이번 출고에서 ' + fmt(x.short) + ' kg 모자람' + (x.need > x.short ? ' · 뒤 출고예정까지 모두 ' + fmt(x.need) + ' kg' : '') + ' — 생산이 필요합니다</p>';
+      else if (x.need > 0) w = '<p class="lskw warn">이번 출고는 재고로 나갑니다. 뒤 출고예정까지 보면 ' + fmt(x.need) + ' kg 모자람(' + esc(poMd(x.shortEff)) + '부터)</p>';
+      h += '<li><div class="lskh"><span class="sw" style="background:' + labTint(x.prod, x.color) + '"></span><b>' + esc(labNm(x.k)) + '</b><span class="lskq">이번 ' + labQty(x.kg) +
+        (x.kg % labBag() ? '' : '포 · ' + fmt(x.kg) + ' kg') + '</span></div>' +
+        '<div class="lskn"><span>현재고 <b>' + fmt(x.cur) + '</b></span>' + (x.day != null ? '<span>그날 <b>' + fmt(Math.max(x.day, 0)) + '</b></span><span>출고 뒤 <b' + (x.after < 0 ? ' class="neg"' : '') + '>' +
+        fmt(Math.max(x.after, 0)) + '</b></span>' : '<span class="muted">이미 나간 출고</span>') + '</div>' + w +
+        (x.others.length ? '<p class="lsko">같은 색 다른 제품 현재고: ' + x.others.map(function (o) { return esc(PROD3_NAME[o.p] || o.p) + ' ' + fmt(o.cur); }).join(' · ') + '</p>' : '') + '</li>';
+    });
+    return h + '</ul><p class="note">현재고 = 지금 창고에 있는 양 · 그날 = 이 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정·생산예정을 반영) · 출고 뒤 = 그날에서 이번 것을 뺀 양. ' +
+      '제품을 바꾸려면 출고 달력에서 그 줄을 눌러 ‘제품 바꾸기’(같은 현장의 같은 색 줄이 함께 바뀝니다).</p></section>';
+  }
   function labQty(kg) { var b = labBag(); return kg % b === 0 ? fmt(kg / b) : fmt(kg) + 'kg'; }
 
   /* ── 엑셀 양식 그대로 그린 A4 한 장 (단위 pt, 595.28 × 841.89) ──
@@ -2360,7 +2433,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<h2 class="h2">물표 · 적재물 상세 내용</h2>' +
       '<p class="muted labsum">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + all.length + '가지 ' + fmt(kg) + ' kg' +
       (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + plan.length + '장</b>' + (plan.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') +
-      (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' +
+      (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' + labStockLine() +
       '<div class="labset"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
       '<div><label class="label" for="lab-date">물표 날짜</label><input id="lab-date" class="text" type="date" data-ch="labdate" value="' + esc(day) + '"></div>' +
       '<div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
@@ -2373,7 +2446,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번 칸에 제품 이름을 적은 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '.</p>' : '') +
       '<button type="button" class="primary wide mt12" data-act="labprint"' + (plan.length ? '' : ' disabled') + '>물표 ' + plan.length + '장 인쇄하기</button></section>' +
       labStrip() +
-      '<div class="labgrid"><div class="labside">' + labOrderCard() + labCmdCard() + '</div><div class="labmain">' + labMainCards(plan) + '</div></div></div>';
+      '<div class="labgrid"><div class="labside">' + labOrderCard() + labStockCard() + labCmdCard() + '</div><div class="labmain">' + labMainCards(plan) + '</div></div></div>';
     // 인쇄용(화면에서는 안 보임, 글자 맞추기는 그대로) — 화면에서는 파렛트마다 옆에 같은 물표가 나옵니다
     h += '<div class="labwrap">' + plan.map(function (p, i) { return labelPage(p, i + 1, plan.length); }).join('') + '</div>';
     return h;
@@ -5607,6 +5680,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'labresave': if (S.lab && S.lab.lay) { S.lab.saving = true; S.lab.saveErr = false; labPaintSave(); labSaveNow(S.lab); } return;
       case 'labfit': labFitOrder(); return;
       case 'labadd': labAddRow(v); return;
+      case 'labtostock': var lsk = document.getElementById('labstock'); if (lsk && lsk.scrollIntoView) { try { lsk.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { lsk.scrollIntoView(); } } return;
       case 'labtoorder': var lo = document.getElementById('labord'); if (lo && lo.scrollIntoView) { try { lo.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { lo.scrollIntoView(); } } return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
