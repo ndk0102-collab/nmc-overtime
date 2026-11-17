@@ -236,18 +236,57 @@ button.datebox{font-family:inherit}
 .mvsel{color:var(--accent-strong)}
 /* 묶음 단추 · 물표 */
 .dgb{display:inline-flex;gap:6px;flex:none}
+/* 전체 확정 · 대기열 (2026-11-17) */
+.dgh{flex-wrap:wrap}.dgb{flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+.dgh .dcfall{white-space:nowrap;flex:none;min-height:36px;padding:0 12px;font-size:14px}
+.pochip.qwait{background:#FFF4D6;color:#8A5A00}
+.poqueue{border:2px solid #F1D08A}
+.poqueue .podh{color:#8A5A00}
+.poqueue .podh h2{margin:0}
+.poql{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 0;font-size:13.5px;color:var(--ink2)}
+.poql > span{display:inline-flex;align-items:center;gap:5px}
+.poql .sw{width:12px;height:12px;border-radius:3px;flex:none}
+.poqbtn{border-color:#E0B54A;color:#8A5A00}
+.bigdate.qwait{color:#8A5A00}
 .labcap{display:flex;align-items:center;gap:8px}
 .labcap .ghost{flex:none;width:48px;min-width:48px;font-size:22px;padding:0}
 .labcap input{width:80px;flex:none;text-align:center;font-size:20px;font-weight:800}
 .labcap span{font-size:15px;font-weight:700;color:var(--ink2)}
 .labwrap{display:flex;flex-direction:column;align-items:center;gap:18px;margin:14px 0 24px}
 .labsvg{display:block;width:100%;max-width:760px;height:auto;aspect-ratio:595.28/841.89;background:#fff;border:1px solid #C9CED6;box-shadow:0 2px 12px rgba(16,24,40,.10)}
-/* 물표 고치기 (2026-11-17) */
-.labtwo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.labtwo .label{margin-top:0}
-.labtwo .labcap{flex-wrap:wrap}
-@media (max-width:520px){.labtwo{grid-template-columns:1fr}}
-.labchat{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;margin:10px 0;padding:10px;border-radius:12px;background:var(--bg2,#F3F5F8)}
+/* 물표 고치기 (2026-11-17) — 발주목록 · 고치기 · 물표를 한눈에 */
+body.labmode .wrap{max-width:1480px}
+.labset{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.labset .label{margin-top:0}
+.labset .labcap{flex-wrap:wrap}
+@media (min-width:520px){.labset{grid-template-columns:1fr 1fr}}
+@media (min-width:1100px){.labset{grid-template-columns:minmax(0,2fr) minmax(0,1fr) auto auto;align-items:end}}
+.labgrid{display:grid;gap:12px;align-items:start}
+.labside,.labmain{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:1100px){
+  .labgrid{grid-template-columns:minmax(320px,400px) minmax(0,1fr)}
+  .labside{position:sticky;top:10px;max-height:calc(100vh - 20px);overflow:auto;padding-bottom:4px}
+  .labstrip{display:none !important}
+}
+.labstrip{position:sticky;top:0;z-index:30;display:block;width:100%;min-height:44px;padding:10px 14px;border:0;border-radius:12px;text-align:left;font-size:15px;font-weight:800;line-height:1.4;cursor:pointer;box-shadow:0 2px 10px rgba(16,24,40,.12)}
+.labstrip.ok{background:#E3F4EA;color:var(--ok)}
+.labstrip.bad{background:#FFF0E0;color:#9A4A00}
+.lostat{font-size:14px;font-weight:800}
+.lostat.ok{color:var(--ok)}.lostat.bad{color:#B54708}
+.lotab{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+.lotab th,.lotab td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top;white-space:nowrap}
+.lotab th:first-child,.lotab td:first-child{text-align:left;white-space:normal}
+.lotab thead th{font-size:12.5px;color:var(--ink2)}
+.lotab .lon{display:inline-flex;align-items:center;gap:6px}
+.lotab td small{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:1px}
+.lotab .sw{width:14px;height:14px;border-radius:4px;border:1px solid rgba(0,0,0,.25);flex:none}
+.lotab .loz th{background:#FFF4D6;text-align:left;font-size:13px;padding:4px 8px}
+.lotab tr.ok td.lost{color:var(--ok);font-weight:800}
+.lotab tr.rest td,.lotab tr.over td,.lotab tr.extra td{background:#FFF7ED}
+.lotab tr.rest td.lost b,.lotab tr.over td.lost b,.lotab tr.extra td.lost b{color:#B54708}
+.lotab td.lost select{display:block;margin:4px 0 0 auto;max-width:150px}
+.lotab tfoot th,.lotab tfoot td{font-weight:800;border-bottom:0}
+.labchat{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto;margin:10px 0;padding:10px;border-radius:12px;background:var(--bg2,#F3F5F8)}
 .labchat .lc{margin:0;padding:8px 11px;border-radius:12px;max-width:92%;font-size:15px;line-height:1.45;word-break:keep-all;overflow-wrap:anywhere}
 .labchat .lc.me{align-self:flex-end;background:var(--accent,#1F5FB0);color:#fff}
 .labchat .lc.app{align-self:flex-start;background:#fff;border:1px solid var(--line,#D9DEE5)}
@@ -259,26 +298,36 @@ button.datebox{font-family:inherit}
 .labegs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .labegs .ghost.sm{font-size:13px}
 .labsave{font-size:13px;text-align:right}
-.lpal{border:1px solid var(--line,#D9DEE5);border-radius:12px;padding:10px 12px;margin-top:10px;background:#fff}
+.lpal{border:1px solid var(--line,#D9DEE5);background:#fff}
 .lpal.over{border-color:#B42318;box-shadow:0 0 0 1px #B42318 inset}
 .lph{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:15px}
-.lph .lpn{font-size:18px}
+.lph .lpn{font-size:20px}
 .lph .lpz{padding:2px 8px;border-radius:999px;background:#FFF4D6;font-weight:700;font-size:13px}
 .lph .lpq{color:var(--ink2,#475467);font-weight:700}
-.lrows{list-style:none;margin:8px 0 0;padding:0}
-.lrows li{display:grid;grid-template-columns:18px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed var(--line,#D9DEE5)}
-.lrows li:first-child{border-top:0}
-.lrows .sw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.25)}
-.lrows .lrn{font-size:15px;overflow-wrap:anywhere}
-.lrq{display:inline-flex;align-items:center;gap:4px}
-.lrq b{min-width:44px;text-align:center;font-size:16px}
-.lrq .ghost.sm{width:34px;min-width:34px;padding:0;font-size:18px}
-.lmove{font-size:14px;padding:4px 6px;max-width:118px}
-.lpa{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.lpbody{display:grid;gap:12px;margin-top:8px}
+@media (min-width:760px){.lpbody{grid-template-columns:minmax(0,1fr) minmax(230px,320px)}}
+.lpprev .labsvg{max-width:100%;box-shadow:none}
+@media (max-width:759px){.lpprev{width:100%;max-width:360px;margin:0 auto}}
+.lrows{list-style:none;margin:0;padding:0}
+.lrows li{padding:8px 0;border-top:1px dashed var(--line,#D9DEE5)}
+.lrows li:first-child{border-top:0;padding-top:0}
+.lr1{display:flex;align-items:center;gap:8px}
+.lr1 .sw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.25);flex:none}
+.lr1 .lrn{flex:1;min-width:0;font-size:16px;overflow-wrap:anywhere}
+.lrq{display:inline-flex;align-items:center;gap:4px;flex:none}
+.lrq .ghost.sm{width:36px;min-width:36px;padding:0;font-size:18px}
+.lqin{width:64px;min-width:64px;flex:none;text-align:center;font-size:18px;font-weight:800;padding:6px 4px}
+.lu{font-size:14px;font-weight:700;color:var(--ink2)}
+.lr2,.lpadd{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding-left:26px;font-size:14px;color:var(--ink2)}
+.lpadd{padding-left:0;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.lpaddt{font-weight:800}
+.lmq{width:58px;min-width:58px;flex:none;text-align:center;font-size:16px;padding:5px 4px}
+.lmove{font-size:14px;padding:4px 6px;max-width:220px}
+.lpa{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .lpa label{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ink2,#475467);font-weight:700}
 .lpa input{font-size:15px;padding:6px 8px}
 .lpb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
-@media (max-width:400px){.lrows li{grid-template-columns:18px minmax(0,1fr) auto}.lrows .lmove{grid-column:2 / 4;max-width:none}}
+@media screen{.labwrap{position:absolute;left:-99999px;top:0;width:760px;visibility:hidden;margin:0}}
 @media print{
   @page{size:A4 portrait;margin:0}
   body.labmode{background:#fff !important;margin:0 !important;padding:0 !important}
@@ -1259,7 +1308,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return true;
     }
     if (VIEW === 'out' && S.outMode === 'porev') { S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return true; }
-    if (VIEW === 'out' && S.outMode === 'add') { S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return true; }
+    if (VIEW === 'out' && S.outMode === 'add') { S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.poQueue = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return true; }
     if (VIEW === 'all' && S.allAdd) { S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
     render();
     return false;
@@ -1812,7 +1861,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return order.map(function (k) {
       var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음');
       return '<div class="dgrp"><div class="dgh"><span><b>' + esc(name) + '</b>' + (x.po ? ' · ' + esc(x.po) : '') + ' · ' + x.rows.length + '줄 · ' + fmt(x.kg) + ' kg</span>' +
-        (S.admin ? '<span class="dgb">' + (x.type !== '생산예정' ? '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>' : '') +
+        (S.admin ? '<span class="dgb">' + (isPlan(x.type) && x.rows.length > 1 ? '<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">전체 확정</button>' : '') +
+          (x.type !== '생산예정' ? '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>' : '') +
           '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button></span>' : '') + '</div>' +
         '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
     }).join('');
@@ -1973,7 +2023,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     S.pick = null;
     if (key === 'indate') { if (d <= S.today) S.inDate = d; render(); return; }
-    if (key === 'inpdate') { if (d >= S.today && d <= planMax()) { S.inPDate = d; S.poNeedDate = false; } render(); return; }
+    if (key === 'inpdate') { if (d >= S.today && d <= planMax()) { S.inPDate = d; S.poNeedDate = false; S.poQueue = false; } render(); return; }
     if (key === 'day') { setDay(d); return; }
     render();
   }
@@ -2349,19 +2399,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<p class="muted labsum">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + all.length + '가지 ' + fmt(kg) + ' kg' +
       (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + plan.length + '장</b>' + (plan.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') +
       (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' +
-      '<div class="labtwo"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
-      '<div><label class="label" for="lab-date">물표 날짜</label><input id="lab-date" class="text" type="date" data-ch="labdate" value="' + esc(day) + '"></div></div>' +
-      '<div class="labtwo"><div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
+      '<div class="labset"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
+      '<div><label class="label" for="lab-date">물표 날짜</label><input id="lab-date" class="text" type="date" data-ch="labdate" value="' + esc(day) + '"></div>' +
+      '<div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
       '<div><p class="label">파렛트 1장 최대 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
       '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 최대 포대 수">' +
       '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button><span>포 = ' + fmt(cap * bag) + ' kg</span></div></div></div>' +
-      '<p class="note">파렛트 한 장에 들어가는 색은 쪼개지 않습니다(최대 ' + cap + '포보다 많은 색만 같은 크기로 나눔). 장 수는 그렇게 실을 수 있는 가장 적은 수이고, 그 안에서 고르게 싣습니다. ' +
-      '양식 표가 10줄이라 한 장에 10가지까지입니다. 메모(비고)에 놀이터1·놀이터2 같은 구분이 있으면 그 구분끼리 따로 싣고, 번호는 전체 장 수로 매깁니다. ' +
-      '최대 포를 바꾸면 처음부터 다시 나눕니다. 아래 ‘말로 고치기’·‘파렛트 고치기’로 마음대로 바꿀 수 있고, 고친 것은 저장되어 다른 기기에서도 같게 나옵니다.' +
+      '<p class="note">파렛트 한 장에 들어가는 색은 쪼개지 않습니다(최대 ' + cap + '포보다 많은 색만 같은 크기로 나눔). 한 장에 10가지까지, 놀이터1·놀이터2 같은 구분은 따로 싣습니다. ' +
+      '최대 포를 바꾸면 처음부터 다시 나눕니다. 발주목록에서 물표에 다 들어갔는지 보면서 파렛트마다 포 수를 직접 쓰거나 옮기세요. 고친 것은 저장되어 다른 기기에서도 같게 나옵니다.' +
       (odd.length ? ' 한 포 무게로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
       (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번 칸에 제품 이름을 적은 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '.</p>' : '') +
       '<button type="button" class="primary wide mt12" data-act="labprint"' + (plan.length ? '' : ' disabled') + '>물표 ' + plan.length + '장 인쇄하기</button></section>' +
-      labEditCards() + '</div>';
+      labStrip() +
+      '<div class="labgrid"><div class="labside">' + labOrderCard() + labCmdCard() + '</div><div class="labmain">' + labMainCards(plan) + '</div></div></div>';
+    // 인쇄용(화면에서는 안 보임, 글자 맞추기는 그대로) — 화면에서는 파렛트마다 옆에 같은 물표가 나옵니다
     h += '<div class="labwrap">' + plan.map(function (p, i) { return labelPage(p, i + 1, plan.length); }).join('') + '</div>';
     return h;
   }
@@ -2933,18 +2984,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return n + '번 ' + labNm(k) + ' ' + labQU(was) + ' → ' + (r.kg ? labQU(r.kg) : '0') + '(물표만).' + (r.kg ? labOver(n) : '');
     });
   }
-  function labMoveRow(v, dest) {
-    if (!dest) return;
-    labRowAct(v, function (p, r, n, k) {
-      var res = labMove(n, dest === 'new' ? 'new' : Number(dest), k, null);
-      if (!res) return '';
-      if (res.err) return res.err;
-      var tp = labPal(res.to);
-      labTidy();
-      var tn = S.lab.lay.pals.indexOf(tp) + 1;
-      return n + '번 → ' + (dest === 'new' ? '새 ' : '') + tn + '번: ' + labNm(k) + ' ' + labQU(res.amt) + '를 옮겼습니다. ' + labDesc(tn) + labOver(tn) + '.';
-    });
-  }
   function labPalAct(n, fn) {
     var L = S.lab;
     if (!L || !L.lay || L.loading || !labPal(n)) return;
@@ -2989,44 +3028,173 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     labCommit(snap, notes.length ? '주문대로 맞췄습니다: ' + notes.join(', ') + '.' : '이미 주문과 같습니다.');
   }
 
-  /* ── 화면 ── */
-  function labEditCards() {
-    var L = S.lab, lay = L.lay, cap = labCapNow(), busy = L.loading;
+  /* ── 직접 쓰기 (2026-11-17 다시 지시) ──
+     "일반 겨자 22포 아이보리 34포로 되어 있는데 내가 겨자를 10포만 다른 곳으로 옮기고 싶을 수도 있고 … 내가 수동으로 입력해서 적을 수 있도록"
+     · 줄마다 포 수 칸(직접 씀, 포로 안 나눠지는 줄은 kg) · '옮기기'에 포 수를 쓰고 갈 곳을 고름(비우면 그 줄 전부)
+     · 장마다 '줄 넣기'(발주목록 품목 + 포 수, 비우면 남은 것 전부) · 발주목록의 남은 것은 '넣을 곳'을 고르면 바로 들어감 */
+  function labParseQty(v, unit) {
+    var t = String(v == null ? '' : v).replace(/[,\s]/g, '').replace(/포대|포|kg/gi, '');
+    if (!/^\d+(\.\d+)?$/.test(t)) return null;
+    var n = Number(t);
+    return unit === 'kg' ? Math.round(n) : Math.round(n * labBag());
+  }
+  function labSetQty(v, val) {
+    labRowAct(v, function (p, r, n, k) {
+      var unit = r.kg % labBag() ? 'kg' : '포', kg = labParseQty(val, unit), was = r.kg;
+      if (kg == null) return n + '번 ' + labNm(k) + ': ' + unit + ' 수를 숫자로 써 주세요.';
+      r.kg = kg;
+      return n + '번 ' + labNm(k) + ' ' + labQU(was) + ' → ' + (kg ? labQU(kg) : '0') + '(물표만).' + (kg ? labOver(n) : '');
+    });
+  }
+  function labMoveRow(v, dest) {
+    if (!dest) return;
+    var L = S.lab, typed = L && L.mvq ? String(L.mvq[v] || '').trim() : '';
+    labRowAct(v, function (p, r, n, k) {
+      var kg = null;
+      L.mvq = {};
+      if (typed) { kg = labParseQty(typed, '포'); if (kg == null || kg <= 0) return '옮길 포 수를 숫자로 써 주세요(비우면 그 줄 전부).'; }
+      var res = labMove(n, dest === 'new' ? 'new' : Number(dest), k, kg);
+      if (!res) return '';
+      if (res.err) return res.err;
+      var tp = labPal(res.to);
+      labTidy();
+      var tn = S.lab.lay.pals.indexOf(tp) + 1;
+      return n + '번 → ' + (dest === 'new' ? '새 ' : '') + tn + '번: ' + labNm(k) + ' ' + labQU(res.amt) + '를 옮겼습니다. ' + labDesc(tn) + labOver(tn) + '.';
+    });
+  }
+  /* 발주목록: 품목마다 주문 · 물표에 들어간 양 · 어느 장에 몇 포 */
+  function labOrder() {
+    var cur = labCur(), have = {}, where = {}, rows = [];
+    S.lab.lay.pals.forEach(function (p, i) {
+      p.rows.forEach(function (r) { var id = r.zk + '#' + r.k; have[id] = (have[id] || 0) + r.kg; (where[id] = where[id] || []).push({ n: i + 1, kg: r.kg }); });
+    });
+    cur.zs.forEach(function (g) {
+      g.lines.forEach(function (l) { var id = g.key + '#' + l.key; rows.push({ id: id, zk: g.key, z: g.zone, k: l.key, prod: l.prod, color: l.color, want: l.kg, got: have[id] || 0, where: where[id] || [] }); });
+    });
+    Object.keys(have).forEach(function (id) {
+      if (cur.map[id]) return;
+      var i = id.indexOf('#'), k = id.slice(i + 1), q = k.split('|');
+      rows.push({ id: id, zk: id.slice(0, i), z: id.slice(0, i), k: k, prod: q[0], color: q.slice(1).join('|'), want: 0, got: have[id], where: where[id], extra: true });
+    });
+    return rows;
+  }
+  function labRestOf(id) { var o = labOrder().filter(function (x) { return x.id === id; })[0]; return o ? Math.max(0, o.want - o.got) : 0; }
+  function labAddRow(n) {
+    var L = S.lab;
+    if (!L || !L.lay || L.loading) return;
+    var a = (L.add && L.add[n]) || {}, m = labCur().map[a.id || ''];
+    if (!m) { labSay('넣을 품목을 고르세요.'); render(); return; }
+    var kg = String(a.q || '').trim() ? labParseQty(a.q, '포') : labRestOf(a.id);
+    if (kg == null || kg <= 0) { labSay(String(a.q || '').trim() ? '넣을 포 수를 숫자로 써 주세요.' : labNm(m.k) + '은(는) 남은 것이 없습니다. 넣을 포 수를 쓰세요.'); render(); return; }
+    var snap = labBegin(), target = n === 'new' ? null : labPal(Number(n));
+    if (!target) { L.lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, rows: [] }); target = L.lay.pals[L.lay.pals.length - 1]; }
+    var r = labRowOf(target, m.k);
+    if (!r && target.rows.length >= LAB_ROWS) { L.lay.pals = L.lay.pals.filter(function (p) { return p.rows.length; }); labSay('그 장은 이미 10줄이라 더 넣을 수 없습니다.'); render(); return; }
+    if (r) r.kg += kg; else target.rows.push({ k: m.k, zk: m.zk, kg: kg });
+    if (L.add) delete L.add[n];
+    labTidy();
+    var tn = L.lay.pals.indexOf(target) + 1;
+    labCommit(snap, (n === 'new' ? '새 ' : '') + tn + '번에 ' + labNm(m.k) + ' ' + labQU(kg) + '를 넣었습니다. ' + labDesc(tn) + labOver(tn) + '.');
+  }
+  function labPutRest(id, dest) {
+    if (!dest || !S.lab) return;
+    S.lab.add = S.lab.add || {};
+    S.lab.add[dest] = { id: id, q: '' };
+    labAddRow(dest);
+  }
+
+  /* ── 화면 (2026-11-17 다시 지시: "물표는 밑에 있고 고치는 건 위에 있어서 보기 힘들고 같이 볼 수 있었으면",
+        "발주목록이 함께 다 보였으면 … 물표에 들어갔는지 안 들어갔는지 바로바로 … 실시간") ──
+     PC: 왼쪽에 발주목록 · 말로 고치기(붙어 있음), 오른쪽에 파렛트마다 [고치기 | 그 장의 물표].
+     휴대폰: 맨 위에 늘 보이는 한 줄(다 들어갔는지), 발주목록, 말로 고치기, 파렛트마다 고치기 아래 그 장의 물표. */
+  function labOrderSum(rows) {
+    var bag = labBag(), rest = [], over = [], extra = [];
+    rows.forEach(function (o) {
+      var d = o.got - o.want;
+      if (o.extra) extra.push(o); else if (d < 0) rest.push(o); else if (d > 0) over.push(o);
+    });
+    var u = function (kg) { return kg % bag ? fmt(kg) + ' kg' : fmt(kg / bag) + '포'; };
+    var want = rows.reduce(function (s, o) { return s + o.want; }, 0), got = rows.reduce(function (s, o) { return s + o.got; }, 0);
+    return { rest: rest, over: over, extra: extra, ok: !rest.length && !over.length && !extra.length, want: want, got: got, u: u };
+  }
+  function labStrip() {
+    var rows = labOrder(), sm = labOrderSum(rows);
+    var t = sm.ok ? '✓ 발주목록 ' + rows.length + '가지 ' + sm.u(sm.want) + ' — 물표에 다 들어감'
+      : [sm.rest.length ? '남음: ' + sm.rest.map(function (o) { return labNm(o.k) + ' ' + sm.u(o.want - o.got); }).join(', ') : '',
+        sm.over.length ? '넘침: ' + sm.over.map(function (o) { return labNm(o.k) + ' ' + sm.u(o.got - o.want); }).join(', ') : '',
+        sm.extra.length ? '주문에 없음: ' + sm.extra.map(function (o) { return labNm(o.k); }).join(', ') : ''].filter(String).join(' · ');
+    return '<button type="button" class="labstrip ' + (sm.ok ? 'ok' : 'bad') + '" data-act="labtoorder" role="status">' + esc(t) + '</button>';
+  }
+  function labOrderCard() {
+    var L = S.lab, rows = labOrder(), sm = labOrderSum(rows), zoned = rows.some(function (o) { return o.z; }), lastZ = null, pals = L.lay.pals, busy = L.loading;
+    var dests = pals.map(function (p, j) { return '<option value="' + (j + 1) + '">→ ' + (j + 1) + '번 (' + fmt(labBags(p)) + '포)</option>'; }).join('') + '<option value="new">→ 새 파렛트</option>';
+    var h = '<section class="card labord" id="labord"><div class="podh"><h2 class="label">발주목록 <small>' + rows.filter(function (o) { return !o.extra; }).length + '가지</small></h2>' +
+      '<span class="lostat ' + (sm.ok ? 'ok' : 'bad') + '">' + (sm.ok ? '✓ 물표에 다 들어감' : '맞지 않음') + '</span></div>' +
+      '<table class="lotab"><thead><tr><th>품목</th><th>주문</th><th>물표</th><th>상태</th></tr></thead><tbody>';
+    rows.forEach(function (o) {
+      if (zoned && o.z !== lastZ) { lastZ = o.z; h += '<tr class="loz"><th colspan="4">' + esc(o.z || '구분 없음') + '</th></tr>'; }
+      var d = o.got - o.want, cls = o.extra ? 'extra' : d < 0 ? 'rest' : d > 0 ? 'over' : 'ok', q = o.k.split('|');
+      var st = o.extra ? '<b>주문에 없음</b>' : d < 0 ? '<b>' + sm.u(-d) + ' 남음</b><select class="lmove" data-ch="labrest" data-v="' + esc(o.id) + '" aria-label="' + esc(labNm(o.k)) + ' 남은 것 넣을 곳"' + (busy ? ' disabled' : '') + '><option value="">넣을 곳</option>' + dests + '</select>'
+        : d > 0 ? '<b>' + sm.u(d) + ' 넘침</b>' : '✓';
+      h += '<tr class="' + cls + '"><td><span class="lon"><span class="sw" style="background:' + labTint(q[0], q.slice(1).join('|')) + '"></span><b>' + esc(labNm(o.k)) + '</b></span>' +
+        (o.where.length ? '<small>' + o.where.map(function (w) { return w.n + '번 ' + sm.u(w.kg); }).join(' · ') + '</small>' : '<small>물표에 없음</small>') + '</td>' +
+        '<td>' + sm.u(o.want) + '</td><td>' + sm.u(o.got) + '</td><td class="lost">' + st + '</td></tr>';
+    });
+    h += '</tbody><tfoot><tr><th>합계</th><td>' + sm.u(sm.want) + '</td><td>' + sm.u(sm.got) + '</td><td>' + (sm.ok ? '✓' : sm.got < sm.want ? sm.u(sm.want - sm.got) + ' 남음' : sm.u(sm.got - sm.want) + ' 넘침') + '</td></tr></tfoot></table>';
+    if (!sm.ok) h += '<p class="hint">남은 것은 ‘넣을 곳’을 고르거나 파렛트의 ‘줄 넣기’로 넣고, 넘친 것은 그 줄의 포 수를 줄이세요. <button type="button" class="link" data-act="labfit"' + (busy ? ' disabled' : '') + '>주문대로 맞추기</button></p>';
+    return h + '</section>';
+  }
+  function labCmdCard() {
+    var L = S.lab, busy = L.loading;
     var h = '<section class="card labed"><div class="podh"><h2 class="label">말로 고치기</h2><small class="muted">쓰거나 🎤 말하면 바로 고칩니다</small></div>';
     if ((L.chat || []).length) h += '<div class="labchat" id="labchat" aria-live="polite">' + L.chat.map(function (c) { return '<p class="lc ' + c.who + '">' + esc(c.t) + '</p>'; }).join('') + '</div>';
-    h += '<div class="labask"><input id="lab-cmd" class="text" type="text" data-in="labcmd" autocomplete="off" enterkeyhint="send" placeholder="예: 청색 한 파렛트로" value="' + esc(L.cmd || '') + '" aria-label="물표 고칠 말"' + (busy ? ' disabled' : '') + '>' +
+    h += '<div class="labask"><input id="lab-cmd" class="text" type="text" data-in="labcmd" autocomplete="off" enterkeyhint="send" placeholder="예: 겨자 10포 2번으로" value="' + esc(L.cmd || '') + '" aria-label="물표 고칠 말"' + (busy ? ' disabled' : '') + '>' +
       (labMicOk() ? '<button type="button" class="ghost labmic' + (L.mic ? ' on' : '') + '" data-act="labmic" aria-label="말로 하기"' + (busy ? ' disabled' : '') + '>' + (L.mic ? '듣는 중' : '🎤') + '</button>' : '') +
       '<button type="button" class="primary labgo" data-act="labcmd"' + (busy ? ' disabled' : '') + '>고치기</button></div>' +
       '<div class="labegs">' + LAB_EG.map(function (x) { return '<button type="button" class="ghost sm" data-act="labeg" data-v="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' +
       '<p class="note">돈 드는 AI가 아니라 이 화면 안의 규칙으로 알아듣습니다(무료). 못 알아들으면 쓸 수 있는 말을 보여 드립니다. 🎤는 크롬(안드로이드·PC)의 음성 인식을 씁니다.</p></section>';
-    h += '<section class="card labpals"><div class="podh"><h2 class="label">파렛트 고치기 <small>' + lay.pals.length + '장</small></h2>' +
-      '<span class="muted labsave" id="labsave">' + labSaveText() + '</span></div>';
-    if (L.loadErr) h += '<p class="warnbox">저장해 둔 물표를 불러오지 못해 처음 계산대로 보여 드립니다. 고치면 새로 저장합니다.</p>';
-    lay.pals.forEach(function (p, i) {
-      var n = i + 1, bags = labBags(p), kg = labKgOf(p), zt = p.ztx != null ? p.ztx : p.z, mixZ = p.rows.some(function (r) { return r.zk !== p.zk; });
-      h += '<div class="lpal' + (bags > cap ? ' over' : '') + '"><div class="lph"><b class="lpn">' + n + '번</b>' + (zt ? '<span class="lpz">' + esc(zt) + '</span>' : '') +
-        '<span class="lpq">' + fmt(bags) + '포 · ' + fmt(kg) + ' kg</span>' + (bags > cap ? '<b class="bad">최대 ' + cap + '포 넘음</b>' : '') + (mixZ ? '<b class="bad">구분 섞임</b>' : '') + '</div><ul class="lrows">';
-      p.rows.forEach(function (r) {
-        var q = r.k.split('|'), v = n + '|' + r.k;
-        h += '<li><span class="sw" style="background:' + labTint(q[0], q.slice(1).join('|')) + '"></span><b class="lrn">' + esc(labNm(r.k)) + '</b>' +
-          '<span class="lrq"><button type="button" class="ghost sm" data-act="labminus" data-v="' + esc(v) + '" aria-label="' + esc(labNm(r.k)) + ' 한 포 빼기"' + (busy ? ' disabled' : '') + '>−</button>' +
-          '<b>' + labQU(r.kg) + '</b><button type="button" class="ghost sm" data-act="labplus" data-v="' + esc(v) + '" aria-label="' + esc(labNm(r.k)) + ' 한 포 더하기"' + (busy ? ' disabled' : '') + '>+</button></span>' +
-          '<select class="lmove" data-ch="labmove" data-v="' + esc(v) + '" aria-label="' + esc(labNm(r.k)) + ' 옮기기"' + (busy ? ' disabled' : '') + '><option value="">옮기기</option>' +
-          lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">→ ' + (j + 1) + '번</option>'; }).join('') + '<option value="new">→ 새 파렛트</option></select></li>';
-      });
-      h += '</ul><div class="lpa">' +
-        '<label><span>비고</span><input class="text" type="text" maxlength="30" data-ch="labnote" data-v="' + n + '" value="' + esc(p.cust != null ? p.cust : (L.cust || '')) + '" aria-label="' + n + '번 비고 첫 줄"' + (busy ? ' disabled' : '') + '></label>' +
-        '<label><span>구분</span><input class="text" type="text" maxlength="20" data-ch="labzone" data-v="' + n + '" value="' + esc(zt || '') + '" placeholder="없음" aria-label="' + n + '번 구분"' + (busy ? ' disabled' : '') + '></label>' +
-        '</div><div class="lpb">' +
-        (lay.pals.length > 1 ? '<select class="lmove" data-ch="labmerge" data-v="' + n + '" aria-label="' + n + '번에 합치기"' + (busy ? ' disabled' : '') + '><option value="">다른 장 합치기</option>' +
-          lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">' + (j + 1) + '번을 여기로</option>'; }).join('') + '</select>' : '') +
-        (bags >= 2 ? '<button type="button" class="ghost sm" data-act="labhalf" data-v="' + n + '"' + (busy ? ' disabled' : '') + '>둘로 나누기</button>' : '') +
-        '<button type="button" class="ghost sm" data-act="labdel" data-v="' + n + '"' + (busy ? ' disabled' : '') + '>이 장 지우기</button></div></div>';
+    return h;
+  }
+  function labPalCard(p, i, page, N) {
+    var L = S.lab, lay = L.lay, cap = labCapNow(), busy = L.loading, n = i + 1;
+    var bags = labBags(p), kg = labKgOf(p), zt = p.ztx != null ? p.ztx : p.z, mixZ = p.rows.some(function (r) { return r.zk !== p.zk; });
+    var dis = busy ? ' disabled' : '';
+    var h = '<section class="card lpal' + (bags > cap ? ' over' : '') + '" id="lpal-' + n + '"><div class="lph"><b class="lpn">' + n + '번</b>' + (zt ? '<span class="lpz">' + esc(zt) + '</span>' : '') +
+      '<span class="lpq">' + fmt(bags) + '포 · ' + fmt(kg) + ' kg</span>' + (bags > cap ? '<b class="bad">최대 ' + cap + '포 넘음</b>' : '') + (mixZ ? '<b class="bad">구분 섞임</b>' : '') + '</div>' +
+      '<div class="lpbody"><div class="lped"><ul class="lrows">';
+    p.rows.forEach(function (r) {
+      var q = r.k.split('|'), v = n + '|' + r.k, odd = r.kg % labBag(), unit = odd ? 'kg' : '포', val = odd ? r.kg : r.kg / labBag(), nm = labNm(r.k);
+      h += '<li><div class="lr1"><span class="sw" style="background:' + labTint(q[0], q.slice(1).join('|')) + '"></span><b class="lrn">' + esc(nm) + '</b>' +
+        '<span class="lrq"><button type="button" class="ghost sm" data-act="labminus" data-v="' + esc(v) + '" aria-label="' + esc(nm) + ' 한 포 빼기"' + dis + '>−</button>' +
+        '<input class="text lqin" type="text" inputmode="numeric" autocomplete="off" data-ch="labqty" data-v="' + esc(v) + '" value="' + esc(String(val)) + '" aria-label="' + esc(n + '번 ' + nm + ' ' + unit + ' 수') + '"' + dis + '><span class="lu">' + unit + '</span>' +
+        '<button type="button" class="ghost sm" data-act="labplus" data-v="' + esc(v) + '" aria-label="' + esc(nm) + ' 한 포 더하기"' + dis + '>+</button></span></div>' +
+        '<div class="lr2"><span>옮기기</span><input class="text lmq" type="text" inputmode="numeric" autocomplete="off" data-in="labmvq" data-v="' + esc(v) + '" value="' + esc((L.mvq && L.mvq[v]) || '') + '" placeholder="' + esc(String(Math.ceil(r.kg / labBag()))) + '" aria-label="' + esc(nm + ' 옮길 포 수 (비우면 전부)') + '"' + dis + '><span>포 →</span>' +
+        '<select class="lmove" data-ch="labmove" data-v="' + esc(v) + '" aria-label="' + esc(nm) + ' 옮길 곳"' + dis + '><option value="">갈 곳</option>' +
+        lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">' + (j + 1) + '번</option>'; }).join('') + '<option value="new">새 파렛트</option></select></div></li>';
     });
-    var diff = labDiff();
-    if (diff.length) h += '<p class="warnbox">물표가 주문과 다릅니다: ' + diff.map(esc).join(', ') + '. 주문(출고예정)은 그대로입니다. <button type="button" class="link" data-act="labfit">주문대로 맞추기</button></p>';
-    h += '<div class="two mt12"><button type="button" class="ghost" data-act="labundo"' + ((L.hist || []).length && !busy ? '' : ' disabled') + '>↶ 방금 고친 것 되돌리기</button>' +
+    var a = (L.add && L.add[n]) || {}, ord = labOrder().filter(function (o) { return !o.extra; });
+    h += '</ul><div class="lpadd"><span class="lpaddt">＋ 줄 넣기</span><select class="lmove" data-ch="labaddk" data-v="' + n + '" aria-label="' + n + '번에 넣을 품목"' + dis + '><option value="">품목</option>' +
+      ord.map(function (o) { var rest = o.want - o.got; return '<option value="' + esc(o.id) + '"' + (a.id === o.id ? ' selected' : '') + '>' + esc((o.z ? o.z + ' · ' : '') + labNm(o.k) + (rest > 0 ? ' (남음 ' + labQU(rest) + ')' : '')) + '</option>'; }).join('') + '</select>' +
+      '<input class="text lmq" type="text" inputmode="numeric" autocomplete="off" data-in="labaddq" data-v="' + n + '" value="' + esc(a.q || '') + '" placeholder="포" aria-label="' + n + '번에 넣을 포 수 (비우면 남은 것 전부)"' + dis + '><span>포</span>' +
+      '<button type="button" class="ghost sm" data-act="labadd" data-v="' + n + '"' + dis + '>넣기</button></div>' +
+      '<div class="lpa"><label><span>비고</span><input class="text" type="text" maxlength="30" data-ch="labnote" data-v="' + n + '" value="' + esc(p.cust != null ? p.cust : (L.cust || '')) + '" aria-label="' + n + '번 비고 첫 줄"' + dis + '></label>' +
+      '<label><span>구분</span><input class="text" type="text" maxlength="20" data-ch="labzone" data-v="' + n + '" value="' + esc(zt || '') + '" placeholder="없음" aria-label="' + n + '번 구분"' + dis + '></label></div>' +
+      '<div class="lpb">' + (lay.pals.length > 1 ? '<select class="lmove" data-ch="labmerge" data-v="' + n + '" aria-label="' + n + '번에 합치기"' + dis + '><option value="">다른 장 합치기</option>' +
+        lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">' + (j + 1) + '번을 여기로</option>'; }).join('') + '</select>' : '') +
+      (bags >= 2 ? '<button type="button" class="ghost sm" data-act="labhalf" data-v="' + n + '"' + dis + '>둘로 나누기</button>' : '') +
+      '<button type="button" class="ghost sm" data-act="labdel" data-v="' + n + '"' + dis + '>이 장 지우기</button></div></div>' +
+      '<div class="lpprev" aria-label="' + n + '번 물표 미리보기">' + labelPage(page, n, N) + '</div></div></section>';
+    return h;
+  }
+  function labMainCards(pages) {
+    var L = S.lab, lay = L.lay, busy = L.loading;
+    var h = '<section class="card labpals"><div class="podh"><h2 class="label">파렛트 고치기 <small>' + lay.pals.length + '장</small></h2>' +
+      '<span class="muted labsave" id="labsave">' + labSaveText() + '</span></div>' +
+      (L.loadErr ? '<p class="warnbox">저장해 둔 물표를 불러오지 못해 처음 계산대로 보여 드립니다. 고치면 새로 저장합니다.</p>' : '') +
+      '<p class="hint">포 수 칸에 직접 쓰고 Enter(또는 칸 밖을 누름). 일부만 옮기려면 ‘옮기기’에 포 수를 쓰고 갈 곳을 고르세요(비우면 그 줄 전부). 오른쪽(휴대폰은 아래)이 그 장의 물표입니다.</p>' +
+      '<div class="two mt8"><button type="button" class="ghost" data-act="labundo"' + ((L.hist || []).length && !busy ? '' : ' disabled') + '>↶ 방금 고친 것 되돌리기</button>' +
       '<button type="button" class="ghost" data-act="labreset"' + (busy ? ' disabled' : '') + '>처음 계산대로</button></div></section>';
+    h += lay.pals.map(function (p, i) { return labPalCard(p, i, pages[i], pages.length); }).join('');
     return h;
   }
   /* 🎤 말로 (브라우저의 음성 인식 — 크롬·안드로이드에서 됨, 따로 돈 들지 않음) */
@@ -3097,7 +3265,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     h += '</div></div>';
     }
-    if (S.po) h += '<div class="daterow"><h2 class="label">' + step(1) + '출고 날짜 <small>(발주서의 납품일)</small></h2><p class="bigdate' + (S.poNeedDate ? ' need' : '') + '">' + (S.poNeedDate ? '고르세요' : esc(fmtDate(S.inPDate))) + '</p></div>' + poDateChips() + '</section>';
+    if (S.po) h += '<div class="daterow"><h2 class="label">' + step(1) + '출고 날짜 <small>(발주서의 납품일)</small></h2><p class="bigdate' + (S.poNeedDate ? ' need' : S.poQueue ? ' qwait' : '') + '">' + (S.poQueue ? '날짜 미정 → 대기열' : S.poNeedDate ? '고르세요' : esc(fmtDate(S.inPDate))) + '</p></div>' +
+      (S.poQueue ? '<p class="hint">날짜가 정해질 때까지 출고 화면의 ‘날짜 미정 대기열’에 둡니다. 재고 계산에는 넣을 때 들어갑니다.</p>' : '') + poDateChips() + '</section>';
     else {
     h += '<div class="daterow"><h2 class="label">' + (plan ? '예정 날짜' : '날짜') + '</h2><p class="bigdate">' + esc(fmtDate(curDate())) + '</p></div>';
     h += (VIEW === 'out' ? '<p class="hint">날짜는 달력에서 고른 날입니다. 바꾸려면 위쪽 ‘뒤로’를 눌러 달력에서 다른 날을 고르세요.</p>' : plan ? planDateChips() : dateChips('indate', S.inDate, 'in-date')) + '</section>';
@@ -3257,7 +3426,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.outMode === 'add') return viewIn();
     if (S.outMode === 'porev') return poRevView();
     if (S.admin && !S.poList && !S.poLoading && !S.poErr) poLoad(false);
-    return '<div class="stack">' + poCard() + poShowCard() + poDone() + calCard() + dayCard() + poInbox() + '</div>';
+    return '<div class="stack">' + poCard() + poShowCard() + poDone() + poQueueCard() + calCard() + dayCard() + poInbox() + '</div>';
   }
   /* ── 발주서 넣기 (2026-11-16) ── */
   var ICON_DOC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -3275,7 +3444,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var PO_TO_JPG = /\.(heic|heif|webp|bmp)$/i;
   var PO_MAX_FILES = 6, PO_MAX_BYTES = 20 * 1024 * 1024, PO_SHOW = 8;
   var PO_ACCEPT = '.pdf,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png,.gif,.heic,.heif,.webp,image/*,application/pdf';
-  var PO_STATE = { '기다림': 'wait', '읽는 중': 'read', '넣음': 'done', '확인 필요': 'bad', '중복': 'dup', '취소': 'off' };
+  var PO_STATE = { '기다림': 'wait', '읽는 중': 'read', '넣음': 'done', '확인 필요': 'bad', '중복': 'dup', '취소': 'off', '날짜 대기': 'qwait' };
   var PO_TOUCH = (function () { try { return window.matchMedia && window.matchMedia('(hover: none)').matches; } catch (e) { return false; } })();
 
   function poSize(n) { return n >= 1048576 ? (Math.round(n / 104857.6) / 10) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
@@ -3291,6 +3460,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var hit = false;
     S.poList.items = S.poList.items.map(function (x) { if (x.id === item.id) { hit = true; return item; } return x; });
     if (!hit) S.poList.items.unshift(item);
+    // 대기열: 오래된 것부터, '날짜 대기'만
+    var W = (S.poList.wait || []).filter(function (x) { return x.id !== item.id; });
+    if (item.state === '날짜 대기') W.push(item);
+    S.poList.wait = W.sort(function (a, b) { return String(a.at).localeCompare(String(b.at)); });
   }
   /* 맨 위: 끌어다 놓는 칸 (누르면 파일 고르기) */
   function poCard() {
@@ -3400,6 +3573,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         ((x.ids || []).length ? '<button type="button" class="ghost sm" data-act="polabids" data-v="' + esc(x.id) + '">물표</button>' : '') +
         (x.undo ? (S.poUndoAsk === x.id ? '<button type="button" class="danger sm" data-act="poundo" data-v="' + esc(x.id) + '">정말 되돌리기</button><button type="button" class="ghost sm" data-act="poundox">아니요</button>'
           : '<button type="button" class="ghost sm" data-act="poundoask" data-v="' + esc(x.id) + '">되돌리기</button>') : '') + '</div>';
+    } else if (x.state === '날짜 대기') {
+      h += '<p class="pores">' + esc(x.result || '') + '</p><div class="poacts"><button type="button" class="primary sm" data-act="poqopen" data-v="' + esc(x.id) + '">날짜 정해 넣기</button>' +
+        '<button type="button" class="ghost sm" data-act="pojumpq">대기열 보기</button></div>';
     } else if (x.state === '확인 필요') {
       h += '<p class="pores bad">' + esc(x.result || '') + '</p><div class="poacts">' + readBtn('읽은 내용 보고 넣기', 'primary') +
         '<button type="button" class="ghost sm" data-act="poadd">직접 넣기</button><button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">넣지 않음</button></div>';
@@ -3408,6 +3584,72 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     return h + '</li>';
   }
+  /* ───────── 날짜 미정 대기열 (2026-11-17 지시) ─────────
+     "발주서는 들어왔는데 날짜 확정이 안 돼서, 대기열이라는 걸 만들어서 날짜 확정될 때까지 있을 수 있도록"
+     발주서 확인 화면의 '대기열에 두기' 또는 '직접 넣기'의 '날짜 미정'으로 들어옵니다. 날짜가 정해지면 '날짜 정해 넣기'.
+     대기열은 재고 계산(예정)에 들어가지 않고, 넣을 때 그날 기준으로 계산합니다. */
+  function poWaitKg(w) { return ((w && w.lines) || []).reduce(function (s, l) { return s + (Number(l.kg) || 0); }, 0); }
+  function poQueueCard() {
+    var L = S.poList, W = (L && L.wait) || [];
+    var h = '<section class="card poqueue" id="poqueue"><div class="podh"><h2 class="label">날짜 미정 대기열 <small>' + (L ? W.length + '건' : '') + '</small></h2>' +
+      '<button type="button" class="ghost sm" data-act="poqadd">＋ 날짜 미정으로 넣기</button></div>';
+    if (!L) return h + '<p class="muted">' + (S.poErr ? '불러오지 못했습니다.' : '불러오는 중…') + '</p></section>';
+    if (!W.length) return h + '<p class="muted">없습니다. 발주는 왔는데 날짜가 안 정해진 것은 발주서 확인 화면의 ‘대기열에 두기’나 위 단추로 여기에 두었다가, 날짜가 정해지면 넣습니다.</p></section>';
+    var show = S.poQMore ? W : W.slice(0, 3);
+    h += '<ul class="polist">' + show.map(function (x) {
+      var w = x.wait || { lines: [] }, kg = poWaitKg(w), del = S.poQDel === x.id;
+      var zs = []; w.lines.forEach(function (l) { var z = poZoneName(l.zone); if (l.zone && zs.indexOf(z) < 0) zs.push(z); });
+      return '<li class="poitem st-qwait"><div class="pohead"><span class="pochip qwait">날짜 미정</span><b class="pfn">' + esc(w.cust || '거래처 없음') + (w.site ? ' · ' + esc(w.site) : '') + '</b></div>' +
+        '<small class="pometa">' + w.lines.length + '줄 · ' + fmt(kg) + ' kg' + (zs.length ? ' · ' + esc(zs.join('·')) : '') + ' · ' + esc(poWhen(x.at)) + ' 받음 · ' + (x.file ? esc(x.name) : '직접 입력') + (x.note ? ' · ' + esc(x.note) : '') + '</small>' +
+        '<p class="poql">' + w.lines.slice(0, 6).map(function (l) { return '<span><span class="sw" style="background:' + labTint(l.prod, l.color) + '"></span>' + ptxt(l.prod) + ' ' + esc(l.color) + ' ' + fmt(l.kg) + '</span>'; }).join('') +
+        (w.lines.length > 6 ? '<span>외 ' + (w.lines.length - 6) + '줄</span>' : '') + '</p>' +
+        '<div class="poacts"><button type="button" class="primary sm" data-act="poqopen" data-v="' + esc(x.id) + '">날짜 정해 넣기</button>' +
+        (del ? '<button type="button" class="danger sm" data-act="poqdel" data-v="' + esc(x.id) + '">정말 빼기</button><button type="button" class="ghost sm" data-act="poqdelx">아니요</button>'
+          : '<button type="button" class="ghost sm" data-act="poqdelask" data-v="' + esc(x.id) + '">대기열에서 빼기</button>') + '</div></li>';
+    }).join('') + '</ul>';
+    if (W.length > 3) h += '<button type="button" class="ghost wide mt8" data-act="poqmore">' + (S.poQMore ? '3건만 보기' : (W.length - 3) + '건 더 보기') + '</button>';
+    return h + '<p class="note">대기열은 아직 재고 계산에 들어가지 않습니다. ‘날짜 정해 넣기’에서 날짜를 고르면 그날 기준으로 재고를 계산해 보여 주고, 넣으면 그날 출고예정이 됩니다.</p></section>';
+  }
+  function poWaitOf(id) { return (((S.poList && S.poList.wait) || []).filter(function (x) { return x.id === id; })[0]) || null; }
+  function poWaitOpen(id) {
+    var x = poWaitOf(id);
+    if (!x || !x.wait) { toast(ERR.not_found); return; }
+    var plan = JSON.parse(JSON.stringify(x.wait));
+    plan.date = ''; plan.mode = 'add'; plan.remove = [];
+    plan.lines = plan.lines.map(function (l) { l.stated = true; return l; });
+    S.poRev = { id: x.id, item: x, R: { draft: {}, issues: [], overlap: null, plan: plan }, plan: plan, sim: null, simBusy: false, busy: false, docDate: '', wait: true };
+    S.outMode = 'porev';
+    S.sheet = null;
+    render();
+    window.scrollTo(0, 0);
+    var di = document.getElementById('prv-date');
+    if (di) { try { di.focus({ preventScroll: true }); } catch (e) { di.focus(); } }
+  }
+  function poReadyWait(p) { return !!p && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }); }
+  function poWaitSave() {
+    var V = S.poRev;
+    if (!V || V.busy) return;
+    if (!poReadyWait(V.plan)) { toast('거래처·제품을 확인해 주세요'); return; }
+    V.busy = true; render();
+    var out = poPlanOut(V.plan);
+    out.date = '';
+    call('apiPoWait', V.id, out).then(function (r) {
+      if (r && r.item) poListPut(r.item);
+      S.poRev = null; S.outMode = 'cal'; render();
+      var q = document.getElementById('poqueue');
+      if (q && q.scrollIntoView) { try { q.scrollIntoView({ block: 'start' }); } catch (e) { q.scrollIntoView(); } }
+      toastOk('대기열에 두었습니다 · ' + V.plan.cust + ' ' + V.plan.lines.length + '줄 · 날짜가 정해지면 ‘날짜 정해 넣기’');
+    }, function (e) { V.busy = false; render(); failed(e); });
+  }
+  function poQueueDel(id) {
+    S.poQDel = '';
+    call('apiPoCancel', id).then(function (r) {
+      if (r && r.item) poListPut(r.item);
+      render();
+      toastOk('대기열에서 뺐습니다(받은 발주서에 ‘취소’로 남음)');
+    }, function (e) { render(); failed(e); });
+  }
+
   /* 목록 불러오기. quiet = 화면에 '불러오는 중'을 띄우지 않음(자동 새로고침) */
   function poLoad(quiet) {
     if (S.poLoading || !S.admin) return;
@@ -3415,7 +3657,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.poErr = false;
     call('apiPoList').then(function (r) {
       S.poLoading = false;
-      S.poList = { items: (r && r.items) || [] };
+      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [] };
       render();
     }, function (e) {
       S.poLoading = false;
@@ -3584,8 +3826,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!V) { S.outMode = 'cal'; return viewOut(); }
     var R = V.R || {}, d = R.draft || {}, p = V.plan, ov = R.overlap, iss = R.issues || [];
     var h = '<div class="stack">';   // 돌아가기는 위쪽 '뒤로' (넣지 않고 닫음)
-    h += '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
-      ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다.</small></p>';
+    h += V.wait ? '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>대기열 — 날짜를 정해 넣기</span><small>' + esc(V.item.file ? V.item.name : '직접 입력') +
+      ' · 출고 날짜를 고르면 그날 기준으로 재고를 계산합니다. 맞으면 맨 아래 ‘넣기’.</small></p>'
+      : '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
+      ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다. 날짜가 아직 안 정해졌으면 ‘대기열에 두기’.</small></p>';
     var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap'; }), inf = iss.filter(function (i) { return !i.block; });
     if (bl.length) h += '<ul class="poiss bad">' + bl.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
     if (inf.length) h += '<ul class="poiss info">' + inf.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
@@ -3597,7 +3841,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (odate && odate !== V.docDate && odate >= S.today) h += chip('기존 예정 ' + poMd(odate), p.date === odate, 'prvdate', odate);
     h += '</div><input id="prv-date" class="text mt8" type="date" data-in="prvdate" min="' + esc(S.today) + '" max="' + esc(planMax()) + '" value="' + esc(isYmd(p.date) ? p.date : '') + '" aria-label="출고 날짜">';
     if (d.dateNote) h += '<p class="hint">발주서: ' + esc(poMd(V.docDate)) + ' ' + esc(d.dateNote) + '</p>';
-    if (!isYmd(p.date)) h += '<p class="bad">출고 날짜를 고르세요.</p>';
+    if (!isYmd(p.date)) h += '<p class="bad">출고 날짜를 고르세요.</p><p class="hint">날짜가 아직 안 정해졌으면 맨 아래 ‘' + (V.wait ? '대기열에 그대로 두기' : '대기열에 두기') + '’를 누르세요.</p>';
     h += '<label class="label mt16" for="prv-cust">' + step(2) + '거래처</label><input id="prv-cust" class="text" type="text" data-in="prvcust" list="cust-list" maxlength="60" autocomplete="off" value="' + esc(p.cust || '') + '" placeholder="거래처 이름">';
     if (p.cust && S.customers.indexOf(String(p.cust).trim()) < 0) h += '<p class="hint">처음 보는 거래처입니다. 이미 있는 거래처면 목록에서 고르세요(이름이 같아야 합계가 맞습니다).</p>';
     h += '<label class="label mt12" for="prv-site">현장명</label><input id="prv-site" class="text" type="text" data-in="prvsite" maxlength="60" autocomplete="off" value="' + esc(p.site || '') + '" placeholder="물표의 현장명 칸에 찍힙니다">';
@@ -3644,7 +3888,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var label = p.mode === 'skip' ? '넣지 않기로 정하기' : nRep ? '기존 ' + nRep + '줄 바꾸고 넣기' : '넣기';
     h += '<button type="button" class="primary wide mt12" data-act="poapply"' + (ready && !V.busy ? '' : ' disabled') + '>' + (V.busy ? '넣는 중…' : label) + '</button>';
     if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고 날짜를 고르세요.' : !String(p.cust || '').trim() ? '거래처를 넣으세요.' : '제품을 고르지 않은 줄이 있습니다.') + '</p>';
-    h += '<button type="button" class="ghost wide mt8" data-act="porevx">닫기 (나중에 받은 발주서에서 다시 열 수 있음)</button></section></div>';
+    if (p.mode !== 'skip') {
+      var rw = poReadyWait(p);
+      h += '<button type="button" class="ghost wide mt8 poqbtn" data-act="poqsave"' + (rw && !V.busy ? '' : ' disabled') + '>' + (V.wait ? '대기열에 그대로 두기 (고친 내용 저장)' : '날짜 미정 — 대기열에 두기') + '</button>';
+    }
+    h += '<button type="button" class="ghost wide mt8" data-act="porevx">' + (V.wait ? '닫기 (대기열에 그대로 있음)' : '닫기 (나중에 받은 발주서에서 다시 열 수 있음)') + '</button></section></div>';
     return h;
   }
   function poLineHtml(l, i, V) {
@@ -3818,7 +4066,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     o = o || {};
     S.po = true;
     S.inType = '출고예정';
-    S.poNeedDate = !o.date;
+    S.poQueue = !!o.queue;
+    S.poNeedDate = !o.date && !o.queue;
     S.inPDate = o.date || S.today;
     S.qty = {}; S.price = {}; S.inMemo = '';
     S.inCust = o.cust || ''; S.inPo = o.po || '';
@@ -3829,10 +4078,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     window.scrollTo(0, 0);
   }
   function poDateChips() {
-    var cur = S.poNeedDate ? '' : S.inPDate, t1 = addDays(S.today, 1), t2 = addDays(S.today, 2);
+    var cur = S.poNeedDate || S.poQueue ? '' : S.inPDate, t1 = addDays(S.today, 1), t2 = addDays(S.today, 2);
     var other = !!cur && [S.today, t1, t2].indexOf(cur) < 0;
     var h = '<div class="chips">' + chip('오늘', cur === S.today, 'inpdate', S.today) + chip('내일', cur === t1, 'inpdate', t1) + chip('모레', cur === t2, 'inpdate', t2);
     h += otherBtn('inpdate', cur, other, pickOpenNow('inpdate'));
+    h += chip('날짜 미정 (대기열)', !!S.poQueue, 'inpqueue', '1');
     return h + '</div>' + pickPanel('inpdate', cur, S.today, planMax());
   }
   function zoneCard() {
@@ -3884,6 +4134,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!past || x.plan.length) {
       h += '<h3 class="dsec">출고예정 ' + (x.plan.length ? x.plan.length + '건 · ' + fmt(x.planKg) + ' kg' : '없음') + '</h3>';
       if (x.plan.length) h += dayGroups(x.plan);
+      var nPg = {};
+      x.plan.forEach(function (r) { nPg[(r.cust || '') + '|' + (r.po || '')] = 1; });
+      if (S.admin && Object.keys(nPg).length > 1) h += '<button type="button" class="ghost wide mt8" data-act="confirmgrp" data-v="' + esc(x.plan.map(function (r) { return r.id; }).join(',')) + '">이 날 출고예정 ' + x.plan.length + '건 모두 확정</button>';
     }
     if (x.pin.length) h += '<h3 class="dsec">생산예정 ' + x.pin.length + '건</h3>' + dayGroups(x.pin);
     h += '<div class="dadd">';
@@ -4067,7 +4320,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var P = project(ls.map(function (l) { return { type: t, prod: l.it.prod, color: l.it.color, qty: l.qty, date: date }; }));
     var mine = {};
     P.lines.forEach(function (x) { if (x.x) mine[x.l.prod + '|' + x.l.color] = x; });
-    var h = '<h2 class="h2" id="sh-title">' + esc(fmtDate(date)) + ' · ' + esc(t) + (sale ? ' · ' + esc(S.inCust.trim()) : '') + '</h2>';
+    var qmode = S.po && S.poQueue && t === '출고예정';
+    var h = '<h2 class="h2" id="sh-title">' + (qmode ? '날짜 미정 (대기열)' : esc(fmtDate(date))) + ' · ' + esc(t) + (sale ? ' · ' + esc(S.inCust.trim()) : '') + '</h2>';
+    if (qmode) h += '<p class="warnbox">날짜가 없어 출고 화면의 ‘날짜 미정 대기열’에 들어갑니다. 날짜가 정해지면 거기서 ‘날짜 정해 넣기’를 누르세요. 아래 재고 계산은 오늘 기준입니다.</p>';
     if (t === '출고예정' && S.inPo.trim()) h += '<p class="muted">현장명·발주번호: ' + esc(S.inPo.trim()) + '</p>';
     if (t === '출고예정' && zoneTag()) h += '<p class="muted">따로 싣기: <b>' + esc(zoneName()) + '</b></p>';
     var groups = [], by = {};
@@ -4116,7 +4371,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (t === '출고예정' && (over || worse)) h += '<p class="warnbox mt8">재고가 모자라는 줄이 있어도 저장할 수 있습니다. 저장하면 예정 화면에서 언제까지 얼마를 생산해야 하는지 볼 수 있습니다.</p>';
     if (t === '출고' && worse) h += '<p class="warnbox mt8">이 출고 때문에 이미 받은 발주(출고예정)에 쓸 재고가 모자라게 됩니다. 그래도 맞으면 저장하세요.</p>';
     h += '<div class="two mt16"><button type="button" class="ghost" data-act="close">고치기</button>' +
-      '<button type="button" class="primary" data-act="save"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : '저장') + '</button></div>';
+      '<button type="button" class="primary" data-act="save"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : S.po && S.poQueue && t === '출고예정' ? '대기열에 넣기' : '저장') + '</button></div>';
     return h;
   }
 
@@ -4140,6 +4395,25 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       }
     }
     var d0 = curDate();
+    if (S.po && S.poQueue && type === '출고예정') {
+      if (!S.inCust.trim()) { toast(ERR.need_cust); return; }
+      S.busy = true;
+      renderSheet();
+      var qz = zoneName(), qc = S.inCust.trim();
+      call('apiQueueAdd', { cust: qc, site: S.inPo.trim(), memo: S.inMemo.trim(),
+        lines: ls.map(function (l) { return { zone: qz, prod: l.it.prod, color: l.it.color, kg: l.qty, price: cleanNum(S.price[pkeyOf(l.it)]) }; }) }).then(function (r) {
+        S.busy = false;
+        if (r && r.item) poListPut(r.item);
+        S.qty = {}; S.inMemo = ''; S.price = {}; S.inCust = ''; S.inPo = ''; S.sheet = null; S.pick = null;
+        S.po = false; S.poNeedDate = false; S.poQueue = false; S.inZone = ''; S.zoneOwn = false;
+        S.outMode = 'cal';
+        render();
+        var q = document.getElementById('poqueue');
+        if (q && q.scrollIntoView) { try { q.scrollIntoView({ block: 'start' }); } catch (e) { q.scrollIntoView(); } }
+        toastOk('대기열에 넣었습니다 · ' + qc + ' ' + n + '줄 ' + fmt(tot) + ' kg · 날짜가 정해지면 ‘날짜 정해 넣기’');
+      }, function (e) { S.busy = false; renderSheet(); failed(e); });
+      return;
+    }
     var poInfo = S.po && type === '출고예정' ? { date: d0, cust: S.inCust.trim(), po: S.inPo.trim(), zone: zoneName(), n: n, kg: tot } : null;
     S.busy = true;
     renderSheet();
@@ -4158,7 +4432,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (isPlan(type)) { S.tab = 'plan'; store('nmc_inv_tab2', 'plan'); }
       S.pick = null;
       if (poInfo) { poInfo.next = nextZone(poInfo.zone); S.poLast = poInfo; }
-      S.po = false; S.poNeedDate = false; S.inZone = ''; S.zoneOwn = false;
+      S.po = false; S.poNeedDate = false; S.poQueue = false; S.inZone = ''; S.zoneOwn = false;
       if (VIEW === 'out') { S.outMode = 'cal'; S.calDay = d0; S.calYm = d0.slice(0, 7); }
       if (VIEW === 'all' && S.allAdd) { S.tab = S.allAddFrom === 'stock' ? 'stock' : 'plan'; store('nmc_inv_tab2', S.tab); S.allAdd = ''; }
       render();
@@ -5121,7 +5395,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'caladd': if (v === '출고예정') { S.poLast = null; startPo({ date: S.calDay }); return; }
         S.po = false; S.inZone = ''; S.zoneOwn = false;
         S.inType = '출고'; S.inDate = S.calDay; S.qty = {}; S.price = {}; S.inCust = ''; S.inPo = ''; S.inMemo = ''; S.outMode = 'add'; S.sheet = null; render(); window.scrollTo(0, 0); return;
-      case 'calback': S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return;
+      case 'calback': S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.poQueue = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return;
       case 'poadd': S.poLast = null; startPo(); return;
       case 'pomore': if (S.poLast) startPo({ date: S.poLast.date, cust: S.poLast.cust, po: S.poLast.po, zone: S.poLast.next || '' }); return;
       case 'polab': if (S.poLast) { var pids = poIds(S.poLast); if (pids.length) labOpen(pids); } return;
@@ -5129,6 +5403,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'pofile': var pfi = document.getElementById('po-file'); if (pfi && !S.poBusy) pfi.click(); return;
       case 'poread': poReadNow(v); return;
       case 'porevx': S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return;
+      case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
+      case 'poqopen': poWaitOpen(v); return;
+      case 'poqsave': poWaitSave(); return;
+      case 'poqdelask': S.poQDel = v; render(); return;
+      case 'poqdelx': S.poQDel = ''; render(); return;
+      case 'poqdel': poQueueDel(v); return;
+      case 'poqmore': S.poQMore = !S.poQMore; render(); return;
+      case 'pojumpq': var qq = document.getElementById('poqueue'); if (qq && qq.scrollIntoView) { try { qq.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { qq.scrollIntoView(); } } return;
       case 'poapply': poApply(); return;
       case 'prvdate': if (S.poRev && isYmd(v)) { S.poRev.plan.date = v; poResim(); } return;
       case 'poshowx': S.poShow = null; S.poUndoAsk = ''; render(); return;
@@ -5162,7 +5444,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'retry': start(); return;
       case 'intype': S.pick = null; S.inType = v; store('nmc_inv_type', v); render(); return;
       case 'indate': S.pick = null; S.inDate = v; render(); return;
-      case 'inpdate': S.pick = null; S.inPDate = v; S.poNeedDate = false; render(); return;
+      case 'inpdate': S.pick = null; S.inPDate = v; S.poNeedDate = false; S.poQueue = false; render(); return;
+      case 'inpqueue': S.pick = null; S.poQueue = true; S.poNeedDate = false; render(); return;
       case 'pickopen': pickOpen(v); return;
       case 'mcnav': mcNav(v); return;
       case 'mcpick': mcPick(v); return;
@@ -5170,6 +5453,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'planprod': goPlanProd(v); return;
       case 'pline': openSheet({ kind: 'pline', id: v }); return;
       case 'confirm1': openConfirm([v]); return;
+      case 'confirmgrp': openConfirm(String(v || '').split(',').filter(String)); return;
       case 'mvopen': openMove(String(v || '').split(',').filter(Boolean)); return;
       case 'mvsave': moveSave(); return;
       case 'labopen': labOpen(String(v || '').split(',').filter(Boolean)); return;
@@ -5187,6 +5471,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'labreset': if (S.lab && S.lab.lay && !S.lab.loading) labReset(); return;
       case 'labresave': if (S.lab && S.lab.lay) { S.lab.saving = true; S.lab.saveErr = false; labPaintSave(); labSaveNow(S.lab); } return;
       case 'labfit': labFitOrder(); return;
+      case 'labadd': labAddRow(v); return;
+      case 'labtoorder': var lo = document.getElementById('labord'); if (lo && lo.scrollIntoView) { try { lo.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { lo.scrollIntoView(); } } return;
       case 'confirmday': openConfirm(S.plan.lines.filter(function (l) { return !l.fut && !l.overdue && l.date === v; }).map(function (l) { return l.id; })); return;
       case 'confirmall': openConfirm(S.plan.lines.filter(function (l) { return l.overdue; }).map(function (l) { return l.id; })); return;
       case 'cfkeep': S.sheet.dmode = 'keep'; S.sheet.calOpen = false; renderSheet(); return;
@@ -5261,6 +5547,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     if (k === 'labsite' && S.lab) { labSiteInput(el.value); return; }
     if (k === 'labcmd' && S.lab) { S.lab.cmd = el.value; return; }
+    if (k === 'labmvq' && S.lab) { S.lab.mvq = S.lab.mvq || {}; S.lab.mvq[el.getAttribute('data-v')] = el.value; return; }
+    if (k === 'labaddq' && S.lab) { S.lab.add = S.lab.add || {}; var an = el.getAttribute('data-v'); S.lab.add[an] = S.lab.add[an] || {}; S.lab.add[an].q = el.value; return; }
     if (k === 'adj' && S.sheet) { S.sheet.val = el.value; var dd = document.getElementById('adj-diff'); if (dd) dd.textContent = adjDiffText(); return; }
     if (k === 'adjmemo' && S.sheet) { S.sheet.memo = el.value; return; }
     if (k === 'cfqty' && S.sheet) { S.sheet.qty = el.value; var cr = document.getElementById('cf-rest'); if (cr) cr.innerHTML = restHtml(); return; }
@@ -5281,7 +5569,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return;
     }
     if (a === 'inpdate') {
-      if (isYmd(el.value) && el.value >= S.today && el.value <= planMax()) { S.inPDate = el.value; S.poNeedDate = false; }
+      if (isYmd(el.value) && el.value >= S.today && el.value <= planMax()) { S.inPDate = el.value; S.poNeedDate = false; S.poQueue = false; }
       else toast(el.value < S.today ? ERR.past_plan : ERR.bad_date);
       render();
       return;
@@ -5301,6 +5589,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (a === 'labmerge') { labMergeIn(Number(el.getAttribute('data-v')), el.value); return; }
     if (a === 'labnote') { labNote(Number(el.getAttribute('data-v')), el.value); return; }
     if (a === 'labzone') { labZoneTx(Number(el.getAttribute('data-v')), el.value); return; }
+    if (a === 'labqty') { labSetQty(el.getAttribute('data-v'), el.value); return; }
+    if (a === 'labaddk' && S.lab) { S.lab.add = S.lab.add || {}; var kn = el.getAttribute('data-v'); S.lab.add[kn] = S.lab.add[kn] || {}; S.lab.add[kn].id = el.value; return; }
+    if (a === 'labrest') { labPutRest(el.getAttribute('data-v'), el.value); return; }
     if (a === 'day') { if (el.value) setDay(el.value); return; }
     var e2 = el.getAttribute('data-ed');
     if (!e2 || !S.sheet || S.sheet.kind !== 'edit') return;
