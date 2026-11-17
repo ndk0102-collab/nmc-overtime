@@ -3839,10 +3839,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     // 1. 날짜 · 거래처 · 현장
     var odate = ov && ov.dates && ov.dates.length === 1 ? ov.dates[0] : '';
     h += '<section class="card"><h2 class="label">' + step(1) + '출고 날짜</h2><div class="chips">';
-    if (V.docDate && V.docDate >= S.today) h += chip('발주서 ' + poMd(V.docDate), p.date === V.docDate, 'prvdate', V.docDate);
+    // (2026-11-17 지시) 발주서의 받는 날 → 출고는 항상 전날. 서버가 이미 전날로 바꿔 둠(docDate = 출고 날짜, d.recv = 받는 날)
+    if (V.docDate && V.docDate >= S.today) h += chip(d.recv ? '받는 날 ' + poMd(d.recv) + '의 전날 ' + poMd(V.docDate) : '발주서 ' + poMd(V.docDate), p.date === V.docDate, 'prvdate', V.docDate);
     if (odate && odate !== V.docDate && odate >= S.today) h += chip('기존 예정 ' + poMd(odate), p.date === odate, 'prvdate', odate);
     h += '</div><input id="prv-date" class="text mt8" type="date" data-in="prvdate" min="' + esc(S.today) + '" max="' + esc(planMax()) + '" value="' + esc(isYmd(p.date) ? p.date : '') + '" aria-label="출고 날짜">';
-    if (d.dateNote) h += '<p class="hint">발주서: ' + esc(poMd(V.docDate)) + ' ' + esc(d.dateNote) + '</p>';
+    if (d.recv) h += '<p class="hint">발주서의 받는 날 ' + esc(poMd(d.recv)) + (d.dateNote ? ' ' + esc(d.dateNote) : '') + ' → 전날 <b>' + esc(poMd(V.docDate)) + '</b> 출고</p>';
+    else if (d.dateNote) h += '<p class="hint">발주서: ' + esc(poMd(V.docDate)) + ' ' + esc(d.dateNote) + '</p>';
     if (!isYmd(p.date)) h += '<p class="bad">출고 날짜를 고르세요.</p><p class="hint">날짜가 아직 안 정해졌으면 맨 아래 ‘' + (V.wait ? '대기열에 그대로 두기' : '대기열에 두기') + '’를 누르세요.</p>';
     h += '<label class="label mt16" for="prv-cust">' + step(2) + '거래처</label><input id="prv-cust" class="text" type="text" data-in="prvcust" list="cust-list" maxlength="60" autocomplete="off" value="' + esc(p.cust || '') + '" placeholder="거래처 이름">';
     if (p.cust && S.customers.indexOf(String(p.cust).trim()) < 0) h += '<p class="hint">처음 보는 거래처입니다. 이미 있는 거래처면 목록에서 고르세요(이름이 같아야 합계가 맞습니다).</p>';
