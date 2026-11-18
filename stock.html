@@ -424,6 +424,13 @@ body.labmode .wrap{max-width:1480px}
 .ppick .pp small.bad{color:var(--bad);font-weight:600}
 .ppick .pp.on{border-color:var(--accent);background:var(--accent-soft)}
 .ppick .pp.on b{color:var(--accent-strong)}
+.ppick.pk2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cfpk{grid-column:1/-1}
+.cfpk .ppick{margin:4px 0 0}
+.dmain .dn2 small.dtb{color:var(--ink2);font-weight:600}
+.dgtb{display:inline-flex;align-items:center;min-height:36px;padding:0 10px;border-radius:8px;background:var(--card);color:var(--ink2);font-size:13px;font-weight:700;white-space:nowrap}
+.lotb{margin:10px 0 4px;padding:9px 11px;border-radius:10px;background:var(--soft);font-size:14px;line-height:1.5}
+.lotb small{color:var(--ink2)}
 .mixw{margin:8px 0 4px;padding:9px 11px;border-radius:10px;font-size:13.5px;line-height:1.5;font-weight:600}
 .mixw.bad{background:var(--bad-soft);color:var(--bad)}
 .mixw.warn{background:#fff4d6;color:#6b4a00}
@@ -1895,7 +1902,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음');
       return '<div class="dgrp"><div class="dgh"><span><b>' + esc(name) + '</b>' + (x.po ? ' · ' + esc(x.po) : '') + ' · ' + x.rows.length + '줄 · ' + fmt(x.kg) + ' kg</span>' +
         (S.admin ? '<span class="dgb">' + (isPlan(x.type) && x.rows.length > 1 ? '<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">전체 확정</button>' : '') +
-          (x.type !== '생산예정' ? '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>' : '') +
+          (x.type === '생산예정' ? '' : x.rows.every(function (r) { return packOf(r) === 'ton'; }) ? '<span class="dgtb">톤백 · 물표 없음</span>' :
+            '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>') +
           '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button></span>' : '') + '</div>' +
         mixWarnHtml(x) + '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
     }).join('');
@@ -2111,7 +2119,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var LAB_PSTYLE = { 'LOK-CHIP': { fill: '#000', ink: '#fff', stroke: '#000', sw: 0 }, 'NM-CHIP': { fill: '#fff', ink: '#000', stroke: '#000', sw: 5 },
     '일반 EPDM': { fill: '#BDBDBD', ink: '#000', stroke: '#000', sw: 1.2 } };
   function labPStyle(prod) { return LAB_PSTYLE[prod] || { fill: '#fff', ink: '#000', stroke: '#000', sw: 1.2 }; }
-  function labPName(prod) { return String(prod || ''); }
+  function labPName(prod) { return prod === '타이어 고무분말' ? 'SBR' : String(prod || ''); }
   function labCap() { var n = Number(stored('nmc_lab_cap2')); return n >= 1 && n <= 200 ? Math.round(n) : 56; }
   function labBag() { var n = Number(stored('nmc_lab_bag')); return n >= 1 && n <= 2000 ? Math.round(n) : 25; }
   /* 따로 싣는 구분 — 메모(비고)에서 읽습니다.
@@ -2133,7 +2141,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return null;
   }
   function zoneParse(memo) {
-    var s = String(memo || '').replace(/[①-⑳]/g, function (c) { return ' ' + (c.charCodeAt(0) - 0x245F); });
+    var s = String(memo || '').replace(/[\[【](톤백|소포장)[\]】]/g, ' ').replace(/[①-⑳]/g, function (c) { return ' ' + (c.charCodeAt(0) - 0x245F); });
     var re = /[\[【]([^\]】]{1,20})[\]】]/g, m, z, e;
     while ((m = re.exec(s))) {
       var c = m[1].replace(/\s+/g, ' ').trim();
@@ -2143,6 +2151,40 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return zoneFind(s) || { name: '', key: '' };
   }
   function zoneOf(memo) { return zoneParse(memo).name; }
+  /* SBR(타이어 고무분말) 포장 (2026-11-18 지시: "5-7mm 가 발주가 들어오면 이거는 톤백단위로 나가는경우가대부분이고 가끔 소포장주문이 들어온다.
+     톤백단위는 800kg 가 포장단위 … 톤백단위로 나가는것들은 물표가 필요가없다. 소포장단위로 주문이 들어오는것은 물표가 필요하다.
+     SBR 5-7mm 와 2-3 mm 의 소포장은 기본 32개가 톤백에 담기므로 물표에는 최대 32개까지만 … SBR이 15개 넘을경우는 톤백으로 포장하며
+     그 이하는 칼라칩과 같이 파레트 적재가능")
+     · 메모의 [톤백] · [소포장] 표시로 압니다. 표시가 없으면 톤백.
+     · 톤백 = 800 kg(나머지는 짜투리 톤백), 물표 없음 — 확정은 출고 달력에서 그대로.
+     · 소포장 = 25 kg 포. 15포까지는 칼라칩 파렛트에 같이 싣고, 넘으면 톤백 포장(한 개 최대 32포, 꽉 찬 것부터)으로 따로 물표. */
+  var TB_KG = 800, TB_BAGS = 32, TB_MIX = 15;
+  function isSbr(prod) { return prod === '타이어 고무분말'; }
+  function packOf(r) {
+    if (!r || !isSbr(r.prod)) return '';
+    var m = /[\[【](톤백|소포장)[\]】]/.exec(r.memo || '');
+    return m && m[1] === '소포장' ? 'small' : 'ton';
+  }
+  function packTag(memo, pack) {   // 메모의 포장 표시 바꾸기: 맨 앞 구분 표시([놀이터1]) 뒤에 [톤백] · [소포장]
+    var s = String(memo || '').replace(/\s*[\[【](톤백|소포장)[\]】]\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    if (pack !== 'ton' && pack !== 'small') return s;
+    var tag = pack === 'small' ? '[소포장]' : '[톤백]', m = s.match(/^([\[【][^\]】]{1,20}[\]】])\s*/);
+    return (m ? m[1] + ' ' + tag + ' ' + s.slice(m[0].length) : tag + ' ' + s).trim().slice(0, 200);
+  }
+  function tbCount(kg) { return Math.ceil(kg / TB_KG); }
+  function tbText(kg) {   // 2,000 kg → 톤백 3개(800·800·400)
+    var full = Math.floor(kg / TB_KG), rest = kg - full * TB_KG, a = [];
+    for (var i = 0; i < full && i < 4; i++) a.push(fmt(TB_KG));
+    var list = full > 4 ? fmt(TB_KG) + '×' + full + (rest ? ' + ' + fmt(rest) : '') : a.concat(rest ? [fmt(rest)] : []).join('·');
+    return '톤백 ' + tbCount(kg) + '개(' + list + ')';
+  }
+  function tbSmallText(kg, bag) {   // 소포장: 80포 → 톤백 포장 3개(32·32·16) · 10포 → 칼라칩 파렛트에 같이
+    var n = Math.ceil(kg / (bag || 25));
+    if (n <= TB_MIX) return fmt(n) + '포 · 칼라칩 파렛트에 같이';
+    var full = Math.floor(n / TB_BAGS), rest = n - full * TB_BAGS, a = [];
+    for (var i = 0; i < full && i < 4; i++) a.push(TB_BAGS);
+    return fmt(n) + '포 · 톤백 포장 ' + (full + (rest ? 1 : 0)) + '개(' + (full > 4 ? TB_BAGS + '×' + full + (rest ? ' + ' + rest : '') : a.concat(rest ? [rest] : []).join('·')) + '포)';
+  }
   /* 구분 이름 보이기: 숫자만이면 놀이터 (2026-11-16 지시 "1이라고 되어 있으면 놀이터 1", 17:48 다시: "1 2 3 이라고 왔으면 놀이터 1 놀이터 2라고 표기")
      1 · 1번 · 놀이터1 → 놀이터 1. 그 밖의 이름(유아 · A구역 …)은 적힌 그대로 */
   function zoneShow(z) {
@@ -2168,6 +2210,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var zs = [], by = {}, ord = {};
     (S.items || []).forEach(function (it, i) { ord[it.key] = i; });
     (S.lab ? S.lab.ids : []).map(recOf).filter(Boolean).forEach(function (l) {
+      if (packOf(l) === 'ton') return;   // 톤백은 물표 없음 (2026-11-18)
       var z = zoneParse(l.memo), g = by['k' + z.key];
       if (!g) { g = by['k' + z.key] = { zone: zoneShow(z.name), key: z.key, lines: [], map: {} }; zs.push(g); }
       var k = l.prod + '|' + l.color;
@@ -2189,6 +2232,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      ④ kg 우수리는 그 색의 마지막 줄에서 뺌. */
   function labUnits(kg, bag) { var w = Math.floor(kg / bag), r = kg - w * bag; return { units: w + (r > 0 ? 1 : 0), part: r }; }
   function labPack(lines, cap, bag) {
+    // SBR 소포장이 15포를 넘으면 톤백 포장(한 개 최대 32포, 꽉 찬 것부터)으로 칼라칩과 따로. 15포까지는 칼라칩 파렛트에 같이 (2026-11-18)
+    var tb = [], rest = [];
+    lines.forEach(function (l) { (isSbr(l.prod) && Math.ceil(l.kg / bag) > TB_MIX ? tb : rest).push(l); });
+    var out = rest.length ? labPackChips(rest, cap, bag) : [];
+    tb.forEach(function (l) {
+      for (var left = l.kg; left > 0; left -= TB_BAGS * bag) {
+        var rows = [{ l: l, kg: Math.min(left, TB_BAGS * bag) }];
+        rows.tb = true;
+        out.push(rows);
+      }
+    });
+    return out;
+  }
+  function labPackChips(lines, cap, bag) {
     var its = [];
     lines.forEach(function (l, i) {
       var u = labUnits(l.kg, bag).units;
@@ -2234,7 +2291,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labPlan() {
     var cap = labCap(), bag = labBag(), out = [];
     labZones().forEach(function (g) {
-      labPack(g.lines, cap, bag).forEach(function (rows) { out.push({ zone: g.zone, rows: rows }); });
+      labPack(g.lines, cap, bag).forEach(function (rows) { out.push({ zone: g.zone, rows: rows, tb: !!rows.tb }); });
     });
     return out;
   }
@@ -2253,17 +2310,33 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var r = recOf(id);
       if (!r) return;
       var k = r.prod + '|' + r.color, x = by[k];
-      if (!x) { x = by[k] = { k: k, prod: r.prod, color: r.color, kg: 0, first: null }; keys.push(k); }
+      if (!x) { x = by[k] = { k: k, prod: r.prod, color: r.color, kg: 0, first: null, ton: true }; keys.push(k); }
       x.kg += Number(r.qty) || 0;
+      if (packOf(r) !== 'ton') x.ton = false;
       if (id in idx && (!x.first || idx[id] < idx[x.first.id])) x.first = S.plan.lines[idx[id]];
     });
     return keys.sort(function (a, b) { return (ord[a] == null ? 9999 : ord[a]) - (ord[b] == null ? 9999 : ord[b]); }).map(function (k) {
       var x = by[k], day = x.first ? x.first.before : null, sm = (S.plan && S.plan.sum && S.plan.sum[k]) || null;
       var others = PROD3.indexOf(x.prod) >= 0 ? PROD3.filter(function (p) { return p !== x.prod && S.byKey[p + '|' + x.color]; })
         .map(function (p) { return { p: p, cur: stockOf(p + '|' + x.color) }; }) : [];
-      return { k: k, prod: x.prod, color: x.color, kg: x.kg, cur: stockOf(k), day: day, after: day == null ? null : day - x.kg,
+      return { k: k, prod: x.prod, color: x.color, kg: x.kg, ton: isSbr(x.prod) && x.ton, cur: stockOf(k), day: day, after: day == null ? null : day - x.kg,
         short: day == null ? 0 : Math.max(0, x.kg - Math.max(day, 0)), need: sm ? sm.need || 0 : 0, shortEff: sm ? sm.shortEff || '' : '', others: others };
     });
+  }
+  /* 이 묶음의 톤백 줄(물표 없음) — 요약에 한 줄 (2026-11-18) */
+  function labTons() {
+    var by = {}, ks = [];
+    ((S.lab && S.lab.ids) || []).map(recOf).filter(Boolean).forEach(function (r) {
+      if (packOf(r) !== 'ton') return;
+      var k = r.prod + '|' + r.color;
+      if (!by[k]) { by[k] = { k: k, kg: 0 }; ks.push(k); }
+      by[k].kg += Number(r.qty) || 0;
+    });
+    return ks.map(function (k) { return by[k]; });
+  }
+  function labTonLine() {
+    var t = labTons();
+    return t.length ? '<br><b>톤백(물표 없음):</b> ' + t.map(function (x) { return esc(labNm(x.k)) + ' ' + fmt(x.kg) + ' kg = ' + esc(tbText(x.kg)); }).join(' · ') : '';
   }
   function labStockLine() {
     var xs = labStock();
@@ -2284,8 +2357,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var w = '';
       if (x.short > 0) w = '<p class="lskw bad">이번 출고에서 ' + fmt(x.short) + ' kg 모자람' + (x.need > x.short ? ' · 뒤 출고예정까지 모두 ' + fmt(x.need) + ' kg' : '') + ' — 생산이 필요합니다</p>';
       else if (x.need > 0) w = '<p class="lskw warn">이번 출고는 재고로 나갑니다. 뒤 출고예정까지 보면 ' + fmt(x.need) + ' kg 모자람(' + esc(poMd(x.shortEff)) + '부터)</p>';
-      h += '<li><div class="lskh"><span class="sw" style="background:' + labTint(x.prod, x.color) + '"></span><b>' + esc(labNm(x.k)) + '</b><span class="lskq">이번 ' + labQty(x.kg) +
-        (x.kg % labBag() ? '' : '포 · ' + fmt(x.kg) + ' kg') + '</span></div>' +
+      h += '<li><div class="lskh"><span class="sw" style="background:' + labTint(x.prod, x.color) + '"></span><b>' + esc(labNm(x.k)) + '</b><span class="lskq">이번 ' + (x.ton ? esc(tbText(x.kg)) + ' · ' + fmt(x.kg) + ' kg' : labQty(x.kg) +
+        (x.kg % labBag() ? '' : '포 · ' + fmt(x.kg) + ' kg')) + '</span></div>' +
         '<div class="lskn"><span>현재고 <b>' + fmt(x.cur) + '</b></span>' + (x.day != null ? '<span>그날 <b>' + fmt(Math.max(x.day, 0)) + '</b></span><span>출고 뒤 <b' + (x.after < 0 ? ' class="neg"' : '') + '>' +
         fmt(Math.max(x.after, 0)) + '</b></span>' : '<span class="muted">이미 나간 출고</span>') + '</div>' + w +
         (x.others.length ? '<p class="lsko">같은 색 다른 제품 현재고: ' + x.others.map(function (o) { return esc(PROD3_NAME[o.p] || o.p) + ' ' + fmt(o.cur); }).join(' · ') + '</p>' : '') + '</li>';
@@ -2378,7 +2451,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var st = labPStyle(k), y0 = top + i * (bh + gap), half = st.sw / 2;
       h += '<rect class="lab-pbox" x="' + f2(bx0 + half) + '" y="' + f2(y0 + half) + '" width="' + f2(bx1 - bx0 - st.sw) + '" height="' + f2(bh - st.sw) + '" rx="6" fill="' + st.fill + '"' +
         (st.sw ? ' stroke="' + st.stroke + '" stroke-width="' + st.sw + '"' : '') + '/>';
-      var label = show.length === 1 && pk.length === 1 ? labPName(k) : labPName(k) + ' ' + labQty(pkg[k]) + (pkg[k] % labBag() ? '' : '포');
+      var label = (show.length === 1 && pk.length === 1 ? labPName(k) : labPName(k) + ' ' + labQty(pkg[k]) + (pkg[k] % labBag() ? '' : '포')) + (p.tb ? ' · 톤백 포장' : '');
       h += svgT((bx0 + bx1) / 2, y0 + bh / 2, label, { size: show.length === 1 && pk.length === 1 ? 30 : 15, bold: true, fill: st.ink, w: bx1 - bx0 - 14, cls: 'lab-pname' });
     });
     if (pk.length > 3) h += svgT((bx0 + bx1) / 2, top + show.length * (bh + gap) + bh / 2, '외 ' + (pk.length - 2) + '가지 제품', { size: 14, bold: true, w: bx1 - bx0 - 14, cls: 'lab-pname' });
@@ -2423,7 +2496,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var kg = all.reduce(function (s, l) { return s + l.kg; }, 0), odd = all.filter(function (l) { return l.kg % bag; });
     var noCode = [], seenNc = {};
     all.forEach(function (l) { if (!labItem(l.prod, l.color).code && !seenNc[l.prod + '|' + l.color]) { seenNc[l.prod + '|' + l.color] = 1; noCode.push(l); } });
-    var sizes = lab.lay.pals.map(function (p) { return labBags(p); });
+    var sizes = lab.lay.pals.filter(function (p) { return !p.tb; }).map(function (p) { return labBags(p); });   // 톤백 포장은 따로 셈 (2026-11-18)
+    var tbs = lab.lay.pals.filter(function (p) { return p.tb; }).map(function (p) { return labBags(p); }), npal = lab.lay.pals.length - tbs.length;
     var lo = sizes.length ? Math.min.apply(null, sizes) : 0, hi = sizes.length ? Math.max.apply(null, sizes) : 0;
     var zc = {}, zo = [];
     plan.forEach(function (p) { var z = p.zone || ''; if (!(z in zc)) { zc[z] = 0; zo.push(z); } zc[z]++; });
@@ -2432,8 +2506,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<div class="stack noprint"><section class="card">' +
       '<h2 class="h2">물표 · 적재물 상세 내용</h2>' +
       '<p class="muted labsum">' + esc(lab.cust || '거래처 없음') + ' · ' + esc(fmtDate(lab.date)) + ' ' + esc(lab.type) + ' · ' + all.length + '가지 ' + fmt(kg) + ' kg' +
-      (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>파렛트 ' + plan.length + '장</b>' + (plan.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') +
-      (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + '</p>' + labStockLine() +
+      (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>' + (npal || !tbs.length ? '파렛트 ' + npal + '장' : '') + (npal && tbs.length ? ' + ' : '') + (tbs.length ? '톤백 포장 ' + tbs.length + '개' : '') + '</b>' +
+      (sizes.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') + (tbs.length ? ' · 톤백 포장 ' + tbs.join('·') + '포' : '') +
+      (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + labTonLine() + '</p>' + labStockLine() +
       '<div class="labset"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
       '<div><label class="label" for="lab-date">물표 날짜</label><input id="lab-date" class="text" type="date" data-ch="labdate" value="' + esc(day) + '"></div>' +
       '<div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
@@ -2494,7 +2569,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var cap = labCap(), bag = labBag(), pals = [];
     labZones().forEach(function (g) {
       labPack(g.lines, cap, bag).forEach(function (rows) {
-        pals.push({ zk: g.key, z: g.zone, cust: null, ztx: null, rows: rows.map(function (r) { return { k: r.l.key, zk: g.key, kg: r.kg }; }) });
+        var pal = { zk: g.key, z: g.zone, cust: null, ztx: null, rows: rows.map(function (r) { return { k: r.l.key, zk: g.key, kg: r.kg }; }) };
+        if (rows.tb) pal.tb = true;   // SBR 톤백 포장(최대 32포) (2026-11-18)
+        pals.push(pal);
       });
     });
     return { v: 2, cap: cap, bag: bag, site: null, date: null, pals: pals, edited: false };
@@ -2503,31 +2580,40 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labKgOf(p) { return p.rows.reduce(function (s, r) { return s + r.kg; }, 0); }
   function labU(kg) { return kg % labBag() ? '' : '포'; }
   function labQU(kg) { return labQty(kg) + labU(kg); }
-  function labNm(k) { var p = String(k).split('|'); return (p[0] === '일반 EPDM' ? '일반 ' : p[0] === 'LOK-CHIP' ? 'LOK ' : p[0] === 'NM-CHIP' ? 'NM ' : p[0] + ' ') + (p[1] || ''); }
+  function labNm(k) { var p = String(k).split('|'); return (p[0] === '일반 EPDM' ? '일반 ' : p[0] === 'LOK-CHIP' ? 'LOK ' : p[0] === 'NM-CHIP' ? 'NM ' : p[0] === '타이어 고무분말' ? 'SBR ' : p[0] + ' ') + (p[1] || ''); }
+  function labCapOf(p) { return p && p.tb ? TB_BAGS : labCapNow(); }   // 톤백 포장은 32포까지
   /* kg 만큼을 물표에 놓기: 같은 색 줄이 통째로 받을 수 있으면 거기, 아니면 통째로 들어가는 같은 구분의 장(남는 자리가 가장 작은 곳), 없으면 새 장 */
   function labPlace(lay, m, kg) {
     var bag = labBag(), cap = labCapNow(), need = function (x) { return Math.ceil(x / bag); };
     var host = null;
     lay.pals.forEach(function (p) { p.rows.forEach(function (r) { if (r.k === m.k && r.zk === m.zk && (!host || r.kg > host.r.kg)) host = { p: p, r: r }; }); });
-    if (host && labBags(host.p) - need(host.r.kg) + need(host.r.kg + kg) <= cap) { host.r.kg += kg; return; }
+    if (host && labBags(host.p) - need(host.r.kg) + need(host.r.kg + kg) <= (host.p.tb ? TB_BAGS : cap)) { host.r.kg += kg; return; }
     // 같은 색은 한 장에 (2026-11-17 17:48 지시) — 원래 장에 다 안 들어가면 그 색을 통째로 들어가는 장(같은 구분)이나 새 장으로 옮김
     var tot = kg + (host ? host.r.kg : 0);
     if (need(tot) <= cap) {
       if (host) host.p.rows.splice(host.p.rows.indexOf(host.r), 1);
-      var to = lay.pals.filter(function (p) { return p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + need(tot) <= cap; })
+      var to = lay.pals.filter(function (p) { return !p.tb && p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + need(tot) <= cap; })
         .sort(function (a, b) { return labBags(b) - labBags(a); })[0];
       if (to) to.rows.push({ k: m.k, zk: m.zk, kg: tot });
       else lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, rows: [{ k: m.k, zk: m.zk, kg: tot }] });
       return;
     }
     while (kg > 0) {
-      var u = need(kg), fit = lay.pals.filter(function (p) { return p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + u <= cap; })
+      var u = need(kg), fit = lay.pals.filter(function (p) { return !p.tb && p.zk === m.zk && p.rows.length < LAB_ROWS && !p.rows.some(function (r) { return r.k === m.k; }) && labBags(p) + u <= cap; })
         .sort(function (a, b) { return labBags(b) - labBags(a); })[0];
       if (fit) { fit.rows.push({ k: m.k, zk: m.zk, kg: kg }); return; }
       var t = Math.min(kg, cap * bag);
       lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, rows: [{ k: m.k, zk: m.zk, kg: t }] });
       kg -= t;
     }
+  }
+  /* SBR 소포장 한 줄을 통째로 다시 놓기 (2026-11-18): 15포 넘으면 톤백 포장(32포씩, 꽉 찬 것부터), 15포까지는 칼라칩 장에 */
+  function labSbrPut(lay, id, m) {
+    var bag = labBag();
+    lay.pals.forEach(function (p) { p.rows = p.rows.filter(function (r) { return r.zk + '#' + r.k !== id; }); });
+    lay.pals = lay.pals.filter(function (p) { return p.rows.length; });
+    if (Math.ceil(m.kg / bag) <= TB_MIX) { labPlace(lay, m, m.kg); return; }
+    for (var left = m.kg; left > 0; left -= TB_BAGS * bag) lay.pals.push({ zk: m.zk, z: m.z, cust: null, ztx: null, tb: true, rows: [{ k: m.k, zk: m.zk, kg: Math.min(left, TB_BAGS * bag) }] });
   }
   /* 같은 색은 한 장에 (2026-11-17 17:48 지시: "같은색상은 다른파레트에 쌓지마라. 같은색상은 같은색상끼리 다 싸라 … 40포면 40포 다 한꺼번에 한파레트에")
      전에 저장한 물표에서 한 장에 다 들어가는 색이 여러 장에 나뉘어 있으면 한 장으로 모음:
@@ -2537,7 +2623,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     lay.pals.forEach(function (p) { p.rows.forEach(function (r) { var id = r.zk + '#' + r.k; if (!by[id]) { by[id] = []; order.push(id); } by[id].push({ p: p, r: r }); }); });
     order.forEach(function (id) {
       var xs = by[id];
-      if (xs.length < 2) return;
+      if (xs.length < 2 || /^타이어 고무분말\|/.test(xs[0].r.k)) return;
       var tot = xs.reduce(function (s, x) { return s + x.r.kg; }, 0);
       if (need(tot) > cap) return;
       xs.sort(function (a, b) { return b.r.kg - a.r.kg; });
@@ -2568,6 +2654,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     Object.keys(cur.map).forEach(function (id) {
       var m = cur.map[id], d = m.kg - (have[id] || 0);
       if (!d) return;
+      if (isSbr(m.prod)) { labSbrPut(lay, id, m); notes.push(labNm(m.k) + ' ' + labQU(Math.abs(d)) + (d > 0 ? ' 더함' : ' 뺌')); return; }
       if (d > 0) { labPlace(lay, m, d); notes.push(labNm(m.k) + ' ' + labQU(d) + ' 더함'); return; }
       var cut = -d, rs = [];
       lay.pals.forEach(function (p) { p.rows.forEach(function (r) { if (r.zk + '#' + r.k === id) rs.push(r); }); });
@@ -2582,7 +2669,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labPagesOf(lay) {
     var cur = labCur();
     return lay.pals.map(function (p) {
-      return { zone: zoneShow(p.ztx != null ? p.ztx : p.z), cust: p.cust, rows: p.rows.slice().sort(function (a, b) {
+      return { zone: zoneShow(p.ztx != null ? p.ztx : p.z), cust: p.cust, tb: !!p.tb, rows: p.rows.slice().sort(function (a, b) {
         var ma = cur.map[a.zk + '#' + a.k], mb = cur.map[b.zk + '#' + b.k];
         return (ma ? ma.ord : 9999) - (mb ? mb.ord : 9999);
       }).map(function (r) { var q = String(r.k).split('|'); return { l: { prod: q[0], color: q.slice(1).join('|') }, kg: r.kg }; }) };
@@ -2715,8 +2802,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labPal(n) { return S.lab.lay.pals[n - 1]; }
   function labRowOf(p, k) { return p ? p.rows.filter(function (r) { return r.k === k; })[0] : null; }
   function labDesc(n) { var p = labPal(n); return p ? n + '번 ' + fmt(labBags(p)) + '포' : ''; }
-  function labOver(n) { var p = labPal(n); return p && labBags(p) > labCapNow() ? ' — 최대 ' + labCapNow() + '포를 넘습니다' : ''; }
-  function labNewPal(from) { S.lab.lay.pals.push({ zk: from ? from.zk : '', z: from ? from.z : '', cust: from ? from.cust : null, ztx: from ? from.ztx : null, rows: [] }); return S.lab.lay.pals.length; }
+  function labOver(n) { var p = labPal(n); return p && labBags(p) > labCapOf(p) ? ' — 최대 ' + labCapOf(p) + '포를 넘습니다' : ''; }
+  function labNewPal(from) {
+    var p = { zk: from ? from.zk : '', z: from ? from.z : '', cust: from ? from.cust : null, ztx: from ? from.ztx : null, rows: [] };
+    if (from && from.tb) p.tb = true;
+    S.lab.lay.pals.push(p);
+    return S.lab.lay.pals.length;
+  }
   function labTidy() {
     var y = S.lab.lay;
     y.pals.forEach(function (p) { p.rows = p.rows.filter(function (r) { return r.kg > 0; }); });
@@ -2787,7 +2879,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (cur.length) groups.push(cur);
     }
     if (!groups || groups.length < 2) return 0;
-    var add = groups.slice(1).map(function (rows) { return { zk: p.zk, z: p.z, cust: p.cust, ztx: p.ztx, rows: rows }; });
+    var add = groups.slice(1).map(function (rows) { var q = { zk: p.zk, z: p.z, cust: p.cust, ztx: p.ztx, rows: rows }; if (p.tb) q.tb = true; return q; });
     p.rows = groups[0];
     Array.prototype.splice.apply(S.lab.lay.pals, [n, 0].concat(add));
     return groups.length;
@@ -3076,6 +3168,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function labHalf(n) {
     labPalAct(n, function () { var c = labSplit(n, 2); return c ? n + '번을 둘로 나눴습니다: ' + labDesc(n) + ' · ' + labDesc(n + 1) + '.' : n + '번은 더 나눌 수 없습니다.'; });
   }
+  function labTbPal(n) {   // SBR 장: 톤백 포장(최대 32포 · 물표에 '톤백 포장') ↔ 파렛트
+    labPalAct(n, function (p) {
+      if (p.tb) delete p.tb; else p.tb = true;
+      return n + '번을 ' + (p.tb ? '톤백 포장(최대 ' + TB_BAGS + '포)으로' : '파렛트로') + ' 바꿨습니다.' + labOver(n);
+    });
+  }
   function labDelPal(n) {
     labPalAct(n, function (p) { var k = labKgOf(p); p.rows = []; return n + '번 파렛트를 지웠습니다(' + labQU(k) + '가 물표에서 빠짐, 주문은 그대로). 되돌리려면 “취소”.'; });
   }
@@ -3213,6 +3311,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         '<td>' + sm.u(o.want) + '</td><td>' + sm.u(o.got) + '</td><td class="lost">' + st + '</td></tr>';
     });
     h += '</tbody><tfoot><tr><th>합계</th><td>' + sm.u(sm.want) + '</td><td>' + sm.u(sm.got) + '</td><td>' + (sm.ok ? '✓' : sm.got < sm.want ? sm.u(sm.want - sm.got) + ' 남음' : sm.u(sm.got - sm.want) + ' 넘침') + '</td></tr></tfoot></table>';
+    var tons = labTons();
+    if (tons.length) h += '<p class="lotb"><b>톤백 · 물표 없음</b> ' + tons.map(function (x) { return esc(labNm(x.k)) + ' ' + fmt(x.kg) + ' kg = ' + esc(tbText(x.kg)); }).join(' · ') + '<br><small>확정은 출고 달력에서 하면 재고에서 빠집니다.</small></p>';
     if (!sm.ok) h += '<p class="hint">남은 것은 ‘넣을 곳’을 고르거나 파렛트의 ‘줄 넣기’로 넣고, 넘친 것은 그 줄의 포 수를 줄이세요. <button type="button" class="link" data-act="labfit"' + (busy ? ' disabled' : '') + '>주문대로 맞추기</button></p>';
     return h + '</section>';
   }
@@ -3228,11 +3328,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return h;
   }
   function labPalCard(p, i, page, N) {
-    var L = S.lab, lay = L.lay, cap = labCapNow(), busy = L.loading, n = i + 1;
+    var L = S.lab, lay = L.lay, cap = labCapOf(p), busy = L.loading, n = i + 1;
     var bags = labBags(p), kg = labKgOf(p), zt = zoneShow(p.ztx != null ? p.ztx : p.z), mixZ = p.rows.some(function (r) { return r.zk !== p.zk; });
     var dis = busy ? ' disabled' : '';
     var h = '<section class="card lpal' + (bags > cap ? ' over' : '') + '" id="lpal-' + n + '"><div class="lph"><b class="lpn">' + n + '번</b>' + (zt ? '<span class="lpz">' + esc(zt) + '</span>' : '') +
-      '<span class="lpq">' + fmt(bags) + '포 · ' + fmt(kg) + ' kg</span>' + (bags > cap ? '<b class="bad">최대 ' + cap + '포 넘음</b>' : '') + (mixZ ? '<b class="bad">구분 섞임</b>' : '') + '</div>' +
+      '<span class="lpq">' + fmt(bags) + '포 · ' + fmt(kg) + ' kg</span>' + (p.tb ? '<span class="lpz">톤백 포장 · 최대 ' + TB_BAGS + '포</span>' : '') + (bags > cap ? '<b class="bad">최대 ' + cap + '포 넘음</b>' : '') + (mixZ ? '<b class="bad">구분 섞임</b>' : '') + '</div>' +
       '<div class="lpbody"><div class="lped"><ul class="lrows">';
     p.rows.forEach(function (r) {
       var q = r.k.split('|'), v = n + '|' + r.k, odd = r.kg % labBag(), unit = odd ? 'kg' : '포', val = odd ? r.kg : r.kg / labBag(), nm = labNm(r.k);
@@ -3254,6 +3354,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '<div class="lpb">' + (lay.pals.length > 1 ? '<select class="lmove" data-ch="labmerge" data-v="' + n + '" aria-label="' + n + '번에 합치기"' + dis + '><option value="">다른 장 합치기</option>' +
         lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">' + (j + 1) + '번을 여기로</option>'; }).join('') + '</select>' : '') +
       (bags >= 2 ? '<button type="button" class="ghost sm" data-act="labhalf" data-v="' + n + '"' + dis + '>둘로 나누기</button>' : '') +
+      (p.rows.length && p.rows.every(function (r) { return /^타이어 고무분말\|/.test(r.k); }) ? '<button type="button" class="ghost sm" data-act="labtb" data-v="' + n + '" aria-pressed="' + !!p.tb + '"' + dis + '>' + (p.tb ? '톤백 포장 끄기' : '톤백 포장으로') + '</button>' : '') +
       '<button type="button" class="ghost sm" data-act="labdel" data-v="' + n + '"' + dis + '>이 장 지우기</button></div></div>' +
       '<div class="lpprev" aria-label="' + n + '번 물표 미리보기">' + labelPage(page, n, N) + '</div></div></section>';
     return h;
@@ -3565,10 +3666,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return zs;
   }
+  /* SBR 톤백 줄(물표 없음)의 톤백 개수 (2026-11-18) */
+  function poTbN(lines) { return lines.reduce(function (s, l) { return s + (l.prod && isSbr(l.prod) && l.pack !== 'small' ? tbCount(l.kg || 0) : 0); }, 0); }
+  function poTbTxt(lines) { var n = poTbN(lines); return n ? ' · 톤백 ' + n + '개(물표 없음)' : ''; }
   function poPallets(lines) {
     var cap = labCap(), bag = labBag();
     return lines.filter(function (l) { return l.prod && l.kg > 0; }).length ? poZones(lines).reduce(function (s, g) {
-      return s + labPack(g.lines.filter(function (x) { return x.l.prod; }).map(function (x) { return { kg: x.l.kg, prod: x.l.prod, color: x.l.color }; }), cap, bag).length;
+      return s + labPack(g.lines.filter(function (x) { return x.l.prod && !(isSbr(x.l.prod) && x.l.pack !== 'small'); }).map(function (x) { return { kg: x.l.kg, prod: x.l.prod, color: x.l.color }; }), cap, bag).length;
     }, 0) : 0;
   }
   function poZoneName(z) { return z ? zoneShow(z) : '구분 없음'; }   // 1 · 놀이터1 → 놀이터 1 (label_views.js zoneShow)
@@ -3604,7 +3708,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var kg = lines.reduce(function (s, l) { return s + l.kg; }, 0), pal = poPallets(lines);
     var h = '<section class="card poshow" role="status"><div class="podh"><b>' + ICON.check + ' 발주서를 넣었습니다</b><button type="button" class="link" data-act="poshowx">닫기</button></div>' +
       '<p class="pobig">' + esc(plan.date ? fmtDate(plan.date) : '') + ' · ' + esc(plan.cust || '') + (plan.site ? ' · ' + esc(plan.site) : '') + '</p>' +
-      '<p>' + lines.length + '줄 · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + (it.result && /바꿈/.test(it.result) ? ' · 기존 예정을 이 발주서 내용으로 바꿨습니다' : '') + '</p>';
+      '<p>' + lines.length + '줄 · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + poTbTxt(lines) + (it.result && /바꿈/.test(it.result) ? ' · 기존 예정을 이 발주서 내용으로 바꿨습니다' : '') + '</p>';
     var zs = poZones(lines).filter(function (g) { return g.zone; });
     if (zs.length) h += '<p class="pozs">' + zs.map(function (g) { return '<span>' + esc(poZoneName(g.zone)) + ' ' + g.lines.length + '줄 ' + fmt(g.lines.reduce(function (s, x) { return s + x.l.kg; }, 0)) + ' kg</span>'; }).join('') + '</p>';
     if (X.notes && X.notes.length) h += '<ul class="poiss info">' + X.notes.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
@@ -3893,7 +3997,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function poPlanOut(p) {
     return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', mode: p.mode === 'replace' ? 'replace' : 'add',
       remove: p.mode === 'replace' ? (p.remove || []) : [],
-      lines: p.lines.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '' }; }) };
+      lines: p.lines.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '', pack: l.pack || '' }; }) };
   }
   function poRevView() {
     var V = S.poRev;
@@ -3948,7 +4052,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (p.mode !== 'skip') {
       var kg = p.lines.reduce(function (s, l) { return s + (l.kg || 0); }, 0), pal = poPallets(p.lines);
       var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
-      h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장</small></h2>';
+      h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + poTbTxt(p.lines) + '</small></h2>';
       if (!p.lines.length) h += '<p class="bad">읽은 품목 줄이 없습니다. ‘직접 넣기’로 넣어 주세요.</p>';
       if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추를 누르면 일반 EPDM · NM-CHIP · 락칩으로 바뀝니다. 같은 색은 한 제품으로만 나가므로 같은 색 줄은 함께 바뀝니다. 현재고 = 지금 있는 양 · 그날 = 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg.</p>';
       var pmx = poMixList(p);
@@ -4044,6 +4148,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return x.po ? '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(mx.join(', ')) + ' — 같은 색은 한 제품으로만 나갑니다. 줄을 눌러 제품을 맞추세요(같은 현장의 같은 색 줄이 함께 바뀝니다).</p>'
       : '<p class="mixw warn">같은 색이 다른 제품으로 있습니다: ' + esc(mx.join(', ')) + ' — 현장 칸이 비어 같은 현장인지 모릅니다. 같은 현장이면 섞여 나가니 맞추고, 다른 현장이면 줄을 눌러 ‘발주번호·현장’에 현장명을 적어 주세요.</p>';
   }
+  /* SBR 포장 고르기: [톤백 · 물표 없음] [소포장 · 물표] — o = { cur: 'ton'|'small', kg, act, i } (2026-11-18) */
+  function packPick(o) {
+    var b = function (v, name, sub) {
+      var on = o.cur === v;
+      return '<button type="button" class="pp' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-act="' + o.act + '"' + (o.i != null ? ' data-i="' + esc(String(o.i)) + '"' : '') +
+        ' data-v="' + v + '"><b>' + name + '</b><small>' + esc(sub) + '</small></button>';
+    };
+    return '<div class="ppick pk2" role="radiogroup" aria-label="포장">' + b('ton', '톤백 · 물표 없음', tbText(o.kg)) + b('small', '소포장 · 물표', tbSmallText(o.kg, 25)) + '</div>';
+  }
   /* o = { prods, cur(고른 제품), color, date, kg, act, i, skip, own: {prod, before}(고치는 줄의 지금 제품과 그날 재고) } */
   function prodPick(o) {
     var h = '<div class="ppick" role="radiogroup" aria-label="' + esc(o.color) + ' 제품 바꾸기">';
@@ -4066,6 +4179,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 고르기') + '</b> <b>' + esc(l.color) + '</b>' +
       '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
     h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
+    if (isSbr(l.prod)) h += packPick({ cur: l.pack === 'small' ? 'small' : 'ton', kg: l.kg, act: 'popack', i: i });   // SBR 톤백 · 소포장 (2026-11-18)
     if (cands.length > 1) {
       var skip = {};
       if (V.plan.mode === 'replace') (V.plan.remove || []).forEach(function (id) { skip[id] = true; });
@@ -4314,7 +4428,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function dayRow(r) {
     var plan = isPlan(r.type), sub = esc(r.cust || (r.type === '생산예정' ? '' : '거래처 없음'));
     if (r.po) sub += (sub ? ' · ' : '') + esc(r.po);
-    if (r.memo) sub += (sub ? ' · ' : '') + esc(r.memo);
+    var pk = isSale(r.type) ? packOf(r) : '', memo = pk ? packTag(r.memo, '') : r.memo;   // SBR 포장 (2026-11-18)
+    if (memo) sub += (sub ? ' · ' : '') + esc(memo);
+    if (pk) sub += '</small><small class="dtb">' + (pk === 'ton' ? esc(tbText(r.qty)) + ' · 물표 없음' : '소포장 ' + esc(tbSmallText(r.qty, labBag())));
     var right = '<b>' + (r.type === '생산예정' ? '+' : '') + fmt(r.qty) + ' kg</b>';
     if (!plan && S.money && r.price) right += '<small>' + fmt(r.price) + '원/kg</small>';
     if (r.type === '출고예정') right += r.short > 0 ? '<small class="bad">부족 ' + fmt(r.short) + ' kg</small>' : '<small class="ok">남음 ' + fmt(Math.max(r.after, 0)) + ' kg</small>';
@@ -4480,6 +4596,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '"><span class="pamt" id="pamt-' + gid + '">' + esc(amtText(pk, kg)) + '</span></div>';
   }
 
+  /* 직접 넣기의 SBR 포장 — 수량 칸(S.qty)이 새로 비워지면 함께 처음(톤백)으로 (2026-11-18) */
+  function inPackOf(k) { return S.inPackFor === S.qty && S.inPack && S.inPack[k] === 'small' ? 'small' : 'ton'; }
+  function inPackSet(k, v) { if (S.inPackFor !== S.qty) { S.inPack = {}; S.inPackFor = S.qty; } S.inPack[k] = v; }
   function sheetReview() {
     var t = S.inType, sale = isSale(t), date = curDate(), ls = validLines(), tot = 0, over = 0, worse = 0;
     var P = project(ls.map(function (l) { return { type: t, prod: l.it.prod, color: l.it.color, qty: l.qty, date: date }; }));
@@ -4518,7 +4637,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         if (l.qty < 0) { note = '재고에서 뺌 · 지금 ' + fmt(stockOf(k)) + ' kg → ' + fmt(stockOf(k) + l.qty) + ' kg'; cls = 'minusn'; }
         h += '<li class="cfrow"><span class="cfname">' + sw(l.it.color, l.it.prod) + esc(l.it.color) + '</span>' +
           (l.qty < 0 ? '<b class="minusv">−' + fmt(-l.qty) + ' kg</b>' : '<b>' + fmt(l.qty) + ' kg</b>') +
-          (note ? '<small class="' + cls + '">' + esc(note) + '</small>' : '') + '</li>';
+          (note ? '<small class="' + cls + '">' + esc(note) + '</small>' : '') +
+          (sale && l.qty > 0 && isSbr(l.it.prod) ? '<div class="cfpk">' + packPick({ cur: inPackOf(k), kg: l.qty, act: 'inpack', i: k }) + '</div>' : '') + '</li>';
       });
       h += '</ul>';
       // 규격·종류마다 단가가 달라서 줄마다 받습니다 (예: 고무분말 5-7mm와 2-3mm)
@@ -4566,7 +4686,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       renderSheet();
       var qz = zoneName(), qc = S.inCust.trim();
       call('apiQueueAdd', { cust: qc, site: S.inPo.trim(), memo: S.inMemo.trim(),
-        lines: ls.map(function (l) { return { zone: qz, prod: l.it.prod, color: l.it.color, kg: l.qty, price: cleanNum(S.price[pkeyOf(l.it)]) }; }) }).then(function (r) {
+        lines: ls.map(function (l) { return { zone: qz, prod: l.it.prod, color: l.it.color, kg: l.qty, price: cleanNum(S.price[pkeyOf(l.it)]), pack: isSbr(l.it.prod) ? inPackOf(l.it.key) : '' }; }) }).then(function (r) {
         S.busy = false;
         if (r && r.item) poListPut(r.item);
         S.qty = {}; S.inMemo = ''; S.price = {}; S.inCust = ''; S.inPo = ''; S.sheet = null; S.pick = null;
@@ -4591,7 +4711,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     renderSheet();
     call('apiSave', {
       type: type, date: curDate(), cust: sale ? S.inCust.trim() : '', memo: memoOut(type), po: type === '출고예정' ? S.inPo.trim() : '',
-      lines: ls.map(function (l) { return { prod: l.it.prod, color: l.it.color, qty: l.qty, price: sale ? cleanNum(S.price[pkeyOf(l.it)]) : '' }; })
+      lines: ls.map(function (l) { return { prod: l.it.prod, color: l.it.color, qty: l.qty, price: sale ? cleanNum(S.price[pkeyOf(l.it)]) : '', pack: sale && isSbr(l.it.prod) ? inPackOf(l.it.key) : '' }; })
     }).then(function (r) {
       S.busy = false;
       if (!isAdminResp(r)) { savedLocked(type, n, tot, ls, r); return; }
@@ -5442,6 +5562,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += '<label class="label" for="ed-po">발주번호·현장 (선택)</label><input id="ed-po" class="text" type="text" autocomplete="off" maxlength="60" data-ed="po" value="' + esc(d.po) + '">';
       h += '<label class="label" for="ed-price">단가 (원/kg, 선택)</label><input id="ed-price" class="text" type="text" inputmode="numeric" autocomplete="off" data-ed="price" value="' + esc(d.price) + '" placeholder="비우면 기준 단가로 추정">';
     }
+    if (isSale(d.type) && isSbr(d.prod)) h += '<span class="label">포장</span>' + packPick({ cur: packOf({ prod: d.prod, memo: d.memo }), kg: Number(String(d.qty).replace(/[,\s]/g, '')) || 0, act: 'edpack' }) +
+      '<p class="hint">톤백은 물표 없이 나가고, 나간 날 ‘확정’만 누르면 재고에서 빠집니다. 소포장은 물표가 나옵니다(15포까지는 칼라칩 파렛트에 같이, 넘으면 톤백 포장 32포씩).</p>';
     h += '<label class="label" for="ed-memo">메모</label><input id="ed-memo" class="text" type="text" maxlength="200" data-ed="memo" value="' + esc(d.memo) + '">';
     h += '</div><div class="two mt16"><button type="button" class="ghost" data-act="close">취소</button>' +
       '<button type="button" class="primary" data-act="edsave"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : '저장') + '</button></div>';
@@ -5466,6 +5588,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.busy = true;
     renderSheet();
     var body = { date: d.date, type: d.type, prod: d.prod, color: d.color, qty: q, cust: String(d.cust).trim(), memo: String(d.memo).trim() };
+    if (!(isSale(d.type) && isSbr(d.prod))) body.memo = packTag(body.memo, '');   // 포장 표시는 SBR 출고에만
     if (isSale(d.type)) { body.price = pr; body.po = String(d.po || '').trim(); }
     call('apiUpdate', S.sheet.id, body)
       .then(function (r) {
@@ -5611,6 +5734,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         if (ppl && v) S.poRev.plan.lines.forEach(function (x) { if (x.color === ppl.color && x.prod !== v && prodCands(x.prod, x.color).indexOf(v) >= 0) { x.prod = v; x.how = 'pick'; nchg++; } });
         if (nchg) poResim();
       } return;
+      case 'popack': if (S.poRev && (v === 'ton' || v === 'small')) { var pkl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))]; if (pkl) { pkl.pack = v; render(); } } return;
       case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
       case 'poqopen': poWaitOpen(v); return;
       case 'poqsave': poWaitSave(); return;
@@ -5674,6 +5798,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'labminus': labStep(v, -1); return;
       case 'labplus': labStep(v, 1); return;
       case 'labhalf': labHalf(Number(v)); return;
+      case 'labtb': labTbPal(Number(v)); return;
       case 'labdel': labDelPal(Number(v)); return;
       case 'labundo': if (S.lab && S.lab.lay && !S.lab.loading) labUndo(); return;
       case 'labreset': if (S.lab && S.lab.lay && !S.lab.loading) labReset(); return;
@@ -5716,6 +5841,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'edit': openEdit(v); return;
       case 'edtype': S.sheet.draft.type = v; renderSheet(); return;
       case 'edprod': if (S.sheet && S.sheet.kind === 'edit' && v) { S.sheet.draft.prod = v; renderSheet(); } return;
+      case 'edpack': if (S.sheet && S.sheet.kind === 'edit' && (v === 'ton' || v === 'small')) { S.sheet.draft.memo = packTag(S.sheet.draft.memo, v); renderSheet(); } return;
+      case 'inpack': if (v === 'ton' || v === 'small') { inPackSet(el.getAttribute('data-i'), v); renderSheet(); } return;
       case 'edsave': editSave(); return;
       case 'eddel': editDelete(); return;
       case 'mprev': if (S.ym > S.firstYm) { S.ym = addMonths(S.ym, -1); S.custOpen = null; render(); } return;
