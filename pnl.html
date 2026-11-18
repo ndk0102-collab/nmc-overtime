@@ -160,12 +160,9 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
 @page{size:A4;margin:10mm} @media print{body *{visibility:hidden} #reportBody,#reportBody *{visibility:visible} #reportBody{position:absolute;left:0;top:0;box-shadow:none;padding:0;max-width:none;min-width:0}}
 .login{max-width:420px;margin:40px auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
 .login h1{font-size:24px;margin:0 0 6px}
-.login .hint{word-break:keep-all}
 .login form{display:flex;gap:8px;margin-top:14px}
 .login input{flex:1;min-width:0;min-height:46px;border:1px solid var(--line);border-radius:8px;padding:0 12px;font-size:16px}
 .login .err{color:var(--bad);font-weight:700}
-.login .back{margin:16px 0 0;font-size:14px}
-.login .back a{color:var(--accent);font-weight:700;text-decoration:none}
 .hidden{position:absolute;left:-9999px}
 #app[hidden],[hidden]{display:none!important}
 </style>
@@ -180,7 +177,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     <button class="btn" type="submit">들어가기</button>
   </form>
   <p class="err" id="loginErr" role="alert"></p>
-  <p class="hint back"><a href="./">← 홈 (첫 화면)</a></p>
+  <p class="hint"><a href="./index.html">잔업 앱으로</a> · <a href="./stock.html">재고</a></p>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -190,7 +187,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       <p class="sub">판매량은 재고 출고 기록에서, 인건비는 급여대장에서 가져옵니다. 금액은 모두 부가세를 뺀 공급가입니다.</p>
     </div>
     <nav class="nav" aria-label="다른 화면">
-      <a href="./" aria-label="홈 (첫 화면)"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>홈</a><button type="button" id="logoutBtn">로그아웃</button>
+      <a href="./admin.html">잔업·급여</a><a href="./stock.html">재고</a><button type="button" id="logoutBtn">로그아웃</button>
     </nav>
   </header>
   <div class="controls">
@@ -317,9 +314,9 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   var ITEMS = [
     { k: 'nm', g: 'EPDM 칩', name: 'EPDM 칩 (일반·NM·KS·재생)' },
     { k: 'lok', g: 'EPDM 칩', name: '락칩 (LOK-CHIP)' },
-    { k: 's57', g: '폐타이어', name: '타이어 고무분말 5-7mm' },
-    { k: 's23', g: '폐타이어', name: '타이어 고무분말 2-3mm' },
-    { k: 's12', g: '폐타이어', name: '타이어 고무분말 1-2mm' },
+    { k: 's57', g: '폐타이어', name: 'SBR 고무분말 5-7mm' },
+    { k: 's23', g: '폐타이어', name: 'SBR 고무분말 2-3mm' },
+    { k: 's12', g: '폐타이어', name: 'SBR 고무분말 1-2mm' },
     { k: 'mibun', g: '폐타이어', name: '미분' },
     { k: 'cord', g: '폐타이어', name: '타이어 코드' },
     { k: 'bead', g: '폐타이어', name: '타이어 비드' },
