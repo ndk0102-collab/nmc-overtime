@@ -358,7 +358,9 @@ body.labmode .wrap{max-width:1480px}
 @keyframes poflash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px var(--accent-soft),0 0 0 6px var(--accent)}}
 .postat{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:10px 2px 0;font-size:14.5px;font-weight:700;color:var(--ink2)}
 .postat .bad{color:var(--bad)}
-.pomanual{display:block;margin:10px 2px 0;font-size:14.5px}
+.pomanual{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 2px 0;font-size:14.5px}
+.dgm{margin:4px 10px 0;font-size:13px;color:var(--muted);word-break:keep-all}
+.labsetb{display:block;width:100%;margin:10px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink2);font:inherit;font-size:14px;font-weight:700;text-align:left;cursor:pointer}
 .podrop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;min-height:118px;padding:16px 14px;border:3px dashed var(--accent);border-radius:16px;background:var(--accent-soft);color:var(--accent-strong);font:inherit;text-align:center;cursor:pointer}
 .podrop svg{width:34px;height:34px}
 .podrop b{font-size:20px;font-weight:800;line-height:1.35}
@@ -1900,12 +1902,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return order.map(function (k) {
       var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음');
+      var m0 = rowMemo(x.rows[0]), same = x.rows.length > 1 && m0 && x.rows.every(function (r) { return rowMemo(r) === m0; }) ? m0 : '';
       return '<div class="dgrp"><div class="dgh"><span><b>' + esc(name) + '</b>' + (x.po ? ' · ' + esc(x.po) : '') + ' · ' + x.rows.length + '줄 · ' + fmt(x.kg) + ' kg</span>' +
         (S.admin ? '<span class="dgb">' + (isPlan(x.type) && x.rows.length > 1 ? '<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">전체 확정</button>' : '') +
           (x.type === '생산예정' ? '' : x.rows.every(function (r) { return packOf(r) === 'ton'; }) ? '<span class="dgtb">톤백 · 물표 없음</span>' :
             '<button type="button" class="ghost sm" data-act="labopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">물표</button>') +
           '<button type="button" class="ghost sm" data-act="mvopen" data-v="' + esc(x.rows.map(function (r) { return r.id; }).join(',')) + '">날짜 바꾸기</button></span>' : '') + '</div>' +
-        mixWarnHtml(x) + '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r); }).join('') + '</ul></div>';
+        (same ? '<p class="dgm">' + esc(same) + '</p>' : '') + mixWarnHtml(x) + '<ul class="dlist">' + x.rows.map(function (r) { return dayRow(r, !!same); }).join('') + '</ul></div>';
     }).join('');
   }
   function openMove(ids) {
@@ -2363,8 +2366,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         fmt(Math.max(x.after, 0)) + '</b></span>' : '<span class="muted">이미 나간 출고</span>') + '</div>' + w +
         (x.others.length ? '<p class="lsko">같은 색 다른 제품 현재고: ' + x.others.map(function (o) { return esc(PROD3_NAME[o.p] || o.p) + ' ' + fmt(o.cur); }).join(' · ') + '</p>' : '') + '</li>';
     });
-    return h + '</ul><p class="note">현재고 = 지금 창고에 있는 양 · 그날 = 이 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정·생산예정을 반영) · 출고 뒤 = 그날에서 이번 것을 뺀 양. ' +
-      '제품을 바꾸려면 출고 달력에서 그 줄을 눌러 ‘제품 바꾸기’(같은 현장의 같은 색 줄이 함께 바뀝니다).</p></section>';
+    return h + '</ul><p class="note">현재고 = 지금 창고 · 그날 = 이 출고 날짜에 쓸 수 있는 양 · 출고 뒤 = 그날 − 이번. 제품 바꾸기는 출고 달력에서 그 줄을 누르세요.</p></section>';
   }
   function labQty(kg) { var b = labBag(); return kg % b === 0 ? fmt(kg / b) : fmt(kg) + 'kg'; }
 
@@ -2509,15 +2511,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       (odd.length ? '' : ' (' + fmt(kg / bag) + '포)') + ' → <b>' + (npal || !tbs.length ? '파렛트 ' + npal + '장' : '') + (npal && tbs.length ? ' + ' : '') + (tbs.length ? '톤백 포장 ' + tbs.length + '개' : '') + '</b>' +
       (sizes.length ? ' · 한 장 ' + (lo === hi ? fmt(lo) : fmt(lo) + '~' + fmt(hi)) + '포' : '') + (tbs.length ? ' · 톤백 포장 ' + tbs.join('·') + '포' : '') +
       (zsum.length ? '<br>따로 싣기: ' + zsum.join(' · ') : '') + labTonLine() + '</p>' + labStockLine() +
-      '<div class="labset"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
+      '<div class="labset ls2"><div><label class="label" for="lab-site">현장명</label><input id="lab-site" class="text" type="text" maxlength="60" autocomplete="off" data-in="labsite" value="' + esc(lab.site) + '" placeholder="현장명을 넣으면 물표에 찍힙니다"></div>' +
       '<div><label class="label" for="lab-date">물표 날짜</label><input id="lab-date" class="text" type="date" data-ch="labdate" value="' + esc(day) + '"></div>' +
-      '<div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
-      '<div><p class="label">파렛트 1장 최대 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
-      '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 최대 포대 수">' +
-      '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button><span>포 = ' + fmt(cap * bag) + ' kg</span></div></div></div>' +
-      '<p class="note">같은 색은 한 장에 통째로 싣습니다 — 한 장에 들어가는 색은 장 수가 늘어도 쪼개지 않습니다(최대 ' + cap + '포보다 많은 색만 같은 크기로 나눔). 한 장에 10가지까지, 놀이터 1·놀이터 2 같은 구분은 따로 싣습니다. ' +
-      '최대 포를 바꾸면 처음부터 다시 나눕니다. 발주목록에서 물표에 다 들어갔는지 보면서 파렛트마다 포 수를 직접 쓰거나 옮기세요. 고친 것은 저장되어 다른 기기에서도 같게 나옵니다.' +
-      (odd.length ? ' 한 포 무게로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
+      '</div><button type="button" class="labsetb" data-act="labset" aria-expanded="' + !!lab.setOpen + '">포대 설정 · 한 포 ' + bag + ' kg · 파렛트 최대 ' + cap + '포 <span aria-hidden="true">' + (lab.setOpen ? '▴' : '▾') + '</span></button>' +
+      (lab.setOpen ? '<div class="labset"><div><p class="label">한 포 무게</p><div class="labcap"><input id="lab-bag" class="text" type="text" inputmode="numeric" data-ch="labbag" value="' + bag + '" aria-label="한 포 무게(kg)"><span>kg</span></div></div>' +
+        '<div><p class="label">파렛트 1장 최대 포대</p><div class="labcap"><button type="button" class="ghost" data-act="labcap" data-v="-1" aria-label="한 포 줄이기">−</button>' +
+        '<input id="lab-cap" class="text" type="text" inputmode="numeric" data-ch="labcap" value="' + cap + '" aria-label="파렛트 1장 최대 포대 수">' +
+        '<button type="button" class="ghost" data-act="labcap" data-v="1" aria-label="한 포 늘리기">+</button><span>포 = ' + fmt(cap * bag) + ' kg</span></div></div></div>' +
+        '<p class="note">최대 포를 바꾸면 처음부터 다시 나눕니다.</p>' : '') +
+      '<p class="note">같은 색은 한 장에 통째로 · 한 장에 10가지까지 · 놀이터 구분은 따로 싣습니다. 고친 것은 저장되어 다른 기기에서도 같습니다.' +
+      (odd.length ? ' 포로 나누어떨어지지 않는 양은 kg으로 적었습니다.' : '') + '</p>' +
       (noCode.length ? '<p class="warnbox mt12">코드표에 없어 품번 칸에 제품 이름을 적은 것: ' + noCode.map(function (l) { return esc(l.prod + ' ' + l.color); }).join(', ') + '.</p>' : '') +
       '<button type="button" class="primary wide mt12" data-act="labprint"' + (plan.length ? '' : ' disabled') + '>물표 ' + plan.length + '장 인쇄하기</button></section>' +
       labStrip() +
@@ -3324,7 +3327,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       (labMicOk() ? '<button type="button" class="ghost labmic' + (L.mic ? ' on' : '') + '" data-act="labmic" aria-label="말로 하기"' + (busy ? ' disabled' : '') + '>' + (L.mic ? '듣는 중' : '🎤') + '</button>' : '') +
       '<button type="button" class="primary labgo" data-act="labcmd"' + (busy ? ' disabled' : '') + '>고치기</button></div>' +
       '<div class="labegs">' + LAB_EG.map(function (x) { return '<button type="button" class="ghost sm" data-act="labeg" data-v="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>' +
-      '<p class="note">돈 드는 AI가 아니라 이 화면 안의 규칙으로 알아듣습니다(무료). 못 알아들으면 쓸 수 있는 말을 보여 드립니다. 🎤는 크롬(안드로이드·PC)의 음성 인식을 씁니다.</p></section>';
+      '<p class="note">무료 — 이 화면 안의 규칙으로 알아듣고, 못 알아들으면 쓸 수 있는 말을 보여 드립니다.</p></section>';
     return h;
   }
   function labPalCard(p, i, page, N) {
@@ -3345,6 +3348,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         lay.pals.map(function (x, j) { return j === i ? '' : '<option value="' + (j + 1) + '">' + (j + 1) + '번</option>'; }).join('') + '<option value="new">새 파렛트</option></select></div></li>';
     });
     var a = (L.add && L.add[n]) || {}, ord = labOrder().filter(function (o) { return !o.extra; });
+    if (!L.tools) return h + '</ul></div><div class="lpprev" aria-label="' + n + '번 물표 미리보기">' + labelPage(page, n, N) + '</div></div></section>';   // 더 고치기 접힘 (2026-11-18 전체 검토)
     h += '</ul><div class="lpadd"><span class="lpaddt">＋ 줄 넣기</span><select class="lmove" data-ch="labaddk" data-v="' + n + '" aria-label="' + n + '번에 넣을 품목"' + dis + '><option value="">품목</option>' +
       ord.map(function (o) { var rest = o.want - o.got; return '<option value="' + esc(o.id) + '"' + (a.id === o.id ? ' selected' : '') + '>' + esc((o.z ? zoneShow(o.z) + ' · ' : '') + labNm(o.k) + (rest > 0 ? ' (남음 ' + labQU(rest) + ')' : '')) + '</option>'; }).join('') + '</select>' +
       '<input class="text lmq" type="text" inputmode="numeric" autocomplete="off" data-in="labaddq" data-v="' + n + '" value="' + esc(a.q || '') + '" placeholder="포" aria-label="' + n + '번에 넣을 포 수 (비우면 남은 것 전부)"' + dis + '><span>포</span>' +
@@ -3364,9 +3368,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<section class="card labpals"><div class="podh"><h2 class="label">파렛트 고치기 <small>' + lay.pals.length + '장</small></h2>' +
       '<span class="muted labsave" id="labsave">' + labSaveText() + '</span></div>' +
       (L.loadErr ? '<p class="warnbox">저장해 둔 물표를 불러오지 못해 처음 계산대로 보여 드립니다. 고치면 새로 저장합니다.</p>' : '') +
-      '<p class="hint">포 수 칸에 직접 쓰고 Enter(또는 칸 밖을 누름). 일부만 옮기려면 ‘옮기기’에 포 수를 쓰고 갈 곳을 고르세요(비우면 그 줄 전부). 오른쪽(휴대폰은 아래)이 그 장의 물표입니다.</p>' +
+      '<p class="hint">포 수는 칸에 바로 쓰거나 −/+ · 일부만 옮기려면 ‘옮기기’에 포 수를 쓰고 갈 곳을 고르세요.</p>' +
       '<div class="two mt8"><button type="button" class="ghost" data-act="labundo"' + ((L.hist || []).length && !busy ? '' : ' disabled') + '>↶ 방금 고친 것 되돌리기</button>' +
-      '<button type="button" class="ghost" data-act="labreset"' + (busy ? ' disabled' : '') + '>처음 계산대로</button></div></section>';
+      '<button type="button" class="ghost" data-act="labreset"' + (busy ? ' disabled' : '') + '>처음 계산대로</button></div>' +
+      '<button type="button" class="ghost wide mt8" data-act="labtools" aria-expanded="' + !!L.tools + '">' + (L.tools ? '더 고치기 접기 ▴' : '더 고치기 ▾ (줄 넣기 · 비고 · 구분 · 합치기 · 나누기 · 지우기)') + '</button></section>';
     h += lay.pals.map(function (p, i) { return labPalCard(p, i, pages[i], pages.length); }).join('');
     return h;
   }
@@ -3426,7 +3431,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function viewIn() {
     var t = S.inType, plan = isPlan(t), sale = isSale(t);
     var h = '<div class="stack">';
-    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>전화 주문처럼 파일이 없을 때 1 → 4 순서로 넣고 확인을 누르세요. 발주서 파일은 출고 화면 맨 위 칸에 끌어다 놓으면 바로 읽어서 넣습니다.</small></p>' : '');
+    if (QUICK || S.allAdd) h += '<section class="card">' + (S.allAdd ? '<p class="addtitle">' + esc(S.allAdd) + ' 넣기</p>' : S.po ? '<p class="addtitle potitle">' + ICON_DOC + '<span>출고예정 직접 넣기</span><small>1 → 4 순서로 넣고 아래 ‘확인’.</small></p>' : '');
     else {
     h += '<section class="card"><h2 class="label" id="h-type">구분</h2><div role="radiogroup" aria-labelledby="h-type"><div class="seg">';
     ACT_TYPES.forEach(function (x) {
@@ -3481,10 +3486,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       '생산': '생산한 양을 ' + vl + '별로 넣으세요. 재고가 실제보다 많게 나오면 칸 왼쪽 − 를 누르고 뺄 양을 넣으세요(재고조정으로 저장).',
       '출고': '나간 양을 ' + vl + '별로 넣으세요.',
       '반입': '반입된 양을 ' + vl + '별로 넣으세요.',
-      '출고예정': '발주 받은 양을 ' + vl + '별로 넣으세요. 예정 화면에서 날짜별로 재고가 모자라는지 계산합니다. 실제로 나가는 날 \'확정\'을 누르면 출고가 됩니다.',
-      '생산예정': '생산 계획을 ' + vl + '별로 넣으세요. 예정 화면의 부족 계산에 들어갑니다. 생산이 끝나면 \'확정\'을 누르면 생산이 됩니다.'
+      '출고예정': '발주 받은 양을 ' + vl + '별로 넣으세요. 나가는 날 \'확정\'을 누르면 출고가 됩니다.',
+      '생산예정': '생산 계획을 ' + vl + '별로 넣으세요. 끝나면 \'확정\'을 누르면 생산이 됩니다.'
     }[t];
-    h += '<p class="hint">' + hint + ' 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p>';
+    h += '<p class="hint">' + hint + ' 빈 칸은 저장되지 않습니다.</p>';
     h += '<ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
@@ -3513,7 +3518,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       dateChips('indate', S.inDate, 'in-date') + '</section>';
     h += '<section class="card"><h2 class="label">제품별 생산 (kg)</h2>' + prodTabs('inprod', S.inProd, true);
     if (S.hasStock) h += '<p class="ptot" id="ptot">' + ptotHtml(S.inProd) + '</p>';
-    h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않고, 다른 제품 칸에 넣은 수량도 함께 저장됩니다.</p>' +
+    h += '<p class="hint">생산한 양을 ' + vlabel(S.inProd) + '별로 넣으세요. 빈 칸은 저장되지 않습니다.</p>' +
       '<p class="hint minushint"><b>재고가 실제보다 많게 나오면</b> 칸 왼쪽 <b>−</b> 를 누르고 뺄 양을 넣으세요. 예: 화면 1,000 kg · 실제 900 kg → <b>−100</b>. 재고조정으로 저장되고 생산에는 들어가지 않습니다.</p><ul class="qlist">';
     itemsOf(S.inProd).forEach(function (it) {
       var v = S.qty[it.key] || '';
@@ -3647,13 +3652,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       (busy ? '<span class="spinner sm" aria-hidden="true"></span><b>' + esc(busy) + '</b><small>올리고 · 글자로 바꾸고 · 읽고 · 재고 계산까지 합니다 (보통 10~30초)</small>'
         : ICON_DOC + '<b>' + (PO_TOUCH ? '눌러서 발주서 파일·사진 올리기' : '발주서 파일을 여기에 끌어다 놓으세요') + '</b>' +
           '<small>' + (PO_TOUCH ? 'PDF·엑셀·사진·카톡 캡처' : '또는 눌러서 고르기 · 카톡 캡처는 Ctrl+V로 붙여넣기 · PDF·엑셀·사진') + '</small>') +
-      '</button>' +
-      '<p class="pohint">놓으면 <b>바로 읽어서 출고예정으로 넣고</b>, 재고로 나갈 수 있는지 · 부족량 · 물표 장 수까지 바로 보여 줍니다. 애매한 것이 있으면 넣기 전에 확인 화면이 뜹니다.</p>';
+      '</button>';
     if (c.wait || c.bad) {
       h += '<p class="postat">' + (c.bad ? '<span class="bad">확인 필요 ' + c.bad + '건</span>' : '') + (c.wait ? '<span>아직 안 읽음 ' + c.wait + '건</span>' : '') +
         '<button type="button" class="link" data-act="pojump">받은 발주서 보기</button></p>';
     }
-    h += '<button type="button" class="link pomanual" data-act="poadd">파일 없이 직접 넣기 (전화 주문 등)</button></section>';
+    h += '<p class="pomanual"><button type="button" class="link" data-act="poadd">파일 없이 직접 넣기 (전화 주문)</button>' +
+      '<button type="button" class="link" data-act="poqadd">날짜 미정으로 넣기</button></p></section>';
     return h;
   }
   /* 물표 장 수: 구분마다 앱의 물표 나누기와 같은 계산 */
@@ -3726,8 +3731,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function poInbox() {
     var L = S.poList, h = '<section class="card poinbox" id="poinbox"><div class="podh"><h2 class="label">받은 발주서</h2>' +
       '<button type="button" class="link" data-act="polist"' + (S.poLoading ? ' disabled' : '') + '>새로고침</button></div>';
-    if (!L) return h + '<p class="muted">' + (S.poErr ? '불러오지 못했습니다. 새로고침을 눌러 주세요.' : '불러오는 중…') + '</p></section>';
-    if (!L.items.length) return h + '<p class="muted">아직 올린 발주서가 없습니다.</p></section>';
+    if (!L) return S.poErr ? h + '<p class="muted">불러오지 못했습니다. 새로고침을 눌러 주세요.</p></section>' : '';
+    if (!L.items.length) return '';
     var all = L.items, show = S.poMore ? all : all.slice(0, PO_SHOW);
     h += '<ul class="polist">';
     show.forEach(function (x) { h += poRow(x); });
@@ -3768,10 +3773,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function poWaitKg(w) { return ((w && w.lines) || []).reduce(function (s, l) { return s + (Number(l.kg) || 0); }, 0); }
   function poQueueCard() {
     var L = S.poList, W = (L && L.wait) || [];
-    var h = '<section class="card poqueue" id="poqueue"><div class="podh"><h2 class="label">날짜 미정 대기열 <small>' + (L ? W.length + '건' : '') + '</small></h2>' +
+    if (!W.length) return '';   // 비어 있으면 숨김 — 넣는 곳은 맨 위 발주서 칸의 '날짜 미정으로 넣기'와 발주서 확인 화면의 '대기열에 두기' (2026-11-18 전체 검토)
+    var h = '<section class="card poqueue" id="poqueue"><div class="podh"><h2 class="label">날짜 미정 대기열 <small>' + W.length + '건</small></h2>' +
       '<button type="button" class="ghost sm" data-act="poqadd">＋ 날짜 미정으로 넣기</button></div>';
-    if (!L) return h + '<p class="muted">' + (S.poErr ? '불러오지 못했습니다.' : '불러오는 중…') + '</p></section>';
-    if (!W.length) return h + '<p class="muted">없습니다. 발주는 왔는데 날짜가 안 정해진 것은 발주서 확인 화면의 ‘대기열에 두기’나 위 단추로 여기에 두었다가, 날짜가 정해지면 넣습니다.</p></section>';
     var show = S.poQMore ? W : W.slice(0, 3);
     h += '<ul class="polist">' + show.map(function (x) {
       var w = x.wait || { lines: [] }, kg = poWaitKg(w), del = S.poQDel === x.id;
@@ -4005,9 +4009,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var R = V.R || {}, d = R.draft || {}, p = V.plan, ov = R.overlap, iss = R.issues || [];
     var h = '<div class="stack">';   // 돌아가기는 위쪽 '뒤로' (넣지 않고 닫음)
     h += V.wait ? '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>대기열 — 날짜를 정해 넣기</span><small>' + esc(V.item.file ? V.item.name : '직접 입력') +
-      ' · 출고 날짜를 고르면 그날 기준으로 재고를 계산합니다. 맞으면 맨 아래 ‘넣기’.</small></p>'
+      ' · 출고 날짜를 고른 뒤 맨 아래 ‘넣기’.</small></p>'
       : '<section class="card porev"><p class="addtitle potitle">' + ICON_DOC + '<span>발주서를 읽었습니다 — 넣기 전에 봐 주세요</span><small>' + esc(V.item.name || '') +
-      ' · 맞으면 맨 아래 ‘넣기’를 누르세요. 틀린 것은 여기서 고치고 넣으면 됩니다. 날짜가 아직 안 정해졌으면 ‘대기열에 두기’.</small></p>';
+      ' · 틀린 것은 여기서 고치고 맨 아래 ‘넣기’.</small></p>';
     var bl = iss.filter(function (i) { return i.block && i.k !== 'overlap' && i.k !== 'prod_mix'; }), inf = iss.filter(function (i) { return !i.block; });
     if (bl.length) h += '<ul class="poiss bad">' + bl.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
     if (inf.length) h += '<ul class="poiss info">' + inf.map(function (i) { return '<li>' + esc(i.t) + '</li>'; }).join('') + '</ul>';
@@ -4054,7 +4058,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
       h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '줄' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + fmt(kg) + ' kg · 물표 ' + pal + '장' + poTbTxt(p.lines) + '</small></h2>';
       if (!p.lines.length) h += '<p class="bad">읽은 품목 줄이 없습니다. ‘직접 넣기’로 넣어 주세요.</p>';
-      if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추를 누르면 일반 EPDM · NM-CHIP · 락칩으로 바뀝니다. 같은 색은 한 제품으로만 나가므로 같은 색 줄은 함께 바뀝니다. 현재고 = 지금 있는 양 · 그날 = 출고 날짜에 쓸 수 있는 양(먼저 잡힌 출고예정을 뺀 것) · 단위 kg.</p>';
+      if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추로 일반 EPDM · NM-CHIP · 락칩을 바꿉니다(같은 색 줄은 함께). 그날 = 출고 날짜에 쓸 수 있는 양 · kg.</p>';
       var pmx = poMixList(p);
       if (pmx.known.length) h += '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(pmx.known.join(', ')) + ' — 같은 색은 한 제품으로만 나갑니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색이 조금씩 다름). 제품 단추로 하나를 고르세요.</p>';
       if (pmx.unknown.length) h += '<p class="mixw warn">같은 날 이 거래처에 같은 색이 다른 제품으로 있습니다: ' + esc(pmx.unknown.join(', ')) + ' — 현장명이 없어 같은 현장인지 모릅니다. 같은 현장이면 섞여 나가니 맞추고, 다른 현장이면 위 현장명 칸에 적어 주세요.</p>';
@@ -4178,7 +4182,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
     else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 고르기') + '</b> <b>' + esc(l.color) + '</b>' +
       '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
-    h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
+    h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : l.unit === 'tonbag' ? fmt(l.units) + '톤백 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
     if (isSbr(l.prod)) h += packPick({ cur: l.pack === 'small' ? 'small' : 'ton', kg: l.kg, act: 'popack', i: i });   // SBR 톤백 · 소포장 (2026-11-18)
     if (cands.length > 1) {
       var skip = {};
@@ -4367,7 +4371,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function zoneCard() {
     var z = S.inZone, own = S.zoneOwn || (!!z && ZONE_CHIPS.indexOf(z) < 0);
     var h = '<section class="card zonecard"><h2 class="label">' + (S.po ? step(3) : '') + '따로 싣기 (놀이터 구분)</h2>' +
-      '<p class="hint">발주서 비고에 ‘놀이터 1’, ‘놀이터 2’처럼 따로 실어 달라는 말이 있으면 고르세요. 물표가 놀이터별로 따로 나오고, 비고 칸에 놀이터가 찍힙니다. 놀이터마다 한 번씩 저장합니다.</p><div class="chips">';
+      '<p class="hint">발주서에 ‘놀이터 1·2’처럼 따로 실어 달라고 하면 고르세요(물표가 따로 나옵니다). 놀이터마다 한 번씩 저장합니다.</p><div class="chips">';
     h += '<button type="button" class="chip" aria-pressed="' + (!z && !own) + '" data-act="pozone" data-v="">없음</button>';
     ZONE_CHIPS.forEach(function (c) { h += '<button type="button" class="chip" aria-pressed="' + (!own && z === c) + '" data-act="pozone" data-v="' + c + '">' + c + '</button>'; });
     h += '<button type="button" class="chip" aria-pressed="' + own + '" data-act="pozone" data-v="#own">직접 쓰기</button></div>';
@@ -4422,21 +4426,23 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!fut) h += '<button type="button" class="primary" data-act="caladd" data-v="출고">＋ 출고 넣기</button>';
     if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 출고예정 넣기</button>';
     h += '</div>';
-    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">날짜가 바뀌면 거래처 옆 ‘날짜 바꾸기’로 그 줄들을 한꺼번에 옮깁니다. 줄을 누르면 고치거나 지울 수 있고, 예정은 실제로 나간 날 ‘확정’을 누르면 출고가 됩니다.</p>';
+    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">줄을 누르면 고치기·지우기 · 나간 날 ‘확정’을 누르면 재고에서 빠집니다.</p>';
     return h + '</section>';
   }
-  function dayRow(r) {
-    var plan = isPlan(r.type), sub = esc(r.cust || (r.type === '생산예정' ? '' : '거래처 없음'));
-    if (r.po) sub += (sub ? ' · ' : '') + esc(r.po);
-    var pk = isSale(r.type) ? packOf(r) : '', memo = pk ? packTag(r.memo, '') : r.memo;   // SBR 포장 (2026-11-18)
-    if (memo) sub += (sub ? ' · ' : '') + esc(memo);
-    if (pk) sub += '</small><small class="dtb">' + (pk === 'ton' ? esc(tbText(r.qty)) + ' · 물표 없음' : '소포장 ' + esc(tbSmallText(r.qty, labBag())));
+  /* 줄의 메모(포장 표시는 뺌) */
+  function rowMemo(r) { return String((isSale(r.type) && packOf(r) ? packTag(r.memo, '') : r.memo) || '').trim(); }
+  /* 거래처·현장은 묶음 머리에 있으므로 줄에는 메모만. 묶음 줄이 모두 같은 메모면 머리에 한 번 (hideMemo) — 2026-11-18 전체 검토 */
+  function dayRow(r, hideMemo) {
+    var plan = isPlan(r.type), sub = '';
+    var pk = isSale(r.type) ? packOf(r) : '', memo = hideMemo ? '' : rowMemo(r);   // SBR 포장 (2026-11-18)
+    if (memo) sub += esc(memo);
+    if (pk) sub += (sub ? '</small><small class="dtb">' : '') + (pk === 'ton' ? esc(tbText(r.qty)) + ' · 물표 없음' : '소포장 ' + esc(tbSmallText(r.qty, labBag())));
     var right = '<b>' + (r.type === '생산예정' ? '+' : '') + fmt(r.qty) + ' kg</b>';
     if (!plan && S.money && r.price) right += '<small>' + fmt(r.price) + '원/kg</small>';
     if (r.type === '출고예정') right += r.short > 0 ? '<small class="bad">부족 ' + fmt(r.short) + ' kg</small>' : '<small class="ok">남음 ' + fmt(Math.max(r.after, 0)) + ' kg</small>';
     var h = '<li class="drow"><button type="button" class="dmain" data-act="edit" data-v="' + esc(r.id) + '"><span class="dn2">' + sw(r.color, r.prod) +
-      '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b>' + (sub ? '<small>' + sub + '</small>' : '') +
-      (r.type === '출고예정' ? '<small>그날 쓸 수 있는 재고 ' + fmt(Math.max(r.before, 0)) + ' kg</small>' : '') + '</span></span>' +
+      '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b>' + (sub ? '<small' + (pk && !memo ? ' class="dtb"' : '') + '>' + sub + '</small>' : '') +
+      (r.type === '출고예정' && r.short > 0 ? '<small class="bad">그날 쓸 수 있는 재고 ' + fmt(Math.max(r.before, 0)) + ' kg</small>' : '') + '</span></span>' +
       '<span class="dq">' + right + '</span></button>';
     if (plan) h += '<button type="button" class="ghost sm dcf" data-act="confirm1" data-v="' + esc(r.id) + '">확정</button>';
     return h + '</li>';
@@ -4921,7 +4927,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     h += '<div class="two mt12"><button type="button" class="ghost" data-act="newplan" data-v="출고예정">출고예정 넣기</button>' +
       '<button type="button" class="ghost" data-act="newplan" data-v="생산예정">생산예정 넣기</button></div>';
-    h += '<p class="note">발주서 파일(엑셀·PDF·사진·카톡 캡처)은 Claude 채팅에 올리시면 읽어서 출고예정으로 넣고, 모자라는 품목을 알려 드립니다.</p></section>';
+    h += '<p class="note">발주서 파일(엑셀·PDF·사진·카톡 캡처)은 <a href="stock.html?view=out">출고 화면</a> 맨 위 칸에 올리면 바로 읽어서 넣습니다.</p></section>';
 
     var sk = shortKeys();
     if (sk.length) {
@@ -5798,6 +5804,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'labminus': labStep(v, -1); return;
       case 'labplus': labStep(v, 1); return;
       case 'labhalf': labHalf(Number(v)); return;
+      case 'labset': if (S.lab) { S.lab.setOpen = !S.lab.setOpen; render(); } return;
+      case 'labtools': if (S.lab) { S.lab.tools = !S.lab.tools; render(); } return;
       case 'labtb': labTbPal(Number(v)); return;
       case 'labdel': labDelPal(Number(v)); return;
       case 'labundo': if (S.lab && S.lab.lay && !S.lab.loading) labUndo(); return;
