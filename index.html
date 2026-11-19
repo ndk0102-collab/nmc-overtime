@@ -33,6 +33,7 @@ if ('serviceWorker' in navigator) {
   --ot:#1E5AA8; --ot-soft:#E6EFFB;
   --st:#1B7A43; --st-soft:#E4F3EA;
   --pl:#9A5B16; --pl-soft:#FBEFE1;
+  --sk:#B4232A; --sk-soft:#FCE9E9;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -57,6 +58,7 @@ button{font:inherit;color:inherit}
 .sect.ot{--c:var(--ot);--soft:var(--ot-soft)}
 .sect.st{--c:var(--st);--soft:var(--st-soft)}
 .sect.pl{--c:var(--pl);--soft:var(--pl-soft)}
+.sect.sk{--c:var(--sk);--soft:var(--sk-soft)}
 .sh{display:flex;align-items:center;gap:12px;margin:0 0 14px}
 .ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--c)}
 .sh h2{margin:0;font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-0.01em;color:var(--c)}
@@ -189,6 +191,20 @@ button{font:inherit;color:inherit}
       </div>
       <a class="go adm" href="pnl.html">
         <span class="t"><b>손익 보기</b></span>
+        <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
+        <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </section>
+
+    <section class="sect sk" aria-labelledby="h-sk">
+      <div class="sh">
+        <span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></span>
+        <div>
+          <h2 id="h-sk">설계</h2>
+        </div>
+      </div>
+      <a class="go adm" href="sketchbook/">
+        <span class="t"><b>스케치북</b><small>도면 위에 바닥 색 설계 · 면적표 · 3D 놀이터</small></span>
         <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>
