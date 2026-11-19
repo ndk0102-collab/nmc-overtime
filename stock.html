@@ -2387,7 +2387,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!x || !x.n) return '';
     var c = S.lab && S.lab.cust && x.cap ? x.cap[String(S.lab.cust).trim()] : null;
     return '<p class="lablearn">' + (on ? '배운 대로: 저장된 물표 ' + fmt(x.n) + '묶음에서 — 함께 싣던 색은 되도록 함께' +
-      (c && c.cap !== 56 ? ' · ' + esc(S.lab.cust) + ' 물표는 파렛트 최대 ' + c.cap + '포' : '') : '배운 것 쓰지 않음(처음 계산만)') +
+      (c && c.full ? ' · ' + esc(S.lab.cust) + ' 물표는 한 장 ' + c.cap + '포까지 채우고 나머지는 다른 색과 함께(지난번에 실은 대로)'
+        : c && c.cap !== 56 ? ' · ' + esc(S.lab.cust) + ' 물표는 파렛트 최대 ' + c.cap + '포' : '') : '배운 것 쓰지 않음(처음 계산만)') +
       ' <button type="button" class="link" data-act="lablearn">' + (on ? '끄기' : '켜기') + '</button></p>';
   }
   function labStockLine() {
@@ -2879,7 +2880,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         // 처음 여는 물표: 배운 것(이 거래처의 파렛트 최대 포 · 함께 싣던 색 · 현장명)으로 다시 계산
         L.lay = labFresh();
         var lr = labLearnOf(), said = [];
-        if (lr && lr.cap && L.cust && lr.cap[L.cust]) said.push(L.cust + ' 물표는 지난번처럼 파렛트 최대 ' + lr.cap[L.cust].cap + '포로 나눴습니다');
+        var lc = lr && lr.cap && L.cust ? lr.cap[L.cust] : null;
+        if (lc) said.push(L.cust + (lc.full ? ' 물표는 지난번처럼 한 장 ' + lc.cap + '포까지 채우고 나머지는 다른 색과 함께 실었습니다'
+          : ' 물표는 지난번처럼 파렛트 최대 ' + lc.cap + '포로 나눴습니다'));
         var st = lr && lr.site ? lr.site[String(L.cust || '').trim() + '|' + String(L.po || '').trim()] : null;
         if (st && st.site && !String(L.site || '').trim() || (st && st.site && L.site === L.site0)) { L.site = st.site; L.lay.site = st.site; said.push('현장명은 지난번에 쓴 ‘' + st.site + '’'); }
         if (said.length) labSay(said.join(' · ') + '.');
