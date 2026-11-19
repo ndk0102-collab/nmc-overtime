@@ -360,6 +360,28 @@ body.labmode .wrap{max-width:1480px}
 .postat .bad{color:var(--bad)}
 .pomanual{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 2px 0;font-size:14.5px}
 .dgm{margin:4px 10px 0;font-size:13px;color:var(--muted);word-break:keep-all}
+/* 거래처·현장 찾기 (2026-11-19) */
+.findbar{padding:12px}
+.findrow{display:flex;gap:8px;align-items:stretch}
+.findrow .text{flex:1;min-width:0}
+.findrow .primary{flex:none;min-height:48px;padding:0 18px}
+.findsug{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.findsug .chip{min-height:40px;font-size:14.5px}
+.findback{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--accent-soft);border-radius:12px;padding:2px 8px}
+.findback .link{font-size:15.5px}
+.fh2{margin:0;font-size:19px;font-weight:800;color:var(--ink);word-break:keep-all}
+.fhead .muted{margin:6px 0 0;font-size:14px}
+.fcust{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.fcust .chip{min-height:40px;font-size:14px}
+.fh2 .spinner,.findwait .spinner{display:inline-block;width:16px;height:16px;border-width:3px;vertical-align:-3px;margin:0 6px 0 0}
+.fmon{margin:14px 0 2px;font-size:14px;font-weight:800;color:var(--accent-strong)}
+.fgrp .dgh .pill{margin-left:4px;vertical-align:1px}
+.dsec.mt0{margin-top:0}
+.ftab{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:6px}
+.ftab th{text-align:left;font-size:13px;color:var(--muted);font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line)}
+.ftab td{padding:7px 4px;border-bottom:1px solid var(--soft);vertical-align:middle}
+.ftab td:nth-child(n+2),.ftab th:nth-child(n+2){text-align:right;white-space:nowrap}
+.ftab .sw{margin-right:6px;vertical-align:-2px}
 .labsv{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0}
 .labsv .ghost{min-height:44px;font-weight:800}
 .labsv .labsave{font-size:13.5px}
@@ -827,6 +849,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     not_found: '그 사이에 지워졌거나 바뀐 기록입니다. 새로고침해 주세요.',
     bad_month: '달을 확인해 주세요.',
     auth: '관리자 로그인이 필요합니다.',
+    bad_find: '찾을 거래처·현장 이름을 넣어 주세요.',
     expired: '관리자 로그인 시간이 지나 잠겼습니다. 생산 입력만 할 수 있습니다.',
     bad_pw: '비밀번호가 맞지 않습니다.',
     locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다. 잠시 뒤 다시 해 주세요.',
@@ -1146,6 +1169,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   function apply(r) {
     S.mixWarnNext = (r && r.mixWarn) || '';
+    if (S.find) S.find.stale = true;
     S.gen++;
     S.today = r.today;
     setItems(r.items || []);
@@ -1227,7 +1251,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var list = S.months[yms[i]].records;
       for (var j = 0; j < list.length; j++) if (list[j].id === id) return list[j];
     }
-    return null;
+    return findRec(id);
   }
 
   /* 입력 줄 */
@@ -1335,7 +1359,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   /* ── 뒤로 (2026-11-17) ── */
   function subLevel() {
     if (!S.ready || !S.admin) return false;
-    if (VIEW === 'out') return S.outMode === 'label' || S.outMode === 'porev' || S.outMode === 'add';
+    if (VIEW === 'out') return S.outMode === 'label' || S.outMode === 'porev' || S.outMode === 'add' || S.outMode === 'find';
     if (VIEW === 'all') return !!S.allAdd;
     return false;
   }
@@ -1354,6 +1378,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return true;
     }
     if (VIEW === 'out' && S.outMode === 'porev') { S.poRev = null; S.outMode = 'cal'; render(); window.scrollTo(0, 0); return true; }
+    if (VIEW === 'out' && S.outMode === 'find') { S.outMode = 'cal'; S.fromFind = false; render(); window.scrollTo(0, 0); return true; }
     if (VIEW === 'out' && S.outMode === 'add') { S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.poQueue = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return true; }
     if (VIEW === 'all' && S.allAdd) { S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
     render();
@@ -3540,6 +3565,238 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var ch = document.getElementById('labchat'); if (ch) ch.scrollTop = ch.scrollHeight;
     } catch (e) { /* 그대로 */ }
   }
+  /* ───────── 거래처·현장 찾기 (2026-11-19 지시: 거래처 이름으로 찾으면 그 거래처의 발주·출고 목록이 다 뜨게) ─────────
+     출고 화면 맨 위 찾기 칸에 거래처(또는 현장) 이름 일부를 넣으면 그 거래처의
+     출고예정(아직 안 나감) · 출고(나간 것) · 반입 · 받은 발주서 · 색상별 합계를 한 화면에 보여 줍니다.
+     띄어쓰기·(주)·㈜·주식회사·대소문자는 보지 않습니다. 줄을 누르면 고치기, 출고예정 줄의 '확정'도 그대로,
+     묶음의 '그날 보기'는 달력의 그날(물표·전체 확정·날짜 바꾸기)로 가고, 달력 위 '찾은 목록으로'로 돌아옵니다. */
+  var FIND_SHOW = 30;     // 나간 것: 한 번에 보여 줄 묶음 수
+  var FIND_COLORS = 12;   // 색상별 합계: 처음에 보여 줄 줄 수
+  var FIND_URLQ = (function () { var m = /[?&]q=([^&]*)/.exec(location.search); try { return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')).trim() : ''; } catch (e) { return ''; } })();
+  function findNorm(v) {
+    return String(v == null ? '' : v).replace(/\(\s*주\s*\)|㈜|주식회사|\(\s*유\s*\)|유한회사/g, '').replace(/\s+/g, '').toLowerCase();
+  }
+  function findSugs(q) {
+    var n = findNorm(q);
+    if (!n) return [];
+    return (S.customers || []).filter(function (c) { return findNorm(c).indexOf(n) >= 0; }).slice(0, 8);
+  }
+  function findSugHtml(q) {
+    var xs = findSugs(q);
+    if (!xs.length) return '';
+    return '<div class="findsug" aria-label="맞는 거래처">' + xs.map(function (c) {
+      return '<button type="button" class="chip" data-act="findsug" data-v="' + esc(c) + '">' + esc(c) + '</button>';
+    }).join('') + '</div>';
+  }
+  /* 찾기 칸 (출고 달력 맨 위 · 찾은 결과 맨 위) */
+  function findBar() {
+    var q = S.findQ || '';
+    return '<section class="card findbar" role="search" aria-label="거래처·현장 찾기"><div class="findrow">' +
+      '<label class="vh" for="find-q">거래처·현장 찾기</label>' +
+      '<input id="find-q" class="text" type="search" data-in="findq" enterkeyhint="search" autocomplete="off" maxlength="40" placeholder="거래처·현장 이름으로 찾기" value="' + esc(q) + '">' +
+      '<button type="button" class="primary" id="find-go" data-act="findgo"' + (findNorm(q) ? '' : ' disabled') + '>찾기</button></div>' +
+      '<div id="find-sug">' + (S.outMode === 'find' ? '' : findSugHtml(q)) + '</div></section>';
+  }
+  function findInput(v) {
+    S.findQ = v;
+    var b = document.getElementById('find-go');
+    if (b) b.disabled = !findNorm(v);
+    var sg = document.getElementById('find-sug');
+    if (sg) sg.innerHTML = findSugHtml(v);
+  }
+  /* 달력으로 간 뒤 찾은 목록으로 돌아가는 줄 */
+  function findBack() {
+    if (!S.fromFind || !S.find) return '';
+    return '<div class="findback"><button type="button" class="link" data-act="findback">← ‘' + esc(S.find.q) + '’ 찾은 목록으로</button>' +
+      '<button type="button" class="link" data-act="findx" aria-label="찾은 목록 닫기">닫기</button></div>';
+  }
+  function findGo(q) {
+    q = String(q == null ? '' : q).trim();
+    if (!findNorm(q)) { toast(ERR.bad_find); return; }
+    S.findQ = q;
+    S.find = { q: q, loading: true, err: '', r: null, cust: '', show: FIND_SHOW, colors: false, stale: false };
+    S.outMode = 'find'; S.sheet = null; S.fromFind = false;
+    var a = document.activeElement;
+    if (a && a.id === 'find-q') { try { a.blur(); } catch (e) {} }
+    render();
+    window.scrollTo(0, 0);
+    findLoad();
+  }
+  function findLoad() {
+    var F = S.find;
+    if (!F) return;
+    F.loading = true; F.err = ''; F.stale = false;
+    call('apiFind', F.q).then(function (r) {
+      if (S.find !== F) return;
+      F.loading = false;
+      F.r = r || { recs: [], pos: [], total: 0 };
+      render();
+    }, function (e) {
+      if (S.find !== F) return;
+      F.loading = false;
+      F.err = errText(e);
+      if (isAuth(e)) { failed(e); return; }
+      render();
+    });
+  }
+  function findDay(d) {
+    if (!isYmd(d) || !S.find) return;
+    S.findY = window.scrollY || 0;
+    S.fromFind = true;
+    S.outMode = 'cal'; S.sheet = null; S.poRev = null;
+    S.calDay = d; S.calYm = d.slice(0, 7);
+    render();
+    var fb = document.querySelector('.findback') || document.getElementById('daycard');
+    if (fb && fb.scrollIntoView) { try { fb.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { fb.scrollIntoView(); } }
+  }
+  function findBackGo() {
+    if (!S.find) { S.fromFind = false; render(); return; }
+    S.outMode = 'find'; S.fromFind = false; S.sheet = null;
+    render();
+    window.scrollTo(0, S.findY || 0);
+  }
+  function findRec(id) {
+    var L = S.find && S.find.r && S.find.r.recs;
+    if (!L) return null;
+    for (var i = 0; i < L.length; i++) if (L[i].id === id) return L[i];
+    return null;
+  }
+  function fmtDateY(d) { return (d.slice(0, 4) !== S.today.slice(0, 4) ? d.slice(0, 4) + '.' : '') + fmtDate(d); }
+  /* 같은 날 · 같은 구분 · 같은 거래처 · 같은 현장 = 한 묶음 */
+  function findGroups(list, asc) {
+    var g = {}, order = [];
+    list.forEach(function (r) {
+      var k = r.date + '|' + r.type + '|' + (r.cust || '') + '|' + (r.po || '');
+      if (!g[k]) { g[k] = { date: r.date, type: r.type, cust: r.cust || '', po: r.po || '', rows: [], kg: 0, amt: 0, noPrice: 0 }; order.push(k); }
+      var x = g[k];
+      x.rows.push(r);
+      x.kg += r.qty;
+      if (r.price != null && r.price !== '' && Number(r.price) > 0) x.amt += r.qty * Number(r.price); else x.noPrice++;
+    });
+    var out = order.map(function (k) { return g[k]; });
+    out.sort(function (a, b) { return asc ? (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) : (a.date < b.date ? 1 : a.date > b.date ? -1 : 0); });
+    return out;
+  }
+  function findGroupHtml(x, many) {
+    var plan = x.type === '출고예정';
+    var rows = x.rows.map(function (r) { return plan ? (findPlan(r.id) || r) : r; });
+    var m0 = rowMemo(rows[0]), same = rows.length > 1 && m0 && rows.every(function (r) { return rowMemo(r) === m0; }) ? m0 : '';
+    var head = '<b>' + esc(fmtDateY(x.date)) + '</b>' + (many ? ' · ' + esc(x.cust || '거래처 없음') : '') + (x.po ? ' · ' + esc(x.po) : '') +
+      ' · ' + rows.length + '줄 · ' + fmt(x.kg) + ' kg' + (S.money && !plan && x.amt > 0 && !x.noPrice ? ' · ' + esc(won(x.amt)) : '');
+    var short = plan && rows.some(function (r) { return r.short > 0; });
+    return '<div class="dgrp fgrp"><div class="dgh"><span>' + head + (short ? ' <span class="pill bad">부족</span>' : '') + '</span>' +
+      '<span class="dgb"><button type="button" class="ghost sm" data-act="findday" data-v="' + esc(x.date) + '">그날 보기</button></span></div>' +
+      (same ? '<p class="dgm">' + esc(same) + '</p>' : '') +
+      '<ul class="dlist">' + rows.map(function (r) { return r.type === '출고예정' && !findPlan(r.id) ? findRowPlain(r, !!same) : dayRow(r, !!same); }).join('') + '</ul></div>';
+  }
+  /* 예정 계산에 없는 줄(드묾): 부족·남음 없이 */
+  function findRowPlain(r, hideMemo) {
+    var memo = hideMemo ? '' : rowMemo(r);
+    return '<li class="drow"><button type="button" class="dmain" data-act="edit" data-v="' + esc(r.id) + '"><span class="dn2">' + sw(r.color, r.prod) +
+      '<span><b>' + ptxt(r.prod) + ' ' + esc(r.color) + '</b>' + (memo ? '<small>' + esc(memo) + '</small>' : '') + '</span></span>' +
+      '<span class="dq"><b>' + fmt(r.qty) + ' kg</b></span></button></li>';
+  }
+  function findView() {
+    var F = S.find;
+    if (!F) { S.outMode = 'cal'; return viewOut(); }
+    if (F.stale && !F.loading) findLoad();
+    var h = '<div class="stack">' + findBar();
+    if (!F.r) {
+      if (F.err) return h + '<section class="card"><p class="bad" role="alert">' + esc(F.err) + '</p><button type="button" class="ghost wide mt8" data-act="findretry">다시 찾기</button></section></div>';
+      return h + '<section class="card"><p class="muted findwait"><span class="spinner sm" aria-hidden="true"></span>‘' + esc(F.q) + '’ 찾는 중…</p></section></div>';
+    }
+    var R = F.r, all = R.recs || [];
+    var cs = {}, corder = [];
+    all.forEach(function (r) { var c = r.cust || '거래처 없음'; if (!(c in cs)) { cs[c] = 0; corder.push(c); } cs[c]++; });
+    if (F.cust && !(F.cust in cs)) F.cust = '';
+    var list = F.cust ? all.filter(function (r) { return (r.cust || '거래처 없음') === F.cust; }) : all;
+    var many = !F.cust && corder.length > 1;
+    var outs = list.filter(function (r) { return r.type === '출고'; }), plans = list.filter(function (r) { return r.type === '출고예정'; }),
+      ins = list.filter(function (r) { return r.type === '반입'; });
+    var sum = function (xs) { return xs.reduce(function (s, r) { return s + r.qty; }, 0); };
+    var og = findGroups(outs, false), pg = findGroups(plans, true), ig = findGroups(ins, false);
+    var pos = (R.pos || []).filter(function (x) { return !F.cust || (x.custs || []).indexOf(F.cust) >= 0; });
+
+    // 머리: 무엇을 찾았나 · 거래처가 여럿이면 골라 보기
+    h += '<section class="card fhead"><h2 class="fh2">‘' + esc(F.q) + '’ 찾은 결과' + (F.loading ? ' <span class="spinner sm" aria-hidden="true"></span>' : '') + '</h2>';
+    if (!all.length) {
+      h += '<p class="muted">맞는 거래처·현장 기록이 없습니다. 이름 일부만(두세 글자) 넣어 보세요.</p>' + (pos.length ? '' : '</section></div>');
+      if (!pos.length) return h;
+    } else {
+      h += '<p class="muted">거래처나 현장 이름에 ‘' + esc(F.q) + '’' + iga(F.q) + ' 들어간 출고·출고예정' +
+        (ins.length ? '·반입' : '') + ' ' + fmt(R.total) + '줄' + (R.total > all.length ? ' (최근 ' + fmt(all.length) + '줄만)' : '') + '</p>';
+      if (corder.length > 1) {
+        h += '<div class="fcust">' + chip('전체 ' + corder.length + '곳', !F.cust, 'findcust', '') +
+          corder.map(function (c) { return chip(c + ' ' + cs[c] + '줄', F.cust === c, 'findcust', c); }).join('') + '</div>';
+      }
+      // 합계
+      var first = '', last = '';
+      outs.forEach(function (r) { if (!first || r.date < first) first = r.date; if (!last || r.date > last) last = r.date; });
+      var rev = 0, kgNone = 0;
+      outs.forEach(function (r) { if (r.price != null && r.price !== '' && Number(r.price) > 0) rev += r.qty * Number(r.price); else kgNone += r.qty; });
+      var nShort = pg.filter(function (x) { return x.rows.some(function (r) { var l = findPlan(r.id); return l && l.short > 0; }); }).length;
+      h += '<div class="tiles">' +
+        '<div class="tile"><span>출고 (나간 것)</span><b>' + fmt(sum(outs)) + ' kg</b><small>' + (og.length ? og.length + '번 · ' + esc(fmtDateY(first)) + (first !== last ? ' ~ ' + esc(fmtDateY(last)) : '') : '없음') + '</small></div>' +
+        '<div class="tile' + (nShort ? ' tbad' : '') + '"><span>출고예정 (아직 안 나감)</span><b>' + fmt(sum(plans)) + ' kg</b><small>' + (pg.length ? pg.length + '묶음' + (nShort ? ' · 부족 ' + nShort + '묶음' : '') : '없음') + '</small></div>' +
+        (ins.length ? '<div class="tile"><span>반입</span><b>' + fmt(sum(ins)) + ' kg</b><small>' + ig.length + '번</small></div>' : '') +
+        (S.money && outs.length ? '<div class="tile"><span>매출 (기록된 단가)</span><b>' + esc(rev ? won(rev) : '단가 없음') + '</b><small>' + (kgNone ? '단가 없는 ' + fmt(kgNone) + ' kg 빠짐' : '모든 출고에 단가 있음') + '</small></div>' : '') +
+        '</div>';
+    }
+    h += '</section>';
+
+    // 출고예정 (가까운 날부터)
+    if (pg.length) {
+      h += '<section class="card"><h3 class="dsec mt0">출고예정 · 아직 안 나감 ' + pg.length + '묶음 · ' + fmt(sum(plans)) + ' kg</h3>' +
+        pg.map(function (x) { return findGroupHtml(x, many); }).join('') + '</section>';
+    }
+    // 출고 (최근부터, 달마다)
+    if (og.length) {
+      var shown = og.slice(0, F.show), mon = '', mtot = {};
+      og.forEach(function (x) { var ym = x.date.slice(0, 7); mtot[ym] = mtot[ym] || { n: 0, kg: 0 }; mtot[ym].n++; mtot[ym].kg += x.kg; });
+      h += '<section class="card"><h3 class="dsec mt0">출고 · 나간 것 ' + og.length + '번 · ' + fmt(sum(outs)) + ' kg</h3>';
+      shown.forEach(function (x) {
+        var ym = x.date.slice(0, 7);
+        if (ym !== mon) { mon = ym; h += '<p class="fmon">' + esc(fmtYm(ym)) + ' · ' + mtot[ym].n + '번 · ' + fmt(mtot[ym].kg) + ' kg</p>'; }
+        h += findGroupHtml(x, many);
+      });
+      if (og.length > shown.length) h += '<button type="button" class="ghost wide mt8" data-act="findmore">' + Math.min(FIND_SHOW, og.length - shown.length) + '번 더 보기 (남은 ' + (og.length - shown.length) + '번)</button>';
+      h += '</section>';
+    }
+    // 반입
+    if (ig.length) {
+      h += '<section class="card"><h3 class="dsec mt0">반입 ' + ig.length + '번 · ' + fmt(sum(ins)) + ' kg</h3>' +
+        ig.slice(0, FIND_SHOW).map(function (x) { return findGroupHtml(x, many); }).join('') + '</section>';
+    }
+    // 색상별 합계 (지금까지 나간 것 + 앞으로 나갈 것)
+    if (outs.length || plans.length) {
+      var ck = {}, corder2 = [];
+      outs.concat(plans).forEach(function (r) {
+        var k = r.prod + '|' + r.color;
+        if (!ck[k]) { ck[k] = { prod: r.prod, color: r.color, out: 0, plan: 0 }; corder2.push(k); }
+        ck[k][r.type === '출고' ? 'out' : 'plan'] += r.qty;
+      });
+      corder2.sort(function (a, b) { return (ck[b].out + ck[b].plan) - (ck[a].out + ck[a].plan); });
+      var cshow = F.colors ? corder2 : corder2.slice(0, FIND_COLORS);
+      h += '<section class="card"><h3 class="dsec mt0">색상별 합계 · ' + corder2.length + '가지</h3><table class="ftab"><thead><tr><th scope="col">제품 · 색상</th><th scope="col">나간 것</th><th scope="col">출고예정</th></tr></thead><tbody>' +
+        cshow.map(function (k) {
+          var c = ck[k];
+          return '<tr><td>' + sw(c.color, c.prod) + ptxt(c.prod) + ' ' + esc(c.color) + '</td><td>' + (c.out ? fmt(c.out) + ' kg' : '–') + '</td><td>' + (c.plan ? fmt(c.plan) + ' kg' : '–') + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        (corder2.length > cshow.length ? '<button type="button" class="link" data-act="findcolors">전부 보기 (' + corder2.length + '가지)</button>' : '') + '</section>';
+    }
+    // 받은 발주서
+    if (pos.length) {
+      h += '<section class="card"><h3 class="dsec mt0">받은 발주서 ' + pos.length + '건</h3><ul class="polist">' + pos.map(function (x) {
+        var st = PO_STATE[x.state] || 'off';
+        return '<li class="poitem st-' + st + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(x.state || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
+          '<small class="pometa">' + esc(poWhen(x.at)) + ' 올림' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>' +
+          (x.result ? '<p class="pores">' + esc(x.result) + '</p>' : '') +
+          ((x.dates || []).length ? '<div class="poacts">' + x.dates.slice(0, 3).map(function (d) { return isYmd(d) ? '<button type="button" class="ghost sm" data-act="findday" data-v="' + esc(d) + '">' + esc(fmtDateY(d)) + ' 그날 보기</button>' : ''; }).join('') + '</div>' : '') + '</li>';
+      }).join('') + '</ul></section>';
+    }
+    h += '<p class="note">줄을 누르면 고치기·지우기 · ‘그날 보기’에서 물표·전체 확정·날짜 바꾸기.</p>';
+    return h + '</div>';
+  }
   function viewLoading() {
     return '<div class="center"><div class="spinner" aria-hidden="true"></div><p>불러오는 중…</p></div>';
   }
@@ -3741,8 +3998,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.outMode === 'label') return labelView();
     if (S.outMode === 'add') return viewIn();
     if (S.outMode === 'porev') return poRevView();
+    if (S.outMode === 'find') return findView();
     if (S.admin && !S.poList && !S.poLoading && !S.poErr) poLoad(false);
-    return '<div class="stack">' + poCard() + poShowCard() + poDone() + poQueueCard() + calCard() + dayCard() + poInbox() + '</div>';
+    if (FIND_URLQ && S.ready && S.admin) { var q0 = FIND_URLQ; FIND_URLQ = ''; setTimeout(function () { findGo(q0); }, 0); }
+    return '<div class="stack">' + poCard() + poShowCard() + poDone() + poQueueCard() + findBar() + calCard() + findBack() + dayCard() + poInbox() + '</div>';
   }
   /* ── 발주서 넣기 (2026-11-16) ── */
   var ICON_DOC = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
@@ -5899,6 +6158,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'pomoreall': S.poMore = true; render(); return;
       case 'pojump': var pib = document.getElementById('poinbox'); if (pib && pib.scrollIntoView) { try { pib.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { pib.scrollIntoView(); } } return;
       case 'pogoto': poGoto(v); return;
+      case 'findgo': { var fqe = document.getElementById('find-q'); findGo(fqe ? fqe.value : S.findQ); return; }
+      case 'findsug': findGo(v); return;
+      case 'findcust': if (S.find) { S.find.cust = v || ''; S.find.show = FIND_SHOW; render(); } return;
+      case 'findday': findDay(v); return;
+      case 'findmore': if (S.find) { S.find.show += FIND_SHOW; render(); } return;
+      case 'findcolors': if (S.find) { S.find.colors = true; render(); } return;
+      case 'findback': findBackGo(); return;
+      case 'findx': S.fromFind = false; render(); return;
+      case 'findretry': findLoad(); render(); return;
       case 'pocancel':
         call('apiPoCancel', v).then(function (r) {
           if (S.poList && r && r.item) S.poList.items = S.poList.items.map(function (x) { return x.id === r.item.id ? r.item : x; });
@@ -6021,6 +6289,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       for (var i = 0; i < chips.length; i++) chips[i].setAttribute('aria-pressed', String(chips[i].getAttribute('data-v') === el.value));
       return;
     }
+    if (k === 'findq') { findInput(el.value); return; }
     if (k === 'memo') { S.inMemo = el.value; return; }
     if (k === 'po') { S.inPo = el.value; return; }
     if (k === 'zone') { S.inZone = el.value; return; }
@@ -6098,6 +6367,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
     var t = ev.target;
     if (ev.key === 'Enter' && t && t.id === 'lg-pw') { ev.preventDefault(); doLogin(); return; }
+    if (ev.key === 'Enter' && t && t.id === 'find-q' && !ev.isComposing && ev.keyCode !== 229) { ev.preventDefault(); findGo(t.value); return; }
     if (ev.key === 'Enter' && t && t.id === 'lab-cmd' && !ev.isComposing) { ev.preventDefault(); labRunCmd(); return; }
     if (ev.key === 'Enter' && t && t.classList && t.classList.contains('qin')) {
       ev.preventDefault();
