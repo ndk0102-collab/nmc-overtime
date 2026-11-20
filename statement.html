@@ -229,14 +229,14 @@ select.inp{padding-right:30px}
 .si b{flex:1;min-width:0;display:flex;align-items:center;padding:0 2mm;font-size:7.8pt;font-weight:700;white-space:nowrap;overflow:hidden}
 table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed;border:.25mm solid #9FB0C9}
 .it thead th{height:5mm;padding:0;background:#1B3A6B;color:#fff;font-size:6.7pt;font-weight:800;text-align:center;white-space:nowrap}
-.it td{height:var(--rh,5mm);padding:0 1.5mm;border-top:.2mm solid #E3E8F0;border-left:.2mm solid #E3E8F0;font-size:7.5pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it td{height:var(--rh,5mm);padding:0 1.5mm;border-top:.2mm solid #E3E8F0;border-left:.2mm solid #E3E8F0;font-size:7.8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .it tbody tr:nth-child(even) td{background:#F7F9FC}
 .it td.c{text-align:center}.it td.r{text-align:right;font-variant-numeric:tabular-nums}
 .it td.b{font-weight:700;color:#1B3A6B}
 .it td.nm{font-weight:700}
 .it td.mm{font-size:6.6pt;color:#5B6474;text-align:center}
 .it td.no{color:#8A93A3;text-align:center;font-size:6.8pt}
-.it tfoot td{height:5.2mm;background:#E4ECF8;border-top:.5mm solid #1B3A6B;font-weight:800;color:#1B3A6B}
+.it tfoot td{height:5.2mm;background:#E4ECF8;border-top:.5mm solid #1B3A6B;font-weight:800;color:#1B3A6B;font-size:7.4pt}
 .it tfoot td.lab{text-align:center;letter-spacing:.6em}
 .it tfoot td.cont{text-align:center;color:#8A93A3;font-weight:700;letter-spacing:.1em}
 .cp.sm .it td{font-size:7pt}
@@ -256,6 +256,69 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .ft i{font-style:normal;margin:0 1.6mm}
 .cp.noamt .mt .am{display:none}
 #print{display:none}
+
+/* 한 부씩 크게 (품목 8줄부터, 2026-11-21): A4 한 장에 한 부 · 칸 20줄 · 글자와 줄 높이를 키움 */
+.pg.f .cp,.pg.f .cp.b{top:0;height:297mm;padding:13mm 14mm 10mm}
+.pg.f .hd{grid-template-columns:40mm 1fr 70mm;height:26mm;padding-bottom:2.4mm;border-bottom-width:.8mm}
+.pg.f .hd .lgo{height:22mm}
+.pg.f .tt b{font-size:22pt}
+.pg.f .tt i{font-size:7pt;margin:1mm 0 1.6mm}
+.pg.f .tt .bd{font-size:9pt;padding:.8mm 3.4mm}
+.pg.f .mt p{font-size:10pt;margin-bottom:.8mm}
+.pg.f .mt p span{font-size:7.6pt}
+.pg.f .mt .am b{font-size:17pt}
+.pg.f .pt{gap:5mm;margin-top:4mm}
+.pg.f .pb h4{height:6mm;font-size:9pt}
+.pg.f .pb th{width:18mm;height:6mm;font-size:8pt}
+.pg.f .pb td{height:6mm;padding:0 2.6mm;font-size:9pt}
+.pg.f .pb td.b{font-size:10pt}
+.pg.f .pb td.ad{font-size:8pt}
+.pg.f .pb td.seal i{font-size:8pt}
+.pg.f .si{margin-top:3mm;height:7mm}
+.pg.f .si span{width:18mm;font-size:8pt}
+.pg.f .si b{font-size:9.5pt}
+.pg.f table.it{margin-top:3.5mm}
+.pg.f .it thead th{height:7mm;font-size:8.4pt}
+.pg.f .it td{padding:0 2mm;font-size:9pt}
+.pg.f .it td.mm,.pg.f .it td.no{font-size:8pt}
+.pg.f .it tfoot td{height:7mm;font-size:8.6pt}
+.pg.f .bt{margin-top:3mm}
+.pg.f .sumbar{height:10mm}
+.pg.f .sumbar span{width:28mm;font-size:9.5pt}
+.pg.f .sumbar em{font-size:9pt}
+.pg.f .sumbar small{font-size:8pt}
+.pg.f .sumbar b{font-size:15pt}
+.pg.f .lo{grid-template-columns:1fr 62mm;margin-top:3mm}
+.pg.f .lo .lb{font-size:8pt;margin-bottom:1mm}
+.pg.f .memo p{height:16mm;font-size:8.6pt}
+.pg.f .sign p{height:16mm}
+.pg.f .sign p em{font-size:8.4pt}
+.pg.f .ft{padding-top:2mm;font-size:7.6pt}
+/* 발행 전 미리보기: 종이 위에 옅게 '미리보기' (인쇄되지 않음 — 미리보기에서는 인쇄 단추가 없음) */
+.pg.draft .cp::after{content:'미리보기';position:absolute;left:50%;top:52%;transform:translate(-50%,-50%) rotate(-18deg);font-size:54pt;font-weight:800;letter-spacing:.3em;color:rgba(27,58,107,.06);pointer-events:none;white-space:nowrap}
+
+/* 미리보기 창 (발행 전) */
+body.pvon{overflow:hidden}
+#pv{position:fixed;inset:0;z-index:45;display:flex;flex-direction:column;background:#DFE5EE}
+.pvh{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--vc);color:#fff;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+.pvh h2{flex:1;min-width:0;margin:0;font-size:19px;font-weight:800}
+.pvh h2 small{margin-left:8px;font-size:12.5px;font-weight:700;color:#E9D7AC}
+.pvx{flex-shrink:0;min-height:40px;padding:0 12px;border:0;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;font-weight:800;font-size:14px;cursor:pointer}
+.pvb{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px}
+.pvb .in{max-width:860px;margin:0 auto}
+.pvsum{padding:11px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.pvt{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 12px}
+.pvt b{font-size:17px;font-weight:800}
+.pvt b em{margin-left:6px;font-style:normal;font-size:14px;font-weight:700;color:var(--muted)}
+.pvt span{font-size:14px;font-weight:700;color:var(--ink2)}
+.pvn{margin:7px 0 0;padding:7px 0 0 18px;border-top:1px solid var(--line);font-size:13px;line-height:1.45;color:var(--muted);font-weight:600}
+.pvn li.w{color:var(--warn);font-weight:800}
+.pvb .pvbox{margin-top:12px}
+.pvb .pvk{margin:0 auto}
+.pvf{display:flex;gap:8px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--line)}
+.pvf .btn{flex:1 1 0;min-width:0;padding:0 10px}
+.pvf .btn.ghost{flex:0 1 auto}
+.pvx:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 
 @media print{
   @page{size:A4 portrait;margin:0}
@@ -279,6 +342,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 <main class="wrap" id="root"></main>
 <div class="savebar" id="savebar" hidden></div>
 <div id="sheet" hidden></div>
+<div id="pv" role="dialog" aria-modal="true" aria-label="거래명세서 미리보기" hidden></div>
 <div id="print" aria-hidden="true"></div>
 <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
 
@@ -290,7 +354,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
   var TOKEN_KEY = 'nmc_pay_token';      // 다른 관리자 화면과 같은 열쇠
 
   var $ = function (id) { return document.getElementById(id); };
-  var root = $('root'), tabsEl = $('vtabs'), saveEl = $('savebar'), sheetEl = $('sheet'), printEl = $('print'), toastEl = $('toast');
+  var root = $('root'), tabsEl = $('vtabs'), saveEl = $('savebar'), sheetEl = $('sheet'), pvEl = $('pv'), printEl = $('print'), toastEl = $('toast');
   var TABS = [['list', '일일 기록'], ['edit', '작성'], ['cust', '거래처'], ['co', '회사 정보']];
   var WD = ['일', '월', '화', '수', '목', '금', '토'];
   var MAX_LINES = 40, BAG = 25;
@@ -304,7 +368,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
     authed: false, loginErr: '', err: '', loading: false,
     tab: /^(list|edit|cust|co)$/.test(q0.get('view') || '') ? q0.get('view') : 'list',
     I: null, ym: '', list: [], mLoading: false,
-    cur: null, curLoading: '', F: null, busy: false, arm: '', cq: '', co: null, coErr: '', coMsg: ''
+    cur: null, curLoading: '', F: null, busy: false, arm: '', cq: '', co: null, coErr: '', coMsg: '', pv: false
   };
   var token = '';
   try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
@@ -436,7 +500,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
   }
   function call(fn, args) {
     return post({ action: 'stock.call', fn: fn, args: args || [] }).catch(function (e) {
-      if (String(e && e.message) === 'auth') { setToken(''); S.authed = false; S.loginErr = ERR.auth; closeSheet(); render(); }
+      if (String(e && e.message) === 'auth') { setToken(''); S.authed = false; S.loginErr = ERR.auth; closeSheet(); S.pv = false; renderPv(); render(); }
       throw e;
     });
   }
@@ -496,6 +560,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
       S.F = F;
       if (!F.lines.length && F.linked.length === 1) { toast('이 출고는 이미 거래명세서 No. ' + F.linked[0] + '로 발행했습니다.'); openStmt(F.linked[0]); return; }
       render();
+      if (F.lines.length && !formCheck()) openPreview();   // 물표(출고 상자)에서 오면 저장 전에 먼저 미리보기 (2026-11-21)
     }, function (e) { S.busy = false; if (!isAuth(e)) { S.F = blankForm(); S.F.err = errText(e); } render(); });
   }
   function editFrom(st, useCur) {
@@ -637,12 +702,11 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
       '<button type="button" class="btn ghost" data-act="back">목록</button></div>';
     if (S.arm === 'cancel') h += '<p class="fwarn">취소하면 이 명세서가 출고 기록에 넣은 단가 · 수량 · 확정이 명세서 전으로 돌아가고, 명세서에서 새로 만든 출고 · 장부 기록은 삭제됩니다. 번호는 \'취소\'로 남습니다.</p>';
     if (!v && (!S.I.co.saved)) h += '<p class="infobox">공급자 칸은 \'회사 정보\' 기본값입니다. 업태 · 종목 · 입금 계좌 등을 넣으려면 회사 정보에서 저장해 주십시오.</p>';
-    h += '<p class="hint">A4 한 장에 위는 공급받는자(인수자) 보관용, 아래는 공급자 보관용입니다. 인쇄 창에서 \'PDF로 저장\'을 고르면 메일 · 팩스용 PDF가 됩니다.</p></section>';
+    h += '<p class="hint">' + esc(layoutNote(st.lines.length)) + ' 인쇄 창에서 \'PDF로 저장\'을 고르면 메일 · 팩스용 PDF가 됩니다.</p></section>';
     h += '<section class="card"><div class="pvbox" id="pvbox"><div class="pvk" id="pvk">' + docHtml(st) + '</div></div></section>';
     return h;
   }
-  function fitPreview() {
-    var box = $('pvbox'), k = $('pvk');
+  function fitBox(box, k) {
     if (!box || !k) return;
     var pgW = k.firstElementChild ? k.firstElementChild.getBoundingClientRect().width / (k._s || 1) : 794;
     var s = Math.min(1, box.clientWidth / pgW);
@@ -650,15 +714,29 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
     k.style.transform = 'scale(' + s + ')';
     box.style.height = Math.ceil(k.scrollHeight * s) + 'px';
   }
+  function fitPreview() { fitBox($('pvbox'), $('pvk')); fitBox($('pvbox2'), $('pvk2')); }
 
-  /* ───────── 인쇄 문서 ───────── */
+  /* ───────── 인쇄 문서 ─────────
+     품목 7줄까지: A4 한 장에 위 '공급받는자 보관용' · 아래 '공급자 보관용' (칸 7줄).
+     8줄부터 (2026-11-21 "제품량이 다양하면 칸이 많아져야, 지금은 좀 작다"): 한 부씩 크게 — 공급받는자 보관용 · 공급자 보관용이
+     각각 A4 한 장 (칸 20줄 · 글자와 줄 높이를 키움). 20줄이 넘으면 그 부가 다음 장으로 이어집니다 (최대 40줄 = 부마다 2장). */
+  var HALF_MAX = 7, FULL_ROWS = 20;
+  function layoutOf(n) {
+    if (n <= HALF_MAX) return { full: false, per: HALF_MAX, rh: 5.4, k: 1, sheets: 1 };
+    var k = Math.ceil(n / FULL_ROWS);
+    return { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k * 2 };
+  }
+  function layoutNote(n) {
+    var L = layoutOf(n);
+    if (!L.full) return 'A4 1장: 위는 공급받는자(인수자) 보관용, 아래는 공급자 보관용입니다.';
+    return '품목이 ' + n + '줄이라 한 부씩 크게 찍습니다: A4 ' + L.sheets + '장 (공급받는자 보관용 ' + L.k + '장 · 공급자 보관용 ' + L.k + '장).';
+  }
   function docHtml(st) {
-    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = st.lines || [];
-    var per = lines.length <= 7 ? 7 : 10, rh = per === 7 ? 5 : 4, n = Math.max(1, Math.ceil(lines.length / per)), out = '';
-    for (var p = 0; p < n; p++) {
-      var pl = lines.slice(p * per, (p + 1) * per);
-      out += '<section class="pg">' + copyHtml(st, co, cu, pl, p, n, per, rh, 't') + '<div class="cut"><span>✂ 절 취 선</span></div>' + copyHtml(st, co, cu, pl, p, n, per, rh, 'b') + '</section>';
-    }
+    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = st.lines || [], L = layoutOf(lines.length), dr = st.draft ? ' draft' : '', out = '';
+    if (!L.full) return '<section class="pg' + dr + '">' + copyHtml(st, co, cu, lines, 0, 1, L, 't') + '<div class="cut"><span>✂ 절 취 선</span></div>' + copyHtml(st, co, cu, lines, 0, 1, L, 'b') + '</section>';
+    ['t', 'b'].forEach(function (pos) {
+      for (var p = 0; p < L.k; p++) out += '<section class="pg f' + dr + '">' + copyHtml(st, co, cu, lines.slice(p * L.per, (p + 1) * L.per), p, L.k, L, pos) + '</section>';
+    });
     return out;
   }
   function partyHtml(title, rows) {
@@ -666,18 +744,19 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
       return '<tr><th>' + r[0] + '</th><td class="' + (r[2] || '') + '">' + esc(r[1] || '') + (r[2] === 'seal' ? '<i>(인)</i>' : '') + '</td></tr>';
     }).join('') + '</table></div>';
   }
-  function copyHtml(st, co, cu, pl, pi, pn, per, rh, pos) {
-    var amt = st.amt !== false, last = pi === pn - 1, base = pi * per, i, l;
-    var h = '<div class="cp ' + pos + (per > 7 ? ' sm' : '') + (amt ? '' : ' noamt') + '" style="--rh:' + rh + 'mm">';
+  function copyHtml(st, co, cu, pl, pi, pn, L, pos) {
+    var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, i, l;
+    var h = '<div class="cp ' + pos + (amt ? '' : ' noamt') + '" style="--rh:' + L.rh + 'mm">';
     h += '<div class="hd"><img class="lgo" src="icons/nmc-logo-print.png" alt="">' +
       '<div class="tt"><b>거래명세표</b><i>TRANSACTION STATEMENT</i><span class="bd ' + pos + '">' + (pos === 't' ? '공급받는자 보관용' : '공급자 보관용') + '</span></div>' +
-      '<div class="mt"><p><span>No.</span>' + esc(st.no) + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
+      '<div class="mt"><p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
       '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + fmt(st.total) + '</b></p></div></div>';
     h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
       ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]]) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
     h += '<div class="si"><span>납품장소</span><b>' + esc(st.site || '') + '</b></div>';
-    var cols = amt ? ['7mm', '', '22mm', '9mm', '16mm', '14mm', '20mm', '16mm', '17mm'] : ['7mm', '', '28mm', '11mm', '20mm', '30mm'];
+    var cols = L.full ? (amt ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['8mm', '', '30mm', '12mm', '22mm', '34mm'])
+      : (amt ? ['7mm', '', '21mm', '9mm', '16mm', '14mm', '21mm', '18mm', '15mm'] : ['7mm', '', '28mm', '11mm', '20mm', '30mm']);
     h += '<table class="it"><colgroup>' + cols.map(function (w) { return '<col' + (w ? ' style="width:' + w + '"' : '') + '>'; }).join('') + '</colgroup>' +
       '<thead><tr><th>No.</th><th>품명</th><th>규격</th><th>포대</th><th>수량(kg)</th>' + (amt ? '<th>단가</th><th>공급가액</th><th>세액</th>' : '') + '<th>비고</th></tr></thead><tbody>';
     for (i = 0; i < per; i++) {
@@ -806,7 +885,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
   function saveBarHtml() {
     var F = S.F;
     return '<div class="in"><button type="button" class="btn ghost" data-act="discard">' + (F.no ? '수정 그만' : '지우기') + '</button>' +
-      '<button type="button" class="btn" data-act="save"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : F.no ? '수정 저장' : '발행') + '</button></div>';
+      '<button type="button" class="btn" data-act="preview"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : F.no ? '미리보기 · 수정 저장' : '미리보기 · 발행') + '</button></div>';
   }
   function updLive(i) {
     var F = S.F, T = formTotals(F), set = function (id, v) { var e = $(id); if (e) e.textContent = v; };
@@ -846,19 +925,24 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
         return o;
       }) };
   }
-  function save() {
-    var F = S.F;
-    if (!F || S.busy) return;
-    F.touched = true; F.err = '';
-    var bad = '';
+  /** 발행 전 확인 (빈칸 · 수량 · 단가 모양). 문제가 없으면 '' */
+  function formCheck() {
+    var F = S.F, bad = '';
     if (!F.date) bad = ERR.bad_date;
     else if (!String(F.cust).trim()) bad = ERR.need_cust;
     else if (!F.lines.length) bad = ERR.no_lines;
     else F.lines.some(function (l, i) { var e = lineErr(l); if (e) { bad = (i + 1) + '번째 줄: ' + e; return true; } return false; });
-    if (bad) { F.err = bad; render(); window.scrollTo(0, 0); toast(bad); return; }
-    S.busy = true; render();
+    return bad;
+  }
+  function save(printAfter) {
+    var F = S.F;
+    if (!F || S.busy) return;
+    F.touched = true; F.err = '';
+    var bad = formCheck();
+    if (bad) { S.pv = false; renderPv(); F.err = bad; render(); window.scrollTo(0, 0); toast(bad); return; }
+    S.busy = true; render(); renderPv();
     call('apiStmtSave', [payload()]).then(function (d) {
-      S.busy = false;
+      S.busy = false; S.pv = false; renderPv();
       var was = F.no;
       S.F = null; S.tab = 'list'; S.cur = d.stmt;
       if (d.ym === S.ym) S.list = d.list;
@@ -867,14 +951,77 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
       render(); window.scrollTo(0, 0);
       var msg = (was ? '수정했습니다' : '발행했습니다') + ' · No. ' + d.stmt.no + (d.confirmed ? ' · 출고 확정 ' + d.confirmed + '줄' : '') + (d.kept ? ' · 출고 화면에서 고친 ' + d.kept + '줄은 그대로' : '');
       toast(d.mixWarn ? msg + ' (같은 색 다른 제품: ' + d.mixWarn + ')' : msg);
+      if (printAfter) setTimeout(printCur, 150);   // 발행하고 인쇄: 저장한 명세서로 바로 인쇄 창
     }, function (e) {
-      S.busy = false;
+      S.busy = false; S.pv = false; renderPv();
       if (isAuth(e)) return;
       if (String(e && e.message) === 'box_changed' && F.from === 'box') { F.err = ERR.box_changed; }
       else F.err = errText(e);
       render(); window.scrollTo(0, 0);
     });
   }
+  /* ───────── 미리보기 (발행 전, 2026-11-21) ─────────
+     작성 중인 양식을 인쇄 모양 그대로 보여 줍니다. 아직 저장하지 않았으므로 번호는 '발행하면 매김', 종이에 옅게 '미리보기'. */
+  function draftStmt() {
+    var F = S.F, sup = 0, tax = 0;
+    var lines = F.lines.map(function (l) {
+      var a = lineAmt(l, F.vat), o;
+      if (l.k === 's') {
+        var q = num(l.qty), p = num(l.price);
+        o = { k: 's', prod: l.prod, color: l.color, name: String(l.name || '').trim() || pname(l.prod, l.color), spec: String(l.spec || '').trim(),
+          qty: q == null || isNaN(q) ? 0 : q, unit: 'kg', price: p == null || isNaN(p) ? null : p, memo: String(l.memo || '').trim() };
+      } else {
+        var q2 = l.mode === 'qp' ? num(l.qty) : null, p2 = l.mode === 'qp' ? num(l.price) : null;
+        o = { k: 'x', name: String(l.name || '').trim(), spec: String(l.spec || '').trim(), qty: q2 == null || isNaN(q2) ? null : q2, unit: String(l.unit || '').trim(),
+          price: p2 == null || isNaN(p2) ? null : p2, memo: String(l.memo || '').trim() };
+      }
+      o.supply = a.sup == null || a.none ? 0 : a.sup; o.tax = a.tax == null || a.none ? 0 : a.tax;
+      sup += o.supply; tax += o.tax;
+      return o;
+    });
+    return { draft: true, no: F.no || '', date: F.date, cust: String(F.cust || '').trim(), site: String(F.site || '').trim(), memo: String(F.memo || '').trim(),
+      vat: F.vat, amt: F.amt, lines: lines, supply: sup, tax: tax, total: sup + tax };
+  }
+  function openPreview() {
+    var F = S.F;
+    if (!F || S.busy) return;
+    F.touched = true; F.err = '';
+    var bad = formCheck();
+    if (bad) { F.err = bad; render(); window.scrollTo(0, 0); toast(bad); return; }
+    S.pv = true; renderPv();
+    var pb = pvEl.querySelector('.pvb'); if (pb) pb.scrollTop = 0;
+  }
+  function pvNotes() {
+    var F = S.F, T = formTotals(F), n = F.lines.length, L = layoutOf(n), out = [];
+    if (T.noPrice) out.push(['w', '단가 없는 줄 ' + T.noPrice + '개: 빈칸으로 찍힙니다 (\'고치기\'에서 넣을 수 있음)']);
+    out.push(['w', F.date > S.I.today ? '거래일자가 앞날이라 발행해도 출고예정으로 둠' : '발행하면 이 거래일자로 출고 확정 (재고에서 빠짐)']);
+    out.push(['', L.full ? 'A4 ' + L.sheets + '장: 품목 ' + n + '줄이라 한 부씩 크게 (공급받는자 보관용 · 공급자 보관용)' : 'A4 1장: 위 공급받는자 보관용 · 아래 공급자 보관용']);
+    if (F.linked && F.linked.length) out.push(['', '이 상자의 일부 출고는 이미 No. ' + F.linked.join(', ') + '에 들어 있어 뺐습니다']);
+    if (!custOf(F.cust)) out.push(['', '거래처 정보 없음: 공급받는자 칸에 상호만 찍힘']);
+    if (!(S.I.co && S.I.co.saved)) out.push(['', '공급자 칸은 회사 정보 기본값 (업태 · 종목 · 입금 계좌는 \'회사 정보\' 탭)']);
+    return out;
+  }
+  function renderPv() {
+    if (!S.pv || !S.F) { pvEl.hidden = true; pvEl.innerHTML = ''; document.body.classList.remove('pvon'); return; }
+    var F = S.F, st = draftStmt(), edit = !!F.no;
+    var h = '<div class="pvh"><button type="button" class="pvx" data-act="pvclose">← 고치기</button><h2>미리보기<small>' + (edit ? '수정 저장 전' : '아직 발행 전') + '</small></h2></div>' +
+      '<div class="pvb"><div class="in"><div class="pvsum"><div class="pvt"><b>' + esc(st.cust) + (st.site ? '<em>' + esc(st.site) + '</em>' : '') + '</b><span>' + dateKo(st.date) + ' · ' + st.lines.length + '줄 · 합계 ' + won(st.total) + '</span></div>' +
+      '<ul class="pvn">' + pvNotes().map(function (n) { return '<li' + (n[0] ? ' class="' + n[0] + '"' : '') + '>' + esc(n[1]) + '</li>'; }).join('') + '</ul></div>' +
+      '<div class="pvbox" id="pvbox2"><div class="pvk" id="pvk2">' + docHtml(st) + '</div></div></div></div>' +
+      '<div class="pvf"><button type="button" class="btn ghost" data-act="pvclose">고치기</button>' +
+      '<button type="button" class="btn ghost" data-act="save"' + (S.busy ? ' disabled' : '') + '>' + (edit ? '수정 저장' : '발행') + '</button>' +
+      '<button type="button" class="btn" data-act="saveprint"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : edit ? '저장하고 인쇄' : '발행하고 인쇄') + '</button></div>';
+    pvEl.innerHTML = h; pvEl.hidden = false; document.body.classList.add('pvon');
+    fitBox($('pvbox2'), $('pvk2'));
+  }
+  function closePv() { S.pv = false; renderPv(); }
+  function printCur() {
+    if (!S.cur) return;
+    if (!printEl.innerHTML) printEl.innerHTML = docHtml(S.cur);
+    window.print();
+    call('apiStmtPrinted', [S.cur.no]).then(function (d) { S.list.forEach(function (s) { if (s.no === d.no) s.printed = d.printed; }); }, function () {});
+  }
+
   /* 저장 뒤 지난 단가 · 품명을 바로 씀 (다음 명세서 제안) */
   function updMemo(st) {
     if (!S.I) return;
@@ -985,11 +1132,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
       case 'new': S.F = blankForm(); S.tab = 'edit'; S.cur = null; setUrl('view=edit'); render(); window.scrollTo(0, 0); return;
       case 'open': openStmt(v); return;
       case 'back': S.cur = null; S.arm = ''; setUrl(''); render(); return;
-      case 'print':
-        if (!S.cur) return;
-        window.print();
-        call('apiStmtPrinted', [S.cur.no]).then(function (d) { S.list.forEach(function (s) { if (s.no === d.no) s.printed = d.printed; }); }, function () {});
-        return;
+      case 'print': printCur(); return;
       case 'edit': if (S.cur) editFrom(S.cur, false); return;
       case 'fixcur': if (S.cur) editFrom(S.cur, true); toast('출고 기록 값으로 바꿨습니다. 확인하고 \'수정 저장\'을 누르십시오.'); return;
       case 'cancel':
@@ -1007,7 +1150,10 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
         return;
       case 'addx': S.F.lines.push(xLine({ name: '운반비', unit: '식' })); render(); return;
       case 'del': S.F.lines.splice(i, 1); render(); return;
-      case 'save': save(); return;
+      case 'preview': openPreview(); return;
+      case 'pvclose': closePv(); return;
+      case 'save': save(false); return;
+      case 'saveprint': save(true); return;
       case 'discard':
         if (S.F && S.F.no) { var no = S.F.no; S.F = null; openStmt(no); return; }
         S.F = blankForm(); render(); window.scrollTo(0, 0); return;
@@ -1070,6 +1216,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
   });
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
+    if (ev.key === 'Escape' && S.pv) { closePv(); return; }
     if (ev.key === 'Enter' && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'radio' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }
   });
   window.addEventListener('resize', fitPreview);
@@ -1077,7 +1224,8 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 
   start();
   if (DEMO) window.__stmt = { get S() { return S; }, numKo: numKo, ckey: ckey, docHtml: docHtml, pname: pname, formTotals: formTotals,
-    nav: function (qs) { q0 = new URLSearchParams(qs); S.F = null; S.cur = null; S.arm = ''; S.tab = /^(list|edit|cust|co)$/.test(q0.get('view') || '') ? q0.get('view') : 'list'; start(); } };   // 시험: 같은 화면에서 주소만 바꿔 다시 열기
+    layoutOf: layoutOf,
+    nav: function (qs) { q0 = new URLSearchParams(qs); S.F = null; S.cur = null; S.arm = ''; S.pv = false; renderPv(); S.tab = /^(list|edit|cust|co)$/.test(q0.get('view') || '') ? q0.get('view') : 'list'; start(); } };   // 시험: 같은 화면에서 주소만 바꿔 다시 열기
 })();
 </script>
 </body>
