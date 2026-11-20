@@ -33,6 +33,7 @@ if ('serviceWorker' in navigator) {
   --ot:#1E5AA8; --ot-soft:#E6EFFB;
   --st:#1B7A43; --st-soft:#E4F3EA;
   --pl:#9A5B16; --pl-soft:#FBEFE1;
+  --cs:#0E7490; --cs-soft:#E0F2F7;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
@@ -57,6 +58,7 @@ button{font:inherit;color:inherit}
 .sect.ot{--c:var(--ot);--soft:var(--ot-soft)}
 .sect.st{--c:var(--st);--soft:var(--st-soft)}
 .sect.pl{--c:var(--pl);--soft:var(--pl-soft)}
+.sect.cs{--c:var(--cs);--soft:var(--cs-soft)}
 .sh{display:flex;align-items:center;gap:12px;margin:0 0 14px}
 .ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--c)}
 .sh h2{margin:0;font-size:26px;font-weight:800;line-height:1.2;letter-spacing:-0.01em;color:var(--c)}
@@ -168,18 +170,42 @@ button{font:inherit;color:inherit}
         <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>
+      <a class="go adm" href="ledger.html?view=recv">
+        <span class="t"><b>입고</b><small>폐타이어 · 원자재 · 부자재 (금액은 매입에 저절로)</small></span>
+        <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
+        <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
       <a class="go adm" href="stock.html?view=in">
         <span class="t"><b>반입</b></span>
         <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>
       <a class="go adm" href="stock.html?view=all">
-        <span class="t"><b>전체관리</b></span>
+        <span class="t"><b>전체관리</b><small>현황 · 분석 · 현재고 · 예정 · 기록 · 매출·매입 합계</small></span>
         <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>
+      <a class="go adm" href="ledger.html?view=sales">
+        <span class="t"><b>매출</b><small>하루 · 한 달 · 분기 · 반기 · 일 년 · 작년과 비교</small></span>
+        <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
+        <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+      <a class="go adm" href="ledger.html?view=buy">
+        <span class="t"><b>매입</b><small>그날그날 지출 넣기 · 달 · 분기 · 반기 · 일 년 합계 · 작년과 비교</small></span>
+        <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
+        <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </a>
+    </section>
+
+    <section class="sect cs" aria-labelledby="h-cs">
+      <div class="sh">
+        <span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span>
+        <div>
+          <h2 id="h-cs">공사</h2>
+        </div>
+      </div>
       <a class="go adm" href="sketchbook/">
-        <span class="t"><b>스케치북</b><small>도면 위에 바닥 색 설계 · 면적표 · 3D 놀이터</small></span>
+        <span class="t"><b>도면</b><small>도면 위에 바닥 색 설계 · 면적표 · 3D 놀이터</small></span>
         <span class="lock"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>관리자</span>
         <svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
       </a>

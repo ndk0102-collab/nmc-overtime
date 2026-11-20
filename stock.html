@@ -877,6 +877,20 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .mmb{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid #E7C27A;border-radius:10px;background:#FFF9EC;text-align:left;font:inherit;font-size:14px;cursor:pointer;color:inherit}
 .mmk{flex:none;font-weight:700;color:#9A4A00}
 .okline{margin:12px 0 0;padding:8px 10px;border-radius:10px;background:#EEF8F1;color:#1F6B3A;font-size:14px;font-weight:700}
+.ledper{border:1px solid var(--line);border-radius:12px;padding:10px 12px 12px;margin-top:10px}
+.ledper:first-of-type{margin-top:4px}
+.ledper h3{margin:0 0 8px;font-size:16px;font-weight:800;color:var(--ink)}
+.ledper h3 small{font-size:13px;font-weight:600;color:var(--muted);margin-left:8px}
+.ledtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ledtiles > div{background:var(--soft);border-radius:10px;padding:8px 8px 7px;min-width:0}
+.ledtiles span{display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.ledtiles b{display:block;font-size:16px;font-weight:800;line-height:1.25;font-variant-numeric:tabular-nums;word-break:keep-all;color:var(--ink)}
+.ledtiles i{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+.ledcard .ledup{color:var(--ok);font-weight:800}
+.ledcard .leddown{color:var(--bad);font-weight:800}
+.ledcard .ledplain .ledup,.ledcard .ledplain .leddown{color:var(--ink)}
+.ledlinks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
+.ledlinks a{text-decoration:none;color:var(--ink);min-width:0;padding:0 6px}
 </style>
 </head>
 <body>
@@ -905,7 +919,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return /[?&]admin=1(?:&|$)/.test(location.search) ? 'all' : 'prod';
   })();
   var ADMIN_VIEW = VIEW !== 'prod';
-  var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);   // 첫 화면 '발주서 올리기'로 들어오면 맨 위 올리기 칸을 잠깐 강조
+  var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);
+  var DAY0 = VIEW === 'out' ? ((/[?&]day=(\d{4}-\d{2}-\d{2})(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 매출 화면 '이 날 출고 목록'   // 첫 화면 '발주서 올리기'로 들어오면 맨 위 올리기 칸을 잠깐 강조
   var QUICK = VIEW === 'out' || VIEW === 'in';
   var VIEW_NAME = { prod: '생산', out: '출고', 'in': '반입', all: '전체관리' }[VIEW];
 
@@ -974,8 +989,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: '', calDay: '', pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
+    led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
@@ -1764,6 +1780,58 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
 
   /* ── 현황 ── */
+  /* ───────── 전체관리 현황: 매출 · 매입 (2026-11-20 지시 "이 모든 자료가 전체관리에 취합되서 모든 걸 분석하고 보고") ─────────
+     숫자는 매출 · 매입 화면(ledger.html)과 같은 셈입니다. 매출 = 출고(단가 × kg, 단가 없는 출고는 기준 단가로 추정) + 장부 매출(시공 · 기타),
+     매입 = 장부 매입(입고 포함). 모두 공급가액. 자세한 것은 아래 버튼의 화면에서 봅니다. */
+  function ensureLed() {
+    if (!S.money || S.ledLoading || !S.today) return;
+    if (S.led && Date.now() - S.ledAt < 300000) return;
+    if (S.ledErr && Date.now() - S.ledErrAt < 60000) return;
+    S.ledLoading = true;
+    call('apiLed', S.today.slice(0, 4)).then(function (d) { S.ledLoading = false; S.led = d; S.ledAt = Date.now(); S.ledErr = false; redrawStats(); },
+      function () { S.ledLoading = false; S.ledErr = true; S.ledErrAt = Date.now(); redrawStats(); });
+  }
+  function ledYAgo(s) {
+    var y = Number(s.slice(0, 4)) - 1, m = Number(s.slice(5, 7)), d = Number(s.slice(8, 10)), last = new Date(Date.UTC(y, m, 0)).getUTCDate();
+    return y + '-' + s.slice(5, 7) + '-' + (Math.min(d, last) < 10 ? '0' : '') + Math.min(d, last);
+  }
+  function ledSums(d, a, b) {
+    var o = { sale: 0, est: 0, buy: 0 };
+    (d.ship || []).forEach(function (r) { if (r[0] >= a && r[0] <= b) { o.sale += r[3] + r[5]; o.est += r[5]; } });
+    (d.rows || []).forEach(function (r) {
+      if (r[1] < a || r[1] > b) return;
+      if (r[2] === '매출') o.sale += Number(r[10]) || 0;
+      else if (r[2] === '매입') o.buy += Number(r[10]) || 0;
+    });
+    return o;
+  }
+  function ledPct(v, last) {
+    var p = Math.round((v - last) / Math.abs(last) * 1000) / 10;
+    return '<span class="' + (p > 0 ? 'ledup' : p < 0 ? 'leddown' : '') + '">' + (p > 0 ? '▲ ' : p < 0 ? '▼ ' : '') + Math.abs(p).toFixed(1) + '%</span>';
+  }
+  function ledTile(name, v, last, none, extra, plain) {
+    var sub = none ? '작년 기록 없음' : '작년 ' + esc(won(last)) + (last ? ' · ' + ledPct(v, last) : '');
+    return '<div' + (plain ? ' class="ledplain"' : '') + '><span>' + name + '</span><b class="money">' + (v < 0 ? '−' : '') + esc(won(Math.abs(v))) + '</b><i>' + (extra ? esc(extra) + '<br>' : '') + sub + '</i></div>';
+  }
+  function ledCard() {
+    if (!S.money) return '';
+    ensureLed();
+    var links = '<div class="ledlinks"><a class="ghost sm" href="ledger.html?view=sales">매출</a><a class="ghost sm" href="ledger.html?view=buy">매입</a>' +
+      '<a class="ghost sm" href="ledger.html?view=recv">입고</a><a class="ghost sm" href="ledger.html?view=sum">한눈에</a></div>';
+    var h = '<section class="card ledcard"><h2 class="label">매출 · 매입 <small>공급가액 · 출고 금액과 장부를 합친 것</small></h2>';
+    var d = S.led;
+    if (!d) return h + '<p class="hint">' + (S.ledErr ? '매출 · 매입을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.' : '불러오는 중…') + '</p>' + links + '</section>';
+    var t = S.today, first = d.first || t;
+    [['이번 달', t.slice(0, 8) + '01'], ['올해', t.slice(0, 4) + '-01-01']].forEach(function (p) {
+      var cur = ledSums(d, p[1], t), la = ledYAgo(p[1]), lb = ledYAgo(t), last = ledSums(d, la, lb), none = lb < first;
+      h += '<div class="ledper"><h3>' + p[0] + '<small>' + Number(p[1].slice(5, 7)) + '월 ' + Number(p[1].slice(8, 10)) + '일~' + Number(t.slice(5, 7)) + '월 ' + Number(t.slice(8, 10)) + '일 · 작년은 같은 날까지</small></h3><div class="ledtiles">' +
+        ledTile('매출', cur.sale, last.sale, none, cur.est > 0 && cur.sale > 0 ? '추정 ' + Math.max(1, Math.round(cur.est / cur.sale * 100)) + '% 포함' : '') +
+        ledTile('매입', cur.buy, last.buy, none, '', true) +
+        ledTile('매출 − 매입', cur.sale - cur.buy, last.sale - last.buy, none, '') + '</div></div>';
+    });
+    return h + '<p class="hint">매출 − 매입은 손익이 아닙니다 (인건비 · 이자 등은 매입에 넣은 만큼만 빠짐).</p>' + links + '</section>';
+  }
+
   function viewSum() {
     if (S.money) ensurePnl();
     var cur = curYm(), y = cur.slice(0, 4), fy = firstYm();
@@ -1778,7 +1846,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     cands.forEach(function (c) { var sig = c[1].join(','); if (sig !== last) { shown.push(c); last = sig; } });
     var allRows = rowsOf(ymRange(fy, cur));
     if (!allRows) return '<div class="stack">' + statsWait() + '</div>';
-    var h = '<div class="stack"><section class="card"><h2 class="label">이때까지 · ' + esc(fmtDate(S.today)) + ' 기준</h2>';
+    var h = '<div class="stack">' + ledCard() + '<section class="card"><h2 class="label">이때까지 · ' + esc(fmtDate(S.today)) + ' 기준</h2>';
     var SG = grpList();
     allRows.forEach(function (r) { var g = grpOf(r[3]); if (SG.indexOf(g) < 0) SG.push(g); });
     shown.forEach(function (c) {
