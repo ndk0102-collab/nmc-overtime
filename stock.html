@@ -891,6 +891,37 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .ledcard .ledplain .ledup,.ledcard .ledplain .leddown{color:var(--ink)}
 .ledlinks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:12px}
 .ledlinks a{text-decoration:none;color:var(--ink);min-width:0;padding:0 6px}
+.dga .bxgo{border-color:var(--accent);color:var(--accent);font-weight:800}
+.dgrp.bxed{border:2px solid var(--accent);background:#F7FAFF}
+.dgrp.bxed .dgh{background:var(--accent-soft)}
+.bxf{display:grid;gap:8px;padding:10px 12px 4px}
+.bxh{display:flex;align-items:center;gap:8px}
+.bxh span{flex:0 0 44px;font-size:14px;font-weight:800;color:var(--ink2)}
+.bxh .text{flex:1;min-width:0;min-height:46px}
+.bxlist{list-style:none;margin:8px 0 0;padding:0 12px}
+.bxrow{padding:10px 0;border-top:1px solid var(--line)}
+.bxrow.chg{background:linear-gradient(90deg,#FFF6D6,#FFFBEA);margin:0 -12px;padding:10px 12px}
+.bxrow.new{background:#EAF7EF;margin:0 -12px;padding:10px 12px}
+.bxrow.del{opacity:.55}
+.bxrow.del .bxsel,.bxrow.del .bxnum{text-decoration:line-through}
+.bxr1,.bxr2{display:flex;align-items:center;gap:6px}
+.bxr2{gap:5px}
+.bxr2{margin-top:6px;flex-wrap:wrap}
+.bxr1 .bxsel{flex:1 1 0;min-width:0;min-height:44px;padding:0 6px;font-size:15px}
+.bxq{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.bxq .bxnum{width:92px;min-height:44px;padding:0 8px;text-align:right;font-size:17px;font-weight:800}
+.bxq span,.bxz span{font-size:13.5px;font-weight:700;color:var(--muted)}
+.bxz{display:flex;align-items:center;gap:4px}
+.bxz .text{width:64px;min-height:44px;padding:0 8px;font-size:15px}
+.bxpk{min-height:44px;width:auto;font-size:14.5px}
+.bxdel{margin-left:auto;padding:0 10px!important;min-width:0}
+.bxwas{display:block;margin-top:4px;font-size:12.5px;color:var(--warn)}
+.bxadd{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px 0}
+#bxmsg{padding:0 12px}
+.bxnote{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-size:14px;font-weight:600}
+.bxerr{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--bad-soft);color:var(--bad);font-size:14px;font-weight:700}
+.bxprob{margin:10px 0 0;padding:8px 10px 8px 28px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:14px;font-weight:600}
+.bxa{padding:12px}
 </style>
 </head>
 <body>
@@ -991,7 +1022,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     ready: false, fatal: false, busy: false, gen: 0,
     today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
-    led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0,
+    led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0, boxEd: null,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
@@ -2228,8 +2259,255 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      옮길 줄(처음엔 모두)과 날짜를 고르면 한 번에 옮깁니다. 수량·거래처·단가·발주번호·메모는 그대로입니다 (서버 apiMove).
      예정은 오늘부터의 날짜로, 실제 출고는 날짜를 고칠 수 있고, 실제 출고를 앞날로 옮기면 아직 안 나간 것이라 출고예정이 됩니다. */
   function recOf(id) { return findPlan(id) || findRecord(id); }
+  /* ───────── 거래처 상자를 그 자리에서 고치기 (2026-11-20 10:56 지시) ─────────
+     "지금 재고에 출고 들어가면 발주서가 나오고 쭉 나와 있는데 이거를 이 자체에서 수정할 수 있도록 만들어라.
+      그리고 물표 누르면 물표에서도 다 수정돼서 자동으로 나오도록 해라"
+     · 상자의 '고치기' → 상자가 그 자리에서 고치는 칸으로 바뀜: 거래처 · 현장 · 날짜(상자 전체), 줄마다 제품 · 색 · kg · 구분(놀이터1 등) · 포장(SBR),
+       줄 빼기 · 되살리기, 줄 더하기. 맨 아래 '저장' 한 번에 서버(apiBoxSave)가 잠금 안에서 모두 씁니다.
+     · 같은 날 · 같은 현장의 같은 색은 한 제품으로만: 칩 제품을 바꾸면 같은 색 줄도 함께 바꾸고, 그래도 섞이면 저장하지 않습니다.
+     · 물표는 기록에서 만들므로 저장하면 그대로 나옵니다. 저장해 둔 물표도 바뀐 양 · 색 · 구분만 맞추고(파렛트 모양은 그대로),
+       현장 · 날짜를 바꾸면 물표에서 덮어쓴 현장명 · 날짜를 지워 새 현장 · 날짜가 나옵니다(서버). */
+  function bxKeyOf(day, r) { return day + '|' + r.type + '|' + (r.cust || '') + '|' + (r.po || ''); }
+  function bxSigOf(rows) {
+    var t = function (v) { return String(v == null ? '' : v).trim(); };
+    return rows.map(function (r) { return [t(r.id), t(r.date), t(r.type), t(r.prod), t(r.color), String(Number(r.qty)), t(r.cust), t(r.po), t(r.memo)].join('|'); }).join('\n');
+  }
+  /** 메모 → 구분 · 나머지 · 포장. 맨 앞 [구분 1] · [놀이터1] 만 구분으로(그 밖 대괄호는 나머지에 둠) */
+  function bxSplit(memo) {
+    var s = String(memo || '').replace(/\s*[\[【](톤백|소포장)[\]】]\s*/g, ' ').replace(/\s+/g, ' ').trim(), zone = '', tag = '';
+    var t = zoneTag(s);
+    if (t && zoneParse(t).name) { tag = t; zone = t.slice(1, -1).trim().replace(/^구분\s*[:：]?\s*/, ''); s = s.slice(t.length).trim(); }
+    return { zone: zone, rest: s, tag: tag };
+  }
+  /** 새로 적은 구분 → 표시. 같은 상자에 이미 있는 구분이면 그 줄과 똑같이(물표에서 한 구분으로 묶이게),
+   *  아니면 출고 넣기 칸과 같은 규칙: 숫자만 = 놀이터N, 놀이터 · 구역 같은 말이 없으면 [구분 ○○] */
+  function bxZoneTag(z) {
+    z = String(z || '').replace(/[\[\]【】]/g, '').replace(/\s+/g, ' ').trim();
+    if (!z) return '';
+    var B = S.boxEd, have = B && B.ztags && B.ztags[z];
+    if (have) return have;
+    var t = z.replace(/\s+/g, ''), zn = t.match(/^(\d{1,2})번?$/);
+    if (zn) t = '놀이터' + Number(zn[1]);
+    return zoneParse('[' + t + ']').key && !/^#/.test(zoneParse('[' + t + ']').key) ? '[' + t + ']' : '[구분 ' + z + ']';
+  }
+  function bxMemoOf(l) {
+    var m = (bxZoneTag(l.zone) + ' ' + l.rest).replace(/\s+/g, ' ').trim();
+    return packTag(m, isSbr(l.prod) ? (l.pack === 'small' ? 'small' : 'ton') : '').slice(0, 200);
+  }
+  function bxLineOf(r) {
+    var sp = bxSplit(r.memo), pack = isSbr(r.prod) ? packOf(r) : '';
+    return { id: r.id, prod: r.prod, color: r.color, qty: fmt(r.qty), zone: sp.zone, ztag: sp.tag, rest: sp.rest, pack: pack, memo0: String(r.memo || '').trim(), del: false,
+      o: { prod: r.prod, color: r.color, qty: Number(r.qty), zone: sp.zone, pack: pack } };
+  }
+  function bxRowsOf(day, key) {
+    var x = calDays(day.slice(0, 7))[day];
+    if (!x) return [];
+    return x.out.concat(x.plan).filter(function (r) { return isSale(r.type) && bxKeyOf(day, r) === key; });
+  }
+  function bxOpen(idsStr) {
+    if (S.boxEd && bxCount().n && S.boxEd.date0 === S.calDay) { toast('고치던 상자를 먼저 저장하거나 취소해 주세요'); return; }
+    var want = String(idsStr || '').split(',').filter(String), day = S.calDay;
+    var r0 = recOf(want[0]);
+    if (!r0 || !isSale(r0.type)) { toast(ERR.not_found || '그 줄을 찾지 못했습니다'); return; }
+    var key = bxKeyOf(day, r0), rows = bxRowsOf(day, key);
+    if (!rows.length) { toast('그 줄을 찾지 못했습니다. 새로 불러와 주세요.'); return; }
+    S.boxEd = { key: key, type: r0.type, date0: day, ids: rows.map(function (r) { return r.id; }), sig: bxSigOf(rows),
+      date: day, cust: r0.cust || '', po: r0.po || '', lines: rows.map(bxLineOf), note: '', err: '', busy: false };
+    S.boxEd.zones = S.boxEd.lines.some(function (l) { return l.zone; });
+    S.boxEd.ztags = {};
+    S.boxEd.lines.forEach(function (l) { if (l.zone && l.ztag && !S.boxEd.ztags[l.zone]) S.boxEd.ztags[l.zone] = l.ztag; });
+    render();
+    setTimeout(function () { var el = document.getElementById('bxed'); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' }); }, 30);
+  }
+  /** 발주서(받은 발주서함 · 넣었습니다 칸)에서 '고치기': 그 발주서 첫 줄이 든 날 · 상자를 엽니다 */
+  function bxOpenPo(poId) {
+    var it = poItemOf(poId), r = null;
+    ((it && it.ids) || []).some(function (id) { r = recOf(id); return !!r; });
+    if (!r) { toast('이 발주서로 넣은 줄이 이제 없습니다'); return; }
+    if (S.boxEd && bxCount().n) { toast('고치던 상자를 먼저 저장하거나 취소해 주세요'); return; }
+    S.boxEd = null; S.poShow = null;
+    S.outMode = 'cal'; S.calDay = r.date; S.calYm = r.date.slice(0, 7); S.sheet = null;
+    var rows = bxRowsOf(r.date, bxKeyOf(r.date, r));
+    bxOpen(rows.map(function (x) { return x.id; }).join(','));
+  }
+  function bxChanged(l) {
+    if (!l.id) return true;
+    if (l.del) return true;
+    return l.prod !== l.o.prod || l.color !== l.o.color || Number(cleanNum(l.qty)) !== l.o.qty || l.zone !== l.o.zone || (isSbr(l.prod) && l.pack !== l.o.pack);
+  }
+  /** 바뀐 곳 수: 줄(고침 · 뺌 · 더함) + 상자(거래처 · 현장 · 날짜) */
+  function bxCount() {
+    var B = S.boxEd, c = { edit: 0, add: 0, del: 0, head: 0, n: 0 };
+    if (!B) return c;
+    B.lines.forEach(function (l) { if (!l.id) { if (!l.del) c.add++; } else if (l.del) c.del++; else if (bxChanged(l)) c.edit++; });
+    var r0 = recOf(B.ids[0]) || {};
+    if (B.cust.trim() !== String(r0.cust || '').trim()) c.head++;
+    if (B.po.trim() !== String(r0.po || '').trim()) c.head++;
+    if (B.date !== B.date0) c.head++;
+    c.n = c.edit + c.add + c.del + c.head;
+    return c;
+  }
+  /** 저장 전에 막을 것: 거래처 · 날짜 · kg · 같은 색 다른 제품 */
+  function bxProblems() {
+    var B = S.boxEd, out = [], plan = isPlan(B.type);
+    if (!B.cust.trim()) out.push('거래처를 넣어 주세요.');
+    if (!isYmd(B.date)) out.push('날짜를 확인해 주세요.');
+    else if (plan && B.date < S.today && B.date !== B.date0) out.push('예정 날짜는 오늘부터 고를 수 있습니다.');
+    else if (plan && B.date > planMax()) out.push('날짜를 확인해 주세요.');
+    else if (!plan && B.date > S.today) out.push('나간 출고는 오늘까지 날짜만 됩니다.');
+    var live = B.lines.filter(function (l) { return !l.del; });
+    live.forEach(function (l) {
+      var q = cleanNum(l.qty);
+      if (!/^\d+$/.test(q) || Number(q) <= 0) out.push((B.lines.indexOf(l) + 1) + '번째 줄 kg을 숫자로 넣어 주세요.');
+      if (!S.byKey[l.prod + '|' + l.color] && !(l.id && l.prod === l.o.prod && l.color === l.o.color)) out.push((B.lines.indexOf(l) + 1) + '번째 줄 제품 · 색을 골라 주세요.');
+    });
+    var by = {};
+    live.forEach(function (l) { if (PROD3.indexOf(l.prod) < 0) return; (by[l.color] = by[l.color] || []).indexOf(l.prod) < 0 && by[l.color].push(l.prod); });
+    var mix = Object.keys(by).filter(function (c) { return by[c].length > 1; });
+    if (mix.length) out.push('같은 날 같은 현장에서 같은 색은 한 제품으로만 나갑니다: ' + mix.map(function (c) { return c + '(' + by[c].join('·') + ')'; }).join(', ') + ' — 제품을 하나로 맞춰 주세요.');
+    return out;
+  }
+  function bxSelProd(i, l) {
+    var ps = S.prods.slice();
+    if (ps.indexOf(l.prod) < 0) ps.unshift(l.prod);
+    return '<select class="text bxsel" data-bxl="prod" data-i="' + i + '" aria-label="' + (i + 1) + '번째 줄 제품"' + (l.del ? ' disabled' : '') + '>' +
+      ps.map(function (p) { return '<option value="' + esc(p) + '"' + (p === l.prod ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>';
+  }
+  function bxSelColor(i, l) {
+    var cs = itemsOf(l.prod).map(function (it) { return it.color; });
+    if (cs.indexOf(l.color) < 0) cs.unshift(l.color);
+    return '<select class="text bxsel" data-bxl="color" data-i="' + i + '" aria-label="' + (i + 1) + '번째 줄 ' + esc(vlabel(l.prod)) + '"' + (l.del ? ' disabled' : '') + '>' +
+      cs.map(function (c) { return '<option value="' + esc(c) + '"' + (c === l.color ? ' selected' : '') + '>' + esc(c || '고르기') + '</option>'; }).join('') + '</select>';
+  }
+  function bxWas(l) {
+    if (!l.id || l.del || !bxChanged(l)) return '';
+    var o = l.o;
+    return '<small class="bxwas">원래: ' + esc(o.prod + ' ' + o.color) + ' ' + fmt(o.qty) + ' kg' + (o.zone ? ' · 구분 ' + esc(o.zone) : '') + (o.pack ? ' · ' + (o.pack === 'small' ? '소포장' : '톤백') : '') + '</small>';
+  }
+  function bxHtml(x, num) {
+    var B = S.boxEd, plan = isPlan(B.type), c = bxCount(), probs = bxProblems();
+    var dmin = plan ? (B.date0 < S.today ? B.date0 : S.today) : '', dmax = plan ? planMax() : S.today;
+    var h = '<div class="dgrp bxed" id="bxed" data-n="' + num + '"><div class="dgh"><span class="dgn" aria-hidden="true">' + num + '</span><span class="dgt"><b>고치는 중</b>' +
+      '<small>바꾸고 맨 아래 ‘저장’ · 물표도 고친 대로 나옵니다</small></span></div>';
+    h += '<div class="bxf"><label class="bxh"><span>거래처</span><input class="text" type="text" data-bx="cust" list="cust-list" autocomplete="off" maxlength="60" value="' + esc(B.cust) + '"></label>' +
+      '<label class="bxh"><span>현장</span><input class="text" type="text" data-bx="po" autocomplete="off" maxlength="60" placeholder="현장 · 발주번호" value="' + esc(B.po) + '"></label>' +
+      '<label class="bxh"><span>날짜</span><input class="text" type="date" data-bx="date"' + (dmin ? ' min="' + dmin + '"' : '') + ' max="' + dmax + '" value="' + esc(B.date) + '"></label></div>';
+    h += '<ul class="bxlist">';
+    B.lines.forEach(function (l, i) {
+      var chg = bxChanged(l);
+      h += '<li class="bxrow' + (l.del ? ' del' : chg ? ' chg' : '') + (l.id ? '' : ' new') + '" data-i="' + i + '">' +
+        '<div class="bxr1">' + sw(l.color, l.prod) + bxSelProd(i, l) + bxSelColor(i, l) + '</div>' +
+        '<div class="bxr2"><label class="bxq"><input class="text bxnum" type="text" inputmode="numeric" autocomplete="off" data-bxl="qty" data-i="' + i + '" value="' + esc(l.qty) + '" aria-label="' + (i + 1) + '번째 줄 kg"' + (l.del ? ' disabled' : '') + '><span>kg</span></label>' +
+        (B.zones ? '<label class="bxz"><span>구분</span><input class="text" type="text" autocomplete="off" maxlength="12" data-bxl="zone" data-i="' + i + '" value="' + esc(l.zone) + '" placeholder="없음" aria-label="' + (i + 1) + '번째 줄 구분"' + (l.del ? ' disabled' : '') + '></label>' : '') +
+        (isSbr(l.prod) ? '<select class="text bxpk" data-bxl="pack" data-i="' + i + '" aria-label="포장"' + (l.del ? ' disabled' : '') + '><option value="ton"' + (l.pack !== 'small' ? ' selected' : '') + '>톤백</option><option value="small"' + (l.pack === 'small' ? ' selected' : '') + '>소포장</option></select>' : '') +
+        '<button type="button" class="ghost sm bxdel" data-act="bxdel" data-v="' + i + '">' + (l.del ? '되살리기' : l.id ? '빼기' : '지우기') + '</button></div>' +
+        (l.del ? '<small class="bxwas">저장하면 이 줄을 뺍니다</small>' : bxWas(l)) + '</li>';
+    });
+    h += '</ul><div class="bxadd"><button type="button" class="ghost sm" data-act="bxadd">+ 줄 더하기</button>' +
+      (B.zones ? '' : '<button type="button" class="link" data-act="bxzones">구분(놀이터1 등) 나누기</button>') + '</div>';
+    h += '<div id="bxmsg">' + bxMsgHtml(probs) + '</div>';
+    h += '<div class="two bxa"><button type="button" class="ghost" data-act="bxcancel"' + (B.busy ? ' disabled' : '') + '>취소</button>' +
+      '<button type="button" class="primary" id="bxsave" data-act="bxsave"' + (B.busy || probs.length || !c.n ? ' disabled' : '') + '>' + bxSaveTxt(c) + '</button></div>';
+    return h + '</div>';
+  }
+  function bxSaveTxt(c) {
+    if (S.boxEd && S.boxEd.busy) return '저장 중…';
+    if (!c.n) return '바꾼 것 없음';
+    return '저장 · ' + [c.edit ? c.edit + '줄 고침' : '', c.add ? c.add + '줄 더함' : '', c.del ? c.del + '줄 뺌' : '', c.head ? '거래처·현장·날짜' : ''].filter(String).join(' · ');
+  }
+  function bxMsgHtml(probs) {
+    var B = S.boxEd, h = '';
+    if (B.note) h += '<p class="bxnote">' + esc(B.note) + '</p>';
+    if (B.err) h += '<p class="bxerr" role="alert">' + esc(B.err) + '</p>';
+    if (probs.length) h += '<ul class="bxprob">' + probs.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>';
+    return h;
+  }
+  /** 글자칸을 칠 때는 다시 그리지 않고 바뀐 표시 · 저장 단추 · 알림만 */
+  function bxPaint() {
+    var B = S.boxEd;
+    if (!B) return;
+    var c = bxCount(), probs = bxProblems(), b = document.getElementById('bxsave'), m = document.getElementById('bxmsg');
+    if (b) { b.textContent = bxSaveTxt(c); b.disabled = B.busy || !!probs.length || !c.n; }
+    if (m) m.innerHTML = bxMsgHtml(probs);
+    var rows = root.querySelectorAll('.bxrow');
+    for (var i = 0; i < rows.length; i++) {
+      var l = B.lines[Number(rows[i].getAttribute('data-i'))];
+      if (!l || l.del) continue;
+      rows[i].classList.toggle('chg', bxChanged(l));
+    }
+  }
+  function bxSetProd(i, prod) {
+    var B = S.boxEd, l = B.lines[i], was = l.prod, keepColor = !!S.byKey[prod + '|' + l.color];
+    l.prod = prod;
+    if (!keepColor) { var cs = itemsOf(prod); l.color = cs.length ? cs[0].color : ''; }
+    if (isSbr(prod) && !l.pack) l.pack = 'ton';
+    B.note = keepColor ? '' : prod + '에는 그 색이 없어 ' + (l.color || '첫 색') + '(으)로 바꿨습니다. 색을 확인해 주세요.';
+    // 같은 색은 한 제품으로만 — 같은 상자의 같은 색 칩 줄도 함께 (2026-11-17 지시)
+    if (keepColor && PROD3.indexOf(prod) >= 0 && PROD3.indexOf(was) >= 0) {
+      var n = 0;
+      B.lines.forEach(function (o, j) { if (j !== i && !o.del && o.color === l.color && PROD3.indexOf(o.prod) >= 0 && o.prod !== prod) { o.prod = prod; n++; } });
+      if (n) B.note = '같은 색 ' + l.color + ' ' + n + '줄도 ' + (PROD3_NAME[prod] || prod) + '(으)로 함께 바꿨습니다 — 같은 색은 한 제품으로만 나갑니다.';
+    }
+  }
+  function bxAdd() {
+    var B = S.boxEd, live = B.lines.filter(function (l) { return !l.del; }), last = live[live.length - 1] || B.lines[B.lines.length - 1];
+    var prod = last ? last.prod : S.prods[0], used = {};
+    B.lines.forEach(function (l) { if (!l.del && l.prod === prod) used[l.color] = true; });
+    var cs = itemsOf(prod).map(function (it) { return it.color; }), color = cs.filter(function (c) { return !used[c]; })[0] || cs[0] || '';
+    var rests = B.lines.map(function (l) { return l.rest; }), rest = rests.every(function (t) { return t === rests[0]; }) ? rests[0] || '' : '';
+    B.lines.push({ id: '', prod: prod, color: color, qty: '', zone: last ? last.zone : '', rest: rest, pack: isSbr(prod) ? 'ton' : '', memo0: '', del: false, o: null });
+    B.note = '';
+    render();
+    var qs = root.querySelectorAll('[data-bxl="qty"]'), q = qs[qs.length - 1];
+    if (q && q.focus) q.focus();
+  }
+  function bxDel(i) {
+    var B = S.boxEd, l = B.lines[i];
+    if (!l) return;
+    if (!l.id) B.lines.splice(i, 1); else l.del = !l.del;
+    B.note = '';
+    render();
+  }
+  function bxSave() {
+    var B = S.boxEd;
+    if (!B || B.busy) return;
+    var probs = bxProblems(), c = bxCount();
+    if (probs.length || !c.n) { bxPaint(); return; }
+    var lines = B.lines.filter(function (l) { return !l.del; }).map(function (l) {
+      var same = l.id && l.zone === l.o.zone && (!isSbr(l.prod) || l.pack === l.o.pack) && isSbr(l.prod) === isSbr(l.o.prod);
+      return { id: l.id, prod: l.prod, color: l.color, qty: cleanNum(l.qty), memo: same ? l.memo0 : bxMemoOf(l) };
+    });
+    if (!lines.length && !B.confirmAll) { B.confirmAll = true; B.err = '줄을 모두 뺐습니다. 저장하면 이 상자의 ' + B.ids.length + '줄을 모두 지웁니다. 맞으면 저장을 한 번 더 누르세요.'; bxPaint(); return; }
+    B.busy = true; B.err = '';
+    bxPaint();
+    var body = { ids: B.ids.slice(), sig: B.sig, date: B.date, cust: B.cust.trim(), po: B.po.trim(), lines: lines };
+    call('apiBoxSave', body).then(function (r) {
+      var bx = (r && r.box) || {};
+      apply(r);
+      S.boxEd = null;
+      if (body.date !== S.calDay) { S.calDay = body.date; S.calYm = body.date.slice(0, 7); }
+      render();
+      toastOk('고쳤습니다: ' + [bx.changed ? bx.changed + '줄 고침' : '', bx.added ? bx.added + '줄 더함' : '', bx.removed ? bx.removed + '줄 뺌' : ''].filter(String).join(' · ') +
+        (lines.length ? ' · 물표도 이대로 나옵니다' : ''));
+    }, function (e) {
+      if (!S.boxEd) return;
+      B.busy = false;
+      var code = String((e && e.message) || '');
+      if (code === 'box_changed') {
+        S.boxEd = null;
+        render();
+        toast('다른 곳에서 이 상자가 바뀌었습니다. 새로 불러왔으니 다시 고쳐 주세요.');
+        refresh(false);
+        return;
+      }
+      if (isAuth(e)) { failed(e); return; }
+      B.err = errText(e);
+      render();
+    });
+  }
   /* 거래처 상자 (2026-11-20): 번호 · 거래처 · 현장(발주번호) · 줄 수 · kg(묶음마다) · 금액. 이름 줄은 내려도 화면 위에 붙음.
      단추 줄(금액 넣기 · 전체 확정 · 물표 · 날짜 바꾸기)은 이름 줄 아래. 다섯 줄이 넘으면 상자 끝에 그 거래처 합계 줄. */
+  var ICON_PEN = '<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:-2px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   function dayGroups(list) {
     var g = {}, order = [];
     list.forEach(function (r) {
@@ -2239,6 +2517,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       g[k].kg += r.qty;
     });
     return order.map(function (k, i) {
+      if (S.boxEd && S.admin && isSale(g[k].type) && S.boxEd.key === S.calDay + '|' + k) return bxHtml(g[k], i + 1);
       var x = g[k], name = x.type === '생산예정' ? '생산예정' : (x.cust || '거래처 없음'), num = i + 1;
       var ids = esc(x.rows.map(function (r) { return r.id; }).join(','));
       var m0 = rowMemo(x.rows[0]), same = x.rows.length > 1 && m0 && x.rows.every(function (r) { return rowMemo(r) === m0; }) ? m0 : '';
@@ -2249,6 +2528,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         (x.po ? '<em>' + esc(x.po) + '</em>' : '') + '<small>' + sum + '</small></span></div>';
       if (S.admin) {
         var bs = [];
+        if (sale) bs.push('<button type="button" class="ghost sm bxgo" data-act="bxopen" data-v="' + ids + '">' + ICON_PEN + '고치기</button>');
         if (m && m.n > m.nOwn) bs.push('<button type="button" class="ghost sm' + (m.nNo ? ' need' : '') + '" data-act="rpopen" data-v="' + ids + '">' + (m.nNo ? '금액 넣기' : '금액 고치기') + '</button>');
         if (isPlan(x.type) && x.rows.length > 1) bs.push('<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + ids + '">전체 확정</button>');
         if (x.type !== '생산예정') bs.push(x.rows.every(function (r) { return packOf(r) === 'ton'; }) ? '<span class="dgtb">톤백 · 물표 없음</span>' :
@@ -4443,6 +4723,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     } else {
       h += '<div class="two mt12"><button type="button" class="primary" data-act="poshowlab"' + ((it.ids || []).length ? '' : ' disabled') + '>물표 보기</button>' +
         '<button type="button" class="ghost" data-act="pogoto" data-v="' + esc(plan.date || '') + '">' + esc(poMd(plan.date)) + ' 달력 보기</button></div>' +
+        ((it.ids || []).length ? '<button type="button" class="ghost wide mt8" data-act="poedit" data-v="' + esc(it.id) + '">' + ICON_PEN + '넣은 줄 그 자리에서 고치기</button>' : '') +
         (it.undo ? '<button type="button" class="link mt8" data-act="poundoask" data-v="' + esc(it.id) + '">잘못 넣었으면 되돌리기</button>' : '');
     }
     return h + '</section>';
@@ -4472,6 +4753,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       h += '<p class="pores">' + esc(x.result || '') + '</p><div class="poacts">' +
         (x.dates || []).slice(0, 3).map(function (d) { return '<button type="button" class="primary sm" data-act="pogoto" data-v="' + esc(d) + '">' + esc(fmtDate(d)) + ' 보기 · 물표</button>'; }).join('') +
         ((x.ids || []).length ? '<button type="button" class="ghost sm" data-act="polabids" data-v="' + esc(x.id) + '">물표</button>' : '') +
+        ((x.ids || []).length ? '<button type="button" class="ghost sm" data-act="poedit" data-v="' + esc(x.id) + '">' + ICON_PEN + '고치기</button>' : '') +
         (x.undo ? (S.poUndoAsk === x.id ? '<button type="button" class="danger sm" data-act="poundo" data-v="' + esc(x.id) + '">정말 되돌리기</button><button type="button" class="ghost sm" data-act="poundox">아니요</button>'
           : '<button type="button" class="ghost sm" data-act="poundoask" data-v="' + esc(x.id) + '">되돌리기</button>') : '') + '</div>';
     } else if (x.state === '날짜 대기') {
@@ -5052,16 +5334,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   /* 저장할 메모: 따로 싣기를 고르면 맨 앞에 [놀이터1] (놀이터·구역 같은 말이 없는 이름은 [구분 정문앞]).
      숫자만 쓰면(1 · 2 · 1번) 놀이터1 · 놀이터2 (2026-11-16 지시) */
-  function zoneTag() {
+  function inZoneTag() {
     var z = String(S.inZone || '').replace(/[\[\]【】]/g, '').replace(/\s+/g, '');
     if (!z) return '';
     var zn = z.match(/^(\d{1,2})번?$/);
     if (zn) z = '놀이터' + Number(zn[1]);
     return zoneParse('[' + z + ']').key ? '[' + z + ']' : '[구분 ' + z + ']';
   }
-  function zoneName() { var t = zoneTag(); return t ? zoneParse(t).name : ''; }
+  function zoneName() { var t = inZoneTag(); return t ? zoneParse(t).name : ''; }
   function memoOut(type) {
-    var m = S.inMemo.trim(), t = type === '출고예정' ? zoneTag() : '';
+    var m = S.inMemo.trim(), t = type === '출고예정' ? inZoneTag() : '';
     return (t ? t + (m ? ' ' + m : '') : m).slice(0, 200);
   }
   function startPo(o) {
@@ -5277,7 +5559,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!fut) h += '<button type="button" class="primary" data-act="caladd" data-v="출고">＋ 출고 넣기</button>';
     if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="caladd" data-v="출고예정">＋ 출고예정 넣기</button>';
     h += '</div>';
-    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">줄을 누르면 고치기·지우기 · 나간 날 ‘확정’을 누르면 재고에서 빠집니다.' +
+    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">거래처 상자의 ‘고치기’로 그 자리에서 여러 줄을 한 번에 고치고(물표도 그대로 나옴), 줄을 누르면 한 줄 자세히 고치기·지우기 · 나간 날 ‘확정’을 누르면 재고에서 빠집니다.' +
       (S.money && (x.out.length || x.plan.length) ? ' 금액 = kg × 단가(부가세 뺀 공급가) · 거래처 상자의 ‘금액 넣기’로 단가를 한 번에 넣습니다.' : '') + '</p>';
     return h + '</section>';
   }
@@ -5703,7 +5985,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<h2 class="h2" id="sh-title">' + (qmode ? '날짜 미정 (대기열)' : esc(fmtDate(date))) + ' · ' + esc(t) + (sale ? ' · ' + esc(S.inCust.trim()) : '') + '</h2>';
     if (qmode) h += '<p class="warnbox">날짜가 없어 출고 화면의 ‘날짜 미정 대기열’에 들어갑니다. 날짜가 정해지면 거기서 ‘날짜 정해 넣기’를 누르세요. 아래 재고 계산은 오늘 기준입니다.</p>';
     if (t === '출고예정' && S.inPo.trim()) h += '<p class="muted">현장명·발주번호: ' + esc(S.inPo.trim()) + '</p>';
-    if (t === '출고예정' && zoneTag()) h += '<p class="muted">따로 싣기: <b>' + esc(zoneName()) + '</b></p>';
+    if (t === '출고예정' && inZoneTag()) h += '<p class="muted">따로 싣기: <b>' + esc(zoneName()) + '</b></p>';
     var groups = [], by = {};
     ls.forEach(function (l) { if (!by[l.it.prod]) { by[l.it.prod] = []; groups.push(l.it.prod); } by[l.it.prod].push(l); });
     groups.forEach(function (p, gi) {
@@ -6882,7 +7164,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'logout': doLogout(); return;
       case 'calprev': S.calYm = addMonths(S.calYm, -1); render(); return;
       case 'calnext': S.calYm = addMonths(S.calYm, 1); render(); return;
-      case 'calday': S.calDay = v; render(); var dc = document.getElementById('daycard'); if (dc && dc.scrollIntoView) dc.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
+      case 'calday': if (S.boxEd && v !== S.calDay) { if (bxCount().n) { toast('고치던 상자를 먼저 저장하거나 취소해 주세요'); return; } S.boxEd = null; } S.calDay = v; render(); var dc = document.getElementById('daycard'); if (dc && dc.scrollIntoView) dc.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return;
       case 'caladd': if (v === '출고예정') { S.poLast = null; startPo({ date: S.calDay }); return; }
         S.po = false; S.inZone = ''; S.zoneOwn = false;
         S.inType = '출고'; S.inDate = S.calDay; S.qty = {}; S.price = {}; S.inCust = ''; S.inPo = ''; S.inMemo = ''; S.outMode = 'add'; S.sheet = null; render(); window.scrollTo(0, 0); return;
@@ -7029,6 +7311,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'initem': goInput(v); return;
       case 'adjust': openSheet({ kind: 'adjust', key: v, val: '', memo: '' }); return;
       case 'adjsave': adjSave(); return;
+      case 'bxopen': bxOpen(v); return;
+      case 'bxcancel': S.boxEd = null; render(); return;
+      case 'bxsave': bxSave(); return;
+      case 'bxadd': if (S.boxEd) bxAdd(); return;
+      case 'bxdel': if (S.boxEd) bxDel(Number(v)); return;
+      case 'bxzones': if (S.boxEd) { S.boxEd.zones = true; render(); var z0 = root.querySelector('[data-bxl="zone"]'); if (z0) z0.focus(); } return;
+      case 'poedit': bxOpenPo(v); return;
       case 'edit': openEdit(v); return;
       case 'edtype': S.sheet.draft.type = v; renderSheet(); return;
       case 'edprod': if (S.sheet && S.sheet.kind === 'edit' && v) { S.sheet.draft.prod = v; renderSheet(); } return;
@@ -7086,6 +7375,19 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if ((k === 'rpp' || k === 'rpr') && S.sheet) { rpInput(el, k); return; }
     var e2 = el.getAttribute('data-ed');
     if (e2 && S.sheet && S.sheet.kind === 'edit' && ['qty', 'cust', 'memo', 'price', 'po'].indexOf(e2) >= 0) S.sheet.draft[e2] = el.value;
+    var bx = el.getAttribute('data-bx'), bl = el.getAttribute('data-bxl');
+    if (S.boxEd && (bx === 'cust' || bx === 'po')) { S.boxEd[bx] = el.value; S.boxEd.err = ''; S.boxEd.confirmAll = false; bxPaint(); return; }
+    if (S.boxEd && (bl === 'qty' || bl === 'zone')) {
+      var L1 = S.boxEd.lines[Number(el.getAttribute('data-i'))];
+      if (!L1) return;
+      if (bl === 'qty') {
+        var raw = String(el.value).replace(/[^0-9]/g, ''), nv = raw ? Number(raw).toLocaleString('ko-KR') : '';
+        if (nv !== el.value) { el.value = nv; try { el.setSelectionRange(nv.length, nv.length); } catch (e3) {} }
+        L1.qty = nv;
+      } else L1.zone = el.value.trim();
+      S.boxEd.err = ''; S.boxEd.confirmAll = false;
+      bxPaint();
+    }
   });
 
   document.addEventListener('change', function (ev) {
@@ -7123,6 +7425,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (a === 'labaddk' && S.lab) { S.lab.add = S.lab.add || {}; var kn = el.getAttribute('data-v'); S.lab.add[kn] = S.lab.add[kn] || {}; S.lab.add[kn].id = el.value; return; }
     if (a === 'labrest') { labPutRest(el.getAttribute('data-v'), el.value); return; }
     if (a === 'day') { if (el.value) setDay(el.value); return; }
+    if (S.boxEd && el.getAttribute('data-bx') === 'date') { S.boxEd.date = el.value; S.boxEd.err = ''; render(); return; }
+    var bl2 = el.getAttribute('data-bxl');
+    if (S.boxEd && (bl2 === 'prod' || bl2 === 'color' || bl2 === 'pack')) {
+      var i2 = Number(el.getAttribute('data-i')), L2 = S.boxEd.lines[i2];
+      if (!L2) return;
+      if (bl2 === 'prod') bxSetProd(i2, el.value); else { L2[bl2] = el.value; S.boxEd.note = ''; }
+      S.boxEd.err = ''; S.boxEd.confirmAll = false;
+      render();
+      return;
+    }
     var e2 = el.getAttribute('data-ed');
     if (!e2 || !S.sheet || S.sheet.kind !== 'edit') return;
     var d = S.sheet.draft;
