@@ -192,13 +192,13 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
 <body class="v-buy">
 <header class="bar">
   <div class="bin">
-    <a class="home" href="./"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>첫 화면</a>
+    <a class="home" href="./"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>홈</a>
     <h1 id="title">매입</h1>
   </div>
-  <nav class="vtabs" id="vtabs" role="tablist" aria-label="화면 고르기"></nav>
+  <nav class="vtabs" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
 </header>
 <main class="wrap" id="root"></main>
-<button type="button" class="fab" id="fab" data-act="add" hidden>+ 넣기</button>
+<button type="button" class="fab" id="fab" data-act="add" hidden>+ 등록</button>
 <div id="sheet" hidden></div>
 <p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
 
@@ -212,18 +212,18 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheetEl = $('sheet'), toastEl = $('toast'), fab = $('fab');
 
-  var VIEWS = [['sales', '매출'], ['buy', '매입'], ['recv', '입고'], ['sum', '한눈에']];
-  var TITLE = { sales: '매출', buy: '매입', recv: '입고', sum: '매출 · 매입 한눈에' };
-  var PERS = [['d', '일'], ['m', '월'], ['q', '분기'], ['h', '반기'], ['y', '년']];
+  var VIEWS = [['sales', '매출'], ['buy', '매입'], ['recv', '입고'], ['sum', '종합']];
+  var TITLE = { sales: '매출', buy: '매입', recv: '입고', sum: '매출 · 매입 종합' };
+  var PERS = [['d', '일별'], ['m', '월별'], ['q', '분기별'], ['h', '반기별'], ['y', '연간']];
   var PROD = ['칼라칩', 'SBR 고무분말', '분철'];                       // 출고(재고기록)에서 저절로 오는 제품 매출 — kg은 서로 더하지 않음
   var SALE_CATS = ['칼라칩', 'SBR 고무분말', '분철', '시공', '기타'];
   var BUY_CATS = ['칼라칩 관련', 'SBR·폐타이어 관련', '시공 관련', '사무실 관련'];
   var RECV_KINDS = ['폐타이어', '원자재', '부자재'];
   var RECV_USE = [['칼라칩 관련', '칼라칩'], ['SBR·폐타이어 관련', 'SBR·폐타이어'], ['시공 관련', '시공']];
   var UNITS = ['kg', '톤', '개', '포', '롤', 'L'];
-  var PAYS = { '매입': ['계좌이체', '카드', '현금', '외상', '기타'], '매출': ['계좌입금', '카드', '현금', '외상', '기타'] };
-  var PROOF = ['세금계산서', '계산서', '카드전표', '현금영수증', '영수증', '없음'];
-  var VATS = [['별도', '부가세 별도'], ['포함', '부가세 포함'], ['없음', '부가세 없음'], ['직접', '나눠 넣기']];
+  var PAYS = { '매입': ['계좌이체', '카드', '현금', '미지급', '기타'], '매출': ['계좌입금', '카드', '현금', '미수', '기타'] };
+  var PROOF = ['세금계산서', '계산서', '카드전표', '현금영수증', '영수증', '증빙 없음'];
+  var VATS = [['별도', '부가세 별도'], ['포함', '부가세 포함'], ['없음', '면세·부가세 없음'], ['직접', '공급가액·세액 직접 입력']];
   /* 항목 보기 (넣을 때 누르기만). 쓴 항목은 서버가 기억해 앞에 나옵니다. */
   var SUB_DEF = {
     '칼라칩 관련': ['원료', '약품', '안료', '포장재', '운송', '수선·부품', '전기'],
@@ -333,13 +333,13 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
 
   /* ───────── 서버 ───────── */
   var ERR = {
-    auth: '로그인 시간이 지났습니다. 비밀번호를 다시 넣어 주세요.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
-    net: '인터넷 연결을 확인해 주세요.', timeout: '응답이 늦습니다. 잠시 뒤 다시 해 주세요.',
-    bad_kind: '매출·매입 구분이 맞지 않습니다.', bad_cat: '분류를 골라 주세요.', bad_amount: '금액을 확인해 주세요. 원 단위 숫자만 됩니다.',
-    bad_qty: '품목과 수량을 확인해 주세요.', bad_date: '날짜를 확인해 주세요.', future_date: '오늘 뒤 날짜는 넣을 수 없습니다.',
-    not_found: '그 기록을 찾지 못했습니다. 다른 곳에서 지웠을 수 있습니다.', bad_src: '이 기록은 여기서 넣을 수 없습니다.', bad_input: '입력값을 확인해 주세요.'
+    auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
+    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
+    bad_kind: '매출·매입 구분이 올바르지 않습니다.', bad_cat: '분류를 선택해 주십시오.', bad_amount: '금액을 확인해 주십시오. 원 단위 숫자만 입력할 수 있습니다.',
+    bad_qty: '품목과 수량을 확인해 주십시오.', bad_date: '일자를 확인해 주십시오.', future_date: '미래 일자는 등록할 수 없습니다.',
+    not_found: '해당 내역이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.', bad_src: '이 내역은 이 화면에서 등록할 수 없습니다.', bad_input: '입력값을 확인해 주십시오.'
   };
-  function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 뒤 다시 해 주세요.'); }
+  function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.'); }
   function post(body) {
     if (token && body.action !== 'login') body.token = token;
     if (DEMO) {
@@ -432,16 +432,16 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       if (e.kind !== '매입' || !inR(e, a, b)) return;
       if (recvOnly && e.src !== '입고') return;
       T.supply += e.supply; T.tax += e.tax; T.total += e.total; T.n++;
-      if (e.pay === '외상') T.unpaid += e.total;
+      if (e.pay === '외상' || e.pay === '미지급') T.unpaid += e.total;
       var c = T.cats[e.cat] || (T.cats[e.cat] = { supply: 0, n: 0, subs: {} });
       c.supply += e.supply; c.n++;
-      var sk = e.sub || '항목 없음'; c.subs[sk] = (c.subs[sk] || 0) + e.supply;
+      var sk = e.sub || '항목 미기재'; c.subs[sk] = (c.subs[sk] || 0) + e.supply;
       if (e.src === '입고') {
         var k = T.kinds[e.sub] || (T.kinds[e.sub] = { supply: 0, n: 0 }); k.supply += e.supply; k.n++;
         var ik = e.sub + '|' + e.desc + '|' + (e.unit || ''), it = T.items[ik] || (T.items[ik] = { kind: e.sub, desc: e.desc, unit: e.unit || '', qty: 0, supply: 0, qn: 0, n: 0 });
         it.n++; it.supply += e.supply; if (e.qty != null) { it.qty += Number(e.qty); it.qn++; }
       }
-      var ck = e.cust || '거래처 없음'; T.custs[ck] = (T.custs[ck] || 0) + e.supply;
+      var ck = e.cust || '거래처 미기재'; T.custs[ck] = (T.custs[ck] || 0) + e.supply;
     });
     return T;
   }
@@ -461,36 +461,36 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     $('vtabs').innerHTML = vt;
     var h = '', canAdd = false;
     if (!S.authed) h = loginHtml();
-    else if (!S.today) h = S.err ? errHtml() : '<p class="wait">불러오는 중…</p>';
+    else if (!S.today) h = S.err ? errHtml() : '<p class="wait">조회 중…</p>';
     else {
       var y = S.at.slice(0, 4), d = S.data[y];
-      if (!d) { if (!S.err) need(y); h = S.err ? errHtml() : '<p class="wait">' + esc(y) + '년 자료를 불러오는 중…</p>'; }
+      if (!d) { if (!S.err) need(y); h = S.err ? errHtml() : '<p class="wait">' + esc(y) + '년 자료 조회 중…</p>'; }
       else { h = viewHtml(d); canAdd = S.view !== 'sum'; }
     }
     root.innerHTML = h;
     fab.hidden = !canAdd;
-    fab.textContent = S.view === 'sales' ? '+ 매출 넣기' : S.view === 'recv' ? '+ 입고 넣기' : '+ 매입 넣기';
+    fab.textContent = S.view === 'sales' ? '+ 매출 등록' : S.view === 'recv' ? '+ 입고 등록' : '+ 매입 등록';
     if (!S.authed) { var pw = $('pw'); if (pw && !S.sheet) pw.focus(); }
   }
   function errHtml() {
-    return '<section class="card"><p class="err" role="alert">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 불러오기</button></div></section>';
+    return '<section class="card"><p class="err" role="alert">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 조회</button></div></section>';
   }
   function loginHtml() {
-    return '<section class="card login"><h2>관리자 로그인</h2><p class="hint">매출 · 매입 · 입고는 관리자만 봅니다. 잔업·급여 관리자 비밀번호를 넣어 주세요. 다른 관리자 화면에서 이미 로그인했다면 그대로 열립니다.</p>' +
-      '<form id="loginForm" autocomplete="off"><label class="hint" for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">들어가기</button></form>' +
+    return '<section class="card login"><h2>관리자 로그인</h2><p class="hint">매출 · 매입 · 입고 화면은 관리자 전용입니다. 관리자 비밀번호를 입력해 주십시오. 다른 관리자 화면에서 이미 로그인한 경우 바로 열립니다.</p>' +
+      '<form id="loginForm" autocomplete="off"><label class="hint" for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
       '<p class="err" id="loginErr" role="alert">' + esc(S.loginErr) + '</p></section>';
   }
   function viewHtml(d) {
     var h = perBar(), per = curPer(), c = pcmp(range(per, S.at).a, range(per, S.at).b);
-    if (c.future) return h + '<section class="card"><p class="hint">아직 오지 않은 기간입니다.</p></section>';
-    if (noRec(c.b)) h += '<p class="warnbox" style="margin:0 0 12px">이 기간은 이 앱에 기록이 없습니다 (첫 기록: ' + esc(span(S.first, S.first)) + '). 예전 매출 · 매입은 날짜를 그때로 골라 넣으면 됩니다.</p>';
+    if (c.future) return h + '<section class="card"><p class="hint">아직 도래하지 않은 기간입니다.</p></section>';
+    if (noRec(c.b)) h += '<p class="warnbox" style="margin:0 0 12px">이 기간은 등록된 자료가 없습니다 (자료 시작일: ' + esc(span(S.first, S.first)) + '). 과거 매출 · 매입은 해당 일자를 선택해 등록하면 됩니다.</p>';
     if (S.view === 'sales') h += salesHtml(d, per, c);
     else if (S.view === 'sum') h += sumHtml(d, per, c);
     else h += buyHtml(d, per, c, S.view === 'recv');
     h += '<section class="card noprint"><div class="tools" style="margin:0">' +
-      (S.view !== 'sum' ? '<button type="button" class="btn ghost sm" data-act="csv">이 기간 엑셀로 받기 (CSV)</button>' : '') +
-      '<button type="button" class="btn ghost sm" data-act="print">인쇄 · PDF</button><button type="button" class="btn ghost sm" data-act="reload">새로 불러오기</button></div>' +
-      '<p class="hint">금액은 모두 공급가액(부가세 뺀 금액)입니다. 장부는 구글 시트 \'NMC 통합 관리\'의 \'장부\' 시트에 저장되고, 고치거나 지운 것은 \'재고이력\'에 남습니다.</p></section>';
+      (S.view !== 'sum' ? '<button type="button" class="btn ghost sm" data-act="csv">해당 기간 엑셀 다운로드 (CSV)</button>' : '') +
+      '<button type="button" class="btn ghost sm" data-act="print">인쇄 · PDF</button><button type="button" class="btn ghost sm" data-act="reload">새로고침</button></div>' +
+      '<p class="hint">모든 금액은 공급가액(부가세 제외) 기준입니다. 자료는 구글 시트 \'NMC 통합 관리\'의 \'장부\' 시트에 저장되며, 수정 · 삭제 내역은 \'재고이력\' 시트에 기록됩니다.</p></section>';
     return h;
   }
   function perBar() {
@@ -500,8 +500,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (per !== 'd') {
       var p = P3(r.a), q = P3(r.b);
       sub = per === 'm' ? '' : p[1] + '월~' + q[1] + '월';
-      if (atNow) sub += (sub ? ' · ' : '') + '오늘(' + P3(S.today)[1] + '월 ' + P3(S.today)[2] + '일)까지';
-    } else if (atNow) sub = '오늘';
+      if (atNow) sub += (sub ? ' · ' : '') + P3(S.today)[1] + '월 ' + P3(S.today)[2] + '일 기준 누계';
+    } else if (atNow) sub = '당일';
     var h = '<section class="card perbar"><div class="seg" role="tablist" aria-label="기간">';
     PERS.forEach(function (p) {
       if (S.view === 'sum' && p[0] === 'd') return;
@@ -512,22 +512,22 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       '<button type="button" class="nav" data-act="next" aria-label="다음 기간"' + (canNext ? '' : ' disabled') + '>›</button></div>';
     if (per === 'd' || !atNow) {
       h += '<div class="pjump">';
-      if (per === 'd') h += '<label class="hint" style="margin:0">날짜 <input type="date" data-act="jump" value="' + esc(S.at) + '" max="' + esc(S.today) + '" min="' + esc(S.minY) + '-01-01"></label>';
-      if (!atNow) h += '<button type="button" class="link" data-act="today">' + (per === 'd' ? '오늘로' : '이번 ' + { m: '달', q: '분기', h: '반기', y: '해' }[per] + '로') + '</button>';
+      if (per === 'd') h += '<label class="hint" style="margin:0">일자 <input type="date" data-act="jump" value="' + esc(S.at) + '" max="' + esc(S.today) + '" min="' + esc(S.minY) + '-01-01"></label>';
+      if (!atNow) h += '<button type="button" class="link" data-act="today">' + (per === 'd' ? '당일로 이동' : { m: '당월', q: '당분기', h: '당반기', y: '당해 연도' }[per] + '로 이동') + '</button>';
       h += '</div>';
     }
     return h + '</section>';
   }
   /** 작년 같은 기간과 비교 한 줄 */
   function yoyHtml(cur, last, c, neutral) {
-    var lab = (c.partial ? '작년 같은 기간' : '작년') + ' (' + span(c.la, c.lb) + ')';
-    if (!last) return '<p class="yoy' + (neutral ? ' neutral' : '') + '">' + esc(lab) + ': ' + (noRec(c.lb) ? '이 앱에 기록 없음 (첫 기록 ' + esc(span(S.first, S.first)) + ')' : '0원') + '</p>';
+    var lab = (c.partial ? '전년 동기' : '전년') + ' (' + span(c.la, c.lb) + ')';
+    if (!last) return '<p class="yoy' + (neutral ? ' neutral' : '') + '">' + esc(lab) + ': ' + (noRec(c.lb) ? '자료 없음 (자료 시작일 ' + esc(span(S.first, S.first)) + ')' : '0원') + '</p>';
     var dl = cur - last;
     return '<p class="yoy' + (neutral ? ' neutral' : '') + '">' + esc(lab) + ' ' + won(last) + '<br>→ <b class="' + dcls(cur, last) + '">' + pct(cur, last) + ' (' + (dl > 0 ? '+' : dl < 0 ? '−' : '') + fmt(dl) + '원)</b></p>';
   }
   function subLine(cur, last, c) {
-    if (!last) return cur ? (noRec(c.lb) ? '작년 기록 없음' : '작년 0원') : '';
-    return '작년 ' + won(last) + ' · <span class="' + dcls(cur, last) + '">' + pct(cur, last) + '</span>';
+    if (!last) return cur ? (noRec(c.lb) ? '전년 자료 없음' : '전년 0원') : '';
+    return '전년 ' + won(last) + ' · <span class="' + dcls(cur, last) + '">' + pct(cur, last) + '</span>';
   }
 
   /* 매출 */
@@ -535,32 +535,32 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var T = salesSum(d, c.a, c.b), L = salesSum(d, c.la, c.lb);
     var h = '<section class="card head"><p class="k">매출<small>공급가액</small></p><p class="big" id="headAmt">' + won(T.tot) + '</p>';
     if (T.est > 0) h += '<p class="note">확정 ' + won(T.conf) + ' + 추정 ' + won(T.est) + ' <span class="est">추정 ' + Math.max(1, Math.round(T.est / T.tot * 100)) + '%</span></p>' +
-      '<p class="hint" style="margin-top:2px">추정 = 출고에 단가를 안 넣은 kg × 기준 단가. 출고에 단가를 넣으면 확정으로 바뀝니다.</p>';
+      '<p class="hint" style="margin-top:2px">추정 = 단가 미입력 출고량(kg) × 기준 단가. 출고에 단가를 입력하면 확정으로 전환됩니다.</p>';
     h += yoyHtml(T.tot, L.tot, c);
     var nk = Object.keys(T.none);
-    if (nk.length) h += '<p class="warnbox">금액을 모르는 출고(단가도 기준 단가도 없음): ' + nk.map(function (g) { return esc(g) + ' ' + fmtQ(T.none[g]) + ' kg'; }).join(' · ') +
-      ' — 매출에 들어가지 않았습니다. <a href="stock.html?view=out">출고 화면에서 금액 넣기 →</a></p>';
+    if (nk.length) h += '<p class="warnbox">금액 미확인 출고(단가·기준 단가 모두 없음): ' + nk.map(function (g) { return esc(g) + ' ' + fmtQ(T.none[g]) + ' kg'; }).join(' · ') +
+      ' — 매출에서 제외되었습니다. <a href="stock.html?view=out">출고 화면에서 단가 입력 →</a></p>';
     var ok = Object.keys(T.own);
-    if (ok.length) h += '<p class="hint">남명(자사 시공)으로 나간 출고는 매출에서 뺐습니다: ' + ok.map(function (g) { return esc(g) + ' ' + fmtQ(T.own[g]) + ' kg'; }).join(' · ') + '</p>';
+    if (ok.length) h += '<p class="hint">자사 시공(남명) 출고분은 매출에서 제외했습니다: ' + ok.map(function (g) { return esc(g) + ' ' + fmtQ(T.own[g]) + ' kg'; }).join(' · ') + '</p>';
     h += '</section>';
     // 분류별
     var cats = SALE_CATS.slice();
     [T, L].forEach(function (X) { Object.keys(X.cats).forEach(function (k) { if (cats.indexOf(k) < 0) cats.push(k); }); });
-    h += '<section class="card"><h2>분류별<small>칼라칩 · SBR 고무분말 · 분철은 kg을 따로 셉니다</small></h2><ul class="rows">';
+    h += '<section class="card"><h2>부문별 매출<small>칼라칩 · SBR 고무분말 · 분철은 중량(kg)을 별도 집계</small></h2><ul class="rows">';
     var any = false;
     cats.forEach(function (k) {
       var t = T.cats[k], l = L.cats[k], tv = t ? t.conf + t.est : 0, lv = l ? l.conf + l.est : 0;
       if (!tv && !lv && !(t && t.kg)) return;
       any = true;
       var info = [];
-      if (t && t.kg) info.push('판매 ' + fmtQ(t.kg) + ' kg');
-      if (t && t.kgP > 0 && t.ship) info.push('평균 ' + fmt(t.ship / t.kgP) + '원/kg (단가 넣은 출고)');
+      if (t && t.kg) info.push('판매량 ' + fmtQ(t.kg) + ' kg');
+      if (t && t.kgP > 0 && t.ship) info.push('평균 단가 ' + fmt(t.ship / t.kgP) + '원/kg (단가 입력분)');
       if (t && t.est) info.push('추정 ' + won(t.est) + ' 포함');
-      if (t && t.n) info.push('장부 ' + t.n + '건');
+      if (t && t.n) info.push('직접 등록 ' + t.n + '건');
       h += '<li class="row" data-cat="' + esc(k) + '"><span class="rl"><b>' + esc(k) + '</b>' + (info.length ? '<small>' + info.join(' · ') + '</small>' : '') + '</span>' +
         '<span class="rr"><b>' + won(tv) + '</b><small>' + subLine(tv, lv, c) + '</small></span></li>';
     });
-    if (!any) h += '<li class="row"><span class="rl"><small>이 기간 매출 기록이 없습니다.</small></span></li>';
+    if (!any) h += '<li class="row"><span class="rl"><small>해당 기간 매출 실적이 없습니다.</small></span></li>';
     h += '</ul></section>';
     h += per === 'd' ? salesDay(d, c.a) : per === 'm' ? salesDays(d, c) : monthsHtml(d, per, c);
     if (per === 'y') h += cmpTables(d, c);
@@ -569,22 +569,22 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   function salesDay(d, day) {
     var ship = d.ship.filter(function (r) { return r[0] === day; });
     var ents = d.R.filter(function (e) { return e.kind === '매출' && e.date === day; }).sort(byNew);
-    var h = '<section class="card"><h2>이 날 출고 매출<small>재고기록에서 저절로</small></h2>';
-    if (!ship.length) h += '<p class="hint">이 날 출고가 없습니다.</p>';
+    var h = '<section class="card"><h2>당일 출고 매출<small>출고 기록 자동 집계</small></h2>';
+    if (!ship.length) h += '<p class="hint">당일 출고 실적이 없습니다.</p>';
     else {
       h += '<ul class="rows">';
       ship.forEach(function (r) {
         var sold = r[2] - r[7], parts = [];
         if (r[3]) parts.push('확정 ' + won(r[3]));
         if (r[5]) parts.push('추정 ' + won(r[5]) + ' (' + fmtQ(r[4]) + ' kg)');
-        if (r[6]) parts.push('금액 모름 ' + fmtQ(r[6]) + ' kg');
-        if (r[7]) parts.push('남명 ' + fmtQ(r[7]) + ' kg 뺌');
-        h += '<li class="row"><span class="rl"><b>' + esc(r[1]) + '</b><small>판매 ' + fmtQ(sold) + ' kg</small></span><span class="rr"><b>' + won(r[3] + r[5]) + '</b><small>' + parts.join(' · ') + '</small></span></li>';
+        if (r[6]) parts.push('금액 미확인 ' + fmtQ(r[6]) + ' kg');
+        if (r[7]) parts.push('자사 시공 ' + fmtQ(r[7]) + ' kg 제외');
+        h += '<li class="row"><span class="rl"><b>' + esc(r[1]) + '</b><small>판매량 ' + fmtQ(sold) + ' kg</small></span><span class="rr"><b>' + won(r[3] + r[5]) + '</b><small>' + parts.join(' · ') + '</small></span></li>';
       });
       h += '</ul>';
     }
-    h += '<p class="hint"><a class="link" href="stock.html?view=out&amp;day=' + esc(day) + '">이 날 출고 목록 · 금액 넣기 →</a></p></section>';
-    h += '<section class="card"><h2>장부에 넣은 매출<small>시공 · 기타</small></h2>' + (ents.length ? ents.map(entHtml).join('') : '<p class="hint">없음</p>') + '</section>';
+    h += '<p class="hint"><a class="link" href="stock.html?view=out&amp;day=' + esc(day) + '">당일 출고 내역 · 단가 입력 →</a></p></section>';
+    h += '<section class="card"><h2>직접 등록 매출<small>시공 · 기타</small></h2>' + (ents.length ? ents.map(entHtml).join('') : '<p class="hint">내역 없음</p>') + '</section>';
     return h;
   }
   function salesDays(d, c) {
@@ -593,13 +593,13 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     d.ship.forEach(function (r) { if (r[0] < c.a || r[0] > c.b) return; var x = D(r[0]); x.tot += r[3] + r[5]; var sold = r[2] - r[7]; if (sold) x.kg[r[1]] = (x.kg[r[1]] || 0) + sold; });
     d.R.forEach(function (e) { if (e.kind !== '매출' || !inR(e, c.a, c.b)) return; var x = D(e.date); x.tot += e.supply; x.n++; });
     order.sort().reverse();
-    var h = '<section class="card"><h2>날짜별 매출<small>누르면 그날 자세히</small></h2>';
-    if (!order.length) return h + '<p class="hint">이 달 매출 기록이 없습니다.</p></section>';
+    var h = '<section class="card"><h2>일자별 매출<small>선택하면 해당일 상세 조회</small></h2>';
+    if (!order.length) return h + '<p class="hint">당월 매출 실적이 없습니다.</p></section>';
     h += '<ul class="rows">';
     order.forEach(function (k) {
       var x = days[k], kg = PROD.concat(Object.keys(x.kg).filter(function (g) { return PROD.indexOf(g) < 0; })).filter(function (g) { return x.kg[g]; })
         .map(function (g) { return esc(g) + ' ' + fmtQ(x.kg[g]) + ' kg'; });
-      if (x.n) kg.push('장부 ' + x.n + '건');
+      if (x.n) kg.push('직접 등록 ' + x.n + '건');
       h += '<li><button type="button" class="row" data-act="goday" data-v="' + k + '"><span class="rl"><b>' + esc(dShort(k)) + '</b><small>' + kg.join(' · ') + '</small></span><span class="rr"><b>' + won(x.tot) + '</b></span></button></li>';
     });
     return h + '</ul></section>';
@@ -608,30 +608,30 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   /* 매입 · 입고 */
   function buyHtml(d, per, c, recv) {
     var T = buySum(d, c.a, c.b, recv), L = buySum(d, c.la, c.lb, recv);
-    var h = '<section class="card head"><p class="k">' + (recv ? '입고 금액' : '매입') + '<small>공급가액' + (recv ? ' · 매입에 같이 들어감' : ' · 입고 포함') + '</small></p><p class="big" id="headAmt">' + won(T.supply) + '</p>' +
-      '<p class="note">' + T.n + '건' + (T.tax ? ' · 부가세 포함 ' + won(T.total) : '') + '</p>';
-    if (T.unpaid) h += '<p class="note">그중 외상(아직 안 준 돈) <b>' + won(T.unpaid) + '</b></p>';
+    var h = '<section class="card head"><p class="k">' + (recv ? '입고 금액' : '매입') + '<small>공급가액' + (recv ? ' · 매입에 자동 반영' : ' · 입고분 포함') + '</small></p><p class="big" id="headAmt">' + won(T.supply) + '</p>' +
+      '<p class="note">' + T.n + '건' + (T.tax ? ' · 부가세 포함 합계 ' + won(T.total) : '') + '</p>';
+    if (T.unpaid) h += '<p class="note">미지급금 <b>' + won(T.unpaid) + '</b></p>';
     h += yoyHtml(T.supply, L.supply, c, true) + '</section>';
     if (recv) {
-      h += '<section class="card"><h2>종류별</h2><ul class="rows">';
+      h += '<section class="card"><h2>입고 구분별</h2><ul class="rows">';
       RECV_KINDS.forEach(function (k) {
         var t = T.kinds[k], l = L.kinds[k], tv = t ? t.supply : 0, lv = l ? l.supply : 0;
         if (!tv && !lv) return;
-        h += '<li class="row"><span class="rl"><b>' + esc(k) + '</b><small>' + (t ? t.n + '건' : '없음') + '</small></span><span class="rr"><b>' + won(tv) + '</b><small>' + subLine(tv, lv, c) + '</small></span></li>';
+        h += '<li class="row"><span class="rl"><b>' + esc(k) + '</b><small>' + (t ? t.n + '건' : '내역 없음') + '</small></span><span class="rr"><b>' + won(tv) + '</b><small>' + subLine(tv, lv, c) + '</small></span></li>';
       });
-      if (!T.n && !L.n) h += '<li class="row"><span class="rl"><small>이 기간 입고 기록이 없습니다.</small></span></li>';
+      if (!T.n && !L.n) h += '<li class="row"><span class="rl"><small>해당 기간 입고 내역이 없습니다.</small></span></li>';
       h += '</ul></section>';
       var items = Object.keys(T.items).map(function (k) { return T.items[k]; }).sort(function (x, y) { return y.supply - x.supply; });
       if (items.length) {
-        h += '<section class="card"><h2>품목별<small>단위가 다르면 따로 셉니다</small></h2><ul class="rows">';
+        h += '<section class="card"><h2>품목별<small>단위별 집계</small></h2><ul class="rows">';
         items.forEach(function (it) {
-          h += '<li class="row"><span class="rl"><b>' + esc(it.desc || '(품목 없음)') + '</b><small>' + esc(it.kind) + ' · ' + it.n + '건' + (it.qn && it.qty ? ' · 평균 ' + fmtQ(Math.round(it.supply / it.qty * 100) / 100) + '원/' + esc(it.unit || '단위') : '') + '</small></span>' +
+          h += '<li class="row"><span class="rl"><b>' + esc(it.desc || '(품목 미기재)') + '</b><small>' + esc(it.kind) + ' · ' + it.n + '건' + (it.qn && it.qty ? ' · 평균 단가 ' + fmtQ(Math.round(it.supply / it.qty * 100) / 100) + '원/' + esc(it.unit || '단위') : '') + '</small></span>' +
             '<span class="rr"><b>' + (it.qn ? fmtQ(it.qty) + ' ' + esc(it.unit) : '') + '</b><small>' + won(it.supply) + '</small></span></li>';
         });
         h += '</ul></section>';
       }
     } else {
-      h += '<section class="card"><h2>분류별</h2><ul class="rows">';
+      h += '<section class="card"><h2>분류별 매입</h2><ul class="rows">';
       var cats = BUY_CATS.slice();
       [T, L].forEach(function (X) { Object.keys(X.cats).forEach(function (k) { if (cats.indexOf(k) < 0) cats.push(k); }); });
       var any = false;
@@ -640,23 +640,23 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
         if (!tv && !lv) return;
         any = true;
         var subs = t ? Object.keys(t.subs).sort(function (x, y) { return t.subs[y] - t.subs[x]; }) : [];
-        h += '<li class="row"><span class="rl"><b>' + esc(k) + '</b><small>' + (t ? t.n + '건' : '없음') + '</small>' +
+        h += '<li class="row"><span class="rl"><b>' + esc(k) + '</b><small>' + (t ? t.n + '건' : '내역 없음') + '</small>' +
           (subs.length ? '<ul class="subs">' + subs.slice(0, 8).map(function (s) { return '<li><span>' + esc(s) + '</span><span>' + won(t.subs[s]) + '</span></li>'; }).join('') +
-            (subs.length > 8 ? '<li><span>그 밖 ' + (subs.length - 8) + '가지</span><span>' + won(subs.slice(8).reduce(function (a, s) { return a + t.subs[s]; }, 0)) + '</span></li>' : '') + '</ul>' : '') +
+            (subs.length > 8 ? '<li><span>기타 ' + (subs.length - 8) + '개 항목</span><span>' + won(subs.slice(8).reduce(function (a, s) { return a + t.subs[s]; }, 0)) + '</span></li>' : '') + '</ul>' : '') +
           '</span><span class="rr"><b>' + won(tv) + '</b><small>' + subLine(tv, lv, c) + '</small></span></li>';
       });
-      if (!any) h += '<li class="row"><span class="rl"><small>이 기간 매입 기록이 없습니다.</small></span></li>';
+      if (!any) h += '<li class="row"><span class="rl"><small>해당 기간 매입 내역이 없습니다.</small></span></li>';
       h += '</ul></section>';
     }
     var custs = Object.keys(T.custs).sort(function (x, y) { return T.custs[y] - T.custs[x]; });
     if (custs.length > 1 && per !== 'd') {
-      h += '<section class="card"><h2>거래처별<small>많은 순</small></h2><ul class="rows">' + custs.slice(0, 10).map(function (k) {
+      h += '<section class="card"><h2>거래처별<small>금액순</small></h2><ul class="rows">' + custs.slice(0, 10).map(function (k) {
         return '<li class="row"><span class="rl"><b>' + esc(k) + '</b></span><span class="rr"><b>' + won(T.custs[k]) + '</b><small>' + Math.round(T.custs[k] / T.supply * 100) + '%</small></span></li>';
-      }).join('') + (custs.length > 10 ? '<li class="row"><span class="rl"><small>그 밖 ' + (custs.length - 10) + '곳</small></span><span class="rr"><b>' + won(custs.slice(10).reduce(function (a, k) { return a + T.custs[k]; }, 0)) + '</b></span></li>' : '') + '</ul></section>';
+      }).join('') + (custs.length > 10 ? '<li class="row"><span class="rl"><small>기타 ' + (custs.length - 10) + '곳</small></span><span class="rr"><b>' + won(custs.slice(10).reduce(function (a, k) { return a + T.custs[k]; }, 0)) + '</b></span></li>' : '') + '</ul></section>';
     }
     if (per === 'd' || per === 'm') {
-      h += '<section class="card"><h2>' + (recv ? '입고' : '매입') + ' 목록<small>누르면 고치기 · 지우기</small></h2>' +
-        '<input class="find noprint" type="search" data-act="filter" placeholder="거래처 · 항목 · 내용으로 찾기" value="' + esc(S.filter) + '" aria-label="목록에서 찾기">' +
+      h += '<section class="card"><h2>' + (recv ? '입고' : '매입') + ' 내역<small>선택하면 수정 · 삭제</small></h2>' +
+        '<input class="find noprint" type="search" data-act="filter" placeholder="거래처 · 항목 · 적요 검색" value="' + esc(S.filter) + '" aria-label="내역 검색">' +
         '<div id="list">' + listHtml(d, c, recv) + '</div></section>';
     } else h += monthsHtml(d, per, c);
     if (per === 'y') h += cmpTables(d, c);
@@ -674,7 +674,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   }
   function listHtml(d, c, recv) {
     var rows = listRows(d, c, recv);
-    if (!rows.length) return '<p class="hint">' + (S.filter.trim() ? '찾는 기록이 없습니다.' : '이 기간에 넣은 것이 없습니다. 아래 ‘+ 넣기’로 넣으십시오.') + '</p>';
+    if (!rows.length) return '<p class="hint">' + (S.filter.trim() ? '검색 결과가 없습니다.' : '해당 기간 등록 내역이 없습니다. 하단 ‘+ 등록’으로 입력하십시오.') + '</p>';
     var by = {}, days = [];
     rows.forEach(function (e) { if (!by[e.date]) { by[e.date] = []; days.push(e.date); } by[e.date].push(e); });
     return days.map(function (k) {
@@ -693,18 +693,18 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (e.memo) info.push(e.memo);
     return '<button type="button" class="ent" data-act="edit" data-id="' + esc(e.id) + '"><span class="et"><b>' + esc(title) +
       (S.view === 'buy' && e.src === '입고' ? '<span class="tag">입고</span>' : '') + (e.src && e.src !== '직접' && e.src !== '입고' ? '<span class="tag">' + esc(e.src) + '</span>' : '') +
-      (e.pay === '외상' ? '<span class="tag unpaid">외상</span>' : '') + '</b><small>' + esc(info.join(' · ')) + '</small></span>' +
+      (e.pay === '외상' || e.pay === '미지급' || e.pay === '미수' ? '<span class="tag unpaid">' + (e.kind === '매출' ? '미수' : '미지급') + '</span>' : '') + '</b><small>' + esc(info.join(' · ')) + '</small></span>' +
       '<span class="ea"><b>' + won(e.supply) + '</b>' + (e.tax ? '<small>부가세 포함 ' + won(e.total) + '</small>' : '') + '</span></button>';
   }
   /** 분기 · 반기 · 년: 달마다 한 줄 (누르면 그 달) */
   function monthsHtml(d, per, c) {
-    var r = range(per, S.at), p = P3(r.a), q = P3(r.b), h = '<section class="card"><h2>달마다<small>누르면 그 달 자세히</small></h2><ul class="rows">';
+    var r = range(per, S.at), p = P3(r.a), q = P3(r.b), h = '<section class="card"><h2>월별 실적<small>선택하면 해당 월 상세 조회</small></h2><ul class="rows">';
     for (var m = p[1]; m <= q[1]; m++) {
       var a = ymd(p[0], m, 1), b = ymd(p[0], m, dim(p[0], m)), x = pcmp(a, b);
-      if (x.future) { h += '<li class="row"><span class="rl"><b>' + m + '월</b><small>아직</small></span><span class="rr"><small>' + (noRec(x.lb) ? '작년 기록 없음' : '작년 ' + won(valOf(S.view, d, x.la, x.lb))) + '</small></span></li>'; continue; }
+      if (x.future) { h += '<li class="row"><span class="rl"><b>' + m + '월</b><small>미도래</small></span><span class="rr"><small>' + (noRec(x.lb) ? '전년 자료 없음' : '전년 ' + won(valOf(S.view, d, x.la, x.lb))) + '</small></span></li>'; continue; }
       var cur = valOf(S.view, d, x.a, x.b), last = valOf(S.view, d, x.la, x.lb);
-      h += '<li><button type="button" class="row" data-act="gomon" data-v="' + a + '"><span class="rl"><b>' + m + '월' + (x.partial ? ' (오늘까지)' : '') + '</b></span>' +
-        '<span class="rr">' + (noRec(x.b) ? '<small>기록 없음</small>' : '<b>' + won(cur) + '</b><small>' + subLine(cur, last, x) + '</small>') + '</span></button></li>';
+      h += '<li><button type="button" class="row" data-act="gomon" data-v="' + a + '"><span class="rl"><b>' + m + '월' + (x.partial ? ' (금일 기준)' : '') + '</b></span>' +
+        '<span class="rr">' + (noRec(x.b) ? '<small>자료 없음</small>' : '<b>' + won(cur) + '</b><small>' + subLine(cur, last, x) + '</small>') + '</span></button></li>';
     }
     return h + '</ul></section>';
   }
@@ -712,14 +712,14 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   function cmpTables(d, c) {
     var y = Number(S.at.slice(0, 4)), neutral = S.view !== 'sales';
     var mk = function (title, list) {
-      var h = '<h3>' + title + '</h3><div class="tw"><table class="cmp' + (neutral ? ' neutral' : '') + '"><thead><tr><th>기간</th><th>' + y + '년</th><th>' + (y - 1) + '년</th><th>증감</th></tr></thead><tbody>';
+      var h = '<h3>' + title + '</h3><div class="tw"><table class="cmp' + (neutral ? ' neutral' : '') + '"><thead><tr><th>기간</th><th>' + y + '년</th><th>' + (y - 1) + '년</th><th>증감률</th></tr></thead><tbody>';
       var st = 0, sl = 0;
       list.forEach(function (it) {
         var x = pcmp(it[1], it[2]), last = valOf(S.view, d, x.la, x.lb), lastTd = noRec(x.lb) ? '<span class="na">없음</span>' : man(last);
-        if (x.future) { h += '<tr><td>' + it[0] + '</td><td class="na">아직</td><td>' + (noRec(yAgo(it[2])) ? '<span class="na">없음</span>' : man(valOf(S.view, d, yAgo(it[1]), yAgo(it[2])))) + '</td><td class="na">—</td></tr>'; return; }
+        if (x.future) { h += '<tr><td>' + it[0] + '</td><td class="na">미도래</td><td>' + (noRec(yAgo(it[2])) ? '<span class="na">없음</span>' : man(valOf(S.view, d, yAgo(it[1]), yAgo(it[2])))) + '</td><td class="na">—</td></tr>'; return; }
         var cur = valOf(S.view, d, x.a, x.b);
         st += cur; sl += last;
-        h += '<tr' + (x.partial ? ' class="cur"' : '') + '><td>' + it[0] + (x.partial ? '<br><small>오늘까지</small>' : '') + '</td><td>' + (noRec(x.b) ? '<span class="na">없음</span>' : man(cur)) + '</td><td>' + lastTd + '</td><td>' +
+        h += '<tr' + (x.partial ? ' class="cur"' : '') + '><td>' + it[0] + (x.partial ? '<br><small>금일 기준</small>' : '') + '</td><td>' + (noRec(x.b) ? '<span class="na">없음</span>' : man(cur)) + '</td><td>' + lastTd + '</td><td>' +
           (last && !noRec(x.b) ? '<span class="' + dcls(cur, last) + '">' + pct(cur, last) + '</span>' : '—') + '</td></tr>';
       });
       return h + '</tbody></table></div>';
@@ -727,21 +727,21 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var H = [['상반기', ymd(y, 1, 1), ymd(y, 6, 30)], ['하반기', ymd(y, 7, 1), ymd(y, 12, 31)]];
     var Q = [1, 2, 3, 4].map(function (i) { var s = i * 3 - 2; return [i + '분기', ymd(y, s, 1), ymd(y, s + 2, dim(y, s + 2))]; });
     var M = []; for (var m = 1; m <= 12; m++) M.push([m + '월', ymd(y, m, 1), ymd(y, m, dim(y, m))]);
-    return '<section class="card"><h2>작년과 비교<small>단위: 만 원 · 오늘이 든 기간은 작년도 같은 날까지</small></h2>' + mk('반기별', H) + mk('분기별', Q) + mk('월별', M) + '</section>';
+    return '<section class="card"><h2>전년 대비 실적<small>단위: 만원 · 진행 중인 기간은 전년 동기 기준</small></h2>' + mk('반기별', H) + mk('분기별', Q) + mk('월별', M) + '</section>';
   }
 
-  /* 한눈에: 매출 · 매입 · 매출 − 매입 */
+  /* 종합: 매출 · 매입 · 매출 − 매입 */
   function sumHtml(d, per, c) {
     var sT = salesSum(d, c.a, c.b), sL = salesSum(d, c.la, c.lb), bT = buySum(d, c.a, c.b), bL = buySum(d, c.la, c.lb);
     var gT = sT.tot - bT.supply, gL = sL.tot - bL.supply;
     var tile = function (name, cur, last, neutral, extra) {
-      return '<div class="tile"><span>' + name + '</span><b>' + won(cur) + '</b><small class="' + (neutral ? 'neutral' : '') + '">' + (extra ? extra + '<br>' : '') + (subLine(cur, last, c) || (noRec(c.lb) ? '작년 기록 없음' : '작년 0원')) + '</small></div>';
+      return '<div class="tile"><span>' + name + '</span><b>' + won(cur) + '</b><small class="' + (neutral ? 'neutral' : '') + '">' + (extra ? extra + '<br>' : '') + (subLine(cur, last, c) || (noRec(c.lb) ? '전년 자료 없음' : '전년 0원')) + '</small></div>';
     };
-    var h = '<section class="card head"><p class="k">매출 · 매입<small>공급가액 · ' + esc(span(c.a, c.b)) + '</small></p><div class="tiles" style="margin-top:8px">' +
+    var h = '<section class="card head"><p class="k">매출 · 매입 종합<small>공급가액 · ' + esc(span(c.a, c.b)) + '</small></p><div class="tiles" style="margin-top:8px">' +
       tile('매출', sT.tot, sL.tot, false, sT.est ? '추정 ' + Math.max(1, Math.round(sT.est / sT.tot * 100)) + '% 포함' : '') +
-      tile('매입', bT.supply, bL.supply, true, bT.unpaid ? '외상 ' + won(bT.unpaid) : '') +
-      tile('매출 − 매입', gT, gL, false, '') + '</div>' +
-      '<p class="hint">매출 = 출고(단가 × kg, 단가 없는 출고는 기준 단가로 추정) + 장부 매출(시공 · 기타). 매입 = 장부 매입(입고 포함). 매출 − 매입은 손익이 아닙니다: 인건비 · 전기 · 이자는 매입에 넣은 만큼만 빠지고, 재고 변동 · 감가상각은 들어가지 않습니다. <a class="link" href="pnl.html">손익 화면 →</a></p></section>';
+      tile('매입', bT.supply, bL.supply, true, bT.unpaid ? '미지급금 ' + won(bT.unpaid) : '') +
+      tile('매출 − 매입 차액', gT, gL, false, '') + '</div>' +
+      '<p class="hint">매출 = 출고 매출(단가 × 중량, 단가 미입력분은 기준 단가로 추정) + 직접 등록 매출(시공 · 기타). 매입 = 등록 매입(입고 포함). 매출 − 매입 차액은 손익계산서상 이익과 다릅니다(인건비 · 전력비 · 이자는 매입 등록분만 반영, 재고 증감 · 감가상각 미반영). <a class="link" href="pnl.html">손익계산서 →</a></p></section>';
     // 아래 칸: 년 = 달마다, 반기·분기 = 달마다, 월 = 날마다(기록 있는 날)
     var r = range(per, S.at), list = [];
     if (per === 'm') {
@@ -760,11 +760,11 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       if (per === 'm' && !s1 && !b1) return;
       shown++;
       var nr = noRec(x.b), NA = '<span class="na">없음</span>';
-      body += '<tr' + (x.partial ? ' class="cur"' : '') + '><td>' + it[0] + (x.partial ? '<br><small>오늘까지</small>' : '') + '</td><td>' + (nr ? NA : man(s1)) + '</td><td>' + (nr ? NA : man(b1)) + '</td><td>' + (nr ? NA : man(s1 - b1)) + '</td><td>' + (noRec(x.lb) ? NA : man(s0 - b0)) + '</td></tr>';
+      body += '<tr' + (x.partial ? ' class="cur"' : '') + '><td>' + it[0] + (x.partial ? '<br><small>금일 기준</small>' : '') + '</td><td>' + (nr ? NA : man(s1)) + '</td><td>' + (nr ? NA : man(b1)) + '</td><td>' + (nr ? NA : man(s1 - b1)) + '</td><td>' + (noRec(x.lb) ? NA : man(s0 - b0)) + '</td></tr>';
     });
-    h += '<section class="card"><h2>' + (per === 'm' ? '날마다' : '달마다') + '<small>단위: 만 원</small></h2>';
-    if (!shown) h += '<p class="hint">이 기간 기록이 없습니다.</p>';
-    else h += '<div class="tw"><table class="cmp"><thead><tr><th>기간</th><th>매출</th><th>매입</th><th>차이</th><th>작년 차이</th></tr></thead><tbody>' + body +
+    h += '<section class="card"><h2>' + (per === 'm' ? '일별 집계' : '월별 집계') + '<small>단위: 만원</small></h2>';
+    if (!shown) h += '<p class="hint">해당 기간 자료가 없습니다.</p>';
+    else h += '<div class="tw"><table class="cmp"><thead><tr><th>기간</th><th>매출</th><th>매입</th><th>차액</th><th>전년 차액</th></tr></thead><tbody>' + body +
       '<tr class="tot"><td>합계</td><td>' + man(tS) + '</td><td>' + man(tB) + '</td><td>' + man(tS - tB) + '</td><td>' + (noRec(c.lb) ? '—' : man(tLS - tLB)) + '</td></tr></tbody></table></div>';
     return h + '</section>';
   }
@@ -783,7 +783,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   }
   function openEdit(id) {
     var e = findRow(id);
-    if (!e) { toast('그 기록을 찾지 못했습니다. 새로 불러옵니다.'); reload(); return; }
+    if (!e) { toast('해당 내역이 없습니다. 새로고침합니다.'); reload(); return; }
     var f = blankForm(e.kind, e.src);
     var neg = e.total < 0, sup = Math.abs(e.supply), tax = Math.abs(e.tax), tot = Math.abs(e.total);
     f.date = e.date; f.cat = e.cat; f.sub = e.src === '입고' ? '' : e.sub; f.rkind = e.src === '입고' ? e.sub : ''; f.cust = e.cust; f.desc = e.desc; f.memo = e.memo;
@@ -868,20 +868,20 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (!sh) { closeSheetNow(); return; }
     var body = sheetEl.querySelector('.sbody'), keepTop = body ? body.scrollTop : 0;
     var f = sh.f, recv = sh.src === '입고', sale = sh.kind === '매출';
-    var title = (sh.id ? '고치기 · ' : '') + (recv ? '입고' : sh.kind) + (sh.id ? '' : ' 넣기');
+    var title = (recv ? '입고' : sh.kind) + (sh.id ? ' 수정' : ' 등록');
     var h = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="shead"><h2 id="shTitle">' + esc(title) + '</h2><button type="button" class="btn ghost sm" data-act="close">닫기</button></div><div class="sbody">';
     if (sh.msg) h += '<p class="smsg ok" role="status">' + esc(sh.msg) + '</p>';
     if (sh.err) h += '<p class="smsg err" role="alert">' + esc(sh.err) + '</p>';
     if (sh.hint) h += '<p class="smsg info">' + esc(sh.hint) + '</p>';
-    if (sh.orig && sh.orig.src && ['직접', '입고'].indexOf(sh.orig.src) < 0) h += '<p class="smsg info">이 줄은 ‘' + esc(sh.orig.src) + '’에서 가져온 것입니다. 고쳐도 출처는 그대로 남습니다.</p>';
+    if (sh.orig && sh.orig.src && ['직접', '입고'].indexOf(sh.orig.src) < 0) h += '<p class="smsg info">이 내역은 ‘' + esc(sh.orig.src) + '’에서 가져온 자료입니다. 수정해도 출처는 유지됩니다.</p>';
     // 날짜
     var yd = addDays(S.today, -1);
-    h += '<div class="fld"><span class="lab">날짜</span><div class="chips"><button type="button" class="chip" aria-pressed="' + (f.date === S.today) + '" data-act="fset" data-f="date" data-v="' + S.today + '">오늘</button>' +
-      '<button type="button" class="chip" aria-pressed="' + (f.date === yd) + '" data-act="fset" data-f="date" data-v="' + yd + '">어제</button>' +
-      '<input class="inp" style="flex:1;min-width:160px;width:auto" type="date" data-f="date" value="' + esc(f.date) + '" max="' + esc(S.today) + '" aria-label="날짜"></div></div>';
+    h += '<div class="fld"><span class="lab">일자</span><div class="chips"><button type="button" class="chip" aria-pressed="' + (f.date === S.today) + '" data-act="fset" data-f="date" data-v="' + S.today + '">금일</button>' +
+      '<button type="button" class="chip" aria-pressed="' + (f.date === yd) + '" data-act="fset" data-f="date" data-v="' + yd + '">전일</button>' +
+      '<input class="inp" style="flex:1;min-width:160px;width:auto" type="date" data-f="date" value="' + esc(f.date) + '" max="' + esc(S.today) + '" aria-label="일자"></div></div>';
     if (recv) {
-      h += '<div class="fld"><span class="lab">무엇이 들어왔나</span>' + chipRow('rkind', RECV_KINDS, f.rkind) + '</div>';
-      if (f.rkind && f.rkind !== '폐타이어') h += '<div class="fld"><span class="lab">어디에 쓰나<small>매입 분류</small></span>' + chipRow('cat', RECV_USE, f.cat) + '</div>';
+      h += '<div class="fld"><span class="lab">입고 구분</span>' + chipRow('rkind', RECV_KINDS, f.rkind) + '</div>';
+      if (f.rkind && f.rkind !== '폐타이어') h += '<div class="fld"><span class="lab">용도<small>매입 분류</small></span>' + chipRow('cat', RECV_USE, f.cat) + '</div>';
       var items = f.rkind ? itemList(f.rkind) : [];
       h += '<div class="fld"><span class="lab">품목</span><input class="inp" type="text" data-f="desc" value="' + esc(f.desc) + '" maxlength="120" list="dlItem" placeholder="예: 폐타이어, 포대" autocomplete="off">' +
         '<datalist id="dlItem">' + items.map(function (x) { return '<option value="' + esc(x.desc) + '">'; }).join('') + '</datalist>' +
@@ -890,33 +890,33 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       h += '<div class="fld"><span class="lab">단가<small>원 / ' + esc(f.unit || '단위') + '</small></span><div class="inrow"><input class="inp" type="text" inputmode="decimal" data-f="price" value="' + esc(f.price) + '" placeholder="0" aria-label="단가" autocomplete="off"><span class="unit">원</span></div><div id="lastPrice">' + lastPriceHtml(f) + '</div></div>';
     } else {
       var cats = sale ? SALE_CATS : BUY_CATS;
-      h += '<div class="fld"><span class="lab">분류</span>' + chipRow('cat', cats, f.cat) + (sale && PROD.indexOf(f.cat) >= 0 ? '<p class="fwarn">' + esc(f.cat) + ' 매출은 출고에 단가를 넣으면 저절로 매출에 들어갑니다. 여기에는 출고 기록이 없는 매출(예: 이 앱을 쓰기 전 달의 합계)만 넣으십시오. 같은 매출을 두 번 넣으면 두 번 셉니다.</p>' : '') + '</div>';
+      h += '<div class="fld"><span class="lab">분류</span>' + chipRow('cat', cats, f.cat) + (sale && PROD.indexOf(f.cat) >= 0 ? '<p class="fwarn">' + esc(f.cat) + ' 매출은 출고에 단가를 입력하면 자동 집계됩니다. 이 화면에는 출고 기록이 없는 매출(예: 앱 사용 전 기간의 월 합계)만 등록하십시오. 동일 매출을 중복 등록하면 이중 집계됩니다.</p>' : '') + '</div>';
       if (f.cat) {
         var subs = subList(sh.kind, f.cat);
-        h += '<div class="fld"><span class="lab">항목<small>골라도 되고 써도 됩니다</small></span><input class="inp" type="text" data-f="sub" value="' + esc(f.sub) + '" maxlength="30" list="dlSub" autocomplete="off" placeholder="예: ' + esc(subs[0] || '항목') + '">' +
+        h += '<div class="fld"><span class="lab">세부 항목<small>선택 또는 직접 입력</small></span><input class="inp" type="text" data-f="sub" value="' + esc(f.sub) + '" maxlength="30" list="dlSub" autocomplete="off" placeholder="예: ' + esc(subs[0] || '항목') + '">' +
           '<datalist id="dlSub">' + subs.map(function (s) { return '<option value="' + esc(s) + '">'; }).join('') + '</datalist>' +
           (subs.length ? '<div class="chips sugg">' + subs.slice(0, 10).map(function (s) { return '<button type="button" class="chip sm" aria-pressed="' + (s === f.sub) + '" data-act="fset" data-f="sub" data-v="' + esc(s) + '">' + esc(s) + '</button>'; }).join('') + '</div>' : '') + '</div>';
       }
     }
     var custs = custList(sh.kind);
-    h += '<div class="fld"><span class="lab">거래처' + (sale ? '<small>받는 곳</small>' : '<small>준 곳</small>') + '</span><input class="inp" type="text" data-f="cust" value="' + esc(f.cust) + '" maxlength="60" list="dlCust" autocomplete="off" placeholder="거래처 이름">' +
+    h += '<div class="fld"><span class="lab">거래처' + (sale ? '<small>매출처</small>' : '<small>매입처</small>') + '</span><input class="inp" type="text" data-f="cust" value="' + esc(f.cust) + '" maxlength="60" list="dlCust" autocomplete="off" placeholder="거래처 이름">' +
       '<datalist id="dlCust">' + custs.slice(0, 200).map(function (s) { return '<option value="' + esc(s) + '">'; }).join('') + '</datalist></div>';
-    if (!recv) h += '<div class="fld"><span class="lab">내용<small>있으면</small></span><input class="inp" type="text" data-f="desc" value="' + esc(f.desc) + '" maxlength="120" autocomplete="off" placeholder="' + (sale ? '예: 현장 이름' : '예: 10월분') + '"></div>';
-    h += '<div class="fld"><span class="lab">' + (recv ? '금액' : '금액') + (recv ? '<small>수량 × 단가로 저절로 · 고쳐도 됨</small>' : '') + '</span>' + chipRow('vat', VATS, f.vat, true) +
+    if (!recv) h += '<div class="fld"><span class="lab">적요<small>선택</small></span><input class="inp" type="text" data-f="desc" value="' + esc(f.desc) + '" maxlength="120" autocomplete="off" placeholder="' + (sale ? '예: 현장명' : '예: 10월분') + '"></div>';
+    h += '<div class="fld"><span class="lab">금액' + (recv ? '<small>수량 × 단가 자동 계산 · 수정 가능</small>' : '') + '</span>' + chipRow('vat', VATS, f.vat, true) +
       '<div class="inrow" style="margin-top:8px"><input class="inp amt" type="text" inputmode="numeric" data-f="amt" value="' + esc(f.amt) + '" placeholder="0" aria-label="' + (f.vat === '포함' ? '합계 (부가세 포함)' : f.vat === '직접' ? '공급가액' : '금액') + '" autocomplete="off"><span class="unit">원</span></div>' +
       (f.vat === '직접' ? '<div class="inrow" style="margin-top:8px"><span class="unit" style="width:56px">세액</span><input class="inp amt" type="text" inputmode="numeric" data-f="amt2" value="' + esc(f.amt2) + '" placeholder="0" aria-label="세액" autocomplete="off"><span class="unit">원</span></div>' : '') +
       '<div class="calc" id="calc">' + calcHtml(f) + '</div></div>';
-    h += '<div class="fld"><span class="lab">' + (sale ? '받는 방법' : '주는 방법') + '</span>' + chipRow('pay', PAYS[sh.kind], f.pay, true) + '</div>';
-    h += '<details class="more"' + (f.proof || f.memo || f.neg ? ' open' : '') + '><summary>더 넣기 (증빙 · 메모 · 반품)</summary>' +
+    h += '<div class="fld"><span class="lab">' + (sale ? '수금 방법' : '지급 방법') + '</span>' + chipRow('pay', PAYS[sh.kind], f.pay, true) + '</div>';
+    h += '<details class="more"' + (f.proof || f.memo || f.neg ? ' open' : '') + '><summary>추가 정보 (증빙 · 비고 · 차감)</summary>' +
       '<div class="fld"><span class="lab">증빙</span>' + chipRow('proof', PROOF, f.proof, true) + '</div>' +
-      '<div class="fld"><span class="lab">메모</span><input class="inp" type="text" data-f="memo" value="' + esc(f.memo) + '" maxlength="200" autocomplete="off"></div>' +
-      '<label class="chk"><input type="checkbox" data-f="neg"' + (f.neg ? ' checked' : '') + '> 빼기 (반품 · 취소 · 할인): 금액을 마이너스로 넣습니다</label></details>';
+      '<div class="fld"><span class="lab">비고</span><input class="inp" type="text" data-f="memo" value="' + esc(f.memo) + '" maxlength="200" autocomplete="off"></div>' +
+      '<label class="chk"><input type="checkbox" data-f="neg"' + (f.neg ? ' checked' : '') + '> 차감 (반품 · 취소 · 할인): 음수 금액으로 등록</label></details>';
     h += '</div><div class="sfoot">';
     if (sh.id) {
-      h += '<button type="button" class="btn danger" data-act="del"' + (sh.saving ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 지웁니다' : '지우기') + '</button>' +
-        '<button type="button" class="btn" data-act="save"' + (sh.saving ? ' disabled' : '') + '>' + (sh.saving ? '저장 중…' : '고친 것 저장') + '</button>';
+      h += '<button type="button" class="btn danger" data-act="del"' + (sh.saving ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 삭제됩니다' : '삭제') + '</button>' +
+        '<button type="button" class="btn" data-act="save"' + (sh.saving ? ' disabled' : '') + '>' + (sh.saving ? '저장 중…' : '수정 저장') + '</button>';
     } else {
-      h += '<button type="button" class="btn ghost" data-act="savemore"' + (sh.saving ? ' disabled' : '') + '>저장하고 하나 더</button>' +
+      h += '<button type="button" class="btn ghost" data-act="savemore"' + (sh.saving ? ' disabled' : '') + '>저장 후 계속 등록</button>' +
         '<button type="button" class="btn" data-act="save"' + (sh.saving ? ' disabled' : '') + '>' + (sh.saving ? '저장 중…' : '저장') + '</button>';
     }
     h += '</div></div>';
@@ -929,7 +929,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   }
   function calcHtml(f) {
     var m = money(f);
-    if (!m) return f.amt ? '<span class="err" style="margin:0">금액을 숫자로 넣어 주세요.</span>' : '<span class="hint" style="margin:0">' + (f.vat === '포함' ? '부가세가 포함된 합계를 넣으면 공급가액과 부가세를 나눕니다.' : f.vat === '별도' ? '공급가액을 넣으면 부가세 10%를 더합니다.' : f.vat === '직접' ? '공급가액과 세액을 따로 넣습니다.' : '부가세 없는 금액입니다 (간이 · 면세 · 영수증).') + '</span>';
+    if (!m) return f.amt ? '<span class="err" style="margin:0">금액을 숫자로 입력해 주십시오.</span>' : '<span class="hint" style="margin:0">' + (f.vat === '포함' ? '부가세 포함 합계를 입력하면 공급가액과 세액으로 자동 분리합니다.' : f.vat === '별도' ? '공급가액을 입력하면 부가세 10%를 가산합니다.' : f.vat === '직접' ? '공급가액과 세액을 각각 입력합니다.' : '부가세가 없는 금액입니다 (간이과세 · 면세 · 영수증).') + '</span>';
     return '공급가액 <b>' + won(m.supply) + '</b> · 부가세 <b>' + won(m.tax) + '</b> · 합계 <b>' + won(m.total) + '</b><span class="han">' + esc(han(m.total)) + '</span>';
   }
   /** 입고: 같은 품목(같은 거래처 먼저)을 지난번에 얼마에 샀는지 */
@@ -942,7 +942,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   function lastPriceHtml(f) {
     var e = lastOf(f);
     if (!e) return '';
-    return '<div class="chips sugg"><button type="button" class="chip sm" data-act="lastprice" data-v="' + esc(e.price) + '">지난번 ' + esc(fmtQ(e.price)) + '원/' + esc(e.unit || 'kg') + ' 쓰기 (' + esc(dShort(e.date)) + (e.cust ? ' · ' + esc(e.cust) : '') + ')</button></div>';
+    return '<div class="chips sugg"><button type="button" class="chip sm" data-act="lastprice" data-v="' + esc(e.price) + '">최근 단가 ' + esc(fmtQ(e.price)) + '원/' + esc(e.unit || 'kg') + ' 적용 (' + esc(dShort(e.date)) + (e.cust ? ' · ' + esc(e.cust) : '') + ')</button></div>';
   }
   function autoAmt() {
     var f = S.sheet.f, q = num(f.qty), p = num(f.price);
@@ -970,20 +970,20 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (!f.pay && e.pay) f.pay = e.pay;
     if (!f.proof && e.proof) f.proof = e.proof;
     if (!did.length) return false;
-    sh.hint = '지난번(' + dShort(e.date) + ') 이 거래처는 ‘' + did.join(' · ') + '’였습니다. 그대로 골라 두었습니다. 다르면 바꾸십시오.';
+    sh.hint = '최근 거래(' + dShort(e.date) + ') 기준으로 ‘' + did.join(' · ') + '’을(를) 자동 선택했습니다. 다르면 변경하십시오.';
     return true;
   }
   function payloadOf(sh) {
     var f = sh.f, m = money(f), recv = sh.src === '입고';
-    if (!f.date || f.date > S.today) return { err: '날짜를 확인해 주세요 (오늘까지).' };
+    if (!f.date || f.date > S.today) return { err: '일자를 확인해 주십시오 (금일까지 등록 가능).' };
     if (recv) {
-      if (!f.rkind) return { err: '무엇이 들어왔는지(폐타이어 · 원자재 · 부자재) 골라 주세요.' };
-      if (!f.cat) return { err: '어디에 쓰는지 골라 주세요.' };
-      if (!f.desc.trim()) return { err: '품목을 넣어 주세요.' };
+      if (!f.rkind) return { err: '입고 구분(폐타이어 · 원자재 · 부자재)을 선택해 주십시오.' };
+      if (!f.cat) return { err: '용도를 선택해 주십시오.' };
+      if (!f.desc.trim()) return { err: '품목을 입력해 주십시오.' };
       var q = num(f.qty);
-      if (q == null || isNaN(q) || q <= 0) return { err: '수량을 넣어 주세요.' };
-    } else if (!f.cat) return { err: '분류를 골라 주세요.' };
-    if (!m) return { err: '금액을 넣어 주세요.' };
+      if (q == null || isNaN(q) || q <= 0) return { err: '수량을 입력해 주십시오.' };
+    } else if (!f.cat) return { err: '분류를 선택해 주십시오.' };
+    if (!m) return { err: '금액을 입력해 주십시오.' };
     var qv = num(f.qty), pv = num(f.price);
     return { p: { kind: sh.kind, src: sh.src, date: f.date, cat: f.cat, sub: recv ? f.rkind : f.sub.trim(), cust: f.cust.trim(), desc: f.desc.trim(),
       qty: qv == null || isNaN(qv) ? '' : qv, unit: recv ? f.unit : '', price: pv == null || isNaN(pv) ? '' : pv,
@@ -999,10 +999,10 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     pr.then(function (d) {
       put(d, true);
       var what = dShort(r.p.date) + ' · ' + (r.p.src === '입고' ? r.p.desc : r.p.sub || r.p.cat) + ' · ' + won(r.p.supply);
-      if (sh.id || close) { closeSheet(); toast((sh.id ? '고쳤습니다: ' : '저장했습니다: ') + what); render(); return; }
+      if (sh.id || close) { closeSheet(); toast((sh.id ? '수정되었습니다: ' : '등록되었습니다: ') + what); render(); return; }
       var f = sh.f;
       S.sheet = { kind: sh.kind, src: sh.src, id: '', f: blankForm(sh.kind, sh.src, { date: f.date, cat: f.cat, vat: f.vat, pay: f.pay, proof: f.proof, rkind: f.rkind, unit: f.unit }),
-        msg: '저장했습니다: ' + what + ' — 다음 것을 넣으십시오.', err: '', arm: false, saving: false };
+        msg: '등록되었습니다: ' + what + ' — 다음 내역을 입력하십시오.', err: '', arm: false, saving: false };
       renderSheet();
       var t = sheetEl.querySelector(sh.src === '입고' ? '[data-f="desc"]' : '[data-f="sub"]') || sheetEl.querySelector('[data-f="amt"]');
       if (t) t.focus();
@@ -1018,7 +1018,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (!sh.arm) { sh.arm = true; renderSheet(); setTimeout(function () { if (S.sheet === sh && sh.arm && !sh.saving) { sh.arm = false; renderSheet(); } }, 5000); return; }
     sh.saving = true; renderSheet();
     call('apiLedDelete', [sh.id]).then(function (d) {
-      put(d, true); closeSheet(); toast('지웠습니다'); render();
+      put(d, true); closeSheet(); toast('삭제되었습니다'); render();
     }, function (e) { if (!S.sheet) return; sh.saving = false; sh.arm = false; sh.err = errText(e); renderSheet(); });
   }
 
@@ -1036,11 +1036,11 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var per = curPer(), r = range(per, S.at), c = pcmp(r.a, r.b), rows = [];
     var name = { sales: '매출', buy: '매입', recv: '입고' }[S.view];
     if (S.view === 'sales') {
-      rows.push(['날짜', '출처', '분류', '항목', '거래처', '내용', 'kg(판매)', '확정 금액', '추정 금액', '금액 모르는 kg', '남명 kg', '공급가액', '세액', '합계', '받는 방법', '증빙', '메모']);
+      rows.push(['일자', '구분', '분류', '세부 항목', '거래처', '적요', '판매량(kg)', '확정 금액', '추정 금액', '금액 미확인(kg)', '자사 시공(kg)', '공급가액', '세액', '합계', '수금 방법', '증빙', '비고']);
       d.ship.filter(function (x) { return x[0] >= c.a && x[0] <= c.b; }).forEach(function (x) { rows.push([x[0], '출고', x[1], '', '', '', x[2] - x[7], x[3], x[5], x[6], x[7], x[3] + x[5], '', '', '', '', '']); });
-      d.R.filter(function (e) { return e.kind === '매출' && inR(e, c.a, c.b); }).forEach(function (e) { rows.push([e.date, '장부', e.cat, e.sub, e.cust, e.desc, '', '', '', '', '', e.supply, e.tax, e.total, e.pay, e.proof, e.memo]); });
+      d.R.filter(function (e) { return e.kind === '매출' && inR(e, c.a, c.b); }).forEach(function (e) { rows.push([e.date, '직접 등록', e.cat, e.sub, e.cust, e.desc, '', '', '', '', '', e.supply, e.tax, e.total, e.pay, e.proof, e.memo]); });
     } else {
-      rows.push(['날짜', '분류', S.view === 'recv' ? '종류' : '항목', '거래처', S.view === 'recv' ? '품목' : '내용', '수량', '단위', '단가', '공급가액', '세액', '합계', '주는 방법', '증빙', '출처', '메모']);
+      rows.push(['일자', '분류', S.view === 'recv' ? '입고 구분' : '세부 항목', '거래처', S.view === 'recv' ? '품목' : '적요', '수량', '단위', '단가', '공급가액', '세액', '합계', '지급 방법', '증빙', '출처', '비고']);
       d.R.filter(function (e) { return e.kind === '매입' && inR(e, c.a, c.b) && (S.view !== 'recv' || e.src === '입고'); }).sort(function (x, y) { return x.date < y.date ? -1 : x.date > y.date ? 1 : 0; })
         .forEach(function (e) { rows.push([e.date, e.cat, e.sub, e.cust, e.desc, e.qty === '' ? '' : e.qty, e.unit, e.price === '' ? '' : e.price, e.supply, e.tax, e.total, e.pay, e.proof, e.src, e.memo]); });
     }
@@ -1050,15 +1050,15 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     a.download = 'NMC_' + name + '_' + c.a + (c.b !== c.a ? '_' + c.b : '') + '.csv';
     document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
-    toast('엑셀 파일(CSV)을 받았습니다: ' + (rows.length - 1) + '줄');
+    toast('엑셀(CSV) 다운로드 완료: ' + (rows.length - 1) + '건');
   }
   var reloading = false;
   function reload(quiet) {
     if (reloading) return;
     var y = S.at ? S.at.slice(0, 4) : '';
     reloading = true;
-    if (!quiet) toast('새로 불러오는 중…');
-    call('apiLed', [y]).then(function (d) { reloading = false; S.err = ''; put(d, true); if (!S.sheet || !quiet) render(); if (!quiet) toast('새로 불러왔습니다'); },
+    if (!quiet) toast('새로고침 중…');
+    call('apiLed', [y]).then(function (d) { reloading = false; S.err = ''; put(d, true); if (!S.sheet || !quiet) render(); if (!quiet) toast('새로고침 완료'); },
       function (e) { reloading = false; if (!quiet && String(e && e.message) !== 'auth') toast(errText(e)); });
   }
   var toastT = null;
