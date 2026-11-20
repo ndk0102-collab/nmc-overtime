@@ -89,7 +89,7 @@ button,input{font:inherit;color:inherit}
   <p class="wait" id="wait">확인 중…</p>
   <section class="login" id="login" hidden aria-labelledby="lh">
     <h2 id="lh">관리자 로그인</h2>
-    <p>관리자 비밀번호를 입력하면 출고 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면이 모두 열립니다.</p>
+    <p>관리자 비밀번호를 입력하면 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면이 모두 열립니다.</p>
     <form id="loginForm" autocomplete="off">
       <label for="pw" style="position:absolute;left:-9999px">비밀번호</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">
@@ -110,6 +110,7 @@ button,input{font:inherit;color:inherit}
         <a class="go" href="stock.html?view=out"><span class="t"><b>출고</b><small>발주서 업로드 · 출고 예정 · 물표 · 거래처 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=recv"><span class="t"><b>입고</b><small>폐타이어 · 원자재 · 부자재 (금액은 매입에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go new" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=sales"><span class="t"><b>매출</b><small>일별 · 월별 · 분기별 · 반기별 · 연간 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="stock.html?view=all"><span class="t"><b>전체관리</b><small>현황 · 분석 · 현재고 · 예정 · 기록 · 매출·매입 합계</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>

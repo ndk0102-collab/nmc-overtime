@@ -1,6 +1,6 @@
 # NMC 통합 관리 (잔업 · 재고 · 손익계산서)
 
-남명(NMC) 직원이 휴대폰에서 잔업·휴일 근무 시간과 생산량을 직접 넣고, 관리자는 같은 앱에서 출고·매출·매입·손익계산서를 보는 설치형 웹 앱입니다.
+남명(NMC) 직원이 휴대폰에서 잔업·휴일 근무 시간과 생산량을 직접 넣고, 관리자는 같은 앱에서 출고·거래명세서·매출·매입·손익계산서를 보는 설치형 웹 앱입니다.
 
 ## 대표 링크 (하나만 쓰면 됩니다)
 https://ndk0102-collab.github.io/nmc-overtime/
@@ -16,7 +16,7 @@ https://ndk0102-collab.github.io/nmc-overtime/
 관리자 창구(`manage.html`) 안의 화면 (서버에서도 관리자 열쇠가 없으면 막습니다):
 
 - 잔업: 잔업 확인 · 급여 (`admin.html`)
-- 재고: 출고 (`stock.html?view=out`) · 입고 (`ledger.html?view=recv`) · 반입 (`stock.html?view=in`) · 매출 (`ledger.html?view=sales`) · 매입 (`ledger.html?view=buy`) · 전체관리 (`stock.html?view=all`, 예전 `?admin=1`)
+- 재고: 출고 (`stock.html?view=out`) · 입고 (`ledger.html?view=recv`) · 반입 (`stock.html?view=in`) · 거래명세서 (`statement.html`) · 매출 (`ledger.html?view=sales`) · 매입 (`ledger.html?view=buy`) · 전체관리 (`stock.html?view=all`, 예전 `?admin=1`)
 - 공사: 도면 (`sketchbook/`)
 - 손익계산서 (`pnl.html`)
 
@@ -25,8 +25,8 @@ https://ndk0102-collab.github.io/nmc-overtime/
 
 ## 구조
 - 이 저장소에는 화면 파일만 있습니다. 기록은 모두 구글 시트 'NMC 통합 관리'에 저장되고, 서버는 그 시트에 붙은 Apps Script 하나입니다.
-- 회사 숫자(대출·원가·매달 비용·단가), 거래처 정보, 분류 규칙은 서버와 시트에만 있습니다. 관리자 비밀번호로 로그인한 뒤에만 받아옵니다. 이 저장소에 회사 숫자·거래처·원재료 이름을 넣지 마세요.
-- 판매량은 재고 출고 기록에서, 인건비는 급여대장(payroll.js 계산)에서 손익계산서로 이어집니다.
+- 회사 숫자(대출·원가·매달 비용·단가), 거래처 정보, 회사 정보(거래명세서에 찍히는 공급자 칸)와 분류 규칙은 서버와 시트에만 있습니다. 관리자 비밀번호로 로그인한 뒤에만 받아옵니다. 이 저장소에 회사 숫자·거래처·원재료 이름을 넣지 마세요.
+- 판매량은 재고 출고 기록에서, 인건비는 급여대장(payroll.js 계산)에서 손익계산서로 이어집니다. 거래명세서를 발행하면 그 수량·단가가 출고 기록에 들어갑니다.
 - `admin.html`(급여 관리)과 `payroll.js`(급여 계산)에도 개인 정보는 없습니다. 급여 자료는 로그인한 뒤 구글 시트에서 받아옵니다.
 - 관리자 로그인 열쇠는 그 창(sessionStorage `nmc_pay_token`)에만 있고, 관리자 창구와 모든 관리자 화면이 같이 씁니다.
 - 화면을 고친 뒤에는 `sw.js`의 `CACHE` 이름(버전)을 올려야 설치된 앱에도 새 화면이 반영됩니다.

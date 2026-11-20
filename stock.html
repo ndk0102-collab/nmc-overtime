@@ -579,6 +579,9 @@ small.minusn{color:var(--bad)}
 .primary{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 22px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-size:17px;font-weight:800;cursor:pointer}
 .primary:disabled{opacity:.45;cursor:default}
 .ghost{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;border:2px solid var(--line);border-radius:12px;background:var(--card);font-size:16px;font-weight:800;cursor:pointer}
+a.ghost{text-decoration:none;color:inherit}
+.stl{border-color:#1B3A6B!important;color:#1B3A6B!important}
+.stl.done{background:#E8EEF7!important}
 .ghost.wide,.primary.wide{width:100%}
 .link{background:none;border:0;color:var(--accent-strong);font-weight:700;font-size:15px;min-height:44px;padding:0 6px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .danger-link{display:block;width:100%;background:none;border:0;color:var(--bad);font-weight:700;font-size:15px;min-height:46px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
@@ -1026,7 +1029,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0, boxEd: null,
-    stock: {}, customers: [], firstYm: '', badRows: [], ver: '',
+    stock: {}, customers: [], firstYm: '', badRows: [], ver: '', stmt: {},
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
     years: {}, yLoading: {}, yErr: {}, yv: '', yMin: '', yMax: '', yProd: '',
@@ -1370,6 +1373,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     setItems(r.items || []);
     S.stock = r.stock || {};
     S.customers = r.customers || [];
+    S.stmt = r.stmt || {};   // 출고 번호 → 거래명세서 번호 (2026-11-20)
     S.firstYm = r.firstYm || r.today.slice(0, 7);
     S.badRows = r.badRows || [];
     S.ver = r.ver || '';
@@ -2511,6 +2515,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   /* 거래처 상자 (2026-11-20): 번호 · 거래처 · 현장(발주번호) · 줄 수 · kg(묶음마다) · 금액. 이름 줄은 내려도 화면 위에 붙음.
      단추 줄(금액 넣기 · 전체 확정 · 물표 · 날짜 바꾸기)은 이름 줄 아래. 다섯 줄이 넘으면 상자 끝에 그 거래처 합계 줄. */
+  /* 거래명세서 (2026-11-20): 상자 출고가 모두 한 명세서에 있으면 그 명세서 보기, 아니면 이 상자 출고로 새 명세서 */
+  function stmtLink(rows) {
+    var map = S.stmt || {}, nos = [], all = true;
+    rows.forEach(function (r) { var n = map[r.id]; if (n) { if (nos.indexOf(n) < 0) nos.push(n); } else all = false; });
+    if (all && nos.length === 1) return '<a class="ghost sm stl done" href="statement.html?no=' + encodeURIComponent(nos[0]) + '" title="거래명세서 No. ' + esc(nos[0]) + '">명세서 No.' + esc(nos[0].replace(/^\d{8}-/, '')) + '</a>';
+    return '<a class="ghost sm stl" href="statement.html?ids=' + encodeURIComponent(rows.map(function (r) { return r.id; }).join(',')) + '">거래명세서' + (nos.length ? ' (일부 발행)' : '') + '</a>';
+  }
   var ICON_PEN = '<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:-2px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   function dayGroups(list) {
     var g = {}, order = [];
@@ -2533,6 +2544,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (S.admin) {
         var bs = [];
         if (sale) bs.push('<button type="button" class="ghost sm bxgo" data-act="bxopen" data-v="' + ids + '">' + ICON_PEN + '수정</button>');
+        if (sale) bs.push(stmtLink(x.rows));
         if (m && m.n > m.nOwn) bs.push('<button type="button" class="ghost sm' + (m.nNo ? ' need' : '') + '" data-act="rpopen" data-v="' + ids + '">' + (m.nNo ? '단가 입력' : '단가 수정') + '</button>');
         if (isPlan(x.type) && x.rows.length > 1) bs.push('<button type="button" class="primary sm dcfall" data-act="confirmgrp" data-v="' + ids + '">전체 확정</button>');
         if (x.type !== '생산예정') bs.push(x.rows.every(function (r) { return packOf(r) === 'ton'; }) ? '<span class="dgtb">톤백 · 물표 없음</span>' :
