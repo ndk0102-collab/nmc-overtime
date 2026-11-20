@@ -921,7 +921,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .bxnote{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--accent-soft);font-size:14px;font-weight:600}
 .bxerr{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:var(--bad-soft);color:var(--bad);font-size:14px;font-weight:700}
 .bxprob{margin:10px 0 0;padding:8px 10px 8px 28px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:14px;font-weight:600}
-.bxa{padding:12px}
+.bxa{padding:12px;grid-template-columns:minmax(0,1fr) minmax(0,2fr)!important}
+#bxsave{word-break:keep-all;line-height:1.25;padding:6px 10px;flex-direction:column}
+#bxsave b{display:block;font-size:17px}
+#bxsave small{display:block;font-size:12.5px;font-weight:700;opacity:.92}
 </style>
 </head>
 <body>
@@ -2413,7 +2416,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function bxSaveTxt(c) {
     if (S.boxEd && S.boxEd.busy) return '저장 중…';
     if (!c.n) return '바꾼 것 없음';
-    return '저장 · ' + [c.edit ? c.edit + '줄 고침' : '', c.add ? c.add + '줄 더함' : '', c.del ? c.del + '줄 뺌' : '', c.head ? '거래처·현장·날짜' : ''].filter(String).join(' · ');
+    return '<b>저장</b><small>' + [c.edit ? c.edit + '줄 고침' : '', c.add ? c.add + '줄 더함' : '', c.del ? c.del + '줄 뺌' : '', c.head ? '거래처·현장·날짜' : ''].filter(String).join(' · ') + '</small>';
   }
   function bxMsgHtml(probs) {
     var B = S.boxEd, h = '';
@@ -2427,7 +2430,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var B = S.boxEd;
     if (!B) return;
     var c = bxCount(), probs = bxProblems(), b = document.getElementById('bxsave'), m = document.getElementById('bxmsg');
-    if (b) { b.textContent = bxSaveTxt(c); b.disabled = B.busy || !!probs.length || !c.n; }
+    if (b) { b.innerHTML = bxSaveTxt(c); b.disabled = B.busy || !!probs.length || !c.n; }
     if (m) m.innerHTML = bxMsgHtml(probs);
     var rows = root.querySelectorAll('.bxrow');
     for (var i = 0; i < rows.length; i++) {
