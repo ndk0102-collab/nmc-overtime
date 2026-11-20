@@ -32,6 +32,7 @@ body.v-sales{--vc:#1B7A43;--vsoft:#E4F3EA}
 body.v-buy{--vc:#9A5B16;--vsoft:#FBEFE1}
 body.v-recv{--vc:#6B4FA0;--vsoft:#F0EAF8}
 body.v-sum{--vc:#1E5AA8;--vsoft:#E6EEF9}
+body.v-auto{--vc:#2D5D73;--vsoft:#E3EEF3}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
@@ -48,6 +49,8 @@ b,.big,td,th{font-variant-numeric:tabular-nums}
 .vtabs{max-width:760px;margin:8px auto 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
 .vtabs button{min-height:46px;border:0;border-radius:12px 12px 0 0;background:rgba(255,255,255,.16);color:#fff;font-weight:800;font-size:16px;cursor:pointer}
 .vtabs button[aria-selected="true"]{background:var(--bg);color:var(--vc)}
+.vtabs.n5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.vtabs.n5 button{padding:0 2px;font-size:15px;line-height:1.2}
 .home:focus-visible,.vtabs button:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 
 .wrap{max-width:760px;margin:0 auto;padding:12px 12px 96px}
@@ -172,6 +175,22 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
 .chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700}
 .chk input{width:22px;height:22px}
 
+/* 자동 수집 */
+.ag{padding:12px 0;border-top:1px solid var(--line)}
+.ag.first{border-top:0;padding-top:4px}
+.agh{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.agh b{font-size:16.5px;font-weight:800;margin-right:2px}
+.agh .tag{margin-left:0}
+.agm{margin:2px 0 6px;font-size:14px;color:var(--ink2)}
+.chip.sug{border-color:var(--warn);background:var(--warn-soft)}
+.chip:disabled{opacity:.5;cursor:default}
+.st{display:inline-block;padding:0 7px;border-radius:999px;font-size:12px;font-weight:800;background:var(--soft);color:var(--ink2)}
+.st.ok{background:var(--ok-soft);color:var(--ok)}.st.warn{background:var(--warn-soft);color:var(--warn)}.st.info{background:var(--accent-soft);color:#174A8C}
+.steps{margin:4px 0 0;padding-left:20px;font-size:14.5px;line-height:1.65}
+.rr .link{display:block;margin-left:auto;padding:4px 0 0;font-size:13.5px}
+.rr b.dif{color:var(--warn)}
+.small{font-size:12.5px;color:var(--muted)}
+
 /* 로그인 */
 .login{max-width:440px;margin:20px auto}
 .login form{display:flex;gap:8px;margin-top:12px}
@@ -195,7 +214,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     <a class="home" href="./"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>홈</a>
     <h1 id="title">매입</h1>
   </div>
-  <nav class="vtabs" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
+  <nav class="vtabs n5" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
 </header>
 <main class="wrap" id="root"></main>
 <button type="button" class="fab" id="fab" data-act="add" hidden>+ 등록</button>
@@ -212,8 +231,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheetEl = $('sheet'), toastEl = $('toast'), fab = $('fab');
 
-  var VIEWS = [['sales', '매출'], ['buy', '매입'], ['recv', '입고'], ['sum', '종합']];
-  var TITLE = { sales: '매출', buy: '매입', recv: '입고', sum: '매출 · 매입 종합' };
+  var VIEWS = [['sales', '매출'], ['buy', '매입'], ['recv', '입고'], ['sum', '종합'], ['auto', '자동 수집']];
+  var TITLE = { sales: '매출', buy: '매입', recv: '입고', sum: '매출 · 매입 종합', auto: '자동 수집' };
   var PERS = [['d', '일별'], ['m', '월별'], ['q', '분기별'], ['h', '반기별'], ['y', '연간']];
   var PROD = ['칼라칩', 'SBR 고무분말', '분철'];                       // 출고(재고기록)에서 저절로 오는 제품 매출 — kg은 서로 더하지 않음
   var SALE_CATS = ['칼라칩', 'SBR 고무분말', '분철', '시공', '기타'];
@@ -238,11 +257,12 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   var PER_DEF = { sales: 'm', buy: 'm', recv: 'm', sum: 'y' };
   var MAX_AMT = 10000000000;
 
-  var vm = /[?&]view=(sales|buy|recv|sum)(?:&|$)/.exec(location.search);
+  var vm = /[?&]view=(sales|buy|recv|sum|auto)(?:&|$)/.exec(location.search);
   var S = {
     view: vm ? vm[1] : 'buy', per: {}, at: '', today: '', minY: '', first: '',
     data: {}, loading: {}, err: '', authed: false, sugg: { cust: [], item: [], sub: [] },
-    sheet: null, pushed: false, filter: '', loginErr: ''
+    sheet: null, pushed: false, filter: '', loginErr: '',
+    auto: null, autoLoading: false, autoBusy: false, autoArm: '', autoErr: ''
   };
   var token = '';
   try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
@@ -337,7 +357,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
     bad_kind: '매출·매입 구분이 올바르지 않습니다.', bad_cat: '분류를 선택해 주십시오.', bad_amount: '금액을 확인해 주십시오. 원 단위 숫자만 입력할 수 있습니다.',
     bad_qty: '품목과 수량을 확인해 주십시오.', bad_date: '일자를 확인해 주십시오.', future_date: '미래 일자는 등록할 수 없습니다.',
-    not_found: '해당 내역이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.', bad_src: '이 내역은 이 화면에서 등록할 수 없습니다.', bad_input: '입력값을 확인해 주십시오.'
+    not_found: '해당 내역이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.', bad_src: '이 내역은 이 화면에서 등록할 수 없습니다.', bad_input: '입력값을 확인해 주십시오.',
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.'); }
   function post(body) {
@@ -461,6 +482,10 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     $('vtabs').innerHTML = vt;
     var h = '', canAdd = false;
     if (!S.authed) h = loginHtml();
+    else if (S.view === 'auto') {
+      if (S.auto) h = autoHtml();
+      else { if (!S.autoErr) needAuto(); h = S.autoErr ? '<section class="card"><p class="err" role="alert">' + esc(S.autoErr) + '</p><div class="tools"><button type="button" class="btn" data-act="aretry">다시 조회</button></div></section>' : '<p class="wait">조회 중…</p>'; }
+    }
     else if (!S.today) h = S.err ? errHtml() : '<p class="wait">조회 중…</p>';
     else {
       var y = S.at.slice(0, 4), d = S.data[y];
@@ -484,6 +509,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var h = perBar(), per = curPer(), c = pcmp(range(per, S.at).a, range(per, S.at).b);
     if (c.future) return h + '<section class="card"><p class="hint">아직 도래하지 않은 기간입니다.</p></section>';
     if (noRec(c.b)) h += '<p class="warnbox" style="margin:0 0 12px">이 기간은 등록된 자료가 없습니다 (자료 시작일: ' + esc(span(S.first, S.first)) + '). 과거 매출 · 매입은 해당 일자를 선택해 등록하면 됩니다.</p>';
+    if (d.auto && d.auto.ask > 0) h += '<p class="warnbox noprint" style="margin:0 0 12px">자동 수집: 분류가 필요한 내역 ' + d.auto.ask + '건이 있습니다. <button type="button" class="link" data-act="view" data-v="auto">자동 수집에서 분류 →</button></p>';
     if (S.view === 'sales') h += salesHtml(d, per, c);
     else if (S.view === 'sum') h += sumHtml(d, per, c);
     else h += buyHtml(d, per, c, S.view === 'recv');
@@ -1064,6 +1090,135 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   var toastT = null;
   function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { toastEl.hidden = true; }, 3600); }
 
+
+  /* ───────── 자동 수집 (2026-11-20) ─────────
+     회사 컴퓨터의 구글 드라이브 폴더 'NMC 자동 수집'에 저장한 세금계산서 · 통장 · 카드 엑셀을 서버가 10분마다 읽어 장부에 반영합니다.
+     여기서는 상태 확인 · 지금 확인 · 분류 고르기(처음 보는 거래처 한 번) · 되돌리기만 합니다. */
+  var AST = { '장부 반영': 'ok', '장부 연결': 'ok', '결제 확인': 'ok', '출고 대조': 'info', '분류 필요': 'warn' };
+  function needAuto(force) {
+    if (S.autoLoading || (S.auto && !force)) return;
+    S.autoLoading = true;
+    call('apiAuto').then(function (d) { S.autoLoading = false; S.auto = d; S.autoErr = ''; if (S.view === 'auto' && !S.sheet) render(); },
+      function (e) { S.autoLoading = false; if (String(e && e.message) !== 'auth') S.autoErr = errText(e); if (S.view === 'auto') render(); });
+  }
+  function md(s) { var p = P3(s); return p[1] + '월 ' + p[2] + '일'; }
+  function dtx(s) { s = String(s || ''); return s.length >= 16 ? md(s.slice(0, 10)) + ' ' + s.slice(11, 16) : s; }
+  function spanD(a, b) { return a === b ? md(a) : md(a) + '~' + md(b); }
+  function ymTxt(ym) { return Number(ym.slice(0, 4)) + '년 ' + Number(ym.slice(5, 7)) + '월'; }
+  function runTxt(r) {
+    if (!r) return '';
+    if (r.busy) return '다른 확인이 진행 중입니다. 잠시 후 다시 확인해 주십시오.';
+    if (r.err) return '확인 중 오류: ' + r.err;
+    if (!r.files) return '새 파일이 없습니다.';
+    return '파일 ' + r.files + '개 처리' + (r.fail ? ' (읽지 못함 ' + r.fail + '개)' : '') + ' · 새 내역 ' + r.fresh + '건' + (r.left ? ' · 남은 파일 ' + r.left + '개는 다음 확인 때 처리' : '');
+  }
+  function autoInvalidate() { S.data = {}; S.loading = {}; }
+  function autoHtml() {
+    var A = S.auto, L = A.last, h = '';
+    var ask = [], bank = [];
+    A.groups.forEach(function (g, i) { g.i = i; (g.t === 'ask' ? ask : bank).push(g); });
+    var nOf = function (a) { return a.reduce(function (t, g) { return t + g.n; }, 0); };
+    h += '<section class="card head"><p class="k">자동 수집<small>세금계산서 · 통장 · 카드 엑셀</small></p><ul class="rows">' +
+      '<li class="row"><div class="rl"><b>수집 폴더</b><small>' + (A.folder ? '내 드라이브 › ' + esc(A.folder.name) : '아직 만들어지지 않았습니다 (서버 설정 필요)') + '</small></div>' +
+      (A.folder && A.folder.url ? '<div class="rr"><a class="link" href="' + esc(A.folder.url) + '" target="_blank" rel="noopener">폴더 열기</a></div>' : '') + '</li>' +
+      '<li class="row"><div class="rl"><b>자동 확인</b><small>' + (A.trig === true ? A.every + '분마다 실행 중' : A.trig === false ? '꺼져 있습니다' : '권한 승인 전입니다 (서버 설정 필요)') + '</small></div>' +
+      (A.trig === false ? '<div class="rr"><button type="button" class="link" data-act="aon">켜기</button></div>' : '') + '</li>' +
+      '<li class="row"><div class="rl"><b>최근 확인</b><small>' + (L && L.at ? esc(dtx(L.at)) + ' · ' + esc(runTxt(L)) : '아직 없습니다') + '</small></div></li></ul>';
+    if (L && L.err) h += '<p class="warnbox">최근 확인 중 오류가 있었습니다: ' + esc(L.err) + '</p>';
+    h += '<div class="tools"><button type="button" class="btn" data-act="arun"' + (S.autoBusy || A.busy ? ' disabled' : '') + '>' + (S.autoBusy ? '확인 중…' : A.busy ? '다른 확인 진행 중' : '지금 확인') + '</button>' +
+      '<button type="button" class="btn ghost sm" data-act="areload">새로고침</button></div>' +
+      '<p class="hint">폴더에 저장한 엑셀 파일을 서버가 읽어 장부에 반영합니다. 같은 내역은 한 번만 들어가며, 읽은 파일은 폴더 안 ‘' + esc(A.folder ? A.folder.done : '처리 완료') + '’로 옮겨집니다.</p></section>';
+    // 분류 필요
+    h += '<section class="card"><h2>분류 필요<small>' + (ask.length ? ask.length + '곳 · ' + nOf(ask) + '건' : '없음') + '</small></h2>';
+    if (!ask.length) h += '<p class="hint">분류가 필요한 내역이 없습니다.</p>';
+    else {
+      h += '<p class="hint" style="margin:0 0 4px">처음 보는 거래처입니다. 분류를 한 번 선택하면 같은 거래처의 내역은 다음부터 자동으로 장부에 반영됩니다.</p>';
+      ask.forEach(function (g, k) { h += groupHtml(g, k === 0); });
+    }
+    h += '</section>';
+    // 통장 출금 중 장부에 없는 것
+    if (bank.length) {
+      h += '<section class="card"><details class="more" style="margin:0;border:0;padding:0"' + (S.autoBankOpen ? ' open' : '') + ' id="autoBank"><summary>통장 출금 중 장부에 없는 내역 (' + bank.length + '곳 · ' + nOf(bank) + '건)</summary>' +
+        '<p class="hint" style="margin:0 0 4px">세금계산서 · 카드 내역과 맞지 않은 출금입니다(급여 · 4대보험 · 이자 · 세금 등). 장부에 반영할 내역만 분류를 선택하십시오. 선택하지 않으면 장부에 반영되지 않습니다.</p>';
+      bank.forEach(function (g, k) { h += groupHtml(g, k === 0); });
+      h += '</details></section>';
+    }
+    if (A.bankIn) h += '<section class="card"><p class="hint" style="margin:0">통장 입금 중 장부 내역과 맞지 않은 ' + A.bankIn + '건은 장부에 반영하지 않습니다. 제품 매출은 출고 × 단가로 집계하며, 입금은 대금 회수 기록입니다.</p></section>';
+    // 출고 대조
+    if (A.ship.length) {
+      h += '<section class="card" id="autoShip"><h2>출고 대조<small>매출 세금계산서와 출고 매출 · 공급가액</small></h2><ul class="rows">';
+      A.ship.forEach(function (x) {
+        var amt = x[5] + x[6], dif = x[3] - amt;
+        h += '<li class="row"><div class="rl"><b>' + esc(x[1]) + '</b><small>' + esc(ymTxt(x[0])) + ' · 세금계산서 ' + x[2] + '건</small><ul class="subs">' +
+          '<li><span>세금계산서</span><span>' + won(x[3]) + '</span></li><li><span>출고 매출</span><span>' + won(amt) + '</span></li>' +
+          (x[6] ? '<li><span>└ 그중 <span class="est">추정</span></span><span>' + won(x[6]) + '</span></li>' : '') +
+          (x[7] ? '<li><span>단가 없는 출고</span><span>' + fmtQ(x[7]) + 'kg</span></li>' : '') + '</ul></div>' +
+          '<div class="rr"><b' + (dif ? ' class="dif"' : '') + '>' + (dif > 0 ? '+' : dif < 0 ? '−' : '') + won(Math.abs(dif)) + '</b><small>차이</small></div></li>';
+      });
+      h += '</ul><p class="hint">제품 매출은 출고 × 단가로 집계하므로 이 세금계산서는 장부에 다시 반영하지 않습니다. 차이가 있으면 출고 단가 또는 출고 기록을 확인하십시오. 추정 = 단가 미입력 출고를 기준 단가로 계산한 금액입니다.</p></section>';
+    }
+    // 최근 수집
+    h += '<section class="card"><h2>최근 수집 내역<small>' + (A.recent.length ? '최근 ' + A.recent.length + '건' : '없음') + '</small></h2>';
+    h += A.recent.length ? '<ul class="rows">' + A.recent.map(recentHtml).join('') + '</ul>' : '<p class="hint">아직 수집한 내역이 없습니다.</p>';
+    h += '</section>';
+    // 파일 처리 기록
+    if (A.logs.length) {
+      h += '<section class="card"><h2>파일 처리 기록<small>최근 ' + A.logs.length + '개</small></h2><ul class="rows">' + A.logs.map(function (l) {
+        var bad = l[6] !== (A.folder ? A.folder.done : '처리 완료');
+        return '<li class="row"><div class="rl"><b>' + esc(l[1]) + '</b><small>' + esc(dtx(l[0])) + (l[2] ? ' · ' + esc(l[2]) : '') + '</small>' + (bad ? '<small class="err" style="margin:0">' + esc(l[5]) + '</small>' : '') + '</div>' +
+          '<div class="rr"><b>' + (bad ? esc(l[6]) : '새 ' + l[4] + '건') + '</b><small>' + (bad ? '' : '읽은 ' + l[3] + '건') + '</small></div></li>';
+      }).join('') + '</ul><p class="hint">읽지 못한 파일은 폴더 안 ‘' + esc(A.folder ? A.folder.fail : '확인 필요') + '’로 옮겨집니다. 엑셀 형식으로 다시 저장해 수집 폴더에 넣으면 다시 읽습니다.</p></section>';
+    }
+    // 설정 방법
+    h += '<section class="card"><details class="more" style="margin:0;border:0;padding:0"><summary>설정 방법 · 저장할 파일</summary>' +
+      '<h3>처음 한 번</h3><ol class="steps"><li>회사 컴퓨터에 ‘데스크톱용 Google Drive’를 설치하고, 이 앱의 구글 시트를 소유한 회사 계정으로 로그인합니다.</li>' +
+      '<li>파일 탐색기의 ‘Google Drive › 내 드라이브’ 안에 ‘' + esc(A.folder ? A.folder.name : 'NMC 자동 수집') + '’ 폴더가 표시됩니다.</li>' +
+      '<li>이후 아래 파일을 이 폴더에 저장하기만 하면 됩니다.</li></ol>' +
+      '<h3>저장할 파일 (엑셀 · CSV)</h3><ul class="steps"><li><b>매출 · 매입 세금계산서</b>: 홈택스 전자(세금)계산서 목록조회에서 매출 · 매입을 각각 조회한 뒤 엑셀로 내려받기</li>' +
+      '<li><b>통장 거래내역</b>: 기업 인터넷뱅킹 입출금 거래내역 조회 → 엑셀 저장</li><li><b>카드 이용내역</b>: 카드사 기업 홈페이지 이용내역(승인내역) 조회 → 엑셀 저장</li></ul>' +
+      '<p class="hint">조회 기간이 겹쳐도 같은 내역은 한 번만 반영됩니다. 매출 · 매입 구분이 되지 않는 목록은 파일 이름에 ‘매출’ 또는 ‘매입’을 넣어 저장하십시오. 홈택스 · 은행 · 카드사 내려받기는 공동인증서 로그인이 필요하여 담당자가 직접 합니다.</p>' +
+      '<h3>장부 반영 기준</h3><ul class="steps"><li>매입 세금계산서 · 카드: 같은 거래처 · 같은 금액의 장부 내역(직접 등록 · 입고)이 있으면 새로 넣지 않고 연결합니다.</li>' +
+      '<li>매출 세금계산서: 시공 · 공사는 장부 매출(시공)로 반영합니다. 제품 매출은 출고 × 단가로 이미 집계하므로 ‘출고 대조’로만 표시합니다.</li>' +
+      '<li>통장: 장부 내역의 결제(계좌이체 · 계좌입금)만 표시합니다. 매입 · 매출로 새로 넣지 않습니다.</li></ul></details></section>';
+    return h;
+  }
+  function groupHtml(g, first) {
+    var cats = g.g === '매출' ? SALE_CATS.map(function (c) { return [c, c]; }).concat([['출고', '출고 매출로 집계'], ['제외', '제외']])
+      : BUY_CATS.map(function (c) { return [c, c]; }).concat([['제외', '제외']]);
+    var h = '<div class="ag' + (first ? ' first' : '') + '"><div class="agh"><b>' + esc(g.name || '(거래처 미기재)') + '</b>' + g.kinds.map(function (k) { return '<span class="tag">' + esc(k) + '</span>'; }).join('') + '</div>' +
+      '<p class="agm">' + g.n + '건 · 합계 ' + won(g.sum) + ' · ' + esc(spanD(g.from, g.to)) + '</p>';
+    if (g.ex.length) h += '<ul class="subs">' + g.ex.map(function (e) { return '<li><span>' + esc(md(e[0]) + (e[1] ? ' · ' + e[1] : '')) + '</span><span>' + won(e[2]) + '</span></li>'; }).join('') + (g.n > g.ex.length ? '<li><span>외 ' + (g.n - g.ex.length) + '건</span><span></span></li>' : '') + '</ul>';
+    if (g.memo) h += '<p class="fwarn">' + esc(g.memo) + '</p>';
+    if (g.sug) h += '<p class="hint" style="margin:6px 0 0">추정 분류: <b>' + esc(g.sug === '제외' ? '제외' : g.sug) + '</b> <span class="est">추정</span></p>';
+    h += '<div class="chips" style="margin-top:8px">' + cats.map(function (c) {
+      return '<button type="button" class="chip sm' + (c[0] === g.sug ? ' sug' : '') + '" data-act="aset" data-i="' + g.i + '" data-v="' + esc(c[0]) + '"' + (S.autoBusy ? ' disabled' : '') + '>' + esc(c[1]) + '</button>';
+    }).join('') + '</div></div>';
+    return h;
+  }
+  function recentHtml(x) {
+    var amt = x[1] === '통장' ? (x[7] ? '출금 ' + won(x[7]) : '입금 ' + won(x[6])) : won(x[5]);
+    var undo = x[8] === '장부 반영' || x[8] === '제외';
+    return '<li class="row"><div class="rl"><b>' + esc(x[3] || '(거래처 미기재)') + '<span class="tag">' + esc(x[1]) + '</span></b><small>' + esc(md(x[2]) + (x[4] ? ' · ' + x[4] : '')) + '</small>' +
+      (x[10] ? '<small>' + esc(x[10]) + '</small>' : '') + '</div><div class="rr"><b>' + amt + '</b><small><span class="st ' + (AST[x[8]] || '') + '">' + esc(x[8]) + '</span>' +
+      (x[9] === 0 ? ' · 장부에서 삭제됨' : '') + '</small>' +
+      (undo ? '<button type="button" class="link" data-act="aundo" data-k="' + esc(x[0]) + '"' + (S.autoBusy ? ' disabled' : '') + '>' + (S.autoArm === x[0] ? '한 번 더 누르면 되돌립니다' : '되돌리기') + '</button>' : '') + '</div></li>';
+  }
+  function autoAct(fn, args, done) {
+    if (S.autoBusy) return;
+    S.autoBusy = true; S.autoArm = '';
+    var bo = $('autoBank'); S.autoBankOpen = !!(bo && bo.open);
+    render();
+    call(fn, args).then(function (d) {
+      S.autoBusy = false; S.auto = d; S.autoErr = ''; autoInvalidate();
+      if (S.view === 'auto') render();
+      if (done) done(d);
+    }, function (e) {
+      S.autoBusy = false;
+      if (String(e && e.message) !== 'auth') toast(errText(e));
+      if (S.view === 'auto') render();
+    });
+  }
+
   /* ───────── 누르기 · 쓰기 ───────── */
   function savePer() { try { localStorage.setItem('nmc_led_per', JSON.stringify(S.per)); } catch (e) {} }
   function setView(v) {
@@ -1071,7 +1226,9 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     S.view = v; S.filter = '';
     if (S.view === 'sum' && S.per.sum === 'd') S.per.sum = 'm';
     try { history.replaceState(history.state, '', location.pathname + '?view=' + v); } catch (e) {}
+    S.autoArm = '';
     render(); window.scrollTo(0, 0);
+    if (v === 'auto' && S.auto) needAuto(true);   // 들어올 때마다 최신으로
   }
   document.addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-act]');
@@ -1104,6 +1261,23 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       case 'print': window.print(); return;
       case 'reload': reload(false); return;
       case 'retry': S.err = ''; if (!S.today) start(); else render(); return;
+      case 'aretry': S.autoErr = ''; S.auto = null; render(); return;
+      case 'areload': needAuto(true); toast('새로고침 중…'); return;
+      case 'arun': autoAct('apiAutoRun', [], function (d) { toast(runTxt(d.run) || '확인 완료'); }); return;
+      case 'aon': autoAct('apiAutoOn', [true], function (d) { toast(d.trig ? '자동 확인을 켰습니다.' : '자동 확인을 켜지 못했습니다.'); }); return;
+      case 'aset': {
+        var g = S.auto && S.auto.groups[Number(el.getAttribute('data-i'))];
+        if (!g || el.disabled) return;
+        var lab = el.textContent;
+        autoAct('apiAutoSet', [{ g: g.g, name: g.name, cat: v }], function (d) { toast(g.name + ' → ' + lab + ' (' + (d.applied || 0) + '건 적용)'); });
+        return;
+      }
+      case 'aundo': {
+        var k = el.getAttribute('data-k');
+        if (S.autoArm !== k) { S.autoArm = k; render(); return; }
+        autoAct('apiAutoUndo', [k], function () { toast('되돌렸습니다. 해당 거래처는 다음부터 분류를 다시 묻습니다.'); });
+        return;
+      }
       case 'fset': {
         var sh = S.sheet; if (!sh) return;
         var k = el.getAttribute('data-f'), f = sh.f;
@@ -1192,7 +1366,9 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (ev.key === 'Enter' && S.sheet && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') { ev.preventDefault(); ev.target.blur(); }
   });
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden || !S.authed || !S.today || S.sheet) return;
+    if (document.hidden || !S.authed || S.sheet) return;
+    if (S.view === 'auto') { needAuto(true); return; }
+    if (!S.today) return;
     reload(true);
   });
 
