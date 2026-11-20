@@ -366,7 +366,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
       '<button class="btn primary" type="submit">로그인</button>' +
       '</form>' + (S.err ? '<p class="err" role="alert">' + esc(S.err) + '</p>' : '') +
-      '<p class="back"><a href="./">← 홈</a></p></section>';
+      '<p class="back"><a href="manage.html">← 관리자</a></p></section>';
   }
   function bindLogin() {
     var f = document.getElementById('loginForm');
@@ -397,7 +397,7 @@ table.pl.ot th { padding: .7mm .2mm; }
   function viewTop() {
     var m = S.month;
     return '<header class="top"><div class="top-in">' +
-      '<a class="iconbtn" href="./" aria-label="홈">' + HOME_IC + '홈</a>' +
+      '<a class="iconbtn" href="manage.html" aria-label="관리자">' + HOME_IC + '관리자</a>' +
       '<div class="brand">잔업 · 급여<small>' + esc(m.config.company) + '</small></div>' +
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
       '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +

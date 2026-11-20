@@ -181,7 +181,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     <button class="btn" type="submit">로그인</button>
   </form>
   <p class="err" id="loginErr" role="alert"></p>
-  <p class="hint back"><a href="./">← 홈</a></p>
+  <p class="hint back"><a href="manage.html">← 관리자</a></p>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -191,7 +191,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       <p class="sub">판매량은 출고 실적, 인건비는 급여대장 기준입니다. 모든 금액은 부가세를 제외한 공급가액입니다.</p>
     </div>
     <nav class="nav" aria-label="화면 이동">
-      <a href="./" aria-label="홈"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>홈</a><button type="button" id="logoutBtn">로그아웃</button>
+      <a href="manage.html" aria-label="관리자"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a><button type="button" id="logoutBtn">로그아웃</button>
     </nav>
   </header>
   <div class="controls">
@@ -332,7 +332,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   /* 칼라칩 · SBR 고무분말 · 분철은 kg을 서로 더하지 않습니다 (2026-11-19 지시). 합계는 묶음 안에서만, 모두 합계는 금액만 */
   var KG_GRP = [{ name: '칼라칩', keys: ['nm', 'lok'] }, { name: 'SBR 고무분말', keys: ['s57', 's23', 's12', 'mibun'] }, { name: '분철', keys: ['cord', 'bead'] }];
   var FIXED_LABELS = { labor: '인건비 (급여·4대보험·원천세·숙소)', elec: '전력비', repair: '수선·부품·소모품비', ins: '보험료', cert: '인증·시험·컨설팅·홍보비', card: '카드 사용액', lease: '차량 리스·보증료', etc: '수도·통신비·세금과공과' };
-  var BUY_CATS = [['raw', '원재료 (고무·EPM)', 1], ['chem', '약품·안료·오일', 1], ['tire', '폐타이어 원료', 1], ['pack', '포장재', 1], ['sub', '외주시공·시공자재', 1], ['trans', '운송·연료', 1], ['repair', '수선·부품·소모품', 0], ['util', '전기·수도·통신', 0], ['labor', '인건비', 0], ['ins', '보험·리스·보증', 0], ['tax', '세금·공과', 0], ['fee', '인증·수수료·회비', 0], ['capex', '설비투자', 0], ['etc', '기타 경비', 0], ['skip', '제외 (내부이체·대출·카드대금 등)', 0]];
+  var BUY_CATS = [['raw', '원재료', 1], ['chem', '약품·안료·오일', 1], ['tire', '폐타이어 원료', 1], ['pack', '포장재', 1], ['sub', '외주시공·시공자재', 1], ['trans', '운송·연료', 1], ['repair', '수선·부품·소모품', 0], ['util', '전기·수도·통신', 0], ['labor', '인건비', 0], ['ins', '보험·리스·보증', 0], ['tax', '세금·공과', 0], ['fee', '인증·수수료·회비', 0], ['capex', '설비투자', 0], ['etc', '기타 경비', 0], ['skip', '제외 (내부이체·대출·카드대금 등)', 0]];
   var VAR_BUY = BUY_CATS.filter(function (c) { return c[2]; }).map(function (c) { return c[0]; });
   var NOVAT = ['labor', 'tax', 'ins', 'skip'];
 

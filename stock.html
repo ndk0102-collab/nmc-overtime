@@ -1606,7 +1606,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var sub = VIEW_NAME + (S.today ? ' · ' + fmtDateLong(S.today) : '');
     if (ADMIN_VIEW && S.ready && !S.admin) sub = VIEW_NAME + ' · 관리자';
     var nav = (subLevel() ? '<button type="button" class="ghost sm navbtn backbtn" data-act="back" aria-label="뒤로 (' + esc(backTo()) + ')">' + ICON.chevL + '<span>뒤로</span></button>' : '') +
-      '<a class="ghost sm navbtn" href="./" aria-label="홈">' + ICON.home + '<span>홈</span></a>';
+      (ADMIN_VIEW ? '<a class="ghost sm navbtn" href="manage.html" aria-label="관리자">' + ICON.home + '<span>관리자</span></a>'   // 관리자 화면 → 관리자 창구 (2026-11-20)
+        : '<a class="ghost sm navbtn" href="./" aria-label="홈">' + ICON.home + '<span>홈</span></a>');
     if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
     else if (ADMIN_VIEW && S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
     return '<header class="top"><div><h1 class="brand"><span>NMC</span>재고</h1><p class="sub">' + esc(sub) + '</p></div>' +
