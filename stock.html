@@ -410,6 +410,29 @@ body.labmode .wrap{max-width:1480px}
 .polist{list-style:none;margin:6px 0 0;padding:0}
 .poitem{padding:12px 0;border-bottom:1px solid var(--line)}
 .poitem:last-child{border-bottom:0}
+/* 수신 발주서 나누기 (2026-11-21 18:43) */
+.posum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:10px 0 4px}
+.psm{display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 2px;border-radius:12px;font-size:12px;font-weight:700;text-align:center;line-height:1.25;word-break:keep-all}
+.psm b{font-size:21px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.psm.bad{background:var(--bad-soft);color:var(--bad)}
+.psm.read{background:var(--accent-soft);color:var(--accent-strong)}
+.psm.done{background:#E3F4EA;color:var(--ok)}
+.psm.off{background:var(--soft);color:var(--muted)}
+.psm.zero{opacity:.55}
+.posec{display:flex;align-items:center;gap:8px;width:100%;margin:16px 0 0;padding:8px 12px;border:0;border-radius:10px;font:inherit;font-size:15.5px;font-weight:800;text-align:left}
+.posec b{font-size:14px;font-weight:800}
+.posec i{margin-left:auto;font-style:normal;font-size:13px;font-weight:700}
+.posec.todo{background:#FDECEA;color:#8F1D14}
+.posec.done{background:#E3F4EA;color:#145C33}
+.posec.off{background:var(--soft);color:var(--ink2);cursor:pointer;min-height:44px}
+.poday{margin:10px 0 0;padding:0 2px 4px;font-size:13.5px;font-weight:800;color:var(--ink2);border-bottom:2px solid var(--line)}
+.poempty{margin:8px 0 0;padding:10px 12px;border-radius:10px;background:#F4F8F5;color:var(--ok);font-size:14.5px;font-weight:700}
+.poinbox .poitem{padding:12px 10px;border-left:5px solid var(--line);border-bottom:1px solid var(--line);border-radius:0}
+.poinbox .poitem.st-bad{border-left-color:var(--bad);background:#FFF8F7}
+.poinbox .poitem.st-wait,.poinbox .poitem.st-read{border-left-color:var(--accent);background:#F6F9FE}
+.poinbox .poitem.st-qwait{border-left-color:#C98A00;background:#FFFBEF}
+.poinbox .poitem.st-done{border-left-color:var(--ok)}
+.poinbox .poitem.st-off,.poinbox .poitem.st-dup{border-left-color:#B8BEC7;opacity:.8}
 .pohead{display:flex;align-items:flex-start;gap:8px}
 .pochip{flex:none;display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
 .pochip.wait,.pochip.off{background:var(--soft);color:var(--muted)}
@@ -520,24 +543,37 @@ body.labmode .wrap{max-width:1480px}
 .cw{text-align:center;font-size:12.5px;font-weight:700;color:var(--muted);padding:2px 0}
 .cw.sun,.cd.sun .dn{color:#C62828}
 .cw.sat,.cd.sat .dn{color:#1E5AA8}
-.cd{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;min-height:64px;padding:4px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit}
+/* 달력 칸 (2026-11-21 18:40 지시 "출고 완료된 거는 중간 줄을 친다던지 … 멀리서 봐도 출고됐구나, 오늘은 박스 색상을 친다던지,
+   발주 예정인 것들도 멀리서 봤을 때 바로 알 수 있게, 재고 부족한 거는 삼각형에 느낌표 빨간색으로 '재고부족 1'")
+   출고 완료 = 회색 칸에 ✓ · 가운데 줄 / 출고예정 = 파란 칸 흰 글자 / 재고 부족 = 빨간 삼각형 느낌표 + 건수 · 빨간 테 / 오늘 = 칸 전체 노랑 + '오늘' / 고른 날 = 파란 굵은 테 */
+.cd{display:flex;flex-direction:column;align-items:stretch;gap:2px;min-width:0;min-height:70px;padding:4px 2px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit}
 .cd.empty{border:0;background:transparent;cursor:default;min-height:0}
-.cd .dn{font-size:13px;font-weight:800;line-height:1.2}
-.cd .co,.cd .cp{display:block;font-size:11px;font-weight:800;line-height:1.3;letter-spacing:-0.02em;border-radius:5px;padding:0 2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.cd .co{background:#E3E8EF;color:var(--ink)}
-.cd .cp{border:1px dashed var(--accent);color:var(--accent-strong)}
-.cd .cx{display:block;font-size:10.5px;font-weight:800;color:var(--warn);line-height:1.2}
-.cd.short{border-color:var(--bad);background:var(--bad-soft)}
-.cd.short .cp{border-color:var(--bad);color:var(--bad);background:#fff}
-.cd.today{box-shadow:inset 0 0 0 2px var(--accent)}
-.cd.sel{border-color:var(--accent);background:var(--accent-soft)}
-.cd.sel.short{background:var(--bad-soft)}
-.cd:focus-visible{outline:3px solid #F4B400;outline-offset:1px}
-.calleg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:10px 0 0;font-size:12.5px;color:var(--muted)}
-.calleg .lg::before{content:'';display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px;box-sizing:border-box}
-.calleg .lg.co::before{background:#E3E8EF}
-.calleg .lg.cp::before{border:1px dashed var(--accent)}
-.calleg .lg.cs::before{background:var(--bad-soft);border:1px solid var(--bad)}
+.cd .dn{display:flex;align-items:center;gap:2px;font-size:14px;font-weight:800;line-height:1.25;padding:0 1px;min-width:0}
+.cd .tdy{margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:#B87800;border-radius:4px;padding:0 3px;line-height:1.5;letter-spacing:-0.03em;white-space:nowrap}
+.cd .co,.cd .cp{display:block;font-size:11.5px;font-weight:800;line-height:1.4;letter-spacing:-0.02em;border-radius:5px;padding:0 2px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.cd .co{background:#E6E9ED;color:#5B626C}
+.co .ck,.lgc .ck{font-style:normal;color:#1B7A43;margin-right:1px}
+.co s,.lgc s{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#2F343B}
+.cd .cp{background:var(--accent);color:#fff}
+.cd .cs{display:flex;align-items:center;justify-content:center;gap:1px;font-size:10.5px;font-weight:800;line-height:1.35;letter-spacing:-0.05em;color:var(--bad);white-space:nowrap;overflow:hidden}
+.cd .cs svg,.lgc svg{flex:none;display:block}
+.cd .cs .lw{display:none}
+@media (min-width:520px){.cd .cs .lw{display:inline}}
+@media (min-width:700px){.cd{min-height:88px;gap:3px;padding:5px 4px}.cd.short,.cd.today{padding:4px 3px}.cd .dn{font-size:16px}.cd .tdy{font-size:12px;padding:0 5px}
+  .cd .co,.cd .cp{font-size:14.5px;line-height:1.5;border-radius:6px}.co s{text-decoration-thickness:2.5px}.cd .cs{font-size:13px;gap:3px;letter-spacing:-0.02em}.cd .cs svg{width:15px;height:14px}.cd .cx{font-size:12.5px}}
+.cd .cx{display:block;font-size:10.5px;font-weight:800;color:var(--warn);line-height:1.2;text-align:center}
+.cd.short{border:2px solid var(--bad);padding:3px 1px;background:#FFF6F5}
+.cd.today{background:#FFF0B0;border:2px solid #D19600;padding:3px 1px}
+.cd.today.short{border-color:var(--bad)}
+.cd.sel{box-shadow:0 0 0 3px var(--accent)}
+.cd:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.calleg{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 14px;margin:12px 0 0;font-size:13px;color:var(--ink2)}
+.calleg .lg{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.lgc{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:19px;padding:0 4px;border-radius:5px;font-size:11.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.lgc.co{background:#E6E9ED;color:#5B626C}
+.lgc.cp{background:var(--accent);color:#fff}
+.lgc.cs{min-width:0;padding:0}
+.lgc.td{min-width:26px;background:#FFF0B0;border:2px solid #D19600}
 .dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 4px}
 .dayhead h2{margin:0;font-size:22px;font-weight:800}
 .dtag{font-size:13px;font-weight:800;color:var(--muted);background:var(--soft);border-radius:999px;padding:2px 10px;white-space:nowrap}
@@ -795,7 +831,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .optseg.calgrp{margin:0 0 10px}
 .cgod{display:inline-block;margin-left:5px;font-size:11px;font-weight:800;color:var(--warn)}
 .cd .cot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#9AA5B4;margin-left:3px;vertical-align:2px}
-.calleg .lg.ot::before{width:8px;height:8px;border-radius:50%;background:#9AA5B4;vertical-align:1px}
+.calleg .lg.ot::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#9AA5B4}
 .calnote{margin:6px 0 0;text-align:center}
 .gkg{white-space:nowrap}
 .gbig{display:block;font-size:17px;line-height:1.3;white-space:nowrap}
@@ -1047,7 +1083,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
-    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poOffOpen: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '', allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0, boxEd: null,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '', stmt: {},
@@ -4612,6 +4648,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      날짜를 누르면 아래에 그날 출고·예정 목록 — 줄을 누르면 고치기·지우기, 예정은 '확정'.
      '＋ 넣기': 오늘·지난 날은 출고, 오늘·앞날은 출고예정. 넣는 동안 그날 재고가 남는지 모자라는지 바로 보입니다. */
   /* 달력 칸에 들어가게 짧게: 10톤 넘으면 '21t', 100kg~10톤은 '9.4t', 그 밑은 '25kg' */
+  var CAL_TRI = '<svg width="12" height="11" viewBox="0 0 26 24" aria-hidden="true"><path d="M13 1.5 25 22.5H1z" fill="#D92D20" stroke="#D92D20" stroke-width="1.5" stroke-linejoin="round"/>' +
+    '<path d="M13 8.5v6.5" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><circle cx="13" cy="18.8" r="1.6" fill="#fff"/></svg>';
   function calAmt(kg) { return kg >= 10000 ? Math.round(kg / 1000) + 't' : kg >= 100 ? (Math.round(kg / 100) / 10) + 't' : fmt(kg) + 'kg'; }
   function calDays(ym) {
     var cur = S.today.slice(0, 7), days = {};
@@ -4791,16 +4829,46 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     return h + '</section>';
   }
+  /* 수신 발주서: 상태마다 나눠서 (2026-11-21 18:43 지시 "출고 아래 수신발주서도 너무 지저분하게 되어 있다. 등록 완료된 거, 판독해야 되는 거,
+     취소된 거 좀 날짜별로 분명하게 나누던지 등록 완료와 판독 부분이나 이런 걸로 나누던지 … 보기 쉽게 해 놔라")
+     맨 위 상태별 건수 → '처리할 것'(확인 필요 · 판독 대기 · 판독 중 · 날짜 미정, 늘 펼침) → '등록 완료'(받은 날짜마다 묶음) → '취소 · 중복'(눌러야 펼침). */
+  var PO_SEC = { '확인 필요': 'todo', '기다림': 'todo', '읽는 중': 'todo', '날짜 대기': 'todo', '넣음': 'done', '취소': 'off', '중복': 'off' };
+  var PO_TODO_ORDER = { '확인 필요': 0, '기다림': 1, '읽는 중': 2, '날짜 대기': 3 };
+  function poDayHead(k) { return /^\d{4}-\d{2}-\d{2}$/.test(k) ? fmtDate(k) + (k === S.today ? ' (오늘)' : '') + ' 수신' : '받은 날짜 모름'; }
+  function poByDay(list) {
+    var out = [], cur = null;
+    list.forEach(function (x) { var k = String(x.at || '').slice(0, 10); if (!cur || cur.k !== k) { cur = { k: k, xs: [] }; out.push(cur); } cur.xs.push(x); });
+    return out;
+  }
+  function poDayList(list) {
+    return poByDay(list).map(function (g) { return '<p class="poday">' + esc(poDayHead(g.k)) + ' · ' + g.xs.length + '건</p><ul class="polist">' + g.xs.map(poRow).join('') + '</ul>'; }).join('');
+  }
   function poInbox() {
     var L = S.poList, h = '<section class="card poinbox" id="poinbox"><div class="podh"><h2 class="label">수신 발주서</h2>' +
       '<button type="button" class="link" data-act="polist"' + (S.poLoading ? ' disabled' : '') + '>새로고침</button></div>';
     if (!L) return S.poErr ? h + '<p class="muted">불러오지 못했습니다. 새로고침을 눌러 주십시오.</p></section>' : '';
     if (!L.items.length) return '';
-    var all = L.items, show = S.poMore ? all : all.slice(0, PO_SHOW);
-    h += '<ul class="polist">';
-    show.forEach(function (x) { h += poRow(x); });
-    h += '</ul>';
-    if (all.length > show.length) h += '<button type="button" class="ghost wide mt8" data-act="pomoreall">' + (all.length - show.length) + '건 더 표시</button>';
+    var G = { todo: [], done: [], off: [] }, newest = function (a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; };
+    L.items.forEach(function (x) { G[PO_SEC[x.state] || 'off'].push(x); });
+    G.done.sort(newest); G.off.sort(newest);
+    G.todo.sort(function (a, b) { var pa = PO_TODO_ORDER[a.state], pb = PO_TODO_ORDER[b.state]; return pa !== pb ? pa - pb : newest(a, b); });
+    var nBad = G.todo.filter(function (x) { return x.state === '확인 필요'; }).length, nRead = G.todo.length - nBad;
+    h += '<div class="posum" role="group" aria-label="상태별 건수">' +
+      '<span class="psm bad' + (nBad ? '' : ' zero') + '"><b>' + nBad + '</b>확인 필요</span>' +
+      '<span class="psm read' + (nRead ? '' : ' zero') + '"><b>' + nRead + '</b>판독 대기 · 날짜 미정</span>' +
+      '<span class="psm done' + (G.done.length ? '' : ' zero') + '"><b>' + G.done.length + '</b>등록 완료</span>' +
+      '<span class="psm off' + (G.off.length ? '' : ' zero') + '"><b>' + G.off.length + '</b>취소 · 중복</span></div>';
+    h += '<h3 class="posec todo"><span>처리할 것</span><b>' + G.todo.length + '건</b></h3>' +
+      (G.todo.length ? '<ul class="polist">' + G.todo.map(poRow).join('') + '</ul>' : '<p class="poempty">처리할 발주서가 없습니다. 모두 등록했거나 취소했습니다.</p>');
+    if (G.done.length) {
+      var show = S.poMore ? G.done : G.done.slice(0, PO_SHOW);
+      h += '<h3 class="posec done"><span>등록 완료</span><b>' + G.done.length + '건</b></h3>' + poDayList(show);
+      if (G.done.length > show.length) h += '<button type="button" class="ghost wide mt8" data-act="pomoreall">등록 완료 ' + (G.done.length - show.length) + '건 더 표시</button>';
+    }
+    if (G.off.length) {
+      h += '<button type="button" class="posec off" data-act="pooff" aria-expanded="' + !!S.poOffOpen + '"><span>취소 · 중복</span><b>' + G.off.length + '건</b><i aria-hidden="true">' + (S.poOffOpen ? '접기 ▲' : '펼치기 ▼') + '</i></button>' +
+        (S.poOffOpen ? poDayList(G.off) : '');
+    }
     return h + '</section>';
   }
   function poRow(x) {
@@ -5449,13 +5517,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return gl.indexOf(g) >= 0 ? g : (gl[0] || '');
   }
   function dayG(x, g) {
-    var o = { outKg: 0, planKg: 0, short: false, overdue: false, n: 0 };
+    var o = { outKg: 0, planKg: 0, short: false, nShort: 0, overdue: false, n: 0 };
     if (!x) return o;
     x.out.forEach(function (r) { if (grpOf(r.prod) === g) { o.outKg += r.qty; o.n++; } });
     x.plan.forEach(function (l) {
       if (grpOf(l.prod) !== g) return;
       o.planKg += l.qty; o.n++;
-      if (l.short > 0) o.short = true;
+      if (l.short > 0) { o.short = true; o.nShort++; }
       if (l.overdue) o.overdue = true;
     });
     return o;
@@ -5504,16 +5572,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var d = ym + '-' + pad(dn), x = days[d], q = dayG(x, G), wd = (first + dn - 1) % 7;
       var oth = x ? GL.filter(function (g) { if (g === G) return false; var z = dayG(x, g); return z.outKg || z.planKg; }) : [];
       var cls = 'cd' + (d === S.today ? ' today' : '') + (d === S.calDay ? ' sel' : '') + (q.short ? ' short' : '') + (wd === 0 ? ' sun' : wd === 6 ? ' sat' : '');
-      var lab = fmtDate(d) + (q.outKg ? ' · ' + grpName(G) + ' 출고 ' + fmt(q.outKg) + 'kg' : '') + (q.planKg ? ' · ' + grpName(G) + ' 출고예정 ' + fmt(q.planKg) + 'kg' : '') +
-        (q.short ? ' · 재고 부족' : '') + (q.overdue ? ' · 미확정' : '') + (oth.length ? ' · ' + oth.join('·') + ' 기록 있음' : '');
+      var lab = fmtDate(d) + (d === S.today ? ' · 오늘' : '') + (q.outKg ? ' · ' + grpName(G) + ' 출고 완료 ' + fmt(q.outKg) + 'kg' : '') + (q.planKg ? ' · ' + grpName(G) + ' 출고예정 ' + fmt(q.planKg) + 'kg' : '') +
+        (q.nShort ? ' · 재고 부족 ' + q.nShort + '건' : '') + (q.overdue ? ' · 미확정' : '') + (oth.length ? ' · ' + oth.join('·') + ' 기록 있음' : '');
       h += '<button type="button" class="' + cls + '" data-act="calday" data-v="' + d + '" aria-label="' + esc(lab) + '" aria-pressed="' + (d === S.calDay) + '">' +
-        '<span class="dn">' + dn + (oth.length ? '<i class="cot" aria-hidden="true"></i>' : '') + '</span>' +
-        (q.outKg ? '<span class="co">' + calAmt(q.outKg) + '</span>' : '') +
+        '<span class="dn"><span>' + dn + '</span>' + (oth.length ? '<i class="cot" aria-hidden="true"></i>' : '') + (d === S.today ? '<span class="tdy" aria-hidden="true">오늘</span>' : '') + '</span>' +
+        (q.outKg ? '<span class="co"><i class="ck" aria-hidden="true">✓</i><s>' + calAmt(q.outKg) + '</s></span>' : '') +
         (q.planKg ? '<span class="cp">' + calAmt(q.planKg) + '</span>' : '') +
+        (q.nShort ? '<span class="cs">' + CAL_TRI + '<span class="lw">재고</span>부족' + q.nShort + '</span>' : '') +
         (q.overdue ? '<span class="cx">미확정</span>' : '') + '</button>';
     }
-    h += '</div><p class="calleg"><span class="lg co">출고</span><span class="lg cp">출고예정</span><span class="lg cs">재고 부족</span>' +
-      (GL.length > 1 ? '<span class="lg ot">다른 제품 기록</span>' : '') + '</p>';
+    h += '</div><p class="calleg"><span class="lg"><span class="lgc co"><i class="ck">✓</i><s>1.2t</s></span>출고 완료</span>' +
+      '<span class="lg"><span class="lgc cp">1.2t</span>출고예정</span><span class="lg"><span class="lgc cs">' + CAL_TRI + '</span>재고 부족(건수)</span>' +
+      '<span class="lg"><span class="lgc td"></span>오늘</span>' + (GL.length > 1 ? '<span class="lg ot">다른 제품 기록</span>' : '') + '</p>';
     if (GL.length > 1) h += '<p class="note calnote">달력 칸의 숫자는 위에서 고른 <b>' + esc(G) + '</b>만 집계합니다. ' + esc(GL.join('·')) + '은(는) 합산하지 않습니다.</p>';
     return h + '</section>';
   }
@@ -7320,6 +7390,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'poundo': poUndo(v); return;
       case 'polist': poLoad(false); render(); return;
       case 'pomoreall': S.poMore = true; render(); return;
+      case 'pooff': S.poOffOpen = !S.poOffOpen; render(); return;
       case 'pojump': var pib = document.getElementById('poinbox'); if (pib && pib.scrollIntoView) { try { pib.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { pib.scrollIntoView(); } } return;
       case 'pogoto': poGoto(v); return;
       case 'findgo': { var fqe = document.getElementById('find-q'); findGo(fqe ? fqe.value : S.findQ); return; }

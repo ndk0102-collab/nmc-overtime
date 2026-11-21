@@ -55,6 +55,19 @@ b{font-variant-numeric:tabular-nums}
 .btn:disabled{opacity:.55;cursor:default}
 .btn:focus-visible,.home:focus-visible,.it:focus-visible,.cnt button:focus-visible,.chip:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 .hint{margin:8px 0 0;color:var(--muted);font-size:14px}
+.mail .mst{margin:4px 0 0;font-size:15.5px;font-weight:800}
+.mail .mst.on{color:var(--ok)}
+.mail .mst.on::before{content:'';display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
+.mail .mst.wait{color:var(--warn)}
+.mail .mst.off{color:var(--muted)}
+.mail .mst.bad{color:var(--bad)}
+.mail .mt{margin-top:12px}
+.mkey{margin:12px 0 0;padding:12px;border-radius:12px;background:var(--vsoft);border:2px solid var(--vc)}
+.mkl{margin:0 0 6px;font-weight:800}
+.mkl small{display:block;font-weight:500;color:var(--ink2);font-size:13.5px}
+.mkey code{display:block;margin:0 0 10px;padding:10px;border-radius:8px;background:#fff;border:1px solid var(--line);font:700 15px/1.5 ui-monospace,Consolas,monospace;word-break:break-all;user-select:all;letter-spacing:.02em}
+.mask{margin:12px 0 0;padding:12px;border-radius:12px;background:var(--soft)}
+.mask p{margin:0 0 10px}
 .err{color:var(--bad);font-weight:700}
 .filt{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
 .filt input[type=search]{flex:1;min-width:180px;min-height:44px;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff}
@@ -127,7 +140,7 @@ b{font-variant-numeric:tabular-nums}
   var TOKEN_KEY = 'nmc_pay_token';
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheet = $('sheet'), shade = $('shade'), toastEl = $('toast'), fileIn = $('fileIn');
-  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', kind: '', q: '', open: '', text: {}, busy: '', up: '' };
+  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', kind: '', q: '', open: '', text: {}, busy: '', up: '', mailKey: '', mailAsk: '' };
   var EXT = /\.(pdf|jpe?g|png|gif|bmp|tiff?|webp|heic|hwpx?|docx?|rtf|odt|eml|txt)$/i, MAX = 10 * 1024 * 1024;
   var ERR = {
     auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
@@ -226,6 +239,7 @@ b{font-variant-numeric:tabular-nums}
         : '수집 폴더가 아직 없습니다. ‘폴더 지금 확인’을 누르면 구글 드라이브에 ‘NMC 자동 수집’ 폴더를 만듭니다.') +
       (D.trig === false ? ' <b class="err">자동 확인이 꺼져 있습니다 — 매출 · 매입 화면의 ‘자동 수집’에서 켜 주십시오.</b>' : '') +
       (D.last && D.last.at ? ' 최근 확인 ' + esc(dtx(D.last.at)) + '.' : '') + '</p></section>';
+    h += mailHtml(D.mail);
     var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
     h += '<div class="filt"><input type="search" id="q" placeholder="제목 · 발신 · 문서번호 · 요약 · 메모 찾기" value="' + esc(S.q) + '" aria-label="공문 찾기">' +
       '<select id="kindSel" aria-label="종류">' + kinds + '</select></div>';
@@ -239,6 +253,41 @@ b{font-variant-numeric:tabular-nums}
     if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
     h += helpHtml();
     root.innerHTML = h;
+  }
+  /* 다음 메일 자동 읽기 (2026-11-21 18:31 지시 "이 컴퓨터 설치해서 메일 자동으로 읽고 가지고 오는 걸로 진행해 봐라")
+     사무실 컴퓨터의 메일 읽기 프로그램이 10분마다 다음 메일의 새 메일을 이 공문함으로 보냅니다(메일 한 통 = '메일' 한 건, 첨부는 따로 정리).
+     여기서는 그 컴퓨터가 쓸 연결 키를 만들고(한 번만 보임), 마지막 확인 시각 · 오류를 봅니다. 메일 비밀번호는 그 컴퓨터에만 있습니다. */
+  var MAIL_ERR = { login: '다음 메일 로그인이 안 됩니다. 카카오 앱 비밀번호가 바뀌었거나 다음 메일의 IMAP 사용이 꺼졌을 수 있습니다. 그 컴퓨터에서 설치 파일을 다시 실행해 주십시오.',
+    imap: '다음 메일 서버에서 메일을 읽지 못했습니다. 다음 확인 때 다시 시도합니다.', net: '그 컴퓨터의 인터넷 연결이 끊겨 있었습니다. 다음 확인 때 다시 시도합니다.' };
+  function mailErrText(e) { e = String(e || ''); return MAIL_ERR[e] || MAIL_ERR[e.split(':')[0]] || ('마지막 확인에서 오류가 났습니다 (' + e + '). 다음 확인 때 다시 시도합니다.'); }
+  function mailHtml(M) {
+    if (!M) return '';
+    var P = M.ping, h = '<section class="card mail" id="mailCard"><h2>다음 메일 자동 읽기</h2>';
+    if (!M.on) h += '<p class="mst off">아직 연결된 컴퓨터가 없습니다.</p><p class="hint">메일 읽기 프로그램을 설치하는 중이라면 아래 ‘연결 키 만들기’를 누르고, 나온 키를 설치 창에 붙여 넣으십시오.</p>';
+    else if (!P) h += '<p class="mst wait">연결 키를 만들었습니다(' + esc(dtx(M.at)) + '). 아직 컴퓨터가 메일을 확인한 적이 없습니다.</p><p class="hint">설치 창에 키를 붙여 넣으면 바로 첫 확인을 합니다.</p>';
+    else {
+      var ago = P.age == null ? '' : P.age < 1 ? '방금' : P.age < 60 ? P.age + '분 전' : Math.floor(P.age / 60) + '시간 ' + (P.age % 60) + '분 전';
+      if (P.err) h += '<p class="mst bad">' + esc(mailErrText(P.err)) + '</p>';
+      else if (P.stale) h += '<p class="mst bad">' + esc(ago) + '부터 확인이 없습니다. 컴퓨터가 꺼져 있거나 잠자기 상태일 수 있습니다. 컴퓨터를 켜면 그동안 온 메일을 빠짐없이 가져옵니다.</p>';
+      else h += '<p class="mst on">작동 중 — 10분마다 확인합니다.</p>';
+      h += '<p class="hint">마지막 확인 ' + esc(dtx(P.at)) + (ago ? ' (' + esc(ago) + ')' : '') + (P.err && P.ok ? ' · 마지막 정상 확인 ' + esc(dtx(P.ok)) : '') +
+        ' · 오늘 받은 메일 ' + (Number(P.today) || 0) + '통' + (P.host ? ' · 컴퓨터 ' + esc(P.host) : '') + (P.user ? ' · ' + esc(P.user) : '') + '</p>';
+    }
+    if (S.mailKey) {
+      h += '<div class="mkey"><p class="mkl">연결 키 <small>지금 한 번만 보입니다. 설치 창에 붙여 넣으십시오.</small></p><code id="mailKey">' + esc(S.mailKey) + '</code>' +
+        '<div class="tools"><button type="button" class="btn" data-act="mailcopy">키 복사</button><button type="button" class="btn ghost" data-act="mailhide">다 붙여 넣었음 (키 숨기기)</button></div></div>';
+    }
+    if (S.mailAsk === 'key') {
+      h += '<div class="mask"><p>' + (M.on ? '<b>새 연결 키를 만들까요?</b> 지금 쓰는 키는 바로 못 쓰게 되어, 그 컴퓨터에서 설치 파일을 다시 실행해 새 키를 넣어야 합니다.' : '<b>연결 키를 만들까요?</b>') + '</p>' +
+        '<div class="tools"><button type="button" class="btn" data-act="mailkeygo"' + (S.busy === 'mail' ? ' disabled' : '') + '>' + (S.busy === 'mail' ? '만드는 중…' : '만들기') + '</button><button type="button" class="btn ghost" data-act="mailaskx">아니요</button></div></div>';
+    } else if (S.mailAsk === 'off') {
+      h += '<div class="mask"><p><b>연결을 끊을까요?</b> 그 컴퓨터는 더 이상 메일을 보내지 못합니다(이미 넣은 메일은 그대로).</p>' +
+        '<div class="tools"><button type="button" class="btn danger" data-act="mailoffgo"' + (S.busy === 'mail' ? ' disabled' : '') + '>연결 끊기</button><button type="button" class="btn ghost" data-act="mailaskx">아니요</button></div></div>';
+    } else {
+      h += '<div class="tools mt"><button type="button" class="btn ghost" data-act="mailkey">' + (M.on ? '연결 키 새로 만들기' : '연결 키 만들기') + '</button>' +
+        (M.on ? '<button type="button" class="btn danger" data-act="mailoff">연결 끊기</button>' : '') + '</div>';
+    }
+    return h + '</section>';
   }
   function cb(f, cls, n, t) { return '<button type="button" class="' + cls + '" data-f="' + f + '" aria-pressed="' + (S.f === f) + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
   function itemHtml(x, today) {
@@ -381,6 +430,21 @@ b{font-variant-numeric:tabular-nums}
     if (!b || b.disabled) return;
     var a = b.getAttribute('data-act');
     if (a === 'reload') load();
+    else if (a === 'mailkey' || a === 'mailoff') { S.mailAsk = a === 'mailkey' ? 'key' : 'off'; render(); }
+    else if (a === 'mailaskx') { S.mailAsk = ''; render(); }
+    else if (a === 'mailhide') { S.mailKey = ''; render(); }
+    else if (a === 'mailkeygo' || a === 'mailoffgo') {
+      S.busy = 'mail'; render();
+      call(a === 'mailkeygo' ? 'apiMailKey' : 'apiMailOff', []).then(function (d) {
+        S.busy = ''; S.mailAsk = ''; S.mailKey = a === 'mailkeygo' ? String(d.mailKey || '') : ''; put(d); render();
+        toast(a === 'mailkeygo' ? '연결 키를 만들었습니다. ‘키 복사’를 눌러 설치 창에 붙여 넣으십시오.' : '연결을 끊었습니다.');
+      }, function (e) { S.busy = ''; render(); toast(errText(e)); });
+    }
+    else if (a === 'mailcopy') {
+      var kv = S.mailKey, done = function () { toast('키를 복사했습니다. 설치 창에 붙여 넣으십시오 (마우스 오른쪽 단추 또는 Ctrl+V).'); };
+      var fall = function () { var r = document.createRange(), el = $('mailKey'); if (el) { r.selectNodeContents(el); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); } toast('키를 골라 두었습니다. Ctrl+C로 복사해 주십시오.'); };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(kv).then(done, fall); else fall();
+    }
     else if (a === 'pick') { fileIn.value = ''; fileIn.click(); }
     else if (a === 'run') {
       S.busy = 'run'; render();
