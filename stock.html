@@ -835,6 +835,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .mtt tr.mtp td:first-child{padding-left:14px}
 .mtt tr.mto td{border-top:0;padding-top:0;font-size:12.5px;color:var(--muted)}
 .mtot .note{margin:6px 0 0}
+.mtt th small{font-size:10.5px;font-weight:700;color:var(--muted)}
+/* 오늘 뒤 날짜: 확정(출고 · 생산) + 예정(출고예정 · 생산예정) 네 칸 (2026-11-21 17:49) */
+.mtot.wide .mtt{font-size:13px}
+.mtot.wide .mtt th{padding:3px 2px;font-size:11.5px}
+.mtot.wide .mtt td{padding:5px 2px}
+.mtot.wide .mtt tr.mtg td b{font-size:14.5px}
 .dsc{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:4px}
 .dsc li{display:flex;align-items:center;gap:5px;min-width:0;padding:5px 7px;background:var(--card);border:1px solid var(--line);border-radius:8px;font-size:13.5px}
 .dsc li .dscn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
@@ -5600,46 +5606,57 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       (label === '생산예정' ? '' : daySum(rows)) + dayGroups(rows);
   }
 
-  /* 그 달 출고 · 생산 합계 (2026-11-21 14:04 지시: "출고에 달력 날짜 클릭하고 밑에 나오는 거. 거기에 당월 총 출고량과 생산량 표기해서 볼 수 있도록")
-     확정 기록(재고기록의 출고 · 생산)을 묶음(칼라칩 · SBR 고무분말 · 분철)마다 따로 더함 — 묶음끼리는 한 숫자로 더하지 않음.
-     칼라칩은 제품마다 아래 줄. 이번 달은 오늘까지의 확정 기록, 앞으로의 달은 기록이 없으므로 출고예정 · 생산예정. */
-  function monthTot(ym) {
-    var cur = S.today.slice(0, 7), fut = ym > cur, m = S.months[ym], rows = [];
-    if (!fut && !m) {
+  /* 그 달 1일부터 누른 날까지 출고 · 생산 합계 (2026-11-21 14:04 지시 "당월 총 출고량과 생산량" →
+     17:49 다시 지시: "달력을 11월 19일 누르면 11월 19일까지 판매된 칼라칩 총 출고 및 생산량을 보여줘야지. 달력에 클릭하면 그 날짜 기준으로 출고된 총 양을 보여줘")
+     확정 기록(재고기록의 출고 · 생산)은 1일~누른 날(오늘 뒤 날짜면 오늘까지). 오늘 뒤 날짜를 누르면 내일~그날의 출고예정 · 생산예정을 칸을 따로 두어 붙임.
+     묶음(칼라칩 · SBR 고무분말 · 분철)마다 따로 더하고 묶음끼리는 한 숫자로 더하지 않음. 칼라칩은 제품마다 아래 줄. */
+  function monthTot(d) {
+    var ym = d.slice(0, 7), cur = S.today.slice(0, 7), first = ym + '-01', m = S.months[ym], rows = [];
+    var real = ym <= cur, plan = d > S.today, upTo = d < S.today ? d : S.today;
+    var mo = Number(ym.slice(5)), dn = Number(d.slice(8, 10)), tn = Number(S.today.slice(8, 10));
+    var range = mo + '월 1일' + (dn > 1 ? '~' + dn + '일' : '');
+    var LAB = { out: '출고', made: '생산', pout: '출고예정', pmade: '생산예정' };
+    var ks = (real ? ['out', 'made'] : []).concat(plan ? ['pout', 'pmade'] : []);
+    var title = esc(range) + ' ' + (real ? '출고 · 생산' : '출고예정 · 생산예정') + ' 합계';
+    if (real && !m) {
       ensureMonth(ym);
-      return '<div class="mtot"><p class="mtoth"><b>' + esc(fmtYm(ym)) + ' 출고 · 생산 합계</b><small>' + (S.mErr[ym] ? '불러오지 못했습니다' : '조회 중…') + '</small></p></div>';
+      return '<div class="mtot"><p class="mtoth"><b>' + title + '</b><small>' + (S.mErr[ym] ? '불러오지 못했습니다' : '조회 중…') + '</small></p></div>';
     }
-    if (fut) S.plan.lines.forEach(function (l) {
-      if (l.fut || l.date.slice(0, 7) !== ym) return;
-      if (l.type === '출고예정' || l.type === '생산예정') rows.push({ k: l.type === '출고예정' ? 'out' : 'made', prod: l.prod, qty: l.qty, cust: l.cust });
+    if (real) m.records.forEach(function (r) {
+      if ((r.type === '출고' || r.type === '생산') && r.date >= first && r.date <= upTo) rows.push({ k: r.type === '출고' ? 'out' : 'made', prod: r.prod, qty: r.qty, cust: r.cust });
     });
-    else m.records.forEach(function (r) {
-      if (r.type === '출고' || r.type === '생산') rows.push({ k: r.type === '출고' ? 'out' : 'made', prod: r.prod, qty: r.qty, cust: r.cust });
+    if (plan) S.plan.lines.forEach(function (l) {
+      if (l.fut || l.date <= S.today || l.date < first || l.date > d) return;
+      if (l.type === '출고예정' || l.type === '생산예정') rows.push({ k: l.type === '출고예정' ? 'pout' : 'pmade', prod: l.prod, qty: l.qty, cust: l.cust });
     });
-    var lab = fut ? ['출고예정', '생산예정'] : ['출고', '생산'];
-    var h = '<div class="mtot" aria-label="' + esc(fmtYm(ym)) + ' 출고 · 생산 합계"><p class="mtoth"><b>' + esc(fmtYm(ym)) + ' ' + lab.join(' · ') + ' 합계</b><small>' +
-      (fut ? '앞으로의 달 · 예정만' : ym === cur ? fmtDate(S.today) + '까지 확정 기록' : '그 달 확정 기록') + '</small></p>';
+    var sub = !plan ? (d === S.today ? '오늘까지 확정 기록' : '확정 기록') : !real ? '예정만 (앞으로의 달)'
+      : (tn > 1 ? '1~' + tn + '일' : '1일') + ' 확정 · ' + (tn + 1 === dn ? dn + '일' : (tn + 1) + '~' + dn + '일') + ' 예정';
+    var h = '<div class="mtot' + (ks.length > 2 ? ' wide' : '') + '" aria-label="' + title + '"><p class="mtoth"><b>' + title + '</b><small>' + esc(sub) + '</small></p>';
     var GL = grpList(), by = {}, order = [];
     rows.forEach(function (r) {
       var g = grpOf(r.prod), G = by[g];
-      if (!G) { G = by[g] = { out: 0, made: 0, own: 0, prods: {}, porder: [] }; order.push(g); }
+      if (!G) { G = by[g] = { out: 0, made: 0, pout: 0, pmade: 0, own: 0, pown: 0, prods: {}, porder: [] }; order.push(g); }
       G[r.k] += r.qty;
       if (r.k === 'out' && isOwn(r.cust)) G.own += r.qty;
+      if (r.k === 'pout' && isOwn(r.cust)) G.pown += r.qty;
       var P = G.prods[r.prod];
-      if (!P) { P = G.prods[r.prod] = { out: 0, made: 0 }; G.porder.push(r.prod); }
+      if (!P) { P = G.prods[r.prod] = { out: 0, made: 0, pout: 0, pmade: 0 }; G.porder.push(r.prod); }
       P[r.k] += r.qty;
     });
-    if (!order.length) return h + '<p class="note">이 달에는 ' + lab.join(' · ') + ' 기록이 없습니다.</p></div>';
+    if (!order.length) return h + '<p class="note">' + esc(range) + '에는 ' + ks.map(function (k) { return LAB[k]; }).join(' · ') + ' 기록이 없습니다.</p></div>';
     order.sort(function (a, b) { var i = GL.indexOf(a), j = GL.indexOf(b); return (i < 0 ? 999 : i) - (j < 0 ? 999 : j); });
-    h += '<table class="mtt"><thead><tr><th>제품</th><th class="r">' + lab[0] + '</th><th class="r">' + lab[1] + '</th></tr></thead><tbody>';
+    h += '<table class="mtt"><thead><tr><th>제품</th>' + ks.map(function (k) { return '<th class="r">' + LAB[k] + ' <small>kg</small></th>'; }).join('') + '</tr></thead><tbody>';
     order.forEach(function (g) {
       var G = by[g], ps = G.porder.slice().sort(function (a, b) { return pIdx(a) - pIdx(b); });
-      h += '<tr class="mtg" data-g="' + esc(g) + '"><td>' + esc(grpName(g)) + '</td><td class="r"><b>' + fmt(G.out) + '</b> kg</td><td class="r"><b>' + fmt(G.made) + '</b> kg</td></tr>';
+      h += '<tr class="mtg" data-g="' + esc(g) + '"><td>' + esc(grpName(g)) + '</td>' + ks.map(function (k) { return '<td class="r"><b>' + fmt(G[k]) + '</b></td>'; }).join('') + '</tr>';
       if (ps.length > 1 || (ps.length === 1 && ps[0] !== g)) ps.forEach(function (p) {
         var P = G.prods[p];
-        h += '<tr class="mtp"><td>' + ptxt(p) + '</td><td class="r">' + fmt(P.out) + '</td><td class="r">' + fmt(P.made) + '</td></tr>';
+        h += '<tr class="mtp"><td>' + ptxt(p) + '</td>' + ks.map(function (k) { return '<td class="r">' + fmt(P[k]) + '</td>'; }).join('') + '</tr>';
       });
-      if (G.own) h += '<tr class="mto"><td colspan="3">' + lab[0] + ' 중 ' + esc(OWN) + '(자사 시공) ' + fmt(G.own) + ' kg 포함</td></tr>';
+      var own = [];
+      if (G.own) own.push('출고 중 ' + esc(OWN) + '(자사 시공) ' + fmt(G.own) + ' kg');
+      if (G.pown) own.push('출고예정 중 ' + esc(OWN) + '(자사 시공) ' + fmt(G.pown) + ' kg');
+      if (own.length) h += '<tr class="mto"><td colspan="' + (ks.length + 1) + '">' + own.join(' · ') + ' 포함</td></tr>';
     });
     h += '</tbody></table>';
     if (order.length > 1) h += '<p class="note">' + esc(order.map(grpName).join(' · ')) + '은(는) 따로 셉니다 (서로 더하지 않음).</p>';
@@ -5649,7 +5666,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var d = S.calDay, x = calDays(d.slice(0, 7))[d] || { out: [], plan: [], pin: [], outKg: 0, planKg: 0 };
     var past = d < S.today, fut = d > S.today;
     var h = '<section class="card day" id="daycard"><div class="dayhead"><h2>' + esc(fmtDate(d)) + '</h2><span class="dtag">' + (d === S.today ? '금일' : past ? '지난 일자' : '향후 (예정)') + '</span></div>';
-    h += monthTot(d.slice(0, 7));
+    h += monthTot(d);
     h += daySec('출고', x.out);
     if (!past || x.plan.length) {
       h += daySec('출고예정', x.plan);
@@ -7110,7 +7127,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (isSale(d.type)) {
       h += '<label class="label" for="ed-cust">거래처</label><input id="ed-cust" class="text" type="text" list="cust-list" autocomplete="off" maxlength="60" data-ed="cust" value="' + esc(d.cust) + '">';
       h += '<label class="label" for="ed-po">발주번호·현장 (선택)</label><input id="ed-po" class="text" type="text" autocomplete="off" maxlength="60" data-ed="po" value="' + esc(d.po) + '">';
-      h += '<label class="label" for="ed-price">단가 (원/kg, 선택)</label><input id="ed-price" class="text" type="text" inputmode="numeric" autocomplete="off" data-ed="price" value="' + esc(d.price) + '" placeholder="비우면 기준 단가로 추정">';
+      h += '<label class="label" for="ed-price">단가 (원/kg, 선택)</label><input id="ed-price" class="text" type="text" inputmode="numeric" autocomplete="off" data-ed="price" value="' + esc(d.price) + '" placeholder="비우면 기준 단가(기본 단가)로 넣음">';
     }
     if (isSale(d.type) && isSbr(d.prod)) h += '<span class="label">포장</span>' + packPick({ cur: packOf({ prod: d.prod, memo: d.memo }), kg: Number(String(d.qty).replace(/[,\s]/g, '')) || 0, act: 'edpack' }) +
       '<p class="hint">톤백은 물표 없이 출고되며, 출고일에 ‘확정’만 누르면 재고에서 차감됩니다. 소포장은 물표가 출력됩니다(15포까지는 칼라칩 파렛트에 혼적, 초과 시 톤백 포장 32포 단위).</p>';
