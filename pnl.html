@@ -232,7 +232,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   <div class="grid">
     <section class="panel" aria-labelledby="h-in">
       <h2 id="h-in">① 당월 판매 실적</h2>
-      <p class="hint">출고 실적을 자동 반영합니다(자사 시공 '남명' 출고분 제외). 노란색 칸을 수정하면 이 화면의 계산만 바뀌며 재고 기록은 변경되지 않습니다. 같은 제품을 여러 단가로 판매한 경우 [다른 단가 추가]로 구분해 입력하십시오. 시공은 금액으로 입력합니다.</p>
+      <p class="hint">출고 실적을 자동 반영합니다(자사 시공 '남명' 출고분 제외). 노란색 칸을 수정하면 이 화면의 계산만 바뀌며 재고 기록은 변경되지 않습니다. 같은 제품을 여러 단가로 판매한 경우 [다른 단가 추가]로 구분해 입력하십시오. 시공 매출은 매출 장부(분류 시공 · 공사 프로젝트 시공 완료분)에서 자동 반영되며, 장부에 없으면 금액을 직접 입력합니다.</p>
       <div class="slip-wrap">
       <table class="slip">
         <colgroup><col><col class="c-kg"><col class="c-pr"><col class="c-amt"></colgroup>
@@ -673,7 +673,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   function fillFromStock(ym) {
     return pnl('stockSales', { ym: ym }).then(function (r) {
       var keep = L.sigong;
-      L = blankL(); L.sigong = keep;
+      L = blankL(); L.sigong = r.sigongN ? num(r.sigong) : keep;   // 시공 매출 = 매출 장부 '시공'(공사 프로젝트 완료분 등), 장부에 없으면 입력해 둔 값 (2026-11-21)
       Object.keys(r.L).forEach(function (k) { if (L[k]) L[k] = r.L[k].map(function (x) { return { kg: x.kg, price: x.price, src: x.src }; }); });
       SRC = 'stock';
       var gk = KG_GRP.map(function (G) {
@@ -685,6 +685,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       var msg = '출고 실적 ' + r.count + '건(' + (gk.length ? gk.join(' · ') : comma(r.kg) + ' kg') + ')으로 판매량을 반영했습니다' + (ownT ? ' (자사 시공 남명 ' + ownT + ' 제외)' : '') + '.';
       if (r.unmapped.length) msg += ' 손익계산서 품목에 없는 출고 ' + r.unmapped.length + '건은 제외되었습니다: ' + r.unmapped.slice(0, 3).map(function (x) { return x.prod + ' ' + x.color; }).join(', ');
       if (!r.count) msg = fmtYM(ym) + ' 출고 실적이 없습니다. 판매량을 직접 입력하거나 매출 엑셀을 업로드해 주십시오.';
+      if (r.sigongN) msg += ' 시공 매출은 매출 장부 ' + r.sigongN + '건(' + comma(r.sigong) + '원, 공급가액)을 반영했습니다.';
       showSrc(msg, !!r.unmapped.length);
       buildSlip(); calc();
       return r;

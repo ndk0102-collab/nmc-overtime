@@ -60,7 +60,7 @@ button,input{font:inherit;color:inherit}
 .go.new b::after{content:'신규';margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--gold);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;vertical-align:3px}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
-@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr;align-items:start}.sect.st{grid-row:span 2}}  /* PC: 가운데 재고는 두 줄을 차지, 손익계산서는 잔업 바로 아래 */
+@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}}  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 손익계산서는 잔업 바로 아래 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -118,7 +118,9 @@ button,input{font:inherit;color:inherit}
 
       <section class="sect cs" aria-labelledby="h-cs">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span><h2 id="h-cs">공사</h2></div>
+        <a class="go new" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료하면 매출에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="sketchbook/"><span class="t"><b>도면</b><small>도면 기반 바닥 색상 설계 · 면적 산출표 · 3D 놀이터</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go new" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색을 포대 비율로 섞어 바닥 미리 보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
 
       <section class="sect pl" aria-labelledby="h-pl">
