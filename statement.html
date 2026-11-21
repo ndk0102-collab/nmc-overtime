@@ -65,6 +65,10 @@ b,td,th,.num{font-variant-numeric:tabular-nums}
 .warnbox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:14px;font-weight:600}
 .okbox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-size:14px;font-weight:700}
 .infobox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--vsoft);color:var(--vc);font-size:14px;font-weight:600}
+.sealrow{display:flex;align-items:center;gap:12px;margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.sealrow img{width:60px;height:60px;flex-shrink:0}
+.sealrow p{margin:0;font-size:14px;line-height:1.45;color:var(--ink2);font-weight:600}
+.sealrow p b{display:block;color:var(--ink);font-size:15px;font-weight:800}
 .st{display:inline-block;padding:0 7px;border-radius:999px;font-size:12px;font-weight:800;background:var(--soft);color:var(--ink2);vertical-align:1px}
 .st.void{background:var(--bad-soft);color:var(--bad)}
 .st.ok{background:var(--ok-soft);color:var(--ok)}
@@ -221,8 +225,11 @@ select.inp{padding-right:30px}
 .pb th{width:14.5mm;height:4.4mm;padding:0;background:#EDF2FA;border-top:.2mm solid #E3E8F0;font-size:6.5pt;font-weight:700;color:#1B3A6B;text-align:center;letter-spacing:.05em;white-space:nowrap}
 .pb td{height:4.4mm;padding:0 2mm;border-top:.2mm solid #E3E8F0;border-left:.2mm solid #E3E8F0;font-size:7.3pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pb td.b{font-weight:800;font-size:8pt}
-.pb td.seal{position:relative}
-.pb td.seal i{position:absolute;right:2.2mm;top:50%;transform:translateY(-50%);color:#8A93A3;font-style:normal;font-size:6.6pt}
+.pb td.seal{position:relative;overflow:visible}
+.pb td.seal i{position:absolute;right:2.2mm;top:0;bottom:0;display:flex;align-items:center;color:#8A93A3;font-style:normal;font-size:6.6pt}
+/* 회사 도장 (2026-11-21): '(인)' 한가운데에 찍음 · 아래 글자가 비치게 곱하기 (도장 그림은 관리자 로그인 뒤 서버에서만 받음) */
+.pb td.seal i .sl{position:absolute;left:50%;top:50%;width:13mm;height:13mm;max-width:none;transform:translate(-50%,-50%);mix-blend-mode:multiply;pointer-events:none}
+.pb td.seal i.on{right:6mm}   /* 도장이 공급자 칸 테두리 안에 들어오게 (인)을 조금 왼쪽으로 */
 .pb td.ad{white-space:normal;line-height:1.1;font-size:6.6pt}
 .si{display:flex;align-items:stretch;margin-top:2mm;height:5.2mm;border:.25mm solid #9FB0C9}
 .si span{width:14.5mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#EDF2FA;color:#1B3A6B;font-size:6.5pt;font-weight:700}
@@ -274,6 +281,8 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .pg.f .pb td.b{font-size:10pt}
 .pg.f .pb td.ad{font-size:8pt}
 .pg.f .pb td.seal i{font-size:8pt}
+.pg.f .pb td.seal i .sl{width:16mm;height:16mm}
+.pg.f .pb td.seal i.on{right:8mm}
 .pg.f .si{margin-top:3mm;height:7mm}
 .pg.f .si span{width:18mm;font-size:8pt}
 .pg.f .si b{font-size:9.5pt}
@@ -739,10 +748,17 @@ body.pvon{overflow:hidden}
     });
     return out;
   }
-  function partyHtml(title, rows) {
+  function partyHtml(title, rows, seal) {
     return '<div class="pb"><h4>' + title + '</h4><table>' + rows.map(function (r) {
-      return '<tr><th>' + r[0] + '</th><td class="' + (r[2] || '') + '">' + esc(r[1] || '') + (r[2] === 'seal' ? '<i>(인)</i>' : '') + '</td></tr>';
+      return '<tr><th>' + r[0] + '</th><td class="' + (r[2] || '') + '">' + esc(r[1] || '') +
+        (r[2] === 'seal' ? (seal ? '<i class="on">(인)<img class="sl" src="' + seal + '" alt=""></i>' : '<i>(인)</i>') : '') + '</td></tr>';
     }).join('') + '</table></div>';
+  }
+  /** 회사 도장 그림 (서버가 관리자에게만 보냄 · PNG data URL만 받음). 취소한 명세서에는 찍지 않음 */
+  function sealSrc(st) {
+    var s = S.I && S.I.seal;
+    if (st && st.state === '취소') return '';
+    return typeof s === 'string' && s.length < 400000 && /^data:image\/png;base64,[A-Za-z0-9+\/]+={0,2}$/.test(s) ? s : '';
   }
   function copyHtml(st, co, cu, pl, pi, pn, L, pos) {
     var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, i, l;
@@ -752,7 +768,7 @@ body.pvon{overflow:hidden}
       '<div class="mt"><p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
       '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + fmt(st.total) + '</b></p></div></div>';
     h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
-      ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]]) +
+      ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]], sealSrc(st)) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
     h += '<div class="si"><span>납품장소</span><b>' + esc(st.site || '') + '</b></div>';
     var cols = L.full ? (amt ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['8mm', '', '30mm', '12mm', '22mm', '34mm'])
@@ -1018,8 +1034,21 @@ body.pvon{overflow:hidden}
   function printCur() {
     if (!S.cur) return;
     if (!printEl.innerHTML) printEl.innerHTML = docHtml(S.cur);
-    window.print();
-    call('apiStmtPrinted', [S.cur.no]).then(function (d) { S.list.forEach(function (s) { if (s.no === d.no) s.printed = d.printed; }); }, function () {});
+    var no = S.cur.no;
+    imgsReady(printEl, function () {   // 도장 · 로고 그림이 다 그려진 뒤 인쇄 창 (안 그러면 도장이 빠질 수 있음)
+      window.print();
+      call('apiStmtPrinted', [no]).then(function (d) { S.list.forEach(function (s) { if (s.no === d.no) s.printed = d.printed; }); }, function () {});
+    });
+  }
+  function imgsReady(el, fn) {
+    var wait = Array.prototype.filter.call(el.querySelectorAll('img'), function (im) { return !im.complete; });
+    if (!wait.length) { fn(); return; }
+    var left = wait.length, done = false, go = function () { if (!done) { done = true; fn(); } };
+    wait.forEach(function (im) {
+      var one = function () { if (--left <= 0) go(); };
+      im.addEventListener('load', one); im.addEventListener('error', one);
+    });
+    setTimeout(go, 2500);
   }
 
   /* 저장 뒤 지난 단가 · 품명을 바로 씀 (다음 명세서 제안) */
@@ -1102,7 +1131,9 @@ body.pvon{overflow:hidden}
       h += '<label class="fld' + (wide ? ' wf' : '') + '"' + (wide ? ' style="grid-column:1/-1"' : '') + '><span>' + f[1] + (f[0] === 'name' ? '' : ' <small>' + (f[0] === 'bank' ? '전달사항 칸에 찍힘' : f[0] === 'note' ? '전달사항 칸 끝' : '선택') + '</small>') + '</span>' +
         '<input class="inp" type="text" data-c="' + f[0] + '" maxlength="' + f[2] + '" value="' + esc(co[f[0]] || '') + '"' + (f[0] === 'biz' ? ' inputmode="numeric"' : '') + '></label>';
     });
-    h += '</div><div class="tools"><button type="button" class="btn" data-act="cosave"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : '저장') + '</button></div>' +
+    var seal = sealSrc(null);
+    h += '</div>' + (seal ? '<div class="sealrow"><img src="' + seal + '" alt="회사 도장"><p><b>도장</b>공급자 칸 \'대표자 (인)\' 자리에 찍힙니다. 취소한 명세서에는 찍히지 않습니다.</p></div>' : '') +
+      '<div class="tools"><button type="button" class="btn" data-act="cosave"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : '저장') + '</button></div>' +
       '<p class="hint">로고와 디자인은 회사 거래명세표 양식(남색 · 금색)을 따릅니다. 이 정보는 구글 시트 \'회사정보\'에 저장됩니다.</p></section>';
     return h;
   }
