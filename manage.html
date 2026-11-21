@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="push.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 /* 관리자 창구 (2026-11-20 19:25 지시: "잔업입력과 생산만 딱 두개만 놓고 하나는 관리자 하나 창구 만들어서 거기서 모든게 다 들어가도록")
@@ -24,7 +25,7 @@ if ('serviceWorker' in navigator) {
 :root{
   --bg:#EEF2F7; --card:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#5B6474; --line:#DCE3EC;
   --navy:#1B3A6B; --gold:#B08A35;
-  --ot:#1E5AA8; --ot-soft:#E6EFFB; --st:#1B7A43; --st-soft:#E4F3EA; --pl:#9A5B16; --pl-soft:#FBEFE1; --cs:#0E7490; --cs-soft:#E0F2F7;
+  --ot:#1E5AA8; --ot-soft:#E6EFFB; --st:#1B7A43; --st-soft:#E4F3EA; --pl:#9A5B16; --pl-soft:#FBEFE1; --cs:#0E7490; --cs-soft:#E0F2F7; --dc:#7A3A14; --dc-soft:#F6EDE6;
   --bad:#B42318;
 }
 *{box-sizing:border-box}
@@ -48,6 +49,12 @@ button,input{font:inherit;color:inherit}
 .sect.st{--c:var(--st);--soft:var(--st-soft)}
 .sect.pl{--c:var(--pl);--soft:var(--pl-soft)}
 .sect.cs{--c:var(--cs);--soft:var(--cs-soft)}
+.sect.dc{--c:var(--dc);--soft:var(--dc-soft)}
+.gos{display:grid;gap:10px}
+.gos .go{margin:0}
+.pushline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:10px 12px;border-radius:14px;background:var(--dc-soft);font-size:14.5px;font-weight:700;color:var(--ink2)}
+.pushline button{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:var(--dc);color:#fff;font-weight:800;font-size:14.5px;cursor:pointer}
+.pushline button:disabled{opacity:.55}
 .sh{display:flex;align-items:center;gap:12px;margin:0 0 14px}
 .ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--c)}
 .sh h2{margin:0;font-size:24px;font-weight:800;line-height:1.2;color:var(--c)}
@@ -60,7 +67,8 @@ button,input{font:inherit;color:inherit}
 .go.new b::after{content:'신규';margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--gold);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;vertical-align:3px}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
-@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}}  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 손익계산서는 잔업 바로 아래 */
+@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
+  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 손익계산서는 잔업 바로 아래 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -100,6 +108,14 @@ button,input{font:inherit;color:inherit}
 
   <div id="menu" hidden>
     <div class="grid">
+      <section class="sect dc" aria-labelledby="h-dc">
+        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><h2 id="h-dc">오늘 · 공문</h2></div>
+        <div class="gos">
+          <a class="go new" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small>오늘 출고 · 입고 · 처리할 공문 · 매일 아침 휴대폰 · 컴퓨터 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go new" href="docs.html"><span class="t"><b>공문함</b><small>메일 · 팩스 공문 자동 정리 · 기한 · 처리 상태 · 파일 올리기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        </div>
+        <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에서 매일 아침 알림을 받으시겠습니까?</span><button type="button" id="pushBtn">이 기기에서 알림 받기</button></p>
+      </section>
       <section class="sect ot" aria-labelledby="h-ot">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h2 id="h-ot">잔업</h2></div>
         <a class="go" href="admin.html"><span class="t"><b>잔업 확인 · 급여</b><small>직원 잔업 기록 확인 · 수정 · 급여 명세서</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
@@ -176,10 +192,29 @@ button,input{font:inherit;color:inherit}
     if (!t) { show('login'); return; }
     show('menu');
     post({ action: 'stock.call', fn: 'apiForm', args: [], token: t }).then(function (d) {
-      if (d && d.admin === true) return;
+      if (d && d.admin === true) { pushCheck(); return; }
       setToken(''); show('login', ERR.expired);
     }, function (e) { if (String(e && e.message) !== 'net') { setToken(''); show('login', ERR.expired); } });
   }
+  /* 아침 알림 (2026-11-21): 알림을 이미 허용한 브라우저인데 등록이 없으면 묻지 않고 다시 등록, 아직 안 받는 기기면 한 번 누르게 */
+  function call(fn, args) { return post({ action: 'stock.call', fn: fn, args: args || [], token: getToken() }); }
+  function pushCheck() {
+    var P = window.NMCPush, line = $('pushLine');
+    if (!P || !P.supported()) { line.hidden = true; return; }
+    P.auto(call, API).then(function () { return P.state(); }).then(function (s) { line.hidden = s.state !== 'off' || Notification.permission === 'denied'; }, function () { line.hidden = true; });
+  }
+  $('pushBtn').addEventListener('click', function () {
+    var b = $('pushBtn');
+    b.disabled = true; b.textContent = '등록 중…';
+    window.NMCPush.enable(call, API).then(function () {
+      $('pushLine').hidden = true;
+      say('이 기기에서 매일 아침 알림을 받습니다');
+    }, function (e) {
+      b.disabled = false; b.textContent = '이 기기에서 알림 받기';
+      var c = String((e && e.message) || '');
+      say(c === 'denied' ? '브라우저에서 알림이 막혀 있습니다 (사이트 설정 → 알림 → 허용)' : c === 'dismissed' ? '알림 허용 창에서 허용을 눌러 주십시오' : '등록하지 못했습니다 (' + c + ')');
+    });
+  });
   $('loginForm').addEventListener('submit', function (ev) {
     ev.preventDefault();
     var v = $('pw').value;

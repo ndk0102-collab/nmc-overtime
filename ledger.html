@@ -1119,7 +1119,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (r.busy) return '다른 확인이 진행 중입니다. 잠시 후 다시 확인해 주십시오.';
     if (r.err) return '확인 중 오류: ' + r.err;
     if (!r.files) return '새 파일이 없습니다.';
-    return '파일 ' + r.files + '개 처리' + (r.fail ? ' (읽지 못함 ' + r.fail + '개)' : '') + ' · 새 내역 ' + r.fresh + '건' + (r.left ? ' · 남은 파일 ' + r.left + '개는 다음 확인 때 처리' : '');
+    return '파일 ' + r.files + '개 처리' + (r.fail ? ' (읽지 못함 ' + r.fail + '개)' : '') + ' · 새 내역 ' + r.fresh + '건' + (r.docs ? ' · 공문함 ' + r.docs + '건' : '') + (r.left ? ' · 남은 파일 ' + r.left + '개는 다음 확인 때 처리' : '');
   }
   function autoInvalidate() { S.data = {}; S.loading = {}; }
   function autoHtml() {
@@ -1173,9 +1173,9 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     // 파일 처리 기록
     if (A.logs.length) {
       h += '<section class="card"><h2>파일 처리 기록<small>최근 ' + A.logs.length + '개</small></h2><ul class="rows">' + A.logs.map(function (l) {
-        var bad = l[6] !== (A.folder ? A.folder.done : '처리 완료');
+        var doc = l[6] === '공문함', bad = !doc && l[6] !== (A.folder ? A.folder.done : '처리 완료');   // 공문 파일은 공문함이 정리 (2026-11-21)
         return '<li class="row"><div class="rl"><b>' + esc(l[1]) + '</b><small>' + esc(dtx(l[0])) + (l[2] ? ' · ' + esc(l[2]) : '') + '</small>' + (bad ? '<small class="err" style="margin:0">' + esc(l[5]) + '</small>' : '') + '</div>' +
-          '<div class="rr"><b>' + (bad ? esc(l[6]) : '새 ' + l[4] + '건') + '</b><small>' + (bad ? '' : '읽은 ' + l[3] + '건') + '</small></div></li>';
+          '<div class="rr"><b>' + (doc ? '<a class="link" href="docs.html">공문함</a>' : bad ? esc(l[6]) : '새 ' + l[4] + '건') + '</b><small>' + (bad || doc ? '' : '읽은 ' + l[3] + '건') + '</small></div></li>';
       }).join('') + '</ul><p class="hint">읽지 못한 파일은 폴더 안 ‘' + esc(A.folder ? A.folder.fail : '확인 필요') + '’로 옮겨집니다. 엑셀 형식으로 다시 저장해 수집 폴더에 넣으면 다시 읽습니다.</p></section>';
     }
     // 설정 방법
@@ -1185,6 +1185,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       '<li>이후 아래 파일을 이 폴더에 저장하기만 하면 됩니다.</li></ol>' +
       '<h3>저장할 파일 (엑셀 · CSV)</h3><ul class="steps"><li><b>매출 · 매입 세금계산서</b>: 홈택스 전자(세금)계산서 목록조회에서 매출 · 매입을 각각 조회한 뒤 엑셀로 내려받기</li>' +
       '<li><b>통장 거래내역</b>: 기업 인터넷뱅킹 입출금 거래내역 조회 → 엑셀 저장</li><li><b>카드 이용내역</b>: 카드사 기업 홈페이지 이용내역(승인내역) 조회 → 엑셀 저장</li></ul>' +
+      '<p class="hint">공문 · 팩스 · 메일(PDF · 사진 · 한글 · 워드 · eml)을 이 폴더에 넣으면 장부가 아니라 <a class="link" href="docs.html">공문함</a>에 정리됩니다.</p>' +
       '<p class="hint">조회 기간이 겹쳐도 같은 내역은 한 번만 반영됩니다. 매출 · 매입 구분이 되지 않는 목록은 파일 이름에 ‘매출’ 또는 ‘매입’을 넣어 저장하십시오. 홈택스 · 은행 · 카드사 내려받기는 공동인증서 로그인이 필요하여 담당자가 직접 합니다.</p>' +
       '<h3>장부 반영 기준</h3><ul class="steps"><li>매입 세금계산서 · 카드: 같은 거래처 · 같은 금액의 장부 내역(직접 등록 · 입고)이 있으면 새로 넣지 않고 연결합니다.</li>' +
       '<li>매출 세금계산서: 시공 · 공사는 장부 매출(시공)로 반영합니다. 제품 매출은 출고 × 단가로 이미 집계하므로 ‘출고 대조’로만 표시합니다.</li>' +

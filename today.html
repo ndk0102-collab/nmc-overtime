@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NMC 오늘 할 일</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1B3A6B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+<!--PREVIEW_SERVER-->
+<script src="push.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* 오늘 할 일 · 아침 알림 (2026-11-21 14:15 지시). 출고 · 입고 · 공문 내용은 이 파일에 없고, 관리자 로그인(또는 알림을 등록한 기기의 열쇠) 뒤 서버에서 받아 옵니다. */
+:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#121820; --ink2:#2E3742; --muted:#5A6471; --line:#D5DBE3; --soft:#EBEEF3;
+  --vc:#1B3A6B; --vsoft:#E8EEF7; --gold:#B08A35;
+  --out:#1B7A43; --out-soft:#E4F3EA; --in:#6B4FA0; --in-soft:#F0EAF8; --doc:#9A3D12; --doc-soft:#FBEBE3;
+  --bad:#B42318; --bad-soft:#FDE9E7; --warn:#8A5300; --warn-soft:#FCF0D6; --ok:#1B7A43; --ok-soft:#E4F3EA;
+  --font:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+button,input,select{font:inherit;color:inherit}
+b,td{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+.bar{position:sticky;top:0;z-index:20;background:var(--vc);color:#fff;padding:10px 12px 12px;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+.bin{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+.bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.bar h1 small{display:block;font-size:13px;font-weight:600;color:#D9E3F2;letter-spacing:0}
+.ref{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--vc);font-size:14px;font-weight:800;cursor:pointer}
+.home:focus-visible,.ref:focus-visible,.btn:focus-visible,.link:focus-visible,select:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;padding:12px 12px 80px}
+.card{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c,var(--vc));border-radius:16px;padding:14px;margin:0 0 12px}
+.card.out{--c:var(--out);--s:var(--out-soft)} .card.in{--c:var(--in);--s:var(--in-soft)} .card.doc{--c:var(--doc);--s:var(--doc-soft)} .card.set{--c:var(--vc);--s:var(--vsoft)}
+.card h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin:0 0 8px;font-size:19px;font-weight:800;color:var(--c,var(--ink))}
+.card h2 small{font-size:14px;font-weight:700;color:var(--ink2)}
+.card h3{margin:14px 0 6px;font-size:15px;font-weight:800;color:var(--ink2)}
+.rows{list-style:none;margin:0;padding:0}
+.row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--soft)}
+.row:first-child{border-top:0}
+.rl{flex:1;min-width:0}
+.rl b{display:block;font-size:16.5px;font-weight:800;line-height:1.35}
+.rl small{display:block;color:var(--muted);font-size:14px;font-weight:600;margin-top:1px}
+.rr{flex-shrink:0;text-align:right;max-width:52%}
+.rr b{display:block;font-size:15.5px;font-weight:800}
+.rr small{display:block;color:var(--muted);font-size:13px}
+.subs{list-style:none;margin:6px 0 0;padding:6px 10px;background:var(--s,var(--soft));border-radius:10px;font-size:14.5px}
+.gk{margin:2px 0 0;font-size:15.5px;font-weight:800;color:var(--c,var(--ink))}
+.subs li{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.subs li span:last-child{font-weight:700;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12.5px;font-weight:800;vertical-align:2px;margin-right:6px;white-space:nowrap;background:var(--soft);color:var(--ink2)}
+.tag.bad{background:var(--bad);color:#fff} .tag.warn{background:var(--warn-soft);color:var(--warn)} .tag.new{background:var(--gold);color:#fff} .tag.ok{background:var(--ok-soft);color:var(--ok)}
+.sum{margin:4px 0 0;color:var(--ink2);font-size:14.5px}
+.empty{margin:0;color:var(--muted);font-weight:600}
+.link{display:inline-flex;align-items:center;min-height:40px;padding:0 4px;color:var(--c,var(--vc));font-weight:800;text-decoration:none;background:none;border:0;cursor:pointer;font-size:15px}
+.allnone{padding:22px 16px;text-align:center;font-size:17px;font-weight:700;color:var(--ink2)}
+.late{background:var(--warn-soft);border:1px solid #EAD29A;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:700;color:var(--warn);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{min-height:46px;padding:0 16px;border:0;border-radius:12px;background:var(--vc);color:#fff;font-weight:800;font-size:15.5px;cursor:pointer}
+.btn.ghost{background:#fff;color:var(--vc);border:2px solid var(--line)}
+.btn.sm{min-height:38px;padding:0 12px;font-size:14px}
+.btn.danger{background:#fff;color:var(--bad);border:2px solid #F2C4BF}
+.btn:disabled{opacity:.55;cursor:default}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
+.devbox{background:var(--vsoft);border-radius:12px;padding:12px;margin:0 0 10px}
+.devbox p{margin:0 0 4px}
+.devbox .st{font-size:17px;font-weight:800}
+.devbox .st.on{color:var(--ok)} .devbox .st.off{color:var(--ink2)} .devbox .st.bad{color:var(--bad)}
+.hint{margin:6px 0 0;color:var(--muted);font-size:14px}
+.setrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0}
+.setrow select{min-height:44px;padding:0 10px;border:2px solid var(--line);border-radius:10px;background:#fff;font-weight:700}
+.devs{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+.devs th{text-align:left;color:var(--muted);font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line)}
+.devs td{padding:8px 4px;border-bottom:1px solid var(--soft);vertical-align:top}
+.devs td b{font-size:14.5px}
+.devs .acts{white-space:nowrap;text-align:right}
+.login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--vc);border-radius:20px;padding:20px 18px}
+.login h2{margin:0 0 6px;font-size:20px;font-weight:800;color:var(--vc)}
+.login p{margin:0;color:var(--muted);font-size:14.5px}
+.login form{display:flex;gap:8px;margin-top:14px}
+.login input{flex:1;min-width:0;min-height:52px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:17px;background:#fff}
+.err{margin:10px 0 0;color:var(--bad);font-weight:700}
+.wait{padding:40px 10px;text-align:center;color:var(--muted);font-weight:700}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3);z-index:50}
+.note{background:var(--soft);border-radius:12px;padding:10px 12px;color:var(--ink2);font-size:14.5px;margin:0 0 12px}
+@media (max-width:420px){.rr{max-width:46%}.rr b{font-size:14.5px}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bin">
+    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>관리자</a>
+    <h1 id="title">오늘 할 일<small id="sub"></small></h1>
+    <button type="button" class="ref" id="refBtn" hidden>새로고침</button>
+  </div>
+</header>
+<main class="wrap" id="root"><p class="wait">확인 중…</p></main>
+<p class="toast" id="toast" role="status" hidden></p>
+<script>
+(function () {
+  'use strict';
+  var DEMO = window.__SERVER__ || null;   // 시험용 화면에서만
+  var API = DEMO ? '' : String(window.NMC_API || '');
+  var TOKEN_KEY = 'nmc_pay_token';        // 다른 관리자 화면과 같은 열쇠
+  var P = window.NMCPush || null;
+  var $ = function (id) { return document.getElementById(id); };
+  var root = $('root'), toastEl = $('toast');
+  var S = { mode: '', brief: null, noti: null, dev: null, at: 0, loginErr: '', busy: '' };
+  var ERR = {
+    auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
+    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', not_found: '해당 기기가 목록에 없습니다. 새로고침해 주십시오.',
+    noti_endpoint: '이 브라우저의 알림 주소를 서버가 받지 않았습니다. 크롬 · 엣지 · 사파리(홈 화면 앱)에서 다시 시도해 주십시오.',
+    noti_many: '등록된 기기가 너무 많습니다. 쓰지 않는 기기를 목록에서 지워 주십시오.',
+    denied: '이 브라우저에서 알림이 막혀 있습니다. 주소창 왼쪽 자물쇠(사이트 설정) → 알림 → 허용으로 바꾼 뒤 다시 눌러 주십시오.',
+    dismissed: '알림 허용 창을 닫았습니다. 다시 눌러 \'허용\'을 선택해 주십시오.',
+    'ios-install': '아이폰은 사파리에서 공유 버튼 → \'홈 화면에 추가\'를 한 뒤, 홈 화면의 NMC 아이콘으로 열어서 알림 받기를 눌러 주십시오.',
+    unsupported: '이 브라우저는 알림을 지원하지 않습니다. 크롬 · 엣지(컴퓨터 · 안드로이드)나 아이폰 홈 화면 앱을 써 주십시오.',
+    no_key: '서버 알림 열쇠를 만들지 못했습니다. 잠시 후 다시 시도해 주십시오.', noti_crypto: '서버의 알림 서명 계산 확인에 실패했습니다. 관리자에게 알려 주십시오(알림을 보내지 않음).',
+    bad_input: '입력 값을 확인해 주십시오.'
+  };
+  function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + ')'); }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function kg(n) { return Math.round(Number(n) || 0).toLocaleString('ko-KR') + ' kg'; }
+  function md(s) { s = String(s || ''); return Number(s.slice(5, 7)) + '월 ' + Number(s.slice(8, 10)) + '일'; }
+  function dtx(s) { s = String(s || ''); return s.length >= 16 ? md(s.slice(0, 10)) + ' ' + s.slice(11, 16) : s; }
+  function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { toastEl.hidden = true; }, 3600); }
+  function getToken() { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
+  function setToken(t) { try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  function devId() {
+    var k = 'nmc_dev', v = '';
+    try { v = localStorage.getItem(k) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(v)) {
+      var a = new Uint8Array(16); crypto.getRandomValues(a);
+      v = Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
+  function post(body) {
+    if (DEMO) {
+      return new Promise(function (res, rej) {
+        setTimeout(function () { try { var j = JSON.parse(DEMO.post(JSON.stringify(body))); if (j.ok) res(j.data); else rej(new Error(j.error)); } catch (e) { rej(e); } }, 20);
+      });
+    }
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 60000);
+    return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('net'); return r.json(); }, function (e) { throw new Error(e && e.name === 'AbortError' ? 'timeout' : 'net'); })
+      .then(function (j) { clearTimeout(timer); if (!j || !j.ok) throw new Error((j && j.error) || 'server'); return j.data; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  /** 관리자 열쇠로 */
+  function call(fn, args) {
+    var t = getToken();
+    return post({ action: 'stock.call', fn: fn, args: args || [], token: t }).then(function (d) {
+      if (d && d.admin !== true && t) throw new Error('auth');
+      return d;
+    }).catch(function (e) {
+      if (String(e && e.message) === 'auth') { setToken(''); if (S.mode === 'admin') { S.mode = ''; start(); } }
+      throw e;
+    });
+  }
+
+  /* ── 시작: 관리자 로그인 → 오늘 할 일 + 알림 설정, 아니면 이 기기의 알림 열쇠 → 오늘 할 일만, 둘 다 없으면 로그인 ── */
+  function start() {
+    if (getToken()) {
+      S.mode = 'admin-wait'; render();
+      call('apiBrief', []).then(function (d) { S.mode = 'admin'; S.brief = d.brief; S.noti = d.noti; S.at = Date.now(); render(); devState(); },
+        function (e) { if (String(e && e.message) !== 'auth') { S.mode = 'error'; S.loginErr = errText(e); render(); } });
+      return;
+    }
+    (P ? P.cfg() : Promise.resolve(null)).then(function (cfg) {
+      if (!cfg || !cfg.key) { S.mode = 'login'; render(); return; }
+      S.mode = 'dev-wait'; render();
+      post({ action: 'stock.call', fn: 'apiBriefDev', args: [cfg.key] }).then(function (d) { S.mode = 'device'; S.brief = d.brief; S.at = Date.now(); render(); },
+        function (e) { S.mode = 'login'; S.loginErr = String(e && e.message) === 'auth' ? '이 기기의 알림 등록이 지워졌습니다. 로그인한 뒤 알림 받기를 다시 눌러 주십시오.' : errText(e); render(); });
+    });
+  }
+  function devState() {
+    if (!P) { S.dev = { state: 'unsupported' }; render(); return; }
+    P.state().then(function (s) { S.dev = s; render(); }, function () { S.dev = { state: 'unsupported' }; render(); });
+  }
+
+  /* ── 그리기 ── */
+  function render() {
+    var b = S.brief;
+    $('sub').textContent = b ? md(b.date) + ' (' + b.dow + ')' : '';
+    $('refBtn').hidden = !(S.mode === 'admin' || S.mode === 'device');
+    if (S.mode === 'login') { root.innerHTML = loginHtml(); var pw = $('pw'); if (pw) pw.focus(); return; }
+    if (S.mode === 'error') { root.innerHTML = '<p class="err">' + esc(S.loginErr) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 시도</button></div>'; return; }
+    if (!b) { root.innerHTML = '<p class="wait">불러오는 중…</p>'; return; }
+    var h = '';
+    if (S.mode === 'device') h += '<p class="note">알림을 등록한 기기로 보는 화면입니다. 알림 시각 · 기기 설정은 <a class="link" href="manage.html" style="min-height:0;padding:0">관리자 로그인</a> 뒤 바꿀 수 있습니다.</p>';
+    var none = !b.out.length && !b.made.length && !b.pj.length && !b.docs.length && !b.late;
+    if (none) h += '<section class="card"><p class="allnone">오늘 예정된 출고 · 입고와 처리할 공문이 없습니다.</p></section>';
+    if (b.late) h += '<p class="late"><span>지난 출고예정 ' + b.late + '건(' + b.lateCust + '곳)이 아직 출고 처리되지 않았습니다.</span><a class="link" style="min-height:0;color:var(--warn)" href="stock.html?view=out">출고 화면 →</a></p>';
+    h += outHtml(b) + inHtml(b) + docHtml(b);
+    if (S.mode === 'admin') h += setHtml();
+    root.innerHTML = h;
+  }
+  function outHtml(b) {
+    if (!b.out.length) return none('out', '출고', '오늘 출고예정이 없습니다.');
+    var h = '<section class="card out" id="sOut"><h2>오늘 출고 <small>' + b.out.length + '곳 · ' + esc(b.outKg) + '</small></h2><ul class="rows">';
+    b.out.forEach(function (g) {   // 거래처 · 현장 한 묶음: 이름 → 합계(칼라칩 · SBR 고무분말 · 분철 따로) → 제품별 줄
+      h += '<li class="row grp"><div class="rl"><b>' + (g.own ? '자사 시공' : esc(g.cust)) + '</b><small>' + (g.site ? esc(g.site) : g.own ? '' : '현장 미기재') + '</small>' +
+        '<p class="gk">' + esc(g.kg) + '</p>' +
+        '<ul class="subs">' + g.lines.map(function (l) { return '<li><span>' + esc(l[0] + ' ' + l[1]) + '</span><span>' + kg(l[2]) + '</span></li>'; }).join('') + '</ul></div></li>';
+    });
+    return h + '</ul><a class="link" href="stock.html?view=out">출고 화면 열기 →</a></section>';
+  }
+  function inHtml(b) {
+    if (!b.made.length && !b.pj.length) return none('in', '입고', '오늘 생산예정 · 자재 입고 예정이 없습니다.');
+    var h = '<section class="card in" id="sIn"><h2>오늘 입고 <small>' + [b.made.length ? '생산예정 ' + esc(b.madeKg) : '', b.pj.length ? '공사 자재 ' + b.pj.length + '건' : ''].filter(String).join(' · ') + '</small></h2>';
+    if (b.made.length) {
+      h += '<h3>생산예정 (생산 입고)</h3><ul class="subs">' + b.made.map(function (l) { return '<li><span>' + esc(l[0] + ' ' + l[1]) + '</span><span>' + kg(l[2]) + '</span></li>'; }).join('') + '</ul>';
+    }
+    if (b.pj.length) {
+      h += '<h3>공사 자재 입고 예정</h3><ul class="rows">' + b.pj.map(function (x) {
+        return '<li class="row"><div class="rl"><b>' + (x.late ? '<span class="tag bad">납품일 지남</span>' : '') + esc(x.sup) + ' · ' + esc(x.first) + (x.n > 1 ? ' 외 ' + (x.n - 1) + '품목' : '') + '</b>' +
+          '<small>' + esc(x.name) + ' (' + esc(x.no) + ') · 발주 ' + esc(x.id) + ' · 납품일 ' + md(x.due) + '</small></div></li>';
+      }).join('') + '</ul><a class="link" href="pj.html">공사 프로젝트 열기 →</a>';
+    }
+    return h + '</section>';
+  }
+  function dueTag(d) {
+    if (d.d == null) return '<span class="tag new">새 · 중요</span>';
+    if (d.d < 0) return '<span class="tag bad">기한 ' + (-d.d) + '일 지남</span>';
+    if (d.d === 0) return '<span class="tag bad">오늘 마감</span>';
+    return '<span class="tag warn">D-' + d.d + '</span>';
+  }
+  function docHtml(b) {
+    if (!b.docs.length) return none('doc', '처리할 공문', '기한이 가까운 공문 · 새로 온 중요 공문이 없습니다.');
+    var h = '<section class="card doc" id="sDoc"><h2>오늘 처리할 공문 <small>' + b.docs.length + '건</small></h2><ul class="rows">';
+    b.docs.forEach(function (d) {
+      h += '<li class="row"><div class="rl"><b>' + dueTag(d) + esc(d.title) + '</b><small>' + esc([d.from, d.kind, d.due ? '기한 ' + md(d.due) : '', d.state].filter(String).join(' · ')) + '</small>' +
+        (d.sum ? '<p class="sum">' + esc(d.sum) + '</p>' : '') + (S.mode === 'admin' ? '<a class="link" href="docs.html#' + encodeURIComponent(d.id) + '">공문함에서 보기 →</a>' : '') + '</div></li>';
+    });
+    return h + '</ul>' + (S.mode === 'admin' ? '<a class="link" href="docs.html">공문함 전체 →</a>' : '') + '</section>';
+  }
+  function none(k, t, msg) { return '<section class="card ' + k + '"><h2>' + (k === 'doc' ? '' : '오늘 ') + t + '</h2><p class="empty">' + msg + '</p></section>'; }
+
+  /* 알림 설정 (관리자) */
+  var DEV_TXT = { on: ['받는 중', 'on'], off: ['안 받음', 'off'], denied: ['브라우저에서 알림이 막혀 있음', 'bad'], 'ios-install': ['홈 화면 앱에서만 받을 수 있음', 'off'], unsupported: ['이 브라우저는 알림을 지원하지 않음', 'bad'] };
+  function setHtml() {
+    var N = S.noti || {}, dv = S.dev || { state: '' }, busy = !!S.busy;
+    var me = dv.cfg && dv.cfg.id ? dv.cfg.id : '';
+    if (dv.state === 'on' && N.devices && !N.devices.some(function (d) { return d[0] === me; })) dv = { state: 'off', cfg: null };   // 서버 목록에서 지워진 기기
+    var t = DEV_TXT[dv.state] || ['확인 중…', 'off'];
+    var h = '<section class="card set" id="sSet"><h2>아침 알림 <small>' + (N.on === true ? '매일 ' + esc(N.at) + ' 켜짐' : N.on === false ? '꺼짐' : '권한 승인 전') + '</small></h2>';
+    h += '<div class="devbox"><p>이 기기' + (P ? ' (' + esc(P.devName()) + ')' : '') + ': <span class="st ' + t[1] + '" id="devSt">' + t[0] + '</span></p>';
+    if (dv.state === 'on') h += '<div class="tools"><button type="button" class="btn sm" data-act="test-me"' + (busy ? ' disabled' : '') + '>이 기기로 시험 알림</button><button type="button" class="btn danger sm" data-act="off-me"' + (busy ? ' disabled' : '') + '>이 기기 알림 끄기</button></div>';
+    else if (dv.state === 'off') h += '<div class="tools"><button type="button" class="btn" data-act="on-me"' + (busy ? ' disabled' : '') + '>' + (S.busy === 'on-me' ? '등록 중…' : '이 기기에서 알림 받기') + '</button></div><p class="hint">누르면 브라우저가 알림 허용을 묻습니다. \'허용\'을 눌러 주십시오.</p>';
+    else if (dv.state === 'ios-install') h += '<p class="hint">' + esc(ERR['ios-install']) + '</p>';
+    else if (dv.state === 'denied') h += '<p class="hint">' + esc(ERR.denied) + '</p>';
+    else if (dv.state === 'unsupported') h += '<p class="hint">' + esc(ERR.unsupported) + '</p>';
+    h += '</div>';
+    var opts = '';
+    for (var m = 5 * 60; m <= 12 * 60; m += 30) { var v = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); opts += '<option value="' + v + '"' + (v === N.at ? ' selected' : '') + '>' + v + '</option>'; }
+    if (N.at && opts.indexOf('value="' + N.at + '"') < 0) opts = '<option value="' + esc(N.at) + '" selected>' + esc(N.at) + '</option>' + opts;
+    h += '<div class="setrow"><label for="atSel"><b>매일 알림 시각</b></label><select id="atSel"' + (busy ? ' disabled' : '') + '>' + opts + '</select>' +
+      (N.on === false ? '<button type="button" class="btn sm" data-act="trig-on"' + (busy ? ' disabled' : '') + '>매일 알림 켜기</button>' : N.on === true ? '<button type="button" class="btn ghost sm" data-act="trig-off"' + (busy ? ' disabled' : '') + '>매일 알림 끄기</button>' : '') + '</div>';
+    var L = N.last;
+    h += '<p class="hint">' + (L && L.at ? '마지막 알림: ' + esc(dtx(L.at)) + ' · 보냄 ' + L.ok + (L.fail ? ' · 보내지 못함 ' + L.fail : '') + (L.gone ? ' · 등록 끝남 ' + L.gone : '') : '아직 보낸 아침 알림이 없습니다.') +
+      ' 정한 시각부터 ' + (N.every || 5) + '분 안에 보냅니다(서버가 ' + (N.every || 5) + '분마다 확인).</p>';
+    var D = N.devices || [];
+    h += '<h3>등록된 기기 ' + D.length + '대</h3>';
+    if (!D.length) h += '<p class="empty">아직 등록된 기기가 없습니다. 알림을 받을 휴대폰 · 컴퓨터마다 이 화면을 열어 \'이 기기에서 알림 받기\'를 한 번 눌러 주십시오.</p>';
+    else {
+      h += '<table class="devs"><thead><tr><th>기기</th><th>상태 · 마지막 결과</th><th></th></tr></thead><tbody>' + D.map(function (d) {
+        var st = d[3] === '받는 중' ? '<span class="tag ok">받는 중</span>' : '<span class="tag ' + (d[3] === '만료' ? 'warn' : 'bad') + '">' + esc(d[3]) + '</span>';
+        return '<tr><td><b>' + esc(d[1]) + (d[0] === me ? ' (이 기기)' : '') + '</b><br><small class="hint" style="margin:0">등록 ' + esc(md(d[2])) + '</small></td>' +
+          '<td>' + st + '<br><small>' + esc(d[4] ? dtx(d[4]) + ' ' + d[5] : '아직 보낸 알림 없음') + '</small></td>' +
+          '<td class="acts"><button type="button" class="btn ghost sm" data-act="test" data-id="' + esc(d[0]) + '"' + (busy ? ' disabled' : '') + '>시험</button> ' +
+          '<button type="button" class="btn danger sm" data-act="del" data-id="' + esc(d[0]) + '"' + (busy ? ' disabled' : '') + '>지우기</button></td></tr>';
+      }).join('') + '</tbody></table>';
+    }
+    h += '<p class="hint">휴대폰: 안드로이드는 크롬, 아이폰은 사파리에서 \'홈 화면에 추가\'한 NMC 앱으로 등록합니다. 컴퓨터: 크롬 · 엣지에서 등록하며, 브라우저가 켜져 있거나 백그라운드 실행이 켜져 있어야 알림이 뜹니다. 알림을 누르면 이 화면이 열립니다.</p>';
+    h += '<p class="hint">알림 신호에는 내용이 없고, 기기가 신호를 받으면 이 서버에서 오늘 할 일을 받아 띄웁니다(외부로 회사 자료를 보내지 않음).</p>';
+    return h + '</section>';
+  }
+  function loginHtml() {
+    return '<section class="login" aria-labelledby="lh"><h2 id="lh">관리자 로그인</h2><p>오늘 출고 · 입고 · 처리할 공문과 아침 알림 설정을 봅니다.</p>' +
+      '<form id="loginForm" autocomplete="off"><label for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
+      '<p class="err" role="alert">' + esc(S.loginErr) + '</p></section>';
+  }
+
+  /* ── 동작 ── */
+  function busy(k, p, ok) {
+    S.busy = k; render();
+    return p.then(function (d) { S.busy = ''; if (ok) ok(d); render(); return d; }, function (e) { S.busy = ''; render(); toast(errText(e)); });
+  }
+  function reload(quiet) {
+    if (S.mode === 'admin') return call('apiBrief', []).then(function (d) { S.brief = d.brief; S.noti = d.noti; S.at = Date.now(); render(); devState(); if (!quiet) toast('새로 받았습니다.'); }, function (e) { toast(errText(e)); });
+    S.mode = ''; start();
+  }
+  root.addEventListener('click', function (ev) {
+    var b = ev.target.closest('[data-act]');
+    if (!b || b.disabled) return;
+    var act = b.getAttribute('data-act'), id = b.getAttribute('data-id');
+    if (act === 'retry') { S.mode = ''; start(); return; }
+    if (act === 'on-me') {
+      busy('on-me', P.enable(call, API), function (d) { if (d && d.data) S.noti = d.data; toast('이 기기에서 매일 아침 알림을 받습니다. \'이 기기로 시험 알림\'으로 확인해 보십시오.'); })
+        .then(function () { devState(); });   // 허용 · 거절 · 닫기 뒤 이 기기 상태를 다시 봄
+      return;
+    }
+    if (act === 'off-me') {
+      if (!window.confirm('이 기기에서 아침 알림을 끄시겠습니까? 다른 기기는 그대로 받습니다.')) return;
+      busy('off-me', P.disable(call).then(function () { return call('apiNoti', []); }), function (d) { S.noti = d; toast('이 기기 알림을 껐습니다.'); devState(); });
+      return;
+    }
+    if (act === 'test-me' || act === 'test') {
+      var tid = act === 'test' ? id : (S.dev && S.dev.cfg && S.dev.cfg.id);
+      if (!tid) return;
+      busy(act, call('apiNotiTest', [tid]), function (d) { S.noti = d; toast(d.sent && d.sent.ok ? '시험 알림을 보냈습니다. 몇 초 안에 그 기기에 뜹니다.' : '보내지 못했습니다. 기기 목록의 결과를 확인해 주십시오.'); });
+      return;
+    }
+    if (act === 'del') {
+      if (!window.confirm('이 기기를 목록에서 지우시겠습니까? 그 기기는 더 이상 알림을 받지 않습니다.')) return;
+      var mine = S.dev && S.dev.cfg && S.dev.cfg.id === id;
+      busy('del', call('apiNotiDel', [id]).then(function (d) { return mine && P ? P.disable(null).then(function () { return d; }) : d; }),
+        function (d) { S.noti = d; toast(mine ? '이 기기를 지웠습니다. 이 기기는 더 이상 알림을 받지 않습니다.' : '지웠습니다.'); devState(); });
+      return;
+    }
+    if (act === 'trig-on' || act === 'trig-off') {
+      busy(act, call('apiNotiSet', [{ on: act === 'trig-on' }]), function (d) { S.noti = d; toast(d.on ? '매일 아침 알림을 켰습니다.' : '매일 아침 알림을 껐습니다.'); });
+    }
+  });
+  root.addEventListener('change', function (ev) {
+    if (ev.target.id !== 'atSel') return;
+    var v = ev.target.value;
+    busy('at', call('apiNotiSet', [{ at: v }]), function (d) { S.noti = d; toast('매일 ' + v + '에 알림을 보냅니다.'); });
+  });
+  root.addEventListener('submit', function (ev) {
+    if (ev.target.id !== 'loginForm') return;
+    ev.preventDefault();
+    var v = $('pw').value;
+    if (!v) return;
+    var btn = ev.target.querySelector('button'); btn.disabled = true; btn.textContent = '확인 중…';
+    post({ action: 'login', pw: v, dev: devId() }).then(function (r) { setToken(r.token); S.loginErr = ''; S.mode = ''; start(); },
+      function (e) { S.loginErr = errText(e); render(); });
+  });
+  $('refBtn').addEventListener('click', function () { reload(false); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && S.at && Date.now() - S.at > 300000) reload(true); });
+  window.__today = { state: function () { return S; }, restart: function () { S.mode = ''; S.brief = null; S.noti = null; S.dev = null; start(); } };   // 시험용
+  start();
+})();
+</script>
+</body>
+</html>

@@ -1,6 +1,8 @@
-/* NMC 통합 관리 (홈 · 관리자 · 잔업 · 재고 · 거래명세서 · 공사 프로젝트 · 배합 시뮬레이션 · 손익계산서) — 앱 화면 파일만 저장해 둡니다. 기록 데이터는 항상 구글 시트에서 새로 받습니다. */
-const CACHE = 'nmc-ot-v60';
-const SHELL = ['./', './index.html', './overtime.html', './stock.html', './ledger.html', './statement.html', './manage.html', './pj.html', './mix.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png', './icons/nmc-logo.png', './icons/nmc-logo-print.png'];
+/* NMC 통합 관리 (홈 · 관리자 · 잔업 · 재고 · 거래명세서 · 공사 프로젝트 · 배합 시뮬레이션 · 손익계산서 · 공문함 · 오늘 할 일) — 앱 화면 파일만 저장해 둡니다. 기록 데이터는 항상 구글 시트에서 새로 받습니다.
+   아침 알림(2026-11-21): 알림 신호(내용 없음)를 받으면 이 기기의 열쇠로 서버에서 오늘 할 일을 받아 알림을 띄웁니다. */
+const CACHE = 'nmc-ot-v61';
+const PUSH = 'nmc-push';   // 이 기기의 알림 열쇠 (화면 파일 저장소와 따로 — 새 판이 와도 지우지 않음)
+const SHELL = ['./', './index.html', './overtime.html', './stock.html', './ledger.html', './statement.html', './manage.html', './pj.html', './mix.html', './today.html', './docs.html', './push.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png', './icons/nmc-logo.png', './icons/nmc-logo-print.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -9,7 +11,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== PUSH).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -36,4 +38,50 @@ self.addEventListener('fetch', (event) => {
       })
       .catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || caches.match('./index.html')))
   );
+});
+
+/* ── 아침 알림 (2026-11-21 지시: "매일 아침 8시에 오늘 입고 · 출고 · 처리할 중요 공문을 팝업처럼 휴대폰으로 · 관리 앱 깔린 컴퓨터에 다") ── */
+function pushCfg() {
+  return caches.open(PUSH).then((c) => c.match(new URL('__push_cfg', self.registration.scope).href))
+    .then((r) => (r ? r.json() : null)).catch(() => null);
+}
+function serverCall(cfg, fn, args) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 20000);
+  return fetch(cfg.api, { method: 'POST', body: JSON.stringify({ action: 'stock.call', fn: fn, args: args }), redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: ctl.signal })
+    .then((r) => r.json()).finally(() => clearTimeout(t));
+}
+self.addEventListener('push', (event) => {
+  event.waitUntil((async () => {
+    let title = 'NMC 오늘 할 일', body = '눌러서 오늘 출고 · 입고 · 처리할 공문을 확인하십시오.';
+    try {
+      const cfg = await pushCfg();
+      if (cfg && cfg.api && cfg.key) {
+        const j = await serverCall(cfg, 'apiBriefDev', [cfg.key]);
+        if (j && j.ok && j.data) { title = j.data.title || title; body = j.data.body || body; }
+        else if (j && j.error === 'auth') body = '이 기기의 알림 등록이 지워졌습니다. 관리 앱의 오늘 할 일에서 알림 받기를 다시 눌러 주십시오.';
+      }
+    } catch (e) { /* 서버가 늦거나 인터넷이 끊기면 기본 글로 */ }
+    await self.registration.showNotification(title, { body: body, tag: 'nmc-today', renotify: true, requireInteraction: true,
+      icon: new URL('icons/icon-192.png', self.registration.scope).href, data: { url: new URL('today.html', self.registration.scope).href } });
+  })());
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || new URL('today.html', self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) { if (c.url.split('#')[0].split('?')[0] === url && 'focus' in c) return c.focus(); }   // 이미 열린 오늘 할 일 창이 있으면 그 창
+    return self.clients.openWindow ? self.clients.openWindow(url) : null;
+  }));
+});
+// 브라우저가 알림 구독을 새로 바꾸면 서버의 기기 주소도 바꿈 (기기 열쇠로)
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    const cfg = await pushCfg();
+    if (!cfg || !cfg.pub || !cfg.key) return;
+    const b = cfg.pub.replace(/-/g, '+').replace(/_/g, '/');
+    const key = Uint8Array.from(atob(b + '==='.slice((b.length + 3) % 4)), (c) => c.charCodeAt(0));
+    const sub = await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key });
+    await serverCall(cfg, 'apiNotiRenew', [cfg.key, sub.toJSON()]);
+  })().catch(() => {}));
 });
