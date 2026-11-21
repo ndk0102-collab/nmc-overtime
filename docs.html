@@ -109,6 +109,7 @@ b{font-variant-numeric:tabular-nums}
 .files{list-style:none;margin:6px 0 0;padding:0}
 .files li{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:8px 0;border-top:1px solid var(--soft)}
 .files li:first-child{border-top:0}
+.files .btn{flex:none;white-space:nowrap}
 .text{white-space:pre-wrap;background:var(--soft);border-radius:10px;padding:10px;font-size:14px;max-height:50vh;overflow:auto;margin:6px 0 0}
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--vc);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:20px;font-weight:800;color:var(--vc)}
@@ -117,7 +118,65 @@ b{font-variant-numeric:tabular-nums}
 .login input{flex:1;min-width:0;min-height:52px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:17px;background:#fff}
 .wait{padding:40px 10px;text-align:center;color:var(--muted);font-weight:700}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3);z-index:60}
-@media (max-width:520px){.cnt{grid-template-columns:repeat(2,minmax(0,1fr))}.fg{grid-template-columns:1fr}}
+/* 분류 · 날짜별 (2026-11-21 22:14 지시: 발주서 · 세금계산서 · 각종 공문으로 나누고, 날짜별로 관리 · 전체는 날짜별로 따로) */
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 10px}
+.cats button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:60px;padding:8px 10px;border:2px solid var(--line);border-left-width:6px;border-radius:12px;background:#fff;cursor:pointer;text-align:left}
+.cats button b{font-size:16px;font-weight:800;line-height:1.25}
+.cats button span{font-size:12.5px;font-weight:700;color:var(--muted)}
+.cats .c-all{border-left-color:#5B5550} .cats .c-po{border-left-color:#1E5AA8} .cats .c-tax{border-left-color:#1B7A43} .cats .c-gong{border-left-color:#7A3A14}
+.cats button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.cats button[aria-pressed="true"] span{color:#E7E5E4}
+.cats button:focus-visible,.cd:focus-visible,.link:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.chip.cal{display:inline-flex;align-items:center;gap:5px;border-color:var(--ink2)}
+.chip.cal svg{flex:none}
+.dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:16px 2px 6px;font-size:16px;font-weight:800;color:var(--ink)}
+.dh small{font-size:13.5px;font-weight:700;color:var(--muted)}
+.dh.today{color:var(--vc)}
+.dh .link{margin-left:auto}
+.link{border:0;background:none;padding:4px 2px;color:var(--blue);font-weight:800;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.tag.c-po{background:#E6EEF9;color:#1E5AA8} .tag.c-tax{background:#E4F3EA;color:#1B7A43} .tag.c-gong{background:#F6EDE6;color:#7A3A14}
+.it.po{border-left-color:#1E5AA8} .it.po.st-done{border-left-color:#BFC6CE}
+.it .a{display:block;margin-top:4px;color:#1E5AA8;font-size:13.5px;font-weight:700}
+.cgh{margin:12px 2px 6px;font-size:15px;font-weight:800;padding-left:8px;border-left:5px solid}
+.cgh.c-po{border-color:#1E5AA8;color:#1E5AA8} .cgh.c-tax{border-color:#1B7A43;color:#1B7A43} .cgh.c-gong{border-color:#7A3A14;color:#7A3A14}
+/* 전체 — 달력 */
+.calc{padding:12px 10px}
+.calh{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.calh h2{margin:0;flex:1;text-align:center;font-size:19px;font-weight:800}
+.calsum{margin:0 0 8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;font-weight:700;color:var(--ink2)}
+.calg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cw{text-align:center;font-size:13px;font-weight:800;color:var(--muted);padding:2px 0}
+.cw.sun,.cd.sun .n{color:var(--bad)} .cw.sat,.cd.sat .n{color:var(--blue)}
+.cd{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:2px;min-height:66px;padding:3px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.cd.pad{border:0;background:none;cursor:default}
+.cd .n{font-size:14px;font-weight:800;line-height:1.1}
+.cd .tdy{position:absolute;top:3px;right:3px;font-size:10.5px;font-weight:800;color:#8A5A00}
+.cd.today{background:#FFF0B0;border:2px solid #D19600}
+.cd.sel{box-shadow:0 0 0 3px var(--ink) inset}
+.cd:not(.has):not(.today){background:#FAF8F6}
+.cc{display:block;padding:1px 3px;border-radius:5px;font-size:11px;font-weight:800;line-height:1.35;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:clip}
+.cc.c-po{background:#1E5AA8} .cc.c-tax{background:#1B7A43} .cc.c-gong{background:#7A3A14}
+.calsum .cc{display:inline-block;padding:2px 8px;font-size:13px;border-radius:999px}
+@media (min-width:640px){.cd{min-height:84px;padding:5px}.cd .n{font-size:15px}.cc{font-size:12.5px;padding:2px 5px}}
+@media (max-width:639px){.cd .cc .cl,.cd .tdy{display:none}.cd .cc{text-align:center;font-size:12.5px}}   /* 휴대폰: 칸이 좁아 색 + 숫자만 (색 뜻은 달력 위 줄) */
+/* 메일 한 통 · 첨부 · 받은 발주서 (2026-11-21 22:17 지시: 원본 열기 하면 이상한 글만 보임 → 메일을 그대로 읽고, 첨부 발주서는 출고로) */
+.mailv{margin:12px 0;padding:12px;border-radius:12px;background:#F7F9FC;border:1px solid #D5DEEA}
+.mh{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0 0 8px;font-size:14.5px}
+.mh dt{font-weight:800;color:var(--muted)} .mh dd{margin:0;overflow-wrap:anywhere}
+.mb{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;line-height:1.6;max-height:46vh;overflow:auto}
+.muted{color:var(--muted)}
+.atts h3,.pinfo h3{margin:14px 0 6px;font-size:15.5px;font-weight:800}
+.atl{list-style:none;margin:0;padding:0}
+.atl li{padding:10px 12px;margin:0 0 8px;border:1px solid var(--line);border-left:5px solid #1E5AA8;border-radius:12px;background:#fff}
+.atl .an b{display:block;font-size:15.5px;overflow-wrap:anywhere}
+.atl .an small{display:block;margin-top:3px;color:var(--ink2);font-size:13.5px}
+.atl .tools{margin-top:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:12px 0;font-size:15px}
+.kv dt{font-weight:800;color:var(--muted)} .kv dd{margin:0}
+.from{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:#F7F9FC;font-size:14.5px}
+.fd{margin:10px 0 0;border-top:1px solid var(--line);padding-top:4px}
+.mt12{margin-top:12px}
+@media (max-width:520px){.cnt{grid-template-columns:repeat(2,minmax(0,1fr))}.fg{grid-template-columns:1fr}.cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -140,7 +199,16 @@ b{font-variant-numeric:tabular-nums}
   var TOKEN_KEY = 'nmc_pay_token';
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheet = $('sheet'), shade = $('shade'), toastEl = $('toast'), fileIn = $('fileIn');
-  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', kind: '', q: '', open: '', text: {}, busy: '', up: '', mailKey: '', mailAsk: '' };
+  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', cat: 'all', calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '' };
+  /* 분류 (2026-11-21 22:14 지시 "공문함에 발주서와 세금계산서 그다음 각종 공문들 정리할 수 있도록 나눠 주고")
+     발주서 = 발주서함(출고 화면에서 처리하는 받은 발주서) + 종류가 발주서인 것 + 제목 · 첨부가 발주서인 메일 · 팩스
+     세금계산서 = 종류가 세금계산서인 것 + 제목 · 첨부가 세금계산서인 메일 · 팩스, 각종 공문 = 나머지 */
+  var CAT = { po: '발주서', tax: '세금계산서', gong: '각종 공문' }, CATS = ['po', 'tax', 'gong'], CAT_S = { po: '발주', tax: '계산서', gong: '공문' };
+  var RE_TAX = /세금\s*계산서|전자\s*(?:세금\s*)?계산서|계산서\s*(?:발행|발급|송부)/, RE_PO = /발\s*주\s*서|주\s*문\s*서|purchase\s*order|발주\s*(?:요청|의뢰|드립니다|합니다|건|내역|송부|확인)/i;
+  var PO_TODO = { '확인 필요': 1, '기다림': 1, '읽는 중': 1, '날짜 대기': 1 }, PO_NEW = { '확인 필요': 1, '기다림': 1, '읽는 중': 1 };
+  var PO_LAB = { '확인 필요': '확인 필요', '기다림': '판독 대기', '읽는 중': '판독 중', '날짜 대기': '날짜 대기', '넣음': '출고예정 등록', '취소': '등록 안 함', '중복': '중복' };
+  var WD = ['일', '월', '화', '수', '목', '금', '토'];
+  var ICON_CAL = '<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
   var EXT = /\.(pdf|jpe?g|png|gif|bmp|tiff?|webp|heic|hwpx?|docx?|rtf|odt|eml|txt)$/i, MAX = 10 * 1024 * 1024;
   var ERR = {
     auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
@@ -193,15 +261,72 @@ b{font-variant-numeric:tabular-nums}
     return { id: r[0], at: r[1], kind: r[2], from: r[3], to: r[4], no: r[5], date: r[6], title: r[7], due: r[8], dueWhy: r[9], imp: !!r[10], state: r[11], sum: r[12],
       who: r[13], att: r[14], memo: r[15], files: r[16] || [], orig: r[17], chars: Number(r[18]) || 0, how: r[19], seen: r[20], done: r[21], edited: r[22] };
   }
+  // 발주서함 한 줄 (서버 v44부터 공문함에도 옴): [번호, 받은 시각, 파일 이름, 상태, 결과, 거래처들, 출고 날짜들, 넣은 줄 수, 파일 번호들, 메모]
+  function poObj(r) {
+    return { t: 'po', id: r[0], at: r[1], name: r[2], st: r[3], result: r[4], custs: r[5] || [], dates: r[6] || [], n: Number(r[7]) || 0, files: r[8] || [], note: r[9] || '', kind: '발주서' };
+  }
   function put(d) {
     d.R = (d.rows || []).map(obj);
+    d.noPo = !Array.isArray(d.po);
+    d.P = d.noPo ? [] : d.po.map(poObj);
+    // 메일 첨부 ↔ 첨부가 간 곳(발주서함 · 공문함): 파일 번호로 잇습니다
+    var byFile = {};
+    d.P.forEach(function (p) { p.files.forEach(function (fid) { if (fid) byFile[fid] = { po: p }; }); });
+    d.R.forEach(function (x) { x.files.forEach(function (f) { if (f[0] && !f[3] && !byFile[f[0]]) byFile[f[0]] = { doc: x }; }); });
+    d.R.forEach(function (x) {
+      x.atts = x.files.filter(function (f) { return f[3]; }).map(function (f) {
+        var h = (f[0] && byFile[f[0]]) || {};
+        return { id: f[0], name: f[1], ext: f[2], po: h.po || null, doc: h.doc && h.doc !== x ? h.doc : null };
+      });
+      x.atts.forEach(function (a) { if (a.po) a.po.mail = x; if (a.doc) a.doc.mail = x; });
+    });
+    d.R.forEach(function (x) { x.cat = catOf(x, 0); });
+    d.P.forEach(function (p) { p.cat = 'po'; });
+    d.E = d.R.concat(d.P);
     S.D = d;
   }
+  function catOf(x, depth) {
+    var k = x.kind;
+    if (k === '발주서') return 'po';
+    if (k === '세금계산서') return 'tax';
+    if (k === '메일' || k === '팩스' || k === '기타') {
+      var t = [x.title, x.orig, x.att].join(' ');
+      if (RE_TAX.test(t)) return 'tax';
+      if (RE_PO.test(t)) return 'po';
+      if ((x.atts || []).some(function (a) { return a.po; })) return 'po';
+      var ad = (x.atts || []).filter(function (a) { return a.doc; }).map(function (a) { return depth < 2 ? catOf(a.doc, depth + 1) : 'gong'; }).filter(function (c) { return c !== 'gong'; });
+      if (ad.length) return ad[0];
+    }
+    return 'gong';
+  }
+  function isOpen(e) { return e.t === 'po' ? !!PO_TODO[e.st] : e.state !== '처리 완료'; }
+  function isNew(e) { return e.t === 'po' ? !!PO_NEW[e.st] : e.state === '새 공문'; }
+  function hayOf(e) {
+    return (e.t === 'po' ? [e.name, e.result, e.custs.join(' '), e.note, '발주서', e.mail ? e.mail.title : '']
+      : [e.title, e.from, e.to, e.no, e.sum, e.memo, e.att, e.who, e.orig, e.kind]).join(' ').replace(/\s+/g, '').toLowerCase();
+  }
+  function isMail(x) { return x.t !== 'po' && (x.kind === '메일' || /^메일\(eml\)/.test(x.how) || (x.files[0] && x.files[0][2] === 'eml')); }
+  function findPo(id) { return S.D ? S.D.P.filter(function (p) { return p.id === id; })[0] : null; }
+  function poHref(id) { return 'stock.html?view=out&poid=' + encodeURIComponent(id); }
+  function poTagCls(st) { return st === '확인 필요' ? 'bad' : PO_TODO[st] ? 'warn' : st === '넣음' ? 'ok' : ''; }
+  function poRes(t) { return String(t || '').replace(/^읽음:\s*/, ''); }
+  function driveView(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
   function load(quiet) {
     if (!quiet) { S.err = ''; render(); }
     return call('apiDocs', []).then(function (d) { put(d); render(); openFromHash(); }, function (e) { if (String(e && e.message) !== 'auth') { S.err = errText(e); render(); } });
   }
   function find(id) { return S.D ? S.D.R.filter(function (x) { return x.id === id; })[0] : null; }
+  function yy(k) { return S.D && k && k.slice(0, 4) !== S.D.today.slice(0, 4) ? k.slice(0, 4) + '년 ' : ''; }
+  function wdOf(k) { return WD[new Date(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10))).getUTCDay()]; }
+  function dayHead(k) {
+    if (!k) return '날짜 없음';
+    var n = days(k, S.D.today);
+    return yy(k) + md(k) + ' (' + wdOf(k) + ')' + (n === 0 ? ' · 오늘' : n === 1 ? ' · 어제' : '');
+  }
+  function dueHead(k) {
+    var n = days(S.D.today, k);
+    return yy(k) + md(k) + ' (' + wdOf(k) + ')' + (n < 0 ? ' · 기한 ' + (-n) + '일 지남' : n === 0 ? ' · 오늘 마감' : ' · D-' + n);
+  }
 
   /* ── 목록 ── */
   function dueTag(x, today) {
@@ -209,26 +334,100 @@ b{font-variant-numeric:tabular-nums}
     var d = days(today, x.due);
     return d < 0 ? '<span class="tag bad">기한 ' + (-d) + '일 지남</span>' : d === 0 ? '<span class="tag bad">오늘 마감</span>' : d <= 3 ? '<span class="tag warn">D-' + d + '</span>' : '<span class="tag">기한 ' + md(x.due) + '</span>';
   }
-  function match(x) {
-    var today = S.D.today, f = S.f;
-    if (f === 'open' && x.state === '처리 완료') return false;
-    if (f === 'new' && x.state !== '새 공문') return false;
-    if (f === 'due' && !(x.due && x.state !== '처리 완료')) return false;
-    if (f === 'late' && !(x.due && x.state !== '처리 완료' && x.due < today)) return false;
-    if (f === 'soon' && !(x.due && x.state !== '처리 완료' && x.due >= today && days(today, x.due) <= 3)) return false;
-    if (f === 'done' && x.state !== '처리 완료') return false;
-    if (S.kind && x.kind !== S.kind) return false;
-    if (S.q) {
-      var q = S.q.replace(/\s+/g, '').toLowerCase();
-      var hay = [x.title, x.from, x.to, x.no, x.sum, x.memo, x.att, x.who, x.orig, x.kind].join(' ').replace(/\s+/g, '').toLowerCase();
-      if (hay.indexOf(q) < 0) return false;
+  function stateOk(e, f, today) {
+    if (f === 'open') return isOpen(e);
+    if (f === 'new') return isNew(e);
+    if (f === 'done') return !isOpen(e);
+    if (f === 'due' || f === 'late' || f === 'soon') {
+      if (e.t === 'po' || !e.due || e.state === '처리 완료') return false;
+      if (f === 'late') return e.due < today;
+      if (f === 'soon') return e.due >= today && days(today, e.due) <= 3;
+      return true;
     }
+    return true;   // 'cal' = 전체
+  }
+  function match(e, f, cat) {
+    if (!stateOk(e, f, S.D.today)) return false;
+    if (cat && cat !== 'all' && e.cat !== cat) return false;
+    if (S.kind && e.kind !== S.kind) return false;
+    if (S.q) { var q = S.q.replace(/\s+/g, '').toLowerCase(); if (hayOf(e).indexOf(q) < 0) return false; }
     return true;
+  }
+  function counts() {
+    var D = S.D, today = D.today, C = { fresh: 0, late: 0, soon: 0, open: 0, cat: { all: 0, po: 0, tax: 0, gong: 0 } };
+    D.E.forEach(function (e) {
+      if (isNew(e)) C.fresh++;
+      if (isOpen(e)) { C.open++; C.cat.all++; C.cat[e.cat]++; }
+      if (e.t !== 'po' && e.due && e.state !== '처리 완료') { if (e.due < today) C.late++; else if (days(today, e.due) <= 3) C.soon++; }
+    });
+    return C;
+  }
+  function newest(a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; }
+  /** → [{ k, xs }] 날짜(받은 날 또는 기한)별 묶음. asc: 오래된 것부터 */
+  function groupBy(list, key, asc) {
+    var m = {}, keys = [];
+    list.forEach(function (e) { var k = key(e) || ''; if (!m[k]) { m[k] = []; keys.push(k); } m[k].push(e); });
+    keys.sort(function (a, b) { return asc ? (a < b ? -1 : a > b ? 1 : 0) : (a < b ? 1 : a > b ? -1 : 0); });
+    return keys.map(function (k) { return { k: k, xs: m[k].sort(function (a, b) { return asc && a.imp !== b.imp ? (a.imp ? -1 : 1) : newest(a, b); }) }; });
+  }
+  function catMix(xs) {
+    var c = { po: 0, tax: 0, gong: 0 };
+    xs.forEach(function (e) { c[e.cat]++; });
+    return CATS.filter(function (k) { return c[k]; }).map(function (k) { return ' · ' + CAT[k] + ' ' + c[k]; }).join('');
+  }
+  function entHtml(e) { return '<li>' + (e.t === 'po' ? poItemHtml(e) : itemHtml(e, S.D.today)) + '</li>'; }
+  function dayList(list, byDue) {
+    var D = S.D;
+    return groupBy(list, byDue ? function (e) { return e.due; } : function (e) { return String(e.at).slice(0, 10); }, byDue).map(function (g) {
+      return '<h3 class="dh' + (!byDue && g.k === D.today ? ' today' : '') + '">' + esc(byDue ? dueHead(g.k) : dayHead(g.k)) + '<small>' + g.xs.length + '건' + (S.cat === 'all' ? catMix(g.xs) : '') + '</small></h3>' +
+        '<ul class="list">' + g.xs.map(entHtml).join('') + '</ul>';
+    }).join('');
+  }
+  function listHtml() {
+    var D = S.D, f = S.f, list = D.E.filter(function (e) { return match(e, f, S.cat); });
+    if (!list.length) return '<ul class="list" id="list"><li class="empty">' + (D.E.length ? '조건에 맞는 것이 없습니다.' : '아직 받은 것이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li></ul>';
+    return '<div id="list">' + dayList(list, f === 'due' || f === 'late' || f === 'soon') + '</div>';
+  }
+  /* 전체 (2026-11-21 22:14 지시 "전체는 날짜별로 뭐가 왔는지 전체적으로 볼 수 있도록 따로 만들어 주고"): 달력(날마다 분류별 건수) + 고른 날 · 그 달 목록 */
+  function dayChips(xs) {
+    if (!xs.length) return '';
+    if (S.cat !== 'all') return '<span class="cc c-' + S.cat + '"><span class="cl">' + CAT_S[S.cat] + ' </span>' + xs.length + '</span>';
+    var c = { po: 0, tax: 0, gong: 0 };
+    xs.forEach(function (e) { c[e.cat]++; });
+    return CATS.filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cc c-' + k + '"><span class="cl">' + CAT_S[k] + ' </span>' + c[k] + '</span>'; }).join('');
+  }
+  function calHtml() {
+    var D = S.D, ym = S.calYm || D.today.slice(0, 7), y = +ym.slice(0, 4), mo = +ym.slice(5, 7);
+    var inM = D.E.filter(function (e) { return String(e.at).slice(0, 7) === ym && match(e, 'cal', S.cat); });
+    var byDay = {};
+    inM.forEach(function (e) { var k = String(e.at).slice(0, 10); (byDay[k] = byDay[k] || []).push(e); });
+    var first = new Date(Date.UTC(y, mo - 1, 1)).getUTCDay(), nd = new Date(Date.UTC(y, mo, 0)).getUTCDate();
+    var c = { po: 0, tax: 0, gong: 0 };
+    inM.forEach(function (e) { c[e.cat]++; });
+    var h = '<section class="card calc" id="cal"><div class="calh"><button type="button" class="btn ghost sm" data-cal="-1" aria-label="이전 달">◀</button><h2>' + y + '년 ' + mo + '월</h2>' +
+      (ym !== D.today.slice(0, 7) ? '<button type="button" class="btn ghost sm" data-cal="0">이번 달</button>' : '') + '<button type="button" class="btn ghost sm" data-cal="1" aria-label="다음 달">▶</button></div>';
+    h += '<p class="calsum">' + mo + '월에 받은 것 ' + inM.length + '건' + (inM.length ? (S.cat === 'all' ? CATS : [S.cat]).filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cc c-' + k + '">' + CAT[k] + ' ' + c[k] + '</span>'; }).join('') : '') + '</p>';
+    h += '<div class="calg">' + WD.map(function (w, i) { return '<div class="cw' + (i === 0 ? ' sun' : i === 6 ? ' sat' : '') + '">' + w + '</div>'; }).join('');
+    for (var i = 0; i < first; i++) h += '<div class="cd pad" aria-hidden="true"></div>';
+    for (var dd = 1; dd <= nd; dd++) {
+      var k = ym + '-' + ('0' + dd).slice(-2), xs = byDay[k] || [], wd = (first + dd - 1) % 7;
+      h += '<button type="button" class="cd' + (k === D.today ? ' today' : '') + (k === S.calDay ? ' sel' : '') + (xs.length ? ' has' : '') + (wd === 0 ? ' sun' : wd === 6 ? ' sat' : '') + '" data-day="' + k + '" aria-pressed="' + (k === S.calDay) + '"' +
+        ' aria-label="' + mo + '월 ' + dd + '일 받은 것 ' + xs.length + '건"><span class="n">' + dd + '</span>' + (k === D.today ? '<span class="tdy">오늘</span>' : '') + dayChips(xs) + '</button>';
+    }
+    h += '</div><p class="hint">날짜를 누르면 그날 받은 것만 아래에 나옵니다. 받은 날 기준입니다.</p></section>';
+    if (S.calDay && S.calDay.slice(0, 7) === ym) {
+      var dx = (byDay[S.calDay] || []).slice().sort(newest);
+      h += '<h3 class="dh' + (S.calDay === D.today ? ' today' : '') + '">' + esc(dayHead(S.calDay)) + '<small>받은 것 ' + dx.length + '건</small><button type="button" class="link" data-day="">' + mo + '월 전체 보기</button></h3>';
+      if (!dx.length) h += '<p class="empty">이날 받은 것이 없습니다.</p>';
+      else if (S.cat === 'all') h += CATS.map(function (ck) { var g = dx.filter(function (e) { return e.cat === ck; }); return g.length ? '<h4 class="cgh c-' + ck + '">' + CAT[ck] + ' ' + g.length + '건</h4><ul class="list">' + g.map(entHtml).join('') + '</ul>' : ''; }).join('');
+      else h += '<ul class="list">' + dx.map(entHtml).join('') + '</ul>';
+    } else h += inM.length ? dayList(inM, false) : '<p class="empty">' + mo + '월에 받은 것이 없습니다.</p>';
+    return h;
   }
   function render() {
     if (!S.authed) { root.innerHTML = loginHtml(); var pw = $('pw'); if (pw) pw.focus(); return; }
     if (!S.D) { root.innerHTML = S.err ? '<p class="err">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="reload">다시 시도</button></div>' : '<p class="wait">불러오는 중…</p>'; return; }
-    var D = S.D, C = D.counts, h = '';
+    var D = S.D, C = counts(), h = '';
     h += '<div class="cnt" role="group" aria-label="빨리 보기">' +
       cb('new', 'fresh', C.fresh, '새 공문') + cb('late', 'late', C.late, '기한 지남') + cb('soon', 'soon', C.soon, '3일 안 기한') + cb('open', '', C.open, '처리할 것') + '</div>';
     h += '<section class="card"><div class="tools">' +
@@ -240,16 +439,17 @@ b{font-variant-numeric:tabular-nums}
       (D.trig === false ? ' <b class="err">자동 확인이 꺼져 있습니다 — 매출 · 매입 화면의 ‘자동 수집’에서 켜 주십시오.</b>' : '') +
       (D.last && D.last.at ? ' 최근 확인 ' + esc(dtx(D.last.at)) + '.' : '') + '</p></section>';
     h += mailHtml(D.mail);
+    h += '<div class="cats" role="group" aria-label="분류">' + [['all', '모두'], ['po', '발주서'], ['tax', '세금계산서'], ['gong', '각종 공문']].map(function (c) {
+      return '<button type="button" class="c-' + c[0] + '" data-cat="' + c[0] + '" aria-pressed="' + (S.cat === c[0]) + '"><b>' + c[1] + '</b><span>처리할 것 ' + C.cat[c[0]] + '건</span></button>';
+    }).join('') + '</div>';
     var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
     h += '<div class="filt"><input type="search" id="q" placeholder="제목 · 발신 · 문서번호 · 요약 · 메모 찾기" value="' + esc(S.q) + '" aria-label="공문 찾기">' +
       '<select id="kindSel" aria-label="종류">' + kinds + '</select></div>';
-    h += '<div class="filt" role="group" aria-label="상태">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료'], ['all', '전체']].map(function (c) {
+    h += '<div class="filt" role="group" aria-label="상태">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료']].map(function (c) {
       return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
-    }).join('') + '</div>';
-    var list = D.R.filter(match);
-    if (S.f === 'open' || S.f === 'due' || S.f === 'late' || S.f === 'soon') list.sort(function (a, b) { var ka = a.due || '9999', kb = b.due || '9999'; return ka < kb ? -1 : ka > kb ? 1 : (a.at < b.at ? 1 : -1); });
-    h += '<ul class="list" id="list">' + (list.length ? list.map(function (x) { return '<li>' + itemHtml(x, D.today) + '</li>'; }).join('') :
-      '<li class="empty">' + (D.total ? '조건에 맞는 공문이 없습니다.' : '아직 공문이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li>') + '</ul>';
+    }).join('') + '<button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '전체 · 날짜별</button></div>';
+    h += S.f === 'cal' ? calHtml() : listHtml();
+    if (D.noPo) h += '<p class="hint">발주서함(받은 발주서)은 서버를 새로 배포한 뒤 여기에도 함께 보입니다.</p>';
     if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
     h += helpHtml();
     root.innerHTML = h;
@@ -257,7 +457,7 @@ b{font-variant-numeric:tabular-nums}
   /* 다음 메일 자동 읽기 (2026-11-21 18:31 지시 "이 컴퓨터 설치해서 메일 자동으로 읽고 가지고 오는 걸로 진행해 봐라")
      사무실 컴퓨터의 메일 읽기 프로그램이 10분마다 다음 메일의 새 메일을 이 공문함으로 보냅니다(메일 한 통 = '메일' 한 건, 첨부는 따로 정리).
      여기서는 그 컴퓨터가 쓸 연결 키를 만들고(한 번만 보임), 마지막 확인 시각 · 오류를 봅니다. 메일 비밀번호는 그 컴퓨터에만 있습니다. */
-  var MAIL_ERR = { login: '다음 메일 로그인이 안 됩니다. 카카오 앱 비밀번호가 바뀌었거나 다음 메일의 IMAP 사용이 꺼졌을 수 있습니다. 그 컴퓨터에서 설치 파일을 다시 실행해 주십시오.',
+  var MAIL_ERR = { login: '다음 메일 로그인이 안 됩니다. 다음 앱 비밀번호(다음 → 계정 보안)를 지웠거나 새로 만들었을 수 있습니다. 그 컴퓨터에서 설치 파일을 다시 실행해 주십시오.',
     imap: '다음 메일 서버에서 메일을 읽지 못했습니다. 다음 확인 때 다시 시도합니다.', net: '그 컴퓨터의 인터넷 연결이 끊겨 있었습니다. 다음 확인 때 다시 시도합니다.' };
   function mailErrText(e) { e = String(e || ''); return MAIL_ERR[e] || MAIL_ERR[e.split(':')[0]] || ('마지막 확인에서 오류가 났습니다 (' + e + '). 다음 확인 때 다시 시도합니다.'); }
   function mailHtml(M) {
@@ -293,10 +493,22 @@ b{font-variant-numeric:tabular-nums}
   function itemHtml(x, today) {
     var tags = dueTag(x, today) + (x.state === '새 공문' ? '<span class="tag new">새 공문</span>' : '') + (x.imp && x.state !== '처리 완료' ? '<span class="tag imp">중요</span>' : '') +
       (x.state === '처리 완료' ? '<span class="tag ok">처리 완료</span>' : '');
-    var meta = [x.from || '발신 미상', '<span class="tag kind">' + esc(x.kind) + '</span>' + (x.date ? '시행 ' + ymd(x.date) : '받음 ' + md(x.at)), x.state === '확인' ? '확인함' : ''].filter(String);
+    var meta = [x.from || '발신 미상', (S.cat === 'all' && x.cat !== 'gong' ? '<span class="tag c-' + x.cat + '">' + CAT[x.cat] + '</span>' : '') + '<span class="tag kind">' + esc(x.kind) + '</span>' +
+      (x.date ? '시행 ' + ymd(x.date) : '받음 ' + md(x.at)), x.state === '확인' ? '확인함' : ''].filter(String);
+    var at = (x.atts || []).length ? '<span class="a">첨부 ' + x.atts.map(function (a) { return esc(a.name) + (a.po ? ' → 발주서 ' + esc(PO_LAB[a.po.st] || a.po.st) : a.doc ? ' → ' + esc(a.doc.kind) : ''); }).join(', ') + '</span>' : '';
     return '<button type="button" class="it st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen') + '" data-open="' + esc(x.id) + '">' +
-      '<span class="t">' + tags + esc(x.title || x.orig) + '</span><span class="m">' + meta.map(function (s, i) { return i === 1 ? s : esc(s); }).join(' · ') + '</span>' +
+      '<span class="t">' + tags + esc(x.title || x.orig) + '</span><span class="m">' + meta.map(function (s, i) { return i === 1 ? s : esc(s); }).join(' · ') + '</span>' + at +
       (x.sum ? '<span class="s">' + esc(x.sum) + '</span>' : !x.chars ? '<span class="s err">글자를 읽지 못했습니다 — 원본을 열어 칸을 채워 주십시오.</span>' : '') + '</button>';
+  }
+  function poItemHtml(p) {
+    var meta = [p.custs.length ? p.custs.join(', ') : '거래처 미상', (S.cat === 'all' ? '<span class="tag c-po">발주서</span>' : '') + '받음 ' + esc(String(p.at).slice(11, 16)),
+      p.dates.length ? '출고 ' + p.dates.map(function (d) { return Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)); }).join('·') : '',
+      p.mail ? '메일 첨부' : p.note === '자동 수집' ? '자동 수집' : '앱에서 올림'].filter(String);
+    return '<button type="button" class="it po st-' + (PO_TODO[p.st] ? 'new' : 'done') + '" data-po="' + esc(p.id) + '">' +
+      '<span class="t"><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st || '?') + '</span>' + esc(p.name) + '</span>' +
+      '<span class="m">' + meta.map(function (v, i) { return i === 1 ? v : esc(v); }).join(' · ') + '</span>' +
+      (p.mail ? '<span class="a">메일: ' + esc(p.mail.title || p.mail.orig) + '</span>' : '') +
+      (p.result ? '<span class="s">' + esc(poRes(p.result)) + '</span>' : '') + '</button>';
   }
   function helpHtml() {
     return '<section class="card"><details class="more"><summary>넣는 방법 · 정리 기준</summary>' +
@@ -328,7 +540,77 @@ b{font-variant-numeric:tabular-nums}
   }
   function openFromHash() {
     var id = decodeURIComponent(String(location.hash || '').slice(1));
-    if (id && find(id) && S.open !== id) openDoc(id);
+    if (!id || S.open === id || S.open === 'po:' + id) return;
+    if (find(id)) openDoc(id); else if (findPo(id)) openPo(id);
+  }
+  /* 받은 발주서 한 건 (발주서함 — 등록 · 취소는 출고 화면에서) */
+  function openPo(id) {
+    var p = findPo(id);
+    if (!p) { toast('발주서함에 없는 발주서입니다.'); return; }
+    S.open = 'po:' + id;
+    sheet.innerHTML = poSheetHtml(p);
+    sheet.hidden = false; shade.hidden = false; document.body.classList.add('noscroll');
+    try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch (e) {}
+    var t = $('shTitle'); if (t) t.focus();
+  }
+  function poSheetHtml(p) {
+    var todo = !!PO_TODO[p.st];
+    var h = '<div class="sh"><h2 id="shTitle" tabindex="-1"><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st || '?') + '</span>' + esc(p.name) + '</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>';
+    h += '<dl class="kv"><dt>종류</dt><dd><span class="tag c-po">발주서</span>발주서함(출고 화면에서 처리)</dd><dt>받은 시각</dt><dd>' + esc(dtx(p.at)) + '</dd>' +
+      (p.custs.length ? '<dt>거래처</dt><dd>' + esc(p.custs.join(', ')) + '</dd>' : '') +
+      (p.dates.length ? '<dt>출고 날짜</dt><dd>' + esc(p.dates.map(ymd).join(' · ')) + '</dd>' : '') +
+      (p.n ? '<dt>넣은 줄</dt><dd>' + p.n + '줄</dd>' : '') + (p.note ? '<dt>메모</dt><dd>' + esc(p.note) + '</dd>' : '') + '</dl>';
+    if (p.mail) h += '<p class="from">메일로 옴: <button type="button" class="link" data-open="' + esc(p.mail.id) + '">' + esc(p.mail.title || p.mail.orig) + '</button>' + (p.mail.from ? ' · ' + esc(p.mail.from) : '') + '</p>';
+    if (p.result) h += '<h3 style="margin:14px 0 4px;font-size:15px">읽은 결과</h3><div class="text">' + esc(poRes(p.result)) + '</div>';
+    h += '<div class="tools mt12"><a class="btn" href="' + esc(poHref(p.id)) + '">' + (todo ? '출고 화면에서 처리' : '출고 화면에서 보기') + '</a>' +
+      (p.files[0] ? '<a class="btn ghost" href="' + esc(driveView(p.files[0])) + '" target="_blank" rel="noopener">발주서 파일 열기</a>' : '') + '</div>';
+    h += '<p class="hint">' + (todo ? '‘출고 화면에서 처리’를 누르면 출고 화면에서 이 발주서의 읽은 내용(날짜 · 거래처 · 품목 · 수량)이 바로 열립니다. 맞으면 ‘등록’, 이미 들어간 발주서면 ‘중복’으로 닫습니다.'
+      : '출고 화면의 ‘수신 발주서’에서 이 발주서를 볼 수 있습니다.') + '</p>';
+    return h;
+  }
+  /* 메일 한 통: 보낸 사람 · 제목 · 본문을 그대로 (원본 eml 파일은 구글 드라이브가 메일로 보여 주지 못해 속 글자만 보임 — 2026-11-21 22:17) */
+  function parseMail(t) {
+    var L = String(t || '').split('\n'), o = { from: '', subj: '', date: '', att: '', body: '' }, keys = { '보낸 사람': 'from', '제목': 'subj', '날짜': 'date', '첨부': 'att' }, i = 0;
+    for (; i < L.length && i < 8; i++) {
+      var m = /^(보낸 사람|제목|날짜|첨부):\s*(.*)$/.exec(L[i]);
+      if (!m) { if (!L[i].trim()) continue; break; }
+      o[keys[m[1]]] = m[2];
+    }
+    o.body = L.slice(i).join('\n').trim();
+    return o;
+  }
+  function loadText(id) {
+    if (S.textBusy[id] || S.text[id] != null) return;
+    S.textBusy[id] = 1;
+    call('apiDocGet', [id]).then(function (d) {
+      delete S.textBusy[id]; S.text[id] = d.text || '';
+      var x = find(S.open), mv = $('mailv'), t = $('txt');
+      if (x && x.id === id && mv) mv.outerHTML = mailBox(x);
+      if (x && x.id === id && t) t.textContent = S.text[id] || '(글자 없음)';
+    }, function (e) { delete S.textBusy[id]; var mv = $('mailv'); if (mv) mv.innerHTML = '<p class="err">' + esc(errText(e)) + '</p>'; });
+  }
+  function mailBox(x) {
+    var t = S.text[x.id];
+    if (t == null) return '<section class="mailv" id="mailv"><p class="muted">메일 내용을 불러오는 중…</p></section>';
+    var M = parseMail(t);
+    return '<section class="mailv" id="mailv"><dl class="mh"><dt>보낸 사람</dt><dd>' + esc(M.from || x.from || '') + '</dd><dt>보낸 날</dt><dd>' + esc(/^\d{4}-\d{2}-\d{2}$/.test(M.date) ? ymd(M.date) : M.date || dtx(x.at)) + '</dd>' +
+      '<dt>제목</dt><dd><b>' + esc(M.subj || x.title) + '</b></dd></dl><div class="mb">' + (M.body ? esc(M.body) : '<span class="muted">(본문 없음)</span>') + '</div></section>';
+  }
+  function attBox(x) {
+    if (!(x.atts || []).length) return '';
+    return '<section class="atts"><h3>첨부 파일 ' + x.atts.length + '개</h3><ul class="atl">' + x.atts.map(function (a) {
+      var where = '', btns = '';
+      if (a.po) {
+        var p = a.po;
+        where = '<small><span class="tag c-po">발주서</span><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st) + '</span>' + esc(poRes(p.result)) + '</small>';
+        btns = '<a class="btn sm" href="' + esc(poHref(p.id)) + '">' + (PO_TODO[p.st] ? '출고 화면에서 처리' : '출고 화면에서 보기') + '</a>';
+      } else if (a.doc) {
+        where = '<small><span class="tag c-' + a.doc.cat + '">' + esc(a.doc.kind) + '</span>공문함 · ' + esc(a.doc.title || a.doc.orig) + '</small>';
+        btns = '<button type="button" class="btn ghost sm" data-open="' + esc(a.doc.id) + '">공문함에서 보기</button>';
+      } else where = '<small>' + (a.id ? '자동 수집에서 정리했습니다.' : '어디로 정리됐는지 찾지 못했습니다 — 수집 폴더를 확인해 주십시오.') + '</small>';
+      if (a.id) btns += '<a class="btn ghost sm" href="' + esc(driveView(a.id)) + '" target="_blank" rel="noopener">파일 열기</a>';
+      return '<li><div class="an"><b>' + esc(a.name) + '</b>' + where + '</div><div class="tools">' + btns + '</div></li>';
+    }).join('') + '</ul></section>';
   }
   function fv(k, label, v, type, w, help) {
     var id = 'f_' + k, inp = type === 'area' ? '<textarea id="' + id + '" data-k="' + k + '" maxlength="600">' + esc(v) + '</textarea>'
@@ -342,6 +624,10 @@ b{font-variant-numeric:tabular-nums}
     h += '<div class="seg" role="group" aria-label="처리 상태">' + D.states.map(function (s) {
       return '<button type="button" data-st="' + esc(s) + '" aria-pressed="' + (x.state === s) + '"' + (busy ? ' disabled' : '') + '>' + esc(s === '확인' ? '확인함' : s) + '</button>';
     }).join('') + '</div>';
+    var mail = isMail(x);
+    if (mail) h += mailBox(x) + attBox(x);
+    else if (x.mail) h += '<p class="from">메일 첨부로 옴: <button type="button" class="link" data-open="' + esc(x.mail.id) + '">' + esc(x.mail.title || x.mail.orig) + '</button></p>';
+    if (mail) h += '<details class="more fd"><summary>칸 보기 · 고치기 (종류 · 기한 · 메모)</summary>';
     h += '<div class="fg">' +
       '<div class="f"><label for="f_kind">종류' + mark('kind') + '</label><select id="f_kind" data-k="kind">' + D.kinds.map(function (k) { return '<option' + (k === x.kind ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select></div>' +
       '<div class="f chk"><label><input type="checkbox" id="f_imp" data-k="imp"' + (x.imp ? ' checked' : '') + '> 중요 (아침 알림에 나옴)' + mark('imp') + '</label></div>' +
@@ -357,13 +643,18 @@ b{font-variant-numeric:tabular-nums}
       '<button type="button" class="btn ghost" data-act="reparse"' + (busy ? ' disabled' : '') + '>다시 읽기</button>' +
       '<button type="button" class="btn danger" data-act="del"' + (busy ? ' disabled' : '') + '>목록에서 지우기</button></div>';
     h += '<p class="hint">칸은 글자를 보고 짐작한 값입니다. ‘다시 읽기’는 저장된 글자로 칸을 다시 채우며, 고친 칸은 그대로 둡니다. 지워도 드라이브 원본 파일은 남습니다.</p>';
-    h += '<h3 style="margin:16px 0 4px;font-size:15px">파일 ' + x.files.length + '개</h3><ul class="files">' + x.files.map(function (f) {
-      return '<li><span>' + esc(f[1]) + '</span><a class="btn ghost sm" href="https://drive.google.com/file/d/' + encodeURIComponent(f[0]) + '/view" target="_blank" rel="noopener">원본 열기</a></li>';
+    if (mail) h += '</details>';
+    var own = x.files.filter(function (f) { return !f[3]; });
+    h += '<h3 style="margin:16px 0 4px;font-size:15px">' + (mail ? '메일 원본 파일' : '파일 ' + own.length + '개') + '</h3><ul class="files">' + own.map(function (f) {
+      return f[2] === 'eml'
+        ? '<li><span>' + esc(f[1]) + '<small class="muted" style="display:block;font-size:12.5px">메일 프로그램(아웃룩 등)에서 열리는 원본입니다. 내용은 위에 있습니다.</small></span><a class="btn ghost sm" href="https://drive.google.com/uc?export=download&id=' + encodeURIComponent(f[0]) + '" target="_blank" rel="noopener">내려받기</a></li>'
+        : '<li><span>' + esc(f[1]) + '</span><a class="btn ghost sm" href="' + esc(driveView(f[0])) + '" target="_blank" rel="noopener">원본 열기</a></li>';
     }).join('') + '</ul>';
     h += '<p class="hint">받은 시각 ' + esc(dtx(x.at)) + ' · 원래 이름 ' + esc(x.orig) + ' · ' + esc(x.how) + ' · 글자 ' + x.chars.toLocaleString('ko-KR') + '자' +
       (x.seen ? ' · 확인 ' + esc(dtx(x.seen)) : '') + (x.done ? ' · 처리 완료 ' + esc(dtx(x.done)) : '') + '</p>';
     h += '<details class="more" id="txtBox"' + (S.text[x.id] != null ? ' open' : '') + '><summary>읽은 글자 전체 보기</summary><div class="text" id="txt">' + (S.text[x.id] != null ? esc(S.text[x.id] || '(글자 없음)') : '불러오는 중…') + '</div></details>';
     sheet.innerHTML = h;
+    if (mail && S.text[x.id] == null) loadText(x.id);
   }
   function form() {
     var p = {};
@@ -390,9 +681,11 @@ b{font-variant-numeric:tabular-nums}
   sheet.addEventListener('click', function (ev) {
     var b = ev.target.closest('button');
     if (!b || b.disabled) return;
+    if (b.getAttribute('data-act') === 'close') { closeSheet(); return; }
+    var go = b.getAttribute('data-open');
+    if (go) { openDoc(go); return; }
     var x = find(S.open);
     if (!x) return;
-    if (b.getAttribute('data-act') === 'close') { closeSheet(); return; }
     var st = b.getAttribute('data-st');
     if (st) { if (st !== x.state) act('state', 'apiDocState', [x.id, st], function () { toast(st === '처리 완료' ? '처리 완료로 바꿨습니다.' : '‘' + (st === '확인' ? '확인함' : st) + '’으로 바꿨습니다.'); }); return; }
     var a = b.getAttribute('data-act');
@@ -413,8 +706,7 @@ b{font-variant-numeric:tabular-nums}
     if (ev.target.id !== 'txtBox' || !ev.target.open) return;
     var id = S.open;
     if (S.text[id] != null) return;
-    call('apiDocGet', [id]).then(function (d) { S.text[id] = d.text || ''; var t = $('txt'); if (t && S.open === id) t.textContent = S.text[id] || '(글자 없음)'; },
-      function (e) { var t = $('txt'); if (t) t.textContent = errText(e); });
+    loadText(id);
   }, true);
   shade.addEventListener('click', closeSheet);
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && S.open) closeSheet(); });
@@ -424,8 +716,26 @@ b{font-variant-numeric:tabular-nums}
   root.addEventListener('click', function (ev) {
     var o = ev.target.closest('[data-open]');
     if (o) { openDoc(o.getAttribute('data-open')); return; }
+    var po = ev.target.closest('[data-po]');
+    if (po) { openPo(po.getAttribute('data-po')); return; }
+    var ct = ev.target.closest('[data-cat]');
+    if (ct) { S.cat = ct.getAttribute('data-cat'); render(); return; }
+    var cl = ev.target.closest('[data-cal]');
+    if (cl) {
+      var dv = Number(cl.getAttribute('data-cal')), ym = S.calYm || S.D.today.slice(0, 7);
+      if (!dv) S.calYm = S.D.today.slice(0, 7);
+      else { var yv = +ym.slice(0, 4), mv = +ym.slice(5, 7) - 1 + dv; yv += Math.floor(mv / 12); mv = ((mv % 12) + 12) % 12; S.calYm = yv + '-' + ('0' + (mv + 1)).slice(-2); }
+      S.calDay = ''; render(); return;
+    }
+    var dy = ev.target.closest('[data-day]');
+    if (dy) { var dk = dy.getAttribute('data-day'); S.calDay = dk === S.calDay ? '' : dk; render(); if (S.calDay) { var dh = root.querySelector('#cal + .dh'); if (dh && dh.scrollIntoView) { try { dh.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { dh.scrollIntoView(); } } } return; }
     var f = ev.target.closest('[data-f]');
-    if (f) { var nf = f.getAttribute('data-f'); S.f = nf === S.f && f.parentNode.classList.contains('cnt') ? 'open' : nf; render(); return; }   // 위 숫자 칸을 다시 누르면 '처리할 것'으로
+    if (f) {   // 위 숫자 칸 = 모든 분류에서 (다시 누르면 '처리할 것'으로)
+      var nf = f.getAttribute('data-f'), top = f.parentNode.classList.contains('cnt');
+      if (top) S.cat = 'all';
+      S.f = nf === S.f && top ? 'open' : nf;
+      render(); return;
+    }
     var b = ev.target.closest('[data-act]');
     if (!b || b.disabled) return;
     var a = b.getAttribute('data-act');

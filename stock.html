@@ -433,6 +433,9 @@ body.labmode .wrap{max-width:1480px}
 .poinbox .poitem.st-qwait{border-left-color:#C98A00;background:#FFFBEF}
 .poinbox .poitem.st-done{border-left-color:var(--ok)}
 .poinbox .poitem.st-off,.poinbox .poitem.st-dup{border-left-color:#B8BEC7;opacity:.8}
+.poinbox .poitem.hi{outline:3px solid #F4B400;outline-offset:-3px;background:#FFFBE6;opacity:1}   /* 공문함에서 연 발주서 (2026-11-21) */
+.rgq{margin:10px 0 2px;font-size:14.5px;font-weight:700;color:#8A5300}   /* 검정 = EPDM 재생일 수 있음 (2026-11-21 22:21) */
+.ppick.rg{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
 .pohead{display:flex;align-items:flex-start;gap:8px}
 .pochip{flex:none;display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
 .pochip.wait,.pochip.off{background:var(--soft);color:var(--muted)}
@@ -1014,6 +1017,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   })();
   var ADMIN_VIEW = VIEW !== 'prod';
   var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);
+  var PO_GO = VIEW === 'out' ? ((/[?&]poid=([A-Za-z0-9_\-]{6,40})(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 공문함의 '출고 화면에서 처리' (2026-11-21 22:17)
   var DAY0 = VIEW === 'out' ? ((/[?&]day=(\d{4}-\d{2}-\d{2})(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 매출 화면 '이 날 출고 목록'   // 첫 화면 '발주서 올리기'로 들어오면 맨 위 올리기 칸을 잠깐 강조
   var QUICK = VIEW === 'out' || VIEW === 'in';
   var VIEW_NAME = { prod: '생산', out: '출고', 'in': '반입', all: '전체관리' }[VIEW];
@@ -4873,7 +4877,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function poRow(x) {
     var st = PO_STATE[x.state] || 'off', busy = S.poOpening === x.id;
-    var h = '<li class="poitem st-' + st + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(poStTxt(x.state) || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
+    var h = '<li class="poitem st-' + st + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(poStTxt(x.state) || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
       '<small class="pometa">' + esc(poWhen(x.at)) + ' 업로드' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>';
     var readBtn = function (label, cls) { return '<button type="button" class="' + (cls || 'ghost') + ' sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '판독 중…' : label) + '</button>'; };
     if (x.state === '기다림' || (x.state === '읽는 중' && x.stale)) {
@@ -5101,6 +5105,26 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
     window.scrollTo(0, 0);
   }
+  /* 공문함에서 '출고 화면에서 처리'로 들어옴 (2026-11-21 22:17 지시 "발주서 너가 열었으면 그거 정리해서 그대로 우리가 발주서 출고로 연계되도록 우리가 뭘 누르면")
+     등록 안 된 발주서 = 판독 내용 확인 화면을 바로 엶(맞으면 '등록', 이미 들어갔으면 '중복'), 이미 등록 = 수신 발주서에서 그 줄을 찾아 보여 줌, 날짜 대기 = 일자 지정 창 */
+  function poGo(id) {
+    PO_GO = '';
+    try { history.replaceState(null, '', location.pathname + '?view=out'); } catch (e) {}
+    S.outMode = 'cal'; S.poOpening = id; render();
+    call('apiPoList').then(function (r) {
+      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [] };
+      S.poOpening = '';
+      var it = S.poList.items.concat(S.poList.wait).filter(function (x) { return x.id === id; })[0];
+      if (it && it.state === '넣음') {
+        S.poHi = id; S.poMore = true; render();
+        setTimeout(function () { var li = document.getElementById('po-' + id); if (li && li.scrollIntoView) { try { li.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { li.scrollIntoView(); } } }, 60);
+        toastOk('이미 출고예정에 등록된 발주서입니다 (노란 테두리)');
+        return;
+      }
+      if (it && it.state === '날짜 대기') { render(); poWaitOpen(id); return; }
+      poReadNow(id);
+    }, function (e) { S.poOpening = ''; render(); failed(e); });
+  }
   function poReadNow(id) {
     if (S.poOpening) return;
     S.poOpening = id;
@@ -5306,20 +5330,36 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return h + '</div>';
   }
+  /* 검정 = EPDM 재생일 수 있음 (2026-11-21 22:21 지시 "일반 epdm 검정 이면 epdm 재생일수 잇으니 그것도 적용해라. 선택할수잇도록 만들고")
+     서버가 제품이 안 적혔거나 '일반 EPDM'으로 적힌 검정 줄에 regen(재생 규격들)을 붙여 줌 → 칩 제품(검정) · EPDM 재생(규격) 중 하나 */
+  function regenPick(l, i, V, skip) {
+    var date = isYmd(V.plan.date) ? V.plan.date : '';
+    var opts = PROD3.filter(function (p) { return !!S.byKey[p + '|검정']; }).map(function (p) { return [p, '검정', (PROD3_NAME[p] || p) + ' 검정']; })
+      .concat(l.regen.filter(function (z) { return !!S.byKey['EPDM 재생|' + z]; }).map(function (z) { return ['EPDM 재생', z, 'EPDM 재생 ' + z + (z === l.size ? ' (발주서 규격)' : '')]; }));
+    var h = '<p class="rgq">검정은 <b>EPDM 재생</b>일 수 있습니다. 발주서대로 골라 주십시오.</p><div class="ppick rg" role="radiogroup" aria-label="검정 — 칩 제품 또는 EPDM 재생">';
+    opts.forEach(function (o) {
+      var on = l.prod === o[0] && l.color === o[1], st = stockAt(o[0], o[1], date, skip), short = date && st.day != null && st.day < l.kg;
+      h += '<button type="button" class="pp' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-act="poregen" data-i="' + i + '" data-v="' + esc(o[0] + '|' + o[1]) + '"><b>' + esc(o[2]) + '</b>' +
+        '<small>현재고 ' + fmt(Math.max(st.cur, 0)) + '</small>' + (date ? '<small' + (short ? ' class="bad"' : '') + '>해당일 ' + fmt(Math.max(st.day, 0)) + (short ? ' 부족' : '') + '</small>' : '') + '</button>';
+    });
+    return h + '</div>';
+  }
   function poLineHtml(l, i, V) {
     var x = V.sim && V.sim.lines ? V.sim.lines[i] : null;
     var short = x && x.short > 0;
     var h = '<li class="poln' + (short ? ' short' : '') + (!l.prod ? ' need' : '') + '"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span>';
-    var cands = prodCands(l.prod, l.color);
-    if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
+    var regen = l.regen && l.regen.length ? l.regen : null;
+    var cands = regen ? [] : prodCands(l.prod, l.color);
+    if (regen) h += '<b>' + esc(l.prod === 'EPDM 재생' ? 'EPDM 재생' : (PROD3_NAME[l.prod] || l.prod || '제품 선택')) + '</b> <b>' + esc(l.color) + '</b><small class="pohow">' + (l.how === 'pick' ? '고른 제품' : '검정 — EPDM 재생인지 확인') + '</small>';
+    else if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
     else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 선택') + '</b> <b>' + esc(l.color) + '</b>' +
       '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
     h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : l.unit === 'tonbag' ? fmt(l.units) + '톤백 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
     if (isSbr(l.prod)) h += packPick({ cur: l.pack === 'small' ? 'small' : 'ton', kg: l.kg, act: 'popack', i: i });   // SBR 톤백 · 소포장 (2026-11-18)
-    if (cands.length > 1) {
+    if (cands.length > 1 || regen) {
       var skip = {};
       if (V.plan.mode === 'replace') (V.plan.remove || []).forEach(function (id) { skip[id] = true; });
-      h += prodPick({ prods: cands, cur: l.prod, color: l.color, date: isYmd(V.plan.date) ? V.plan.date : '', kg: l.kg, act: 'poprodset', i: i, skip: skip });
+      h += regen ? regenPick(l, i, V, skip) : prodPick({ prods: cands, cur: l.prod, color: l.color, date: isYmd(V.plan.date) ? V.plan.date : '', kg: l.kg, act: 'poprodset', i: i, skip: skip });
     }
     if (V.simBusy || !l.prod) h += '<div class="pl3 muted">' + (l.prod ? '계산 중…' : '제품을 선택하면 계산합니다') + '</div>';
     else if (x) h += '<div class="pl3">' + (short ? '<b class="bad">부족 ' + fmt(x.short) + ' kg</b> · 해당일 재고 ' + fmt(Math.max(0, x.before)) + ' kg' : '<span class="ok">재고로 출고 가능</span> · 해당일 재고 ' + fmt(x.before) + ' kg') + '</div>';
@@ -7371,6 +7411,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         if (ppl && v) S.poRev.plan.lines.forEach(function (x) { if (x.color === ppl.color && x.prod !== v && prodCands(x.prod, x.color).indexOf(v) >= 0) { x.prod = v; x.how = 'pick'; nchg++; } });
         if (nchg) poResim();
       } return;
+      case 'poregen': if (S.poRev) {   // 검정: 칩 제품이면 같은 색(검정) 칩 줄을 함께, EPDM 재생이면 그 줄만
+        var rgl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))], rv = String(v || '').split('|');
+        if (rgl && rv.length === 2 && (rv[0] !== rgl.prod || rv[1] !== rgl.color)) {
+          if (PROD3.indexOf(rv[0]) >= 0) S.poRev.plan.lines.forEach(function (x) { if (x === rgl || (x.color === '검정' && PROD3.indexOf(x.prod) >= 0)) { x.prod = rv[0]; x.color = '검정'; x.how = 'pick'; } });
+          else { rgl.prod = rv[0]; rgl.color = rv[1]; rgl.how = 'pick'; }
+          poResim();
+        }
+      } return;
       case 'popack': if (S.poRev && (v === 'ton' || v === 'small')) { var pkl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))]; if (pkl) { pkl.pack = v; render(); } } return;
       case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
       case 'poqopen': poWaitOpen(v); return;
@@ -7705,6 +7753,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       apply(r);
       S.ready = true;
       render();
+      if (PO_GO) poGo(PO_GO);
     }, function (e) {
       if (!isAuth(e)) { S.fatal = true; render(); return; }
       if (tok) { setToken(''); toast(ERR.expired); }
@@ -7715,7 +7764,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
   }
 
-  if (DEMO) window.__nmc = { S: S, project: project };   // 미리보기에서만: 화면 시험용
+  if (DEMO) window.__nmc = { S: S, project: project, poGo: poGo };   // 미리보기에서만: 화면 시험용 (poGo = 공문함 링크로 들어온 것처럼)
   start();
 })();
 </script>
