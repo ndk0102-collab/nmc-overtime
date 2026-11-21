@@ -359,7 +359,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     bad_qty: '품목과 수량을 확인해 주십시오.', bad_date: '일자를 확인해 주십시오.', future_date: '미래 일자는 등록할 수 없습니다.',
     not_found: '해당 내역이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.', bad_src: '이 내역은 이 화면에서 등록할 수 없습니다.', bad_input: '입력값을 확인해 주십시오.',
     bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.',
-    pj_linked: '공사 프로젝트가 만든 매출입니다. 공사 프로젝트 화면에서 수정해 주십시오.'
+    pj_linked: '공사 프로젝트가 만든 내역입니다 (시공 매출 · 자재 입고 매입). 공사 프로젝트 화면에서 수정해 주십시오.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.'); }
   function post(body) {
@@ -901,9 +901,10 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (sh.err) h += '<p class="smsg err" role="alert">' + esc(sh.err) + '</p>';
     if (sh.hint) h += '<p class="smsg info">' + esc(sh.hint) + '</p>';
     var pjKey = sh.orig ? String(sh.orig.link || '').split(',').map(function (k) { return k.trim(); }).filter(function (k) { return /^P\|/.test(k); })[0] : '';
-    var pjNo = pjKey ? pjKey.slice(2) : '';
-    var pjOwn = !!(sh.orig && sh.orig.src === '공사');   // 공사 프로젝트가 만든 매출 (2026-11-21): 공사 화면에서만 고침
-    if (pjOwn) h += '<p class="smsg info">이 매출은 공사 프로젝트' + (pjNo ? ' ' + esc(pjNo) : '') + '의 시공 완료로 만들어졌습니다. 금액 · 날짜는 공사 프로젝트 화면에서 고치십시오.' + (pjNo ? ' <a href="pj.html?no=' + encodeURIComponent(pjNo) + '">공사 프로젝트 열기</a>' : '') + '</p>';
+    var pjNo = pjKey ? pjKey.slice(2).split('|')[0] : '', pjOrd = pjKey ? (pjKey.split('|')[2] || '') : '';
+    var pjOwn = !!(sh.orig && (sh.orig.src === '공사' || (sh.orig.src === '입고' && pjOrd)));   // 공사 프로젝트가 만든 줄 (2026-11-21): 공사 화면에서만 고침
+    if (pjOwn && pjOrd) h += '<p class="smsg info">이 매입은 공사 프로젝트 ' + esc(pjNo) + '의 발주 ' + esc(pjOrd) + ' 입고 확인으로 만들어졌습니다. 수량 · 단가 · 날짜는 공사 프로젝트 화면의 발주에서 고치십시오 (장부가 따라 바뀝니다). <a href="pj.html?no=' + encodeURIComponent(pjNo) + '&amp;go=ord">공사 프로젝트 열기</a></p>';
+    else if (pjOwn) h += '<p class="smsg info">이 매출은 공사 프로젝트' + (pjNo ? ' ' + esc(pjNo) : '') + '의 시공 완료로 만들어졌습니다. 금액 · 날짜는 공사 프로젝트 화면에서 고치십시오.' + (pjNo ? ' <a href="pj.html?no=' + encodeURIComponent(pjNo) + '">공사 프로젝트 열기</a>' : '') + '</p>';
     else if (sh.orig && sh.orig.src && ['직접', '입고'].indexOf(sh.orig.src) < 0) h += '<p class="smsg info">이 내역은 ‘' + esc(sh.orig.src) + '’에서 가져온 자료입니다. 수정해도 출처는 유지됩니다.</p>';
     if (pjNo && !pjOwn) h += '<p class="smsg info">공사 프로젝트 ' + esc(pjNo) + '의 시공 매출로 연결되어 있습니다. <a href="pj.html?no=' + encodeURIComponent(pjNo) + '">공사 프로젝트 열기</a></p>';
     // 날짜
@@ -945,7 +946,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       '<label class="chk"><input type="checkbox" data-f="neg"' + (f.neg ? ' checked' : '') + '> 차감 (반품 · 취소 · 할인): 음수 금액으로 등록</label></details>';
     h += '</div><div class="sfoot">';
     if (sh.id && pjOwn) {
-      h += '<a class="btn" href="pj.html?no=' + encodeURIComponent(pjNo) + '">공사 프로젝트에서 고치기</a>';
+      h += '<a class="btn" href="pj.html?no=' + encodeURIComponent(pjNo) + (pjOrd ? '&amp;go=ord' : '') + '">공사 프로젝트에서 고치기</a>';
     } else if (sh.id) {
       h += '<button type="button" class="btn danger" data-act="del"' + (sh.saving ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 삭제됩니다' : '삭제') + '</button>' +
         '<button type="button" class="btn" data-act="save"' + (sh.saving ? ' disabled' : '') + '>' + (sh.saving ? '저장 중…' : '수정 저장') + '</button>';

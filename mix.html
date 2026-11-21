@@ -21,7 +21,7 @@ if ('serviceWorker' in navigator) {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 /* 배합 시뮬레이션 (2026-11-21) — 홈페이지 '디자인' 창구의 칩 표면 그리기(granule)를 앱으로 옮긴 것.
-   NM01 ~ NM22 색과 포대 비율로 섞은 바닥을 미리 봅니다. 프로젝트 번호(?pj=)로 열면 확정 도면의 배합을 불러옵니다(관리자). */
+   NM01 ~ NM22 색과 포대 비율로 섞은 바닥을 미리 봅니다. 프로젝트 번호(?pj=)로 열면 그 프로젝트의 '색상 정하기'(구역마다 배합을 골라 저장)가 됩니다(관리자, 2026-11-21 12:12). */
 :root{
   --bg:#EEF1F5; --card:#FFFFFF; --ink:#121820; --ink2:#2E3742; --muted:#5A6471; --line:#D5DBE3; --soft:#EBEEF3;
   --vc:#1B3A6B; --vsoft:#E8EEF7; --gold:#B08A35; --blue:#1F5FBF; --bad:#B42318; --bad-soft:#FDE9E7; --warn:#8A5300; --warn-soft:#FCF0D6;
@@ -97,6 +97,32 @@ button,input,select{font:inherit;color:inherit}
 .login input{flex:1;min-width:0;min-height:46px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:16px}
 .err{margin:8px 0 0;color:var(--bad);font-weight:700;font-size:14px}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3)}
+
+/* 프로젝트 색상 정하기 (2026-11-21 12:12) */
+.pd h2 small b{color:var(--vc)}
+.plan{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#F4F1EA;border:1px solid var(--line);touch-action:manipulation}
+.plan canvas{display:block;width:100%;cursor:pointer}
+.slots{margin-top:10px;max-height:420px;overflow:auto;-webkit-overflow-scrolling:touch;border-top:1px solid var(--line)}
+.slot{display:flex;align-items:center;gap:10px;width:100%;padding:8px 6px;border:0;border-bottom:1px solid var(--line);background:#fff;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.slot[aria-pressed="true"]{background:var(--vsoft);box-shadow:inset 4px 0 0 var(--vc)}
+.slot .sw{flex-shrink:0;width:34px;height:34px;border-radius:9px;border:1px solid rgba(0,0,0,.15)}
+.slot .st{flex:1;min-width:0}
+.slot .st b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot .st small{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot .ar{flex-shrink:0;font-size:13.5px;font-weight:800;font-variant-numeric:tabular-nums}
+.slot.none .sw{background:repeating-linear-gradient(45deg,#fff 0 5px,#ddd 5px 10px)}
+.sg{margin:10px 0 0;font-size:13px;font-weight:800;color:var(--vc)}
+.selbox{margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14px}
+.selbox b{font-size:15px}
+.pdsum{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:6px}
+.pdsum td{padding:4px 6px;border-top:1px solid var(--line)}
+.pdsum td.r{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pdsum .sw{display:inline-block;width:14px;height:14px;border-radius:4px;border:1px solid rgba(0,0,0,.15);vertical-align:-2px;margin-right:6px}
+.savebar{position:sticky;bottom:0;z-index:15;display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px -14px -14px;padding:10px 14px;border-top:1px solid var(--line);background:rgba(255,255,255,.97);border-radius:0 0 16px 16px}
+.savebar .btn{flex:1 1 160px}
+.savebar .dirty{flex:1 1 100%;font-size:13px;font-weight:700;color:var(--warn)}
+.okmsg{margin:8px 0 0;color:#1B7A43;font-weight:700;font-size:14px}
+.warnmsg{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:13.5px;font-weight:600}
 </style>
 </head>
 <body>
@@ -108,6 +134,7 @@ button,input,select{font:inherit;color:inherit}
 </header>
 <main class="wrap">
   <div class="col">
+    <section class="card pd" id="pjCard" hidden></section>
     <section class="card">
       <div class="vrow">
         <div class="chips" role="group" aria-label="보기" id="views"></div>
@@ -118,7 +145,6 @@ button,input,select{font:inherit;color:inherit}
       <div class="code" id="code"></div>
       <p class="hint" id="vnote"></p>
     </section>
-    <section class="card" id="pjCard" hidden></section>
   </div>
   <div class="col">
     <section class="card">
@@ -401,7 +427,7 @@ button,input,select{font:inherit;color:inherit}
       return '<button type="button" data-add="' + c[0] + '" aria-pressed="' + on + '" style="background:' + c[2] + '" title="' + c[0] + ' ' + c[1] + '"><span>' + c[0].slice(2) + '</span></button>';
     }).join('');
   }
-  function changed() { renderMix(); renderInfo(); setUrl(); draw(); markPj(); }
+  function changed(fromSel) { renderMix(); renderInfo(); setUrl(); draw(); markPj(); if (!fromSel) pdApply(); }
   function renderRecs() {
     var el = $('recs');
     el.innerHTML = S.recs.map(function (r, i) {
@@ -421,7 +447,8 @@ button,input,select{font:inherit;color:inherit}
   var token = '';
   try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
   var ERR = { auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
-    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다.', not_found: '프로젝트를 찾을 수 없습니다.', bad_action: '서버가 아직 공사 프로젝트 기능을 지원하지 않습니다.' };
+    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다.', not_found: '프로젝트를 찾을 수 없습니다.', bad_action: '서버가 아직 공사 프로젝트 기능을 지원하지 않습니다.',
+    no_doc: '저장된 도면이 없습니다.', bad_doc: '도면 파일을 저장하지 못했습니다 (형식 또는 크기).', pj_void: '취소된 프로젝트입니다. 프로젝트 화면에서 복원해 주십시오.' };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + ')'); }
   function post(body) {
     if (token && body.action !== 'login') body.token = token;
@@ -442,37 +469,231 @@ button,input,select{font:inherit;color:inherit}
     var key = S.bags.map(function (b) { return b.code + '.' + b.parts; }).join('_');
     Array.prototype.forEach.call(document.querySelectorAll('[data-pjm]'), function (el) { el.setAttribute('aria-pressed', String(el.getAttribute('data-key') === key)); });
   }
+  /* ───────── 프로젝트 색상 정하기 (2026-11-21 12:12) ─────────
+     도면 파일의 구역(zones[].rings · mix)과 장식(motifs[].mixes[부분])에 배합을 넣고, 면적표 요약(색상별 · 배합별)을 다시 셉니다.
+     면적은 도면 화면이 저장할 때 센 구역별 면적(겹침 · 빼기 반영)을 그대로 씁니다. */
+  function pdMix(m) { return (m || []).filter(function (x) { return x && COL[x.code] && x.bags > 0; }).map(function (x) { return { code: x.code, bags: x.bags }; }); }
+  function pdKey(m) { return (m || []).map(function (x) { return x.code + ':' + x.bags; }).join(','); }
+  function pdHex(m) { return m && m.length ? averageHex(m.map(function (x) { return { hex: COL[x.code].hex, pct: x.bags }; })) : ''; }
+  function pdText(m) { return m && m.length ? (m.length === 1 ? COL[m[0].code].name + ' 단색' : m.map(function (x) { return COL[x.code].name + ' ' + x.bags; }).join(' : ')) : '색 없음'; }
+  function b64ToText(b) {
+    var bin = atob(b), u = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    return new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  }
+  function textToB64(t) {
+    return new Response(new Blob([t]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer().then(function (ab) {
+      var u = new Uint8Array(ab), bin = '';
+      for (var i = 0; i < u.length; i += 32768) bin += String.fromCharCode.apply(null, u.subarray(i, i + 32768));
+      return btoa(bin);
+    });
+  }
+  /** 서버 도면 → 고를 수 있는 칸(구역 · 장식 부분) */
+  function pdOpen(pj, d) {
+    var doc = d.doc, zi = {}, mi = {};
+    (doc.zones || []).forEach(function (z) { zi[z.id] = z; });
+    (doc.motifs || []).forEach(function (m) { mi[m.id] = m; });
+    var rows = (pj.design.rows || []).map(function (r) { return Object.assign({}, r, { mix: pdMix(r.mix) }); });
+    var stale = false, slots = [];
+    rows.forEach(function (r, i) {
+      if (!(r.kind === 'zone' || r.kind === 'motif') || !(r.area > 0)) return;
+      if (!r.id || (r.kind === 'zone' && !zi[r.id]) || (r.kind === 'motif' && (!mi[r.id] || !r.part))) { stale = true; return; }
+      slots.push({ i: i, kind: r.kind, id: r.id, part: r.part || '', ko: r.ko || (r.kind === 'zone' ? '구역' : '장식'), role: r.role || '', area: r.area, mix: r.mix.length ? r.mix : null, touched: false });
+    });
+    slots.sort(function (a, b) { return a.kind === b.kind ? b.area - a.area : a.kind === 'zone' ? -1 : 1; });
+    S.pd = { doc: doc, at: d.at, name: pj.design.name || '', total: pj.design.total || 0, erased: pj.design.erased || 0, rows: rows, slots: slots, sel: -1, stale: stale,
+      dirty: false, saving: false, err: '', msg: '', view: null };
+    if (slots.length) pdSelect(0, true);
+  }
+  function pdSlotOfZone(id) { var x = S.pd.slots.filter(function (s) { return s.kind === 'zone' && s.id === id; })[0]; return x || null; }
+  function pdSelect(k, quiet) {
+    var s = S.pd && S.pd.slots[k];
+    if (!s) return;
+    S.pd.sel = k;
+    if (s.mix) S.bags = s.mix.slice(0, MAX_COLORS).map(function (x) { return { code: x.code, parts: Math.min(MAX_PARTS, Math.max(1, x.bags)) }; });
+    if (!quiet) changed(true);
+    renderPj();
+  }
+  /** 배합 칸이 바뀌면 고른 칸에 바로 넣음 */
+  function pdApply() {
+    var P = S.pd;
+    if (!P || P.sel < 0 || P.saving) return;
+    var s = P.slots[P.sel], m = S.bags.map(function (b) { return { code: b.code, bags: b.parts }; });
+    if (s.mix && pdKey(s.mix) === pdKey(m)) return;
+    s.mix = m; s.touched = true; P.dirty = true; P.msg = '';
+    renderPj();
+  }
+  function pdSameRole() {
+    var P = S.pd, s = P && P.slots[P.sel];
+    if (!s || !s.mix) return 0;
+    var n = 0;
+    P.slots.forEach(function (x) { if (x !== s && x.kind === s.kind && x.role === s.role && pdKey(x.mix) !== pdKey(s.mix)) { x.mix = s.mix.map(function (y) { return { code: y.code, bags: y.bags }; }); x.touched = true; n++; } });
+    if (n) { P.dirty = true; P.msg = ''; }
+    renderPj();
+    return n;
+  }
+  /** 면적표 요약 다시 세기 (도면 화면과 같은 방식: 색 몫 = 포대 / 포대 합) */
+  function pdSum() {
+    var P = S.pd, col = {}, mix = {}, keys = [];
+    P.slots.forEach(function (s) {
+      if (!s.mix || !s.mix.length) return;
+      var tb = s.mix.reduce(function (a, x) { return a + x.bags; }, 0) || 1, k = pdKey(s.mix);
+      s.mix.forEach(function (x) { col[x.code] = (col[x.code] || 0) + s.area * x.bags / tb; });
+      if (!mix[k]) { mix[k] = { mix: s.mix, area: 0 }; keys.push(k); }
+      mix[k].area += s.area;
+    });
+    var rows = P.rows.map(function (r) { return Object.assign({}, r); });
+    P.slots.forEach(function (s) { rows[s.i].mix = s.mix || null; });
+    return { name: P.name, total: P.total, erased: P.erased,
+      byColor: Object.keys(col).map(function (c) { return { code: c, name: COL[c].name, hex: COL[c].hex, area: col[c] }; }).sort(function (a, b) { return b.area - a.area; }),
+      byMix: keys.map(function (k) { return mix[k]; }).sort(function (a, b) { return b.area - a.area; }), rows: rows };
+  }
+  function pdDocOut() {
+    var P = S.pd, doc = JSON.parse(JSON.stringify(P.doc)), zi = {}, mi = {};
+    (doc.zones || []).forEach(function (z) { zi[z.id] = z; });
+    (doc.motifs || []).forEach(function (m) { mi[m.id] = m; });
+    P.slots.forEach(function (s) {
+      if (!s.touched || !s.mix) return;
+      var m = s.mix.map(function (x) { return { code: x.code, bags: x.bags }; });
+      if (s.kind === 'zone' && zi[s.id]) zi[s.id].mix = m;
+      if (s.kind === 'motif' && mi[s.id]) { mi[s.id].mixes = mi[s.id].mixes || {}; mi[s.id].mixes[s.part] = m; }
+    });
+    return doc;
+  }
+  function pdSave(next) {
+    var P = S.pd;
+    if (!P || P.saving || P.stale) return;
+    if (!P.dirty) { if (next) location.href = 'pj.html?no=' + encodeURIComponent(pjNo) + '&go=qty'; return; }
+    P.saving = true; P.err = ''; renderPj();
+    var txt = JSON.stringify(pdDocOut()), sum = pdSum();
+    var enc = window.CompressionStream && window.DecompressionStream ? textToB64(txt).then(function (b) { return { doc: b, enc: 'gz64' }; }, function () { return { doc: txt, enc: 'json' }; }) : Promise.resolve({ doc: txt, enc: 'json' });
+    enc.then(function (x) {
+      return post({ action: 'stock.call', fn: 'apiPjDesign', args: [pjNo, { sum: sum, doc: x.doc, enc: x.enc, by: 'color' }] });
+    }).then(function (d) {
+      P.saving = false; P.dirty = false; P.doc = pdDocOut(); P.slots.forEach(function (s) { s.touched = false; });
+      S.pj = d.pj; P.at = d.pj.design ? d.pj.design.at : P.at; P.rows = (d.pj.design.rows || P.rows).map(function (r) { return Object.assign({}, r, { mix: pdMix(r.mix) }); });
+      P.msg = '프로젝트에 저장했습니다 (' + P.at + ').';
+      renderPj(); toast('색상을 저장했습니다. 물량 산출에 바로 반영됩니다.');
+      if (next) location.href = 'pj.html?no=' + encodeURIComponent(pjNo) + '&go=qty';
+    }, function (e) {
+      P.saving = false; P.err = '저장하지 못했습니다: ' + errText(e); renderPj();
+    });
+  }
+  /** 도면 평면: 구역을 평균 색으로 (장식 · 시설물은 목록으로만) */
+  function pdRings(z) { var r = z.rings || []; return r.length && typeof r[0][0] === 'number' ? [r] : r; }
+  function pdZoneMix(z) {
+    var s = pdSlotOfZone(z.id), D = S.pd.doc.design || {};
+    if (s && s.mix) return s.mix;
+    return pdMix(z.mix && z.mix.length ? z.mix : D[z.role] || D.base);
+  }
+  function pdDraw() {
+    var cv = $('pdPlan'), P = S.pd;
+    if (!cv || !P) return;
+    var zs = (P.doc.zones || []).filter(function (z) { return pdRings(z).length; });
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    zs.forEach(function (z) { pdRings(z).forEach(function (r) { r.forEach(function (pt) { x0 = Math.min(x0, pt[0]); x1 = Math.max(x1, pt[0]); y0 = Math.min(y0, pt[1]); y1 = Math.max(y1, pt[1]); }); }); });
+    var W = Math.max(200, Math.round(cv.parentNode.getBoundingClientRect().width));
+    if (!zs.length || !(x1 > x0) || !(y1 > y0)) { cv.width = W; cv.height = 60; P.view = null; return; }
+    var pad = 14, sc = (W - pad * 2) / (x1 - x0), H = Math.round((y1 - y0) * sc + pad * 2);
+    if (H > 520) { sc = (520 - pad * 2) / (y1 - y0); H = 520; }
+    var ox = (W - (x1 - x0) * sc) / 2, dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
+    var c = cv.getContext('2d');
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = '#F4F1EA'; c.fillRect(0, 0, W, H);
+    P.view = { x0: x0, y1: y1, sc: sc, ox: ox, pad: pad };
+    var path = function (z) { c.beginPath(); pdRings(z).forEach(function (r) { r.forEach(function (pt, i) { var X = ox + (pt[0] - x0) * sc, Y = pad + (y1 - pt[1]) * sc; if (i) c.lineTo(X, Y); else c.moveTo(X, Y); }); c.closePath(); }); };
+    var sel = P.slots[P.sel], order = zs.filter(function (z) { return !z.exclude; }).concat(zs.filter(function (z) { return z.exclude; }));
+    order.forEach(function (z) {
+      path(z);
+      if (z.exclude) { c.fillStyle = '#FFFFFF'; c.fill('evenodd'); c.setLineDash([5, 4]); c.strokeStyle = 'rgba(30,36,48,.45)'; c.lineWidth = 1; c.stroke(); c.setLineDash([]); return; }
+      var m = pdZoneMix(z);
+      c.fillStyle = m.length ? pdHex(m) : '#DDDDDD'; c.fill('evenodd');
+      c.strokeStyle = 'rgba(30,36,48,.45)'; c.lineWidth = 1; c.stroke();
+    });
+    if (sel && sel.kind === 'zone') {
+      var z = zs.filter(function (q) { return q.id === sel.id; })[0];
+      if (z) { path(z); c.strokeStyle = '#F4B400'; c.lineWidth = 4; c.stroke(); c.strokeStyle = '#1B3A6B'; c.lineWidth = 1.5; c.stroke(); }
+    }
+  }
+  function pdHit(ev) {
+    var P = S.pd, cv = $('pdPlan');
+    if (!P || !P.view || !cv) return;
+    var r = cv.getBoundingClientRect(), X = ev.clientX - r.left, Y = ev.clientY - r.top, v = P.view;
+    var wx = v.x0 + (X - v.ox) / v.sc, wy = v.y1 - (Y - v.pad) / v.sc;
+    var inside = function (z) {
+      var n = 0;
+      pdRings(z).forEach(function (ring) {
+        for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          var a = ring[i], b = ring[j];
+          if ((a[1] > wy) !== (b[1] > wy) && wx < (b[0] - a[0]) * (wy - a[1]) / (b[1] - a[1]) + a[0]) n++;
+        }
+      });
+      return n % 2 === 1;
+    };
+    var zs = (P.doc.zones || []).filter(function (z) { return pdRings(z).length; });
+    var order = zs.filter(function (z) { return !z.exclude; }).concat(zs.filter(function (z) { return z.exclude; })).reverse();
+    for (var k = 0; k < order.length; k++) {
+      if (!inside(order[k])) continue;
+      if (order[k].exclude) return;
+      var s = pdSlotOfZone(order[k].id);
+      if (s) pdSelect(P.slots.indexOf(s));
+      return;
+    }
+  }
+  function pdHtml() {
+    var P = S.pd, p = S.pj, sum = pdSum(), colored = sum.byColor.reduce(function (a, c) { return a + c.area; }, 0), un = Math.max(0, P.total - colored);
+    var sel = P.slots[P.sel];
+    var h = '<h2>' + esc(p.no + ' ' + p.name) + ' <small>색상 정하기 · 탄성포장 <b>' + f2(P.total) + '㎡</b> · 색 ' + sum.byColor.length + '가지' + (un >= 0.05 ? ' · 색 미정 ' + f2(un) + '㎡' : '') + '</small></h2>';
+    if (P.stale) h += '<p class="warnmsg">이 도면은 예전 방식으로 저장되어 구역을 찾을 수 없습니다. 도면 화면에서 \'프로젝트에 저장\'을 한 번 누른 뒤 다시 열어 주십시오. <a href="sketchbook/?pj=' + encodeURIComponent(p.no) + '">도면 열기</a></p>';
+    h += '<p class="hint" style="margin-top:0">구역을 고르고(목록 또는 평면을 눌러) 오른쪽 배합 칸에서 색 · 비율을 바꾸면 바로 들어갑니다. 위 큰 그림은 고른 구역의 배합을 실제 칩 표면처럼 보여 줍니다.</p>';
+    h += '<div class="plan"><canvas id="pdPlan" aria-label="도면 평면 (구역별 평균 색)"></canvas></div>';
+    if (sel) {
+      h += '<div class="selbox"><b>' + esc(sel.ko) + '</b> · ' + f2(sel.area) + '㎡ · ' + esc(pdText(sel.mix)) + (sel.mix ? '' : ' — 오른쪽에서 색을 고르면 바로 들어갑니다') +
+        '<div class="chips" style="margin-top:8px">' + (sel.mix ? '' : '<button type="button" class="btn sm" data-pd="fill">지금 배합 넣기</button>') +
+        (sel.mix && P.slots.some(function (x) { return x !== sel && x.kind === sel.kind && x.role === sel.role; }) ? '<button type="button" class="btn ghost sm" data-pd="same">같은 종류 모두 이 배합으로</button>' : '') + '</div></div>';
+    }
+    var grp = function (kind, title) {
+      var xs = P.slots.map(function (s, k) { return [s, k]; }).filter(function (x) { return x[0].kind === kind; });
+      if (!xs.length) return '';
+      return '<p class="sg">' + title + ' ' + xs.length + '곳</p>' + xs.map(function (x) {
+        var s = x[0];
+        return '<button type="button" class="slot' + (s.mix ? '' : ' none') + '" data-slot="' + x[1] + '" aria-pressed="' + (x[1] === P.sel) + '"><span class="sw" style="' + (s.mix ? 'background:' + pdHex(s.mix) : '') + '"></span>' +
+          '<span class="st"><b>' + esc(s.ko) + (s.touched ? ' · 바뀜' : '') + '</b><small>' + esc(pdText(s.mix)) + '</small></span><span class="ar">' + f2(s.area) + '㎡</span></button>';
+      }).join('');
+    };
+    h += '<div class="slots">' + grp('zone', '구역') + grp('motif', '장식') + '</div>';
+    if (sum.byColor.length) h += '<table class="pdsum"><tbody>' + sum.byColor.map(function (c) {
+      return '<tr><td><span class="sw" style="background:' + c.hex + '"></span>' + esc(c.code + ' ' + c.name) + '</td><td class="r">' + f2(c.area) + '㎡</td><td class="r">' + f2(c.area * 100 / (P.total || 1)) + '%</td></tr>';
+    }).join('') + '</tbody></table>';
+    if (P.err) h += '<p class="err" role="alert">' + esc(P.err) + '</p>';
+    if (P.msg) h += '<p class="okmsg">' + esc(P.msg) + '</p>';
+    h += '<div class="savebar">' + (P.dirty ? '<span class="dirty">저장하지 않은 색상 변경이 있습니다.</span>' : '') +
+      '<button type="button" class="btn ghost" data-pd="save"' + (P.saving || P.stale || !P.dirty ? ' disabled' : '') + '>' + (P.saving ? '저장 중…' : '저장') + '</button>' +
+      '<button type="button" class="btn" data-pd="next"' + (P.saving || P.stale ? ' disabled' : '') + '>' + (P.dirty ? '저장하고 물량 산출하기 →' : '물량 산출하기 →') + '</button>' +
+      '<a class="btn ghost" href="sketchbook/?pj=' + encodeURIComponent(p.no) + '">도면 고치기</a></div>';
+    return h;
+  }
   function renderPj() {
     var card = $('pjCard');
     if (!/^\d{4}-\d{3,}$/.test(pjNo)) { card.hidden = true; return; }
     card.hidden = false;
     $('back').href = 'pj.html?no=' + encodeURIComponent(pjNo); $('backT').textContent = '프로젝트';
     if (!token) {
-      card.innerHTML = '<h2>프로젝트 ' + esc(pjNo) + ' 도면 배합</h2><div class="login"><p class="hint">확정 도면의 배합을 불러오려면 관리자 비밀번호를 입력해 주십시오.</p>' +
+      card.innerHTML = '<h2>프로젝트 ' + esc(pjNo) + ' 색상 정하기</h2><div class="login"><p class="hint">프로젝트 도면을 불러오려면 관리자 비밀번호를 입력해 주십시오.</p>' +
         '<form id="loginForm" autocomplete="off"><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100" aria-label="비밀번호"><button class="btn" type="submit">로그인</button></form>' +
         '<p class="err" role="alert">' + esc(S.pjErr) + '</p></div>';
       return;
     }
     if (!S.pj) { card.innerHTML = '<h2>프로젝트 ' + esc(pjNo) + '</h2><p class="hint">' + (S.pjErr ? '<span class="err">' + esc(S.pjErr) + '</span>' : '불러오는 중…') + '</p>'; return; }
-    var p = S.pj, d = p.design, ms = pjMixes();
-    var h = '<h2>' + esc(p.no + ' ' + p.name) + ' <small>' + (d ? '확정 도면 ' + esc(d.at) + ' · 탄성포장 ' + f2(d.total) + '㎡' : '확정 도면 없음') + '</small></h2>';
-    if (!d) h += '<p class="hint">이 프로젝트에 확정된 도면이 없습니다. <a href="sketchbook/?pj=' + encodeURIComponent(p.no) + '">도면 만들기</a></p>';
-    else if (!ms.length) h += '<p class="hint">도면에 정해진 배합이 없습니다.</p>';
-    else {
-      h += '<p class="hint" style="margin-top:0">도면 구역에 쓴 배합 ' + ms.length + '가지 · 누르면 위에 크게 그립니다. 물량은 프로젝트 화면에서 산출됩니다.</p>' + ms.map(function (m, i) {
-        var key = m.mix.map(function (x) { return x.code + '.' + x.bags; }).join('_');
-        return '<button type="button" class="pmix" data-pjm="' + i + '" data-key="' + esc(key) + '" aria-pressed="false"><canvas width="172" height="112"></canvas><span class="pt"><b>' + esc(codeText(m.mix.map(function (x) { return { code: x.code, parts: x.bags }; }))) + '</b><small>면적 ' + f2(m.area) + '㎡ · ' + f2(m.area * 100 / (d.total || 1)) + '%</small></span></button>';
-      }).join('');
-    }
-    card.innerHTML = h;
-    var cvs = card.querySelectorAll('canvas'), k = 0;
-    (function next() {
-      if (k >= cvs.length) return;
-      var m = ms[k];
-      renderSurface(cvs[k], 172, 112, { mix: m.mix.map(function (x) { return { hex: COL[x.code].hex, pct: x.bags }; }), sizeMm: CHIP_MM, pxPerMm: 172 / (CHIP_MM[1] * 42), finish: 'matte', seed: 5 + k, flat: true });
-      k++; setTimeout(next, 0);
-    })();
-    markPj();
+    var p = S.pj;
+    if (!p.design) { card.innerHTML = '<h2>' + esc(p.no + ' ' + p.name) + '</h2><p class="hint">이 프로젝트에 저장된 도면이 없습니다. 도면을 먼저 잡아 주십시오. <a href="sketchbook/?pj=' + encodeURIComponent(p.no) + '">도면 잡기</a></p>'; return; }
+    if (!S.pd) { card.innerHTML = '<h2>' + esc(p.no + ' ' + p.name) + '</h2><p class="hint">' + (S.pjErr ? '<span class="err">' + esc(S.pjErr) + '</span>' : '도면을 불러오는 중…') + '</p>'; return; }
+    var keep = card.querySelector('.slots'), top = keep ? keep.scrollTop : 0;
+    card.innerHTML = pdHtml();
+    var nk = card.querySelector('.slots');
+    if (nk && top) nk.scrollTop = top;
+    pdDraw();
   }
   function loadPj() {
     if (!/^\d{4}-\d{3,}$/.test(pjNo)) return;
@@ -480,20 +701,35 @@ button,input,select{font:inherit;color:inherit}
     if (!token) return;
     post({ action: 'stock.call', fn: 'apiPjGet', args: [pjNo] }).then(function (d) {
       S.pj = d.pj; S.pjErr = '';
-      var ms = pjMixes();
-      if (!qm && ms.length) S.bags = ms[0].mix.slice(0, MAX_COLORS).map(function (x) { return { code: x.code, parts: Math.min(MAX_PARTS, Math.max(1, x.bags)) }; });   // 넓은 배합부터
-      renderPj(); changed();
-    }, function (e) {
+      renderPj();
+      if (!d.pj.design) return null;
+      return post({ action: 'stock.call', fn: 'apiPjDoc', args: [pjNo] }).then(function (x) {
+        if (x.enc === 'gz64' && !window.DecompressionStream) throw new Error('old_browser');
+        return (x.enc === 'gz64' ? b64ToText(x.doc) : Promise.resolve(x.doc)).then(function (t) { return { at: x.at, doc: JSON.parse(t) }; });
+      }).then(function (x) {
+        pdOpen(S.pj, x);
+        changed(true); renderPj();
+      });
+    }).catch(function (e) {
       if (String(e && e.message) === 'auth') { token = ''; try { sessionStorage.removeItem(TOKEN_KEY); } catch (x) {} }
-      S.pjErr = errText(e); renderPj();
+      S.pjErr = String(e && e.message) === 'old_browser' ? '이 브라우저는 압축된 도면 파일을 열 수 없습니다. 최신 크롬 · 엣지 · 사파리에서 열어 주십시오.' : errText(e); renderPj();
     });
   }
 
   /* ───────── 누르기 ───────── */
   document.addEventListener('click', function (ev) {
+    if (ev.target && ev.target.id === 'pdPlan') { pdHit(ev); return; }
     var el = ev.target.closest('button');
     if (!el || el.disabled) return;
     var a;
+    if (el.hasAttribute('data-slot')) { pdSelect(Number(el.getAttribute('data-slot'))); return; }
+    if ((a = el.getAttribute('data-pd'))) {
+      if (a === 'save') pdSave(false);
+      else if (a === 'next') pdSave(true);
+      else if (a === 'same') { var n = pdSameRole(); toast(n ? '같은 종류 ' + n + '곳에 이 배합을 넣었습니다.' : '바꿀 곳이 없습니다.'); }
+      else if (a === 'fill') { var P = S.pd, sl = P && P.slots[P.sel]; if (sl) { sl.mix = S.bags.map(function (b) { return { code: b.code, bags: b.parts }; }); sl.touched = true; P.dirty = true; renderPj(); } }
+      return;
+    }
     if ((a = el.getAttribute('data-view'))) { S.view = a; renderViews(); renderInfo(); draw(); return; }
     if ((a = el.getAttribute('data-cam'))) { S.cam = a; renderViews(); draw(); return; }
     if (el.id === 'fin') { S.finish = S.finish === 'gloss' ? 'matte' : 'gloss'; renderViews(); draw(); return; }
@@ -539,13 +775,15 @@ button,input,select{font:inherit;color:inherit}
     }, function (e) { S.pjErr = errText(e); renderPj(); });
   });
   var rw = 0;
-  window.addEventListener('resize', function () { var w = stageW(); if (Math.abs(w - rw) > 24) { rw = w; draw(); } });
+  window.addEventListener('resize', function () { var w = stageW(); if (Math.abs(w - rw) > 24) { rw = w; draw(); pdDraw(); } });
+  window.addEventListener('beforeunload', function (ev) { if (S.pd && S.pd.dirty) { ev.preventDefault(); ev.returnValue = ''; } });
 
   renderViews(); renderMix(); renderInfo();
   S.recs = makeBlends(8); renderRecs();
   rw = stageW(); draw();
   loadPj();
-  if (DEMO) window.__mix = { get S() { return S; }, averageHex: averageHex, pool: POOL, parseMix: parseMix, get rendered() { return rendered; } };
+  if (DEMO) window.__mix = { get S() { return S; }, averageHex: averageHex, pool: POOL, parseMix: parseMix, get rendered() { return rendered; }, pdSum: function () { return S.pd ? pdSum() : null; },
+    reload: function () { S.pj = null; S.pd = null; S.pjErr = ''; loadPj(); } };
 })();
 </script>
 </body>
