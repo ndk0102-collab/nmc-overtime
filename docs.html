@@ -376,6 +376,84 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 .srmore{margin:6px 2px 0;font-size:13px;color:var(--muted)}
 .sri .nw{white-space:nowrap}
 @media (max-width:759px){ .sri .bh{flex-wrap:nowrap;align-items:flex-start} .sri .bh .bd{order:0} .sri .bt{flex:1 1 auto} }
+/* ── 첫 화면 (v56, 2026-11-22 22:09 지시 "아무것도 모르는사람도 들어가자마자 바로 알아보기 쉽게") ── */
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 16px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;padding:8px 4px;border:0;border-right:1px solid var(--line);border-radius:0;background:#fff;cursor:pointer;text-align:center;color:var(--ink2)}
+.tabs button:last-child{border-right:0}
+.tabs button .tt{font-size:16.5px;font-weight:800;line-height:1.25}
+.tabs button small{font-size:13px;font-weight:700;color:var(--muted);line-height:1.3}
+.tabs button small.r{color:var(--bad)}
+.tabs button[aria-pressed="true"]{background:var(--vsoft);color:var(--vc);box-shadow:inset 0 -4px 0 var(--vc)}
+.tabs button:hover{background:#FAF7F4}
+.tabs button:focus-visible{outline:3px solid #F4B400;outline-offset:-3px}
+@media (max-width:559px){.tabs{grid-template-columns:1fr 1fr}.tabs button{border-bottom:1px solid var(--line)}.tabs button:nth-child(2n){border-right:0}.tabs button:nth-child(n+3){border-bottom:0}}
+.thead{margin:2px 2px 4px}
+.thead h2{margin:0;font-size:23px;font-weight:800;line-height:1.3}
+.thead h2 b{color:var(--vc)}
+.thead p{margin:6px 0 0;font-size:15.5px;line-height:1.5;color:var(--ink2)}
+.thead p b.r{color:var(--bad)} .thead p b.o{color:var(--warn)}
+.tg{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:22px 2px 10px;font-size:17px;font-weight:800;color:var(--ink)}
+.tg .gn{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:24px;padding:0 8px;border-radius:999px;background:var(--ink2);color:#fff;font-size:13.5px}
+.tg small{flex-basis:100%;font-size:13.5px;font-weight:600;color:var(--muted)}
+.tg.late{color:var(--bad)} .tg.late .gn{background:var(--bad)}
+.tg.soon{color:var(--warn)} .tg.soon .gn{background:#C77700}
+.tg.pick .gn{background:var(--gold)}
+.tg.none{color:var(--muted)} .tg.none .gn{background:#8A837C}
+.tcl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.tc{background:#fff;border:1px solid var(--line);border-left:6px solid #B9B2AB;border-radius:12px;overflow:hidden}
+.tc.w-late{border-left-color:var(--bad)} .tc.w-week{border-left-color:#E0A100} .tc.k-meet{border-left-color:var(--blue)} .tc.k-pick{border-left-color:var(--gold)}
+.tc-main{display:block;width:100%;padding:12px 14px 6px;margin:0;border:0;background:none;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.tc-main:hover .tc-t{text-decoration:underline}
+.tc-main:focus-visible{outline:3px solid #F4B400;outline-offset:-3px}
+.tc-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0 0 7px}
+.due{display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;background:var(--soft);color:var(--ink2);font-size:14px;font-weight:800;line-height:1.45;font-variant-numeric:tabular-nums}
+.due.late{background:var(--bad);color:#fff} .due.soon{background:#FCE7B4;color:#7A4A00} .due.meet{background:var(--blue-soft);color:var(--blue)} .due.meet.now{background:var(--blue);color:#fff}
+.due.past,.due.none{background:#F1EEEB;color:#6F6862}
+.kd{font-size:13.5px;font-weight:800;color:var(--muted)}
+.nw{display:inline-flex;padding:1px 8px;border-radius:999px;background:var(--vc);color:#fff;font-size:12px;font-weight:800}
+.tc-t{display:block;font-size:17px;font-weight:800;line-height:1.42;color:var(--ink)}
+.tc-do{display:block;margin:8px 0 0;padding:9px 11px;border-radius:9px;background:#FFF6DC;font-size:15.5px;line-height:1.5;color:var(--ink)}
+.tc-do b{display:inline-block;margin-right:7px;color:#8A4B00}
+.tc-r{display:block;margin:6px 0 0;font-size:14.5px;line-height:1.45;color:var(--ink2)}
+.tc-who{display:block;margin:7px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.tc-act{display:flex;gap:8px;padding:6px 14px 12px}
+.tc-act .btn{flex:1;min-height:46px}
+@media (min-width:760px){
+  .tc{display:grid;grid-template-columns:minmax(0,1fr) 170px;align-items:stretch}
+  .tc-main{padding:12px 16px 12px}
+  .tc-act{flex-direction:column;justify-content:center;gap:8px;padding:12px 14px 12px 0}
+  .tc-act .btn{flex:none;width:100%}
+}
+.btn.okb{background:var(--ok)}
+.btn.wide{display:flex;width:100%;margin:10px 0 0}
+.tmore{margin:14px 0 0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:0 14px}
+.tmore>summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-height:52px;cursor:pointer;font-size:16px;font-weight:800;list-style:revert}
+.tmore>summary .gn{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 7px;border-radius:999px;background:#8A837C;color:#fff;font-size:13px}
+.tmore>summary small{font-size:13px;font-weight:600;color:var(--muted)}
+.tmore[open]{padding-bottom:12px}
+.tnone{margin:14px 0 0;padding:18px 16px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-size:16px;font-weight:800;text-align:center}
+.upl{margin:22px 0 0;padding:14px 16px;border:2px dashed var(--line);border-radius:12px;background:#FCFAF8}
+.upl p{margin:0 0 10px;font-size:15px;color:var(--ink2)}
+.mbar{margin:0 0 12px;padding:12px 14px;border-radius:12px;font-size:15px;line-height:1.5}
+.mbar.bad{background:var(--bad-soft);color:#7A1A12;border:1px solid #F2C4BF}
+.mbar.warn{background:var(--warn-soft);color:#5C3A00;border:1px solid #EBD59B}
+.mbar b{display:block;font-size:16px}
+.adm{margin-top:26px;padding:0 16px}
+.adm>summary{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;min-height:56px;cursor:pointer;list-style:revert}
+.adm>summary b{font-size:16px}
+.adm>summary small{font-size:13.5px;color:var(--muted);font-weight:600}
+.adm[open]{padding-bottom:14px}
+.adm .card{margin:10px 0 0;border-color:#E7E1DB}
+.stbox{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:12px 0;padding:10px 12px;border-radius:12px;background:var(--soft)}
+.stbox span{font-size:15.5px;font-weight:800}
+.stbox.done{background:var(--ok-soft)} .stbox.done span{color:var(--ok)}
+.stbox .btn{min-height:46px}
+.toast .tbtn{margin-left:10px;padding:4px 10px;border:1px solid rgba(255,255,255,.6);border-radius:8px;background:transparent;color:#fff;font-weight:800;cursor:pointer}
+.info{margin:12px 0}
+.filt .segs{flex-wrap:nowrap;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.filt .segs::-webkit-scrollbar{display:none}
+.filt .segs .chip{flex:none;white-space:nowrap}
+.info .kv{margin:0}
 </style>
 </head>
 <body>
@@ -400,7 +478,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   var TOKEN_KEY = 'nmc_pay_token';
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheet = $('sheet'), shade = $('shade'), toastEl = $('toast'), fileIn = $('fileIn');
-  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', cat: 'all', calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '',
+  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', cat: 'todo', dOpen: {}, pickAll: false, calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '',
     taxDir: 'buy', taxYear: '', taxYm: '', taxMon: {}, taxBusy: {},
     sq: '', srC: {}, srE: {}, srBusy: {}, srBy: {}, srLast: null, srGen: 0 };   // 돋보기 찾기 (v55): 친 글자 · 서버 답(찾는 말마다) · 오류 · 받은 건(번호마다)   // 세금계산서: 매입 · 매출 · 확인 필요, 해 · 달 (2026-11-22)
   /* 분류 (2026-11-21 22:14 지시 "공문함에 발주서와 세금계산서 그다음 각종 공문들 정리할 수 있도록 나눠 주고")
@@ -427,6 +505,12 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function dtx(s) { s = String(s || ''); return s.length >= 16 ? md(s) + ' ' + s.slice(11, 16) : md(s); }
   function days(a, b) { var t = function (s) { return Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)); }; return Math.round((t(b) - t(a)) / 86400000); }
   function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(function () { toastEl.hidden = true; }, 3800); }
+  function toastAct(t, lab, fn) {   // 단추 달린 알림 띠 (되돌리기) — 7초
+    toastEl.innerHTML = esc(t) + '<button type="button" class="tbtn">' + esc(lab) + '</button>';
+    toastEl.hidden = false; clearTimeout(toast.t);
+    toastEl.querySelector('.tbtn').onclick = function () { toastEl.hidden = true; clearTimeout(toast.t); fn(); };
+    toast.t = setTimeout(function () { toastEl.hidden = true; }, 7000);
+  }
   function getToken() { try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
   function setToken(t) { try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
   function devId() {
@@ -800,7 +884,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     return '<span class="cell l2"><span class="due' + (d <= 0 ? ' late' : d <= 3 ? ' soon' : '') + '">' + esc(d < 0 ? '기한 ' + (-d) + '일 지남' : d === 0 ? '오늘 마감' : 'D-' + d + ' · ' + dShort(x.due)) + '</span></span>';
   }
   function stPill(x) {
-    var st = x.state === '새 공문' ? ['new', '새 공문'] : x.state === '처리 완료' ? ['done', '처리 완료'] : ['seen', '확인함'];
+    var st = x.state === '새 공문' ? ['new', '새로 옴'] : x.state === '처리 완료' ? ['done', '처리 완료'] : ['seen', '확인함'];
     return '<span class="cell st"><span class="pill ' + st[0] + '">' + st[1] + '</span></span>';
   }
   function subOf(x) {
@@ -874,11 +958,37 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (!S.authed) { root.innerHTML = loginHtml(); var pw = $('pw'); if (pw) pw.focus(); return; }
     if (!S.D) { root.innerHTML = S.err ? '<p class="err">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="reload">다시 시도</button></div>' : '<p class="wait">불러오는 중…</p>'; return; }
     if (srKey(S.sq)) { root.innerHTML = searchHtml(); if (window.NMCNav) NMCNav.sync(); return; }
-    var D = S.D, C = counts(), h = '';
-    h += '<div class="cnt" role="group" aria-label="빨리 보기">' +
-      cb('new', 'fresh', C.fresh, '새 공문') + cb('late', 'late', C.late, '기한 지남') + cb('soon', 'soon', C.soon, '3일 안 기한') + cb('open', '', C.open, '처리할 것') + '</div>';
-    if ((S.cat === 'all' || S.cat === 'gong') && S.f === 'open' && !S.kind) h += boardHtml();
-    h += '<section class="card"><div class="tools">' +
+    var D = S.D, h = '', TS = todoSets(), nk = S.cat === 'gong' ? 'all' : S.cat;
+    h += mailBanner(D.mail) + tabsHtml(TS);
+    if (nk === 'todo') h += todoHtml(TS);
+    else h += listTab();
+    if (D.noPo && nk === 'po') h += '<p class="hint">발주서함(받은 발주서)은 서버를 새로 배포한 뒤 여기에도 함께 보입니다.</p>';
+    if (D.total > D.R.length && nk === 'all') h += '<p class="hint">오래된 처리 끝난 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(맨 위 돋보기로 찾으면 나옴).</p>';
+    h += admHtml();
+    root.innerHTML = h;
+    if (window.NMCNav) NMCNav.sync();
+  }
+  /** 받은 것 전체 · 발주서 · 세금계산서 칸 (예전 목록 · 달력 · 세금계산서 달 보기) */
+  function listTab() {
+    var D = S.D, h = '';
+    var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
+    var taxNew = S.cat === 'tax' && Array.isArray(D.taxm);   // 서버 v51부터: 세금계산서는 매입 · 매출 · 해 · 달마다
+    if (taxNew) return '<div class="filt"><input type="search" id="q" placeholder="이 달 안에서 거래처 · 품목 · 승인번호 거르기" value="' + esc(S.q) + '" aria-label="이 달 안에서 거르기"></div>' + taxView();
+    var F = S.cat === 'po' ? [['open', '확인할 것'], ['done', '끝난 것'], ['every', '전부']] : [['every', '전부'], ['open', '안 끝난 것'], ['new', '새로 온 것'], ['due', '기한 있음'], ['done', '끝난 것']];
+    h += '<div class="filt" role="group" aria-label="보기"><div class="segs">' + F.map(function (c) {
+      return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
+    }).join('') + '</div><button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '달력</button>' +
+      (S.cat === 'po' ? '' : '<select id="kindSel" aria-label="종류">' + kinds + '</select>') + '</div>';
+    if (S.cat === 'tax') h += taxCard();
+    if (S.cat === 'po') h += poCard();
+    return h + (S.f === 'cal' ? calHtml() : listHtml());
+  }
+  /** 맨 아래 접힌 칸: 공문 넣기 · 메일 자동 읽기 · 자동 정리 · 넣는 방법 (평소에는 볼 일 없음) */
+  function admHtml() {
+    var D = S.D, M = D.mail, P = M && M.ping;
+    var st = !M || !M.on ? '연결 안 됨' : !P ? '아직 확인 전' : P.err ? '오류' : P.stale ? '멈춤' : '정상 (' + agoTxt(P.age) + ' 확인)';
+    var h = '<details class="card adm" id="adm"' + (S.dOpen.adm ? ' open' : '') + '><summary><b>공문 넣기 · 메일 자동 읽기 · 사용 설명</b><small>메일 자동 읽기: ' + esc(st) + '</small></summary>';
+    h += '<section class="card"><h2>공문 넣기</h2><div class="tools">' +
       '<button type="button" class="btn" data-act="pick"' + (S.up ? ' disabled' : '') + '>' + (S.up ? esc(S.up) : '공문 파일 올리기') + '</button>' +
       '<button type="button" class="btn ghost" data-act="run"' + (S.busy === 'run' ? ' disabled' : '') + '>' + (S.busy === 'run' ? '확인 중…' : '폴더 지금 확인') + '</button>' +
       (D.folder && D.folder.url ? '<a class="btn ghost" href="' + esc(D.folder.url) + '" target="_blank" rel="noopener">수집 폴더 열기</a>' : '') + '</div>' +
@@ -887,28 +997,142 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       (D.trig === false ? ' <b class="err">자동 확인이 꺼져 있습니다 — 매출 · 매입 화면의 ‘자동 수집’에서 켜 주십시오.</b>' : '') +
       (D.last && D.last.at ? ' 최근 확인 ' + esc(dtx(D.last.at)) + '.' : '') + '</p></section>';
     h += mailHtml(D.mail);
-    h += '<div class="cats" role="group" aria-label="분류">' + [['all', '모두'], ['po', '발주서'], ['tax', '세금계산서'], ['gong', '각종 공문']].map(function (c) {
-      return '<button type="button" class="c-' + c[0] + '" data-cat="' + c[0] + '" aria-pressed="' + (S.cat === c[0]) + '"><b>' + c[1] + '</b><span>처리할 것 ' + C.cat[c[0]] + '건</span></button>';
-    }).join('') + '</div>';
-    var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
-    var taxNew = S.cat === 'tax' && Array.isArray(D.taxm);   // 서버 v51부터: 세금계산서는 매입 · 매출 · 해 · 달마다
-    // 찾기는 맨 위 돋보기 칸(공문함 전체). 세금계산서 달 보기에만 '이 달 안에서 거르기'(그 달 소계가 걸러진 것으로 바뀜)
-    h += '<div class="filt">' + (taxNew ? '<input type="search" id="q" placeholder="이 달 안에서 거래처 · 품목 · 승인번호 거르기" value="' + esc(S.q) + '" aria-label="이 달 안에서 거르기">'
-      : '<select id="kindSel" aria-label="종류">' + kinds + '</select>') + '</div>';
-    if (!taxNew) h += '<div class="filt" role="group" aria-label="상태"><div class="segs">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료']].map(function (c) {
-      return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
-    }).join('') + '</div><button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '전체 · 날짜별</button></div>';
-    if (taxNew) h += taxView();
-    else {
-      if (S.cat === 'tax') h += taxCard();
-      if (S.cat === 'po') h += poCard();
-      h += S.f === 'cal' ? calHtml() : listHtml();
-    }
-    if (D.noPo) h += '<p class="hint">발주서함(받은 발주서)은 서버를 새로 배포한 뒤 여기에도 함께 보입니다.</p>';
-    if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
+    var A = autoCount();
+    h += '<section class="card"><h2>자동 정리</h2><p class="hint" style="margin-top:0">받은 메일 · 공문을 서버가 읽어 할 일 · 일정 · 거래 문의 · 신청 · 참가 · 알림 · 광고로 나눕니다(글자를 보고 짐작한 것이라 틀릴 수 있음).' +
+      (A ? ' 이번 달 자동으로 처리 끝남으로 넣은 것 ' + A + '건(광고 · 참고 · 알림 · 첨부 · 우리 회사 사진).' : '') + '</p>' +
+      '<div class="tools" style="margin-top:10px"><button type="button" class="btn ghost sm" data-act="tidy"' + (S.busy === 'tidy' ? ' disabled' : '') + '>' + (S.busy === 'tidy' ? '정리 중…' : '지금 다시 정리') + '</button></div></section>';
     h += helpHtml();
-    root.innerHTML = h;
-    if (window.NMCNav) NMCNav.sync();
+    return h + '</details>';
+  }
+  function agoTxt(m) { m = Number(m) || 0; return m < 1 ? '방금' : m < 60 ? m + '분 전' : Math.floor(m / 60) + '시간 ' + (m % 60) + '분 전'; }
+  function autoCount() {
+    var ym = S.D.today.slice(0, 7), n = 0;
+    S.D.R.forEach(function (x) { if (x.td && /^(ad|info|note|att|self)$/.test(x.td.c) && String(x.at).slice(0, 7) === ym && x.state === '처리 완료') n++; });
+    return n;
+  }
+  /** 메일 자동 읽기에 문제가 있을 때만 맨 위 띠 (정상이면 아무것도 안 보임) */
+  function mailBanner(M) {
+    var P = M && M.on ? M.ping : null;
+    if (!P) return '';
+    if (P.err) return '<div class="mbar bad" id="mailBar"><b>메일 자동 읽기에 문제가 있습니다</b>' + esc(mailErrText(P.err)) + ' <button type="button" class="link" data-act="admopen">자세히</button></div>';
+    if (P.stale) return '<div class="mbar bad" id="mailBar"><b>메일 자동 읽기가 ' + esc(agoTxt(P.age)) + '부터 멈춰 있습니다</b>회사 컴퓨터가 꺼져 있거나 잠자기 상태일 수 있습니다. 켜면 그동안 온 메일을 모두 가져옵니다.</div>';
+    if (P.ver && /^1\.[0-6]\b/.test(P.ver)) return '<div class="mbar warn" id="mailBar"><b>메일 프로그램을 1.7판으로 바꿔 주십시오</b>2026년 1월부터 온 지난 세금계산서를 가져오려면 회사 컴퓨터에서 새 설치 파일(install.cmd)을 한 번 두 번 눌러 실행해야 합니다. <button type="button" class="link" data-act="admopen">자세히</button></div>';
+    return '';
+  }
+  /* ── 해야 할 일 (v56, 2026-11-22 22:09 지시 "아무것도 모르는사람도 들어가자마자 바로 알아보기 쉽게 디자인" · 22:10 "우리가 무조건 컨트롤하기 쉽고 알아보기 쉽도록")
+     서버가 메일 · 공문마다 읽어 붙인 정리(할 일 · 일정 · 거래 문의 · 신청 · 참가)로: 급한 차례(기한 지남 → 7일 안 → 그 뒤 → 기한 없음).
+     한 건 = 기한(색) · 종류 · 제목 · 할 일 · 보낸 곳 + [✓ 처리 완료] (누르면 바로 '처리 끝남', 알림 띠에서 되돌리기) ── */
+  var KIND_T = { todo: '할 일', meet: '일정', deal: '거래 문의', pick: '신청 · 참가' };
+  function isMust(x) {
+    if (x.cat !== 'gong' || x.state === '처리 완료') return false;
+    if (x.imp && String(x.edited || '').split(',').indexOf('imp') >= 0) return true;   // 사람이 '중요'를 직접 켠 건
+    var t = x.td;
+    if (!t) return !!(x.due || (x.imp && x.state === '새 공문'));
+    if (t.s === 'todo' && /^(todo|meet|deal)$/.test(t.c)) return true;
+    if (t.c === 'pick' || t.s === 'wait' || t.s === 'done') return false;
+    return !!x.due && !/^(ad|att|self)$/.test(t.c);   // 정리가 알림 · 참고로 봤어도 기한이 적혀 있고 아직 안 끝난 공문
+  }
+  function todoSets() {
+    var D = S.D, today = D.today, G = D.R.filter(function (x) { return x.cat === 'gong'; });
+    var byWhen = function (a, b) { var A = whenOf(a).k, B = whenOf(b).k; return A < B ? -1 : A > B ? 1 : newest(a, b); };
+    var recent = function (x, n) { return days(String(x.at).slice(0, 10), today) <= n; };
+    return {
+      must: G.filter(isMust).sort(byWhen),
+      pick: G.filter(function (x) { return x.state !== '처리 완료' && x.td && x.td.c === 'pick' && x.td.s === 'todo'; }).sort(byWhen),
+      wait: G.filter(function (x) { return x.td && x.td.s === 'wait' && recent(x, 30); }).sort(newest),
+      note: G.filter(function (x) { return x.td && x.td.c === 'note' && x.td.d && x.td.d.length && recent(x, 7); }).sort(newest),
+      chk: G.filter(function (x) { return x.td && x.td.chk && x.state === '처리 완료'; }).sort(newest)
+    };
+  }
+  /** 언제: 일정이면 그 일시, 아니면 기한 → { k: 정렬, d: 날짜, tm: 시각, meet } */
+  function whenOf(x) {
+    var t = x.td || {}, e = String(t.e || '');
+    if (t.c === 'meet' && /^\d{4}-\d{2}-\d{2}/.test(e)) return { k: e, d: e.slice(0, 10), tm: e.length >= 16 ? e.slice(11, 16) : '', meet: true };
+    if (x.due) return { k: x.due, d: x.due, tm: '', meet: false };
+    if (/^\d{4}-\d{2}-\d{2}/.test(e)) return { k: e, d: e.slice(0, 10), tm: e.length >= 16 ? e.slice(11, 16) : '', meet: false };
+    return { k: '9999', d: '', tm: '', meet: false };
+  }
+  function addDaysC(k, n) { return new Date(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10) + n)).toISOString().slice(0, 10); }
+  /** 기한 표 → { c: 색, t: 글, b: 묶음(late · week · later · none) } */
+  function dueOf(x, today) {
+    var w = whenOf(x), pick = x.td && x.td.c === 'pick';
+    if (!w.d) return { c: 'none', t: '기한 없음', b: 'none' };
+    var n = days(today, w.d), dd = tdMd(w.d + (w.tm ? ' ' + w.tm : ''));
+    if (w.meet) {
+      if (n < 0) return { c: 'past', t: '지난 일정 · ' + dd, b: 'late' };
+      return { c: 'meet' + (n <= 1 ? ' now' : ''), t: (n === 0 ? '오늘 ' : n === 1 ? '내일 ' : '') + dd + (n > 1 ? ' · ' + n + '일 뒤' : ''), b: n <= 6 ? 'week' : 'later' };
+    }
+    var m = pick ? '마감' : '기한';
+    if (n < 0) return { c: 'late', t: m + ' ' + (-n) + '일 지남 · ' + tdMd(w.d), b: 'late' };
+    if (n === 0) return { c: 'late', t: '오늘까지 (' + m + ' 오늘)', b: 'week' };
+    if (n === 1) return { c: 'soon', t: '내일까지 · ' + tdMd(w.d), b: 'week' };
+    if (n <= 6) return { c: 'soon', t: n + '일 남음 · ' + tdMd(w.d) + '까지', b: 'week' };
+    return { c: '', t: tdMd(w.d) + '까지 · ' + n + '일 남음', b: 'later' };
+  }
+  function tcHtml(x, today) {
+    var t = x.td || {}, u = dueOf(x, today), k = KIND_T[t.c] ? t.c : 'todo';
+    var todo = (t.d || []).filter(String).slice(0, 3).join(' / ') ||
+      (k === 'meet' ? '참석' : k === 'deal' ? '답장(견적 · 문의 회신)할지 정하기' : k === 'pick' ? '신청 · 참가할지 정하기' : x.dueWhy ? String(x.dueWhy).replace(/^정리:\s*/, '') : '내용을 읽고 처리');
+    var who = [x.from || '보낸 곳 모름', dShort(x.at) + ' 받음'];
+    if (t.t) who.push('연락 ' + t.t);
+    var why = t.r ? (/반려/.test(t.why || '') ? '반려 사유: ' : '요점: ') + t.r : '';
+    return '<li class="tc k-' + k + ' w-' + u.b + '"><button type="button" class="tc-main" data-open="' + esc(x.id) + '">' +
+      '<span class="tc-top"><span class="due ' + u.c + '">' + esc(u.t) + '</span><span class="kd">' + esc(KIND_T[t.c] || x.kind || '공문') + '</span></span>' +
+      '<span class="tc-t">' + esc(tdTitle(x)) + '</span><span class="tc-do"><b>' + (k === 'pick' ? '정할 것' : '할 일') + '</b>' + esc(todo) + '</span>' +
+      (why ? '<span class="tc-r">' + esc(why) + '</span>' : '') + '<span class="tc-who">' + esc(who.join(' · ')) + '</span></button>' +
+      '<div class="tc-act"><button type="button" class="btn okb" data-done="' + esc(x.id) + '"' + (S.busy ? ' disabled' : '') + '>✓ 처리 완료</button>' +
+      '<button type="button" class="btn ghost" data-open="' + esc(x.id) + '">자세히 보기</button></div></li>';
+  }
+  function tabsHtml(T) {
+    var today = S.D.today, late = T.must.filter(function (x) { return dueOf(x, today).b === 'late'; }).length;
+    var poN = S.D.P.filter(function (p) { return PO_TODO[p.st]; }).length, cur = S.cat === 'gong' ? 'all' : S.cat;
+    var tb = function (k, t, sub, red) { return '<button type="button" data-cat="' + k + '" aria-pressed="' + (cur === k) + '"><span class="tt">' + t + '</span><small' + (red ? ' class="r"' : '') + '>' + sub + '</small></button>'; };
+    return '<div class="tabs" role="group" aria-label="보기">' + tb('todo', '해야 할 일', T.must.length ? T.must.length + '건' + (late ? ' · 지남 ' + late : '') : '없음', late > 0) +
+      tb('tax', '세금계산서', '매입 · 매출') + tb('po', '발주서', poN ? '확인할 것 ' + poN + '건' : '받은 발주서', poN > 0) + tb('all', '받은 것 전체', '날짜별 목록 · 달력') + '</div>';
+  }
+  function todoHtml(T) {
+    var today = S.D.today, B = { late: [], week: [], later: [], none: [] };
+    T.must.forEach(function (x) { B[dueOf(x, today).b].push(x); });
+    var n3 = T.must.filter(function (x) { var w = whenOf(x); return w.d && !w.meet && days(today, w.d) >= 0 && days(today, w.d) <= 3; }).length;
+    var h = '<section class="thead" id="todoHead"><h2>' + (T.must.length ? '해야 할 일 <b>' + T.must.length + '</b>건' : '지금 해야 할 일이 없습니다') + '</h2><p>' +
+      (T.must.length ? [B.late.length ? '<b class="r">기한 지난 것 ' + B.late.length + '건</b>' : '', n3 ? '<b class="o">3일 안에 할 것 ' + n3 + '건</b>' : '', '급한 것부터 놓았습니다. 끝낸 일은 ‘✓ 처리 완료’를 누르십시오.'].filter(String).join(' · ')
+        : '새 공문 · 메일이 오면 서버가 읽어 할 일만 여기에 놓습니다.') + '</p></section>';
+    var grp = function (id, cls, title, xs, sub) {
+      return xs.length ? '<h3 class="tg ' + cls + '" id="' + id + '">' + title + '<span class="gn">' + xs.length + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</h3><ul class="tcl">' + xs.map(function (x) { return tcHtml(x, today); }).join('') + '</ul>' : '';
+    };
+    h += grp('g-late', 'late', '기한 지남 · 지난 일정', B.late) + grp('g-week', 'soon', '7일 안', B.week, tdMd(today) + ' ~ ' + tdMd(addDaysC(today, 6))) +
+      grp('g-later', '', '그 뒤', B.later) + grp('g-none', 'none', '기한이 적혀 있지 않은 일', B.none);
+    if (!T.must.length) h += '<p class="tnone">✓ 지금 해야 할 일이 없습니다.</p>';
+    if (T.pick.length) {
+      var P5 = S.pickAll ? T.pick : T.pick.slice(0, 5);
+      h += grp('g-pick', 'pick', '신청 · 참가할지 정할 것', P5, '교육 · 행사 · 지원사업 안내 — 꼭 해야 하는 일은 아니지만 마감이 있습니다') +
+        (P5.length < T.pick.length ? '<button type="button" class="btn ghost wide" data-act="pickall">나머지 ' + (T.pick.length - P5.length) + '건 더 보기</button>' : '');
+    }
+    var more = function (id, title, sub, xs, mini) {
+      return xs.length ? '<details class="tmore" id="' + id + '"' + (S.dOpen[id] ? ' open' : '') + '><summary>' + title + ' <span class="gn">' + xs.length + '</span><small>' + sub + '</small></summary><ul class="bl">' + xs.map(function (x) { return tdItem(x, today, mini); }).join('') + '</ul></details>' : '';
+    };
+    h += more('g-wait', '답을 기다리는 것', '우리가 보낸 뒤 상대 답 · 결과를 기다림 (최근 30일)', T.wait, true) +
+      more('g-note', '읽어 둘 알림', '할 일은 없고 알아 두면 되는 것 (최근 7일)', T.note, false) +
+      more('g-chk', '예전 메일 중 부탁이 있던 것', '처리했는지만 확인하면 됨', T.chk, false);
+    h += '<div class="upl"><p>종이 · 팩스로 받은 공문은 사진을 찍거나 파일로 올리면 자동으로 읽어 여기에 넣습니다.</p><button type="button" class="btn" data-act="pick"' + (S.up ? ' disabled' : '') + '>' + (S.up ? esc(S.up) : '공문 사진 · 파일 올리기') + '</button></div>';
+    return h;
+  }
+  /** 처리 완료: 바로 '처리 끝남' → 알림 띠의 '되돌리기'로 원래대로 */
+  function doneDoc(id) {
+    var x = find(id);
+    if (!x || S.busy) return;
+    var prev = x.state === '처리 완료' ? '확인' : x.state, title = tdTitle(x);
+    S.busy = 'done'; render();
+    call('apiDocState', [id, '처리 완료']).then(function (r) {
+      S.busy = ''; if (r && r.data) put(r.data); else if (r && r.rows) put(r);
+      if (S.open === id) closeSheet();
+      render();
+      toastAct('처리 완료: ' + (title.length > 22 ? title.slice(0, 22) + '…' : title), '되돌리기', function () {
+        S.busy = 'done'; render();
+        call('apiDocState', [id, prev]).then(function (r2) { S.busy = ''; if (r2 && r2.data) put(r2.data); else if (r2 && r2.rows) put(r2); render(); toast('되돌렸습니다.'); },
+          function (e) { S.busy = ''; render(); toast(errText(e)); });
+      });
+    }, function (e) { S.busy = ''; render(); toast(errText(e)); });
   }
   /* 다음 메일 자동 읽기 (2026-11-21 18:31 지시 "이 컴퓨터 설치해서 메일 자동으로 읽고 가지고 오는 걸로 진행해 봐라")
      사무실 컴퓨터의 메일 읽기 프로그램이 10분마다 다음 메일의 새 메일을 이 공문함으로 보냅니다(메일 한 통 = '메일' 한 건, 첨부는 따로 정리).
@@ -956,7 +1180,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     return h + '</section>';
   }
   /* ── 정리 (서버 v52): 메일 · 공문마다 서버가 읽어 붙인 분류 · 할 일 · 기한 · 어디서 · 사유 · 연락처 ── */
-  var TD_LAB = { todo: '할 일', meet: '일정', deal: '거래 문의', pick: '검토', note: '알림', info: '참고', ad: '광고', att: '첨부', self: '내부', po: '발주서' };
+  var TD_LAB = { todo: '할 일', meet: '일정', deal: '거래 문의', pick: '신청·참가', note: '알림', info: '참고', ad: '광고', att: '첨부', self: '우리 회사', po: '발주서' };
   function tdTitle(x) {
     return String(x.title || x.orig || '').replace(/\[(?:POTENTIAL PHISHING|외부\s*메일)\]\s*/gi, '').replace(/^(?:\s*(?:RE|Re|re|FW|Fw|Fwd|fwd|답장|전달)\s*:\s*)+/, '')
       .replace(/\s*\b(?:RE|Re|FW|Fwd)\s*:\s*/g, ' ').replace(/\s+/g, ' ').trim();
@@ -1016,8 +1240,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var t = x.td;
     if (!t || x.cat !== 'gong') return '';
     if (t.c === 'att') return t.p ? '<p class="tdn">메일 첨부입니다. 할 일은 메일 건에 정리했습니다. <button type="button" class="link" data-open="' + esc(t.p) + '">메일 보기</button></p>' : '';
-    var h = '<section class="tdb k-' + t.c + '"><div class="tdh"><span class="lab k-' + t.c + '">' + esc(TD_LAB[t.c] || t.c) + '</span>' + (t.g ? '<span class="tdg">' + esc(t.g) + '</span>' : '') +
-      (t.s === 'done' ? '<span class="pill done">끝남</span>' : t.s === 'wait' ? '<span class="pill info">진행 중</span>' : t.s === 'todo' ? '<span class="pill warn">해야 함</span>' : '') + '</div>';
+    var h = '<section class="tdb k-' + t.c + '"><div class="tdh"><span class="lab k-' + t.c + '">' + esc(TD_LAB[t.c] || t.c) + '</span>' +
+      (t.s === 'done' ? '<span class="pill done">끝난 일</span>' : t.s === 'wait' ? '<span class="pill info">상대 답 기다리는 중</span>' : t.s === 'todo' ? '<span class="pill warn">아직 안 함</span>' : '') + '</div>';
     if (t.d && t.d.length) h += '<ol class="tdd">' + t.d.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ol>';
     var kv = [];
     if (t.c === 'meet' && t.e) kv.push(['일시', tdMd(t.e)]);
@@ -1035,7 +1259,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
           (y.td.s === 'done' ? '<span class="pill done">끝남</span>' : y.td.s === 'wait' ? '<span class="pill info">진행 중</span>' : y.td.s === 'todo' ? '<span class="pill warn">해야 함</span>' : '') + '</li>';
       }).join('') + '</ol></div>';
     }
-    return h + '<p class="tdw">자동 정리: ' + esc(t.why || TD_LAB[t.c] || '') + (t.hand ? ' · 상태는 사람이 바꾼 그대로 둡니다' : '') + ' — 글자를 보고 짐작한 것이라 틀릴 수 있습니다. 틀리면 상태를 직접 바꿔 주십시오.</p></section>';
+    return h + '<p class="tdw">서버가 메일 · 공문 글자를 읽고 짐작해 적은 것입니다. 틀렸으면 아래 ‘내용 고치기’에서 고치거나 ‘✓ 처리 완료’를 누르십시오.</p></section>';
   }
   function cb(f, cls, n, t) { return '<button type="button" class="' + cls + '" data-f="' + f + '" aria-pressed="' + (S.f === f) + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
   function itemHtml(x, today) {   // 공문함 한 건 = 표 한 줄 (칸은 지금 분류의 머리줄과 같음)
@@ -1216,6 +1440,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       '<li>서버가 글자를 읽어 종류 · 발신 · 문서번호 · 시행일 · 제목 · 기한 · 요약 · 담당 연락처 · 붙임을 채웁니다. PDF · 사진은 구글 드라이브 글자 인식을 씁니다(무료).</li>' +
       '<li>같은 공문의 PDF와 한글 파일처럼 문서번호가 같으면 한 건으로 묶고, 똑같은 파일을 또 넣으면 ‘공문/중복’ 폴더로 옮깁니다. 메일(eml)의 첨부 파일은 꺼내서 따로 정리합니다.</li>' +
       '<li>칸은 글자를 보고 짐작한 값입니다. 틀리면 고쳐 저장하십시오. 고친 칸은 ‘다시 읽기’를 해도 그대로 둡니다.</li>' +
+      '<li>처음 화면 ‘해야 할 일’에는 서버가 메일 · 공문을 읽어 할 일 · 일정 · 거래 문의만 급한 차례로 놓습니다. 끝낸 일은 ‘✓ 처리 완료’(잘못 누르면 아래 알림 띠의 ‘되돌리기’). 처리 끝난 것은 ‘받은 것 전체’에 남습니다.</li>' +
       '<li>맨 위 돋보기 칸에 거래처 이름 · 품목 이름 · 제목 · 문서번호(승인번호)의 일부를 치면 공문함 전부(발주서 · 세금계산서 · 각종 공문)에서 바로 찾습니다. 띄어 쓰면 모두 들어간 것만 나옵니다. 컴퓨터에서는 / 를 누르면 칸으로 갑니다.</li>' +
       '<li>기한이 3일 안이거나 지난 공문, 새로 온 중요 공문(기한 · 독촉 · 과태료 · 처분 등)은 매일 아침 알림(오늘 할 일)에 나옵니다. 처리하면 ‘처리 완료’를 눌러 주십시오.</li></ol></details></section>';
   }
@@ -1259,7 +1484,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function navSet(v) {
     v = v || {};
     if (!v.s && S.sq) srClear(true);
-    S.cat = v.cat || 'all'; S.f = v.f || 'open';
+    S.cat = v.cat || 'todo'; S.f = v.f || 'open';
     if (!v.open) { if (S.open) closeSheet(); }
     else if (v.open !== S.open) { if (v.open.indexOf('po:') === 0) { if (findPo(v.open.slice(3))) openPo(v.open.slice(3)); } else if (find(v.open)) openDoc(v.open); }
     render();
@@ -1307,6 +1532,12 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       if (x && x.id === id && t) t.textContent = S.text[id] || '(글자 없음)';
     }, function (e) { delete S.textBusy[id]; var mv = $('mailv'); if (mv) mv.innerHTML = '<p class="err">' + esc(errText(e)) + '</p>'; });
   }
+  /** 공문(파일로 온 것): 읽기용 요약 표 — 고치는 칸은 '내용 고치기'에 */
+  function infoBox(x) {
+    var kv = [['보낸 곳', x.from], ['받는 곳', x.to], ['문서번호', x.no], [x.cat === 'tax' ? '작성일' : '시행일', x.date ? ymd(x.date) : ''], ['기한', x.due ? ymd(x.due) + (x.dueWhy ? ' — ' + String(x.dueWhy).replace(/^정리:\s*/, '') : '') : ''],
+      ['요약', x.sum], ['붙임', x.att], ['담당 · 연락처', x.who], ['메모', x.memo]].filter(function (p) { return p[1]; });
+    return kv.length ? '<section class="info" id="infoBox"><dl class="kv">' + kv.map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl></section>' : '';
+  }
   function mailBox(x) {
     var t = S.text[x.id];
     if (t == null) return '<section class="mailv" id="mailv"><p class="muted">메일 내용을 불러오는 중…</p></section>';
@@ -1339,9 +1570,11 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var D = S.D, busy = !!S.busy, ed = String(x.edited || '').split(',');
     var mark = function (k) { return ed.indexOf(k) >= 0 ? ' (고침)' : ''; };
     var h = '<div class="sh"><h2 id="shTitle" tabindex="-1">' + dueTag(x, D.today) + esc(x.title || x.orig) + '</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>';
-    h += '<div class="seg" role="group" aria-label="처리 상태">' + D.states.map(function (s) {
-      return '<button type="button" data-st="' + esc(s) + '" aria-pressed="' + (x.state === s) + '"' + (busy ? ' disabled' : '') + '>' + esc(s === '확인' ? '확인함' : s) + '</button>';
-    }).join('') + '</div>';
+    h += x.state === '처리 완료'
+      ? '<div class="stbox done" id="stBox"><span>✓ 처리 끝남' + (x.done ? ' (' + esc(dtx(x.done)) + ')' : '') + '</span><button type="button" class="btn ghost sm" data-st="확인"' + (busy ? ' disabled' : '') + '>다시 할 일로 되돌리기</button></div>'
+      : '<div class="stbox" id="stBox"><span>' + (x.cat === 'gong' && !isMust(x) ? '‘해야 할 일’ 목록에는 없는 것' : x.state === '새 공문' ? '새로 온 것 · 아직 처리 안 함' : '아직 처리 안 함') + '</span><span class="tools" style="margin:0">' +
+        (x.cat === 'gong' && !isMust(x) ? '<button type="button" class="btn ghost sm" data-act="mustadd"' + (busy ? ' disabled' : '') + '>해야 할 일에 넣기</button>' : '') +
+        '<button type="button" class="btn okb" data-st="처리 완료"' + (busy ? ' disabled' : '') + '>✓ 처리 완료</button></span></div>';
     if (x.cat === 'tax') {   // 장부(자동 수집) 상태 (서버 v51)
       var le = ledOf(x);
       if (le || /^\[(매입|매출)\]/.test(x.title)) h += '<p class="lednote">장부: ' + (le ? '<b>' + esc((LEDST[le[0]] || ['', le[0]])[1]) + '</b>' + (le[1] ? ' · ' + esc(le[1]) : '') + (le[2] ? ' (분류 추정)' : '') + (le[3] ? '<br><small class="muted">' + esc(le[3]) + '</small>' : '')
@@ -1353,10 +1586,11 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var mail = isMail(x);
     if (mail) h += mailBox(x) + attBox(x);
     else if (x.mail) h += '<p class="from">메일 첨부로 옴: <button type="button" class="link" data-open="' + esc(x.mail.id) + '">' + esc(x.mail.title || x.mail.orig) + '</button></p>';
-    if (mail) h += '<details class="more fd"><summary>칸 보기 · 고치기 (종류 · 기한 · 메모)</summary>';
+    if (!mail) h += infoBox(x);
+    h += '<details class="more fd" id="fixBox"><summary>내용 고치기 · 지우기 (종류 · 제목 · 기한 · 메모)</summary>';
     h += '<div class="fg">' +
       '<div class="f"><label for="f_kind">종류' + mark('kind') + '</label><select id="f_kind" data-k="kind">' + D.kinds.map(function (k) { return '<option' + (k === x.kind ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select></div>' +
-      '<div class="f chk"><label><input type="checkbox" id="f_imp" data-k="imp"' + (x.imp ? ' checked' : '') + '> 중요 (아침 알림에 나옴)' + mark('imp') + '</label></div>' +
+      '<div class="f chk"><label><input type="checkbox" id="f_imp" data-k="imp"' + (x.imp ? ' checked' : '') + '> 중요 (켜면 ‘해야 할 일’ · 아침 알림에 나옴)' + mark('imp') + '</label></div>' +
       fv('title', '제목' + mark('title'), x.title, 'text', true) +
       fv('from', '발신' + mark('from'), x.from) + fv('to', '수신' + mark('to'), x.to) +
       fv('no', '문서번호' + mark('no'), x.no) + fv('date', (x.cat === 'tax' ? '작성일자' : '시행일') + mark('date'), x.date, 'date') +
@@ -1370,7 +1604,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       '<button type="button" class="btn ghost" data-act="reparse"' + (busy ? ' disabled' : '') + '>다시 읽기</button>' +
       '<button type="button" class="btn danger" data-act="del"' + (busy ? ' disabled' : '') + '>목록에서 지우기</button></div>';
     h += '<p class="hint">칸은 글자를 보고 짐작한 값입니다. ‘다시 읽기’는 저장된 글자로 칸을 다시 채우며, 고친 칸은 그대로 둡니다. 지워도 드라이브 원본 파일은 남습니다.</p>';
-    if (mail) h += '</details>';
+    h += '</details>';
     var own = x.files.filter(function (f) { return !f[3]; });
     h += '<h3 style="margin:16px 0 4px;font-size:15px">' + (mail ? '메일 원본 파일' : '파일 ' + own.length + '개') + '</h3><ul class="files">' + own.map(function (f) {
       return f[2] === 'eml'
@@ -1417,12 +1651,15 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var x = find(S.open);
     if (!x) return;
     var st = b.getAttribute('data-st');
-    if (st) { if (st !== x.state) act('state', 'apiDocState', [x.id, st], function () { toast(st === '처리 완료' ? '처리 완료로 바꿨습니다.' : '‘' + (st === '확인' ? '확인함' : st) + '’으로 바꿨습니다.'); }); return; }
+    if (st === '처리 완료') { if (x.state !== st) doneDoc(x.id); return; }   // 처리 완료 → 창을 닫고 '되돌리기' 띠
+    if (st) { if (st !== x.state) act('state', 'apiDocState', [x.id, st], function () { toast(st === '확인' ? '다시 할 일로 되돌렸습니다.' : '‘' + st + '’으로 바꿨습니다.'); }); return; }
     var a = b.getAttribute('data-act');
     if (a === 'save') {
       var p = changed(x, form());
       if (!Object.keys(p).length) { toast('바뀐 칸이 없습니다.'); return; }
       act('save', 'apiDocSave', [x.id, p], function () { toast('저장했습니다.'); });
+    } else if (a === 'mustadd') {   // v56: 사람이 고른 '중요' = 해야 할 일 · 아침 알림
+      act('save', 'apiDocSave', [x.id, { imp: '중요' }], function () { toast('‘해야 할 일’에 넣었습니다. 끝내면 ‘✓ 처리 완료’를 누르십시오.'); });
     } else if (a === 'reparse') {
       act('reparse', 'apiDocReparse', [x.id], function () { toast('저장된 글자로 다시 읽었습니다 (고친 칸은 그대로).'); });
     } else if (a === 'del') {
@@ -1439,11 +1676,14 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     loadText(id);
   }, true);
   shade.addEventListener('click', closeSheet);
+  root.addEventListener('toggle', function (ev) { var d = ev.target; if (d && d.tagName === 'DETAILS' && d.id) S.dOpen[d.id] = d.open; }, true);   // 접힌 칸: 다시 그려도 연 채로
   document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && S.open) closeSheet(); });
   window.addEventListener('hashchange', openFromHash);
 
   /* ── 목록 · 올리기 ── */
   root.addEventListener('click', function (ev) {
+    var dn = ev.target.closest('[data-done]');
+    if (dn) { if (!dn.disabled) doneDoc(dn.getAttribute('data-done')); return; }
     var o = ev.target.closest('[data-open]');
     if (o) { openDoc(o.getAttribute('data-open')); return; }
     var po = ev.target.closest('[data-po]');
@@ -1456,7 +1696,11 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     }
     if (ev.target.closest('[data-act="srgo"]')) { var kq = srKey(S.sq); delete S.srE[kq]; render(); srGo(kq); return; }
     var ct = ev.target.closest('[data-cat]');
-    if (ct) { S.cat = ct.getAttribute('data-cat'); render(); return; }
+    if (ct) {   // 칸 바꾸기: 받은 것 전체 = 전부, 발주서 = 확인할 것부터
+      var nc = ct.getAttribute('data-cat');
+      if (nc !== S.cat) { S.cat = nc; S.f = nc === 'po' ? 'open' : nc === 'all' ? 'every' : S.f; S.calDay = ''; }
+      render(); return;
+    }
     var dr = ev.target.closest('[data-dir]');
     if (dr) { S.taxDir = dr.getAttribute('data-dir'); render(); return; }
     var ty = ev.target.closest('[data-ty]');
@@ -1487,6 +1731,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (!b || b.disabled) return;
     var a = b.getAttribute('data-act');
     if (a === 'reload') load();
+    else if (a === 'pickall') { S.pickAll = true; render(); }
+    else if (a === 'admopen') { S.dOpen.adm = true; render(); var ad = $('adm'); if (ad && ad.scrollIntoView) { try { ad.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { ad.scrollIntoView(); } } }
     else if (a === 'mailkey' || a === 'mailoff') { S.mailAsk = a === 'mailkey' ? 'key' : 'off'; render(); }
     else if (a === 'mailaskx') { S.mailAsk = ''; render(); }
     else if (a === 'mailhide') { S.mailKey = ''; render(); }

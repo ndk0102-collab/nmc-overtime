@@ -1,6 +1,6 @@
 /* NMC 통합 관리 (홈 · 관리자 · 잔업 · 재고 · 거래명세서 · 공사 프로젝트 · 배합 시뮬레이션 · 손익계산서 · 공문함 · 오늘 할 일) — 앱 화면 파일만 저장해 둡니다. 기록 데이터는 항상 구글 시트에서 새로 받습니다.
    아침 알림(2026-11-21): 알림 신호(내용 없음)를 받으면 이 기기의 열쇠로 서버에서 오늘 할 일을 받아 알림을 띄웁니다. */
-const CACHE = 'nmc-ot-v71';
+const CACHE = 'nmc-ot-v72';
 const PUSH = 'nmc-push';   // 이 기기의 알림 열쇠 (화면 파일 저장소와 따로 — 새 판이 와도 지우지 않음)
 const SHELL = ['./', './index.html', './overtime.html', './stock.html', './ledger.html', './statement.html', './manage.html', './pj.html', './mix.html', './today.html', './docs.html', './push.js', './nav.js', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-32.png', './icons/nmc-logo.png', './icons/nmc-logo-print.png'];
 
