@@ -176,6 +176,25 @@ b{font-variant-numeric:tabular-nums}
 .kv dt{font-weight:800;color:var(--muted)} .kv dd{margin:0}
 .from{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:#F7F9FC;font-size:14.5px}
 .fd{margin:10px 0 0;border-top:1px solid var(--line);padding-top:4px}
+/* 세금계산서 총 금액 (2026-11-22 지시 "금액이 비어있어도 총 금액만 정리해라") */
+.taxsum{border-left:6px solid #1B7A43}
+.taxsum h2 small{display:block;font-size:13.5px;font-weight:700;color:var(--muted);margin-top:2px}
+.tk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 0}
+.tk div{padding:10px 12px;border-radius:12px;background:#F3F8F5;border:1px solid #CFE6D8}
+.tk small{display:block;font-size:13px;font-weight:700;color:var(--muted)}
+.tk b{display:block;font-size:20px;font-weight:800;line-height:1.25;color:#14532D;overflow-wrap:anywhere}
+.tk .big{grid-column:span 1}
+.tk .unk b{color:var(--warn)}
+table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;font-variant-numeric:tabular-nums}
+.tm th,.tm td{padding:6px 8px;border-bottom:1px solid var(--soft);text-align:right;white-space:nowrap}
+.tm th:first-child,.tm td:first-child{text-align:left}
+.tm thead th{font-size:13px;color:var(--muted);font-weight:800;border-bottom:2px solid var(--line)}
+.tm tr.yr td{font-weight:800;background:#F3F8F5}
+.tm .link{font-size:14.5px;padding:2px 0}
+.it .amt{display:inline-block;margin-top:4px;padding:1px 9px;border-radius:999px;font-size:14px;font-weight:800;background:#E4F3EA;color:#14532D}
+.it .amt.none{background:var(--warn-soft);color:var(--warn)}
+.dh .sum{font-size:13.5px;font-weight:800;color:#14532D}
+@media (max-width:520px){.tk{grid-template-columns:1fr 1fr}.tk .big{grid-column:1/-1}}
 .mt12{margin-top:12px}
 @media (max-width:520px){.cnt{grid-template-columns:repeat(2,minmax(0,1fr))}.fg{grid-template-columns:1fr}.cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
@@ -261,7 +280,46 @@ b{font-variant-numeric:tabular-nums}
   // 서버 한 줄 → 공문 한 건
   function obj(r) {
     return { id: r[0], at: r[1], kind: r[2], from: r[3], to: r[4], no: r[5], date: r[6], title: r[7], due: r[8], dueWhy: r[9], imp: !!r[10], state: r[11], sum: r[12],
-      who: r[13], att: r[14], memo: r[15], files: r[16] || [], orig: r[17], chars: Number(r[18]) || 0, how: r[19], seen: r[20], done: r[21], edited: r[22] };
+      who: r[13], att: r[14], memo: r[15], files: r[16] || [], orig: r[17], chars: Number(r[18]) || 0, how: r[19], seen: r[20], done: r[21], edited: r[22],
+      amt: r[23] === '' || r[23] == null || !isFinite(Number(r[23])) ? '' : Number(r[23]) };
+  }
+  function won(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+  /** 세금계산서 총 금액: 서버가 공문함 전체로 셈한 것(서버 v46부터). 예전 서버면 화면에 받은 목록으로 셈합니다 */
+  function taxTotals() {
+    var D = S.D;
+    if (D.tax && Array.isArray(D.tax.months)) return D.tax;
+    var T = { n: 0, known: 0, sum: 0, skip: 0, first: '', last: '', months: [] }, M = {};
+    D.R.forEach(function (x) {
+      if (x.cat !== 'tax') return;
+      var d = String(x.at).slice(0, 10), m = M[d.slice(0, 7)] = M[d.slice(0, 7)] || [0, 0, 0];
+      T.n++; m[0]++;
+      if (!T.first || d < T.first) T.first = d;
+      if (d > T.last) T.last = d;
+      if (x.amt !== '') { T.known++; T.sum += x.amt; m[1]++; m[2] += x.amt; }
+    });
+    T.months = Object.keys(M).sort().map(function (k) { return [k].concat(M[k]); });
+    return T;
+  }
+  function taxCard() {
+    var T = taxTotals();
+    if (!T.n) return '<section class="card taxsum" id="taxSum"><h2>세금계산서 총 금액</h2><p class="hint" style="margin:0">아직 세금계산서가 없습니다.</p></section>';
+    var unk = T.n - T.known - (T.skip || 0), years = {}, rows = '';
+    T.months.forEach(function (m) { var y = m[0].slice(0, 4); (years[y] = years[y] || []).push(m); });
+    Object.keys(years).sort().reverse().forEach(function (y) {
+      var L = years[y], a = [0, 0, 0];
+      L.forEach(function (m) { a[0] += m[1]; a[1] += m[2]; a[2] += m[3]; });
+      rows += '<tr class="yr"><td>' + y + '년</td><td>' + a[0] + '건</td><td>' + a[1] + '건</td><td>' + won(a[2]) + '원</td></tr>';
+      L.slice().reverse().forEach(function (m) {
+        rows += '<tr><td><button type="button" class="link" data-calym="' + m[0] + '">' + Number(m[0].slice(5, 7)) + '월</button></td><td>' + m[1] + '건</td><td>' + m[2] + '건</td><td>' + (m[2] ? won(m[3]) + '원' : '—') + '</td></tr>';
+      });
+    });
+    return '<section class="card taxsum" id="taxSum"><h2>세금계산서 총 금액<small>받은 날 ' + esc(ymd(T.first)) + ' ~ ' + esc(ymd(T.last)) + '</small></h2>' +
+      '<div class="tk"><div class="big"><small>합계 (금액 확인 ' + T.known + '건)</small><b>' + won(T.sum) + '원</b></div>' +
+      '<div><small>세금계산서</small><b>' + T.n + '건</b></div><div class="unk"><small>금액 모름</small><b>' + unk + '건</b></div></div>' +
+      '<p class="hint">합계 = 금액(공급가액 + 세액)을 아는 건만 더한 값입니다. <b>금액 모름 ' + unk + '건</b>은 메일 본문에 금액이 없던 건이라 합계에 들어 있지 않습니다. 건을 열어 ‘금액(합계)’에 넣으면 합계에 들어갑니다.' +
+      (T.skip ? ' 같은 계산서의 중복 알림 · 취소 알림 ' + T.skip + '건은 합계에서 뺐습니다.' : '') + '</p>' +
+      '<details class="more" id="taxMonths"><summary>해마다 · 달마다 보기</summary><table class="tm"><thead><tr><th>달</th><th>건수</th><th>금액 확인</th><th>합계</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="hint">달을 누르면 그달 달력이 열립니다.</p></details></section>';
   }
   // 발주서함 한 줄 (서버 v44부터 공문함에도 옴): [번호, 받은 시각, 파일 이름, 상태, 결과, 거래처들, 출고 날짜들, 넣은 줄 수, 파일 번호들, 메모]
   function poObj(r) {
@@ -381,13 +439,19 @@ b{font-variant-numeric:tabular-nums}
   function dayList(list, byDue) {
     var D = S.D;
     return groupBy(list, byDue ? function (e) { return e.due; } : function (e) { return String(e.at).slice(0, 10); }, byDue).map(function (g) {
-      return '<h3 class="dh' + (!byDue && g.k === D.today ? ' today' : '') + '">' + esc(byDue ? dueHead(g.k) : dayHead(g.k)) + '<small>' + g.xs.length + '건' + (S.cat === 'all' ? catMix(g.xs) : '') + '</small></h3>' +
+      var ts = S.cat === 'tax' ? g.xs.reduce(function (a, e) { return e.amt !== '' && e.amt != null ? a + e.amt : a; }, 0) : 0;
+      return '<h3 class="dh' + (!byDue && g.k === D.today ? ' today' : '') + '">' + esc(byDue ? dueHead(g.k) : dayHead(g.k)) + '<small>' + g.xs.length + '건' + (S.cat === 'all' ? catMix(g.xs) : '') + '</small>' +
+        (ts ? '<span class="sum">합계 ' + won(ts) + '원</span>' : '') + '</h3>' +
         '<ul class="list">' + g.xs.map(entHtml).join('') + '</ul>';
     }).join('');
   }
   function listHtml() {
     var D = S.D, f = S.f, list = D.E.filter(function (e) { return match(e, f, S.cat); });
-    if (!list.length) return '<ul class="list" id="list"><li class="empty">' + (D.E.length ? '조건에 맞는 것이 없습니다.' : '아직 받은 것이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li></ul>';
+    if (!list.length) {
+      var anyTax = S.cat === 'tax' && (f === 'open' || f === 'new') && D.E.some(function (e) { return e.cat === 'tax'; });
+      return '<ul class="list" id="list"><li class="empty">' + (anyTax ? '처리할 세금계산서가 없습니다. 받은 세금계산서는 <button type="button" class="link" data-f="done">처리 완료</button> · <button type="button" class="link" data-f="cal">전체 · 날짜별</button>에서 봅니다.'
+        : D.E.length ? '조건에 맞는 것이 없습니다.' : '아직 받은 것이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li></ul>';
+    }
     return '<div id="list">' + dayList(list, f === 'due' || f === 'late' || f === 'soon') + '</div>';
   }
   /* 전체 (2026-11-21 22:14 지시 "전체는 날짜별로 뭐가 왔는지 전체적으로 볼 수 있도록 따로 만들어 주고"): 달력(날마다 분류별 건수) + 고른 날 · 그 달 목록 */
@@ -408,7 +472,9 @@ b{font-variant-numeric:tabular-nums}
     inM.forEach(function (e) { c[e.cat]++; });
     var h = '<section class="card calc" id="cal"><div class="calh"><button type="button" class="btn ghost sm" data-cal="-1" aria-label="이전 달">◀</button><h2>' + y + '년 ' + mo + '월</h2>' +
       (ym !== D.today.slice(0, 7) ? '<button type="button" class="btn ghost sm" data-cal="0">이번 달</button>' : '') + '<button type="button" class="btn ghost sm" data-cal="1" aria-label="다음 달">▶</button></div>';
-    h += '<p class="calsum">' + mo + '월에 받은 것 ' + inM.length + '건' + (inM.length ? (S.cat === 'all' ? CATS : [S.cat]).filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cc c-' + k + '">' + CAT[k] + ' ' + c[k] + '</span>'; }).join('') : '') + '</p>';
+    var tm = S.cat === 'tax' ? (taxTotals().months.filter(function (m) { return m[0] === ym; })[0] || null) : null;
+    h += '<p class="calsum">' + mo + '월에 받은 것 ' + inM.length + '건' + (inM.length ? (S.cat === 'all' ? CATS : [S.cat]).filter(function (k) { return c[k]; }).map(function (k) { return '<span class="cc c-' + k + '">' + CAT[k] + ' ' + c[k] + '</span>'; }).join('') : '') +
+      (tm ? ' · 합계 ' + won(tm[3]) + '원 (금액 확인 ' + tm[2] + '건 / ' + tm[1] + '건)' : '') + '</p>';
     h += '<div class="calg">' + WD.map(function (w, i) { return '<div class="cw' + (i === 0 ? ' sun' : i === 6 ? ' sat' : '') + '">' + w + '</div>'; }).join('');
     for (var i = 0; i < first; i++) h += '<div class="cd pad" aria-hidden="true"></div>';
     for (var dd = 1; dd <= nd; dd++) {
@@ -450,6 +516,7 @@ b{font-variant-numeric:tabular-nums}
     h += '<div class="filt" role="group" aria-label="상태">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료']].map(function (c) {
       return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
     }).join('') + '<button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '전체 · 날짜별</button></div>';
+    if (S.cat === 'tax') h += taxCard();
     h += S.f === 'cal' ? calHtml() : listHtml();
     if (D.noPo) h += '<p class="hint">발주서함(받은 발주서)은 서버를 새로 배포한 뒤 여기에도 함께 보입니다.</p>';
     if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
@@ -497,10 +564,11 @@ b{font-variant-numeric:tabular-nums}
     var tags = dueTag(x, today) + (x.state === '새 공문' ? '<span class="tag new">새 공문</span>' : '') + (x.imp && x.state !== '처리 완료' ? '<span class="tag imp">중요</span>' : '') +
       (x.state === '처리 완료' ? '<span class="tag ok">처리 완료</span>' : '');
     var meta = [x.from || '발신 미상', (S.cat === 'all' && x.cat !== 'gong' ? '<span class="tag c-' + x.cat + '">' + CAT[x.cat] + '</span>' : '') + '<span class="tag kind">' + esc(x.kind) + '</span>' +
-      (x.date ? '시행 ' + ymd(x.date) : '받음 ' + md(x.at)), x.state === '확인' ? '확인함' : ''].filter(String);
+      (x.date ? (x.cat === 'tax' ? '작성 ' : '시행 ') + ymd(x.date) : '받음 ' + md(x.at)), x.state === '확인' ? '확인함' : ''].filter(String);
+    var amt = x.cat === 'tax' ? (x.amt !== '' ? '<span class="amt">합계 ' + won(x.amt) + '원</span>' : '<span class="amt none">금액 모름</span>') : '';
     var at = (x.atts || []).length ? '<span class="a">첨부 ' + x.atts.map(function (a) { return esc(a.name) + (a.po ? ' → 발주서 ' + esc(PO_LAB[a.po.st] || a.po.st) : a.doc ? ' → ' + esc(a.doc.kind) : ''); }).join(', ') + '</span>' : '';
     return '<button type="button" class="it st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen') + '" data-open="' + esc(x.id) + '">' +
-      '<span class="t">' + tags + esc(x.title || x.orig) + '</span><span class="m">' + meta.map(function (s, i) { return i === 1 ? s : esc(s); }).join(' · ') + '</span>' + at +
+      '<span class="t">' + tags + esc(x.title || x.orig) + '</span><span class="m">' + meta.map(function (s, i) { return i === 1 ? s : esc(s); }).join(' · ') + '</span>' + amt + at +
       (x.sum ? '<span class="s">' + esc(x.sum) + '</span>' : !x.chars ? '<span class="s err">글자를 읽지 못했습니다 — 원본을 열어 칸을 채워 주십시오.</span>' : '') + '</button>';
   }
   function poItemHtml(p) {
@@ -652,7 +720,8 @@ b{font-variant-numeric:tabular-nums}
       '<div class="f chk"><label><input type="checkbox" id="f_imp" data-k="imp"' + (x.imp ? ' checked' : '') + '> 중요 (아침 알림에 나옴)' + mark('imp') + '</label></div>' +
       fv('title', '제목' + mark('title'), x.title, 'text', true) +
       fv('from', '발신' + mark('from'), x.from) + fv('to', '수신' + mark('to'), x.to) +
-      fv('no', '문서번호' + mark('no'), x.no) + fv('date', '시행일' + mark('date'), x.date, 'date') +
+      fv('no', '문서번호' + mark('no'), x.no) + fv('date', (x.cat === 'tax' ? '작성일자' : '시행일') + mark('date'), x.date, 'date') +
+      (x.cat === 'tax' || x.amt !== '' ? fv('amt', '금액 (합계, 원)' + mark('amt'), x.amt === '' ? '' : won(x.amt), 'text', false, '공급가액 + 세액. 비우면 ‘금액 모름’') : '') +
       fv('due', '기한' + mark('due'), x.due, 'date', false, x.dueWhy ? '근거: ' + esc(x.dueWhy) : '기한이 있으면 넣어 주십시오 (아침 알림에 나옴)') +
       fv('who', '담당 · 연락처' + mark('who'), x.who) +
       fv('sum', '요약' + mark('sum'), x.sum, 'area', true) +
@@ -682,7 +751,10 @@ b{font-variant-numeric:tabular-nums}
   }
   function changed(x, p) {
     var out = {};
-    Object.keys(p).forEach(function (k) { var cur = k === 'imp' ? (x.imp ? '중요' : '') : String(x[k] || ''); if (String(p[k]).trim() !== cur) out[k] = p[k]; });
+    Object.keys(p).forEach(function (k) {
+      if (k === 'amt') { var a = String(p[k]).replace(/[^0-9\-]/g, ''), c = x.amt === '' ? '' : String(x.amt); if (a !== c) out[k] = p[k]; return; }
+      var cur = k === 'imp' ? (x.imp ? '중요' : '') : String(x[k] || ''); if (String(p[k]).trim() !== cur) out[k] = p[k];
+    });
     return out;
   }
   function act(k, fn, args, done) {
@@ -746,6 +818,8 @@ b{font-variant-numeric:tabular-nums}
       else { var yv = +ym.slice(0, 4), mv = +ym.slice(5, 7) - 1 + dv; yv += Math.floor(mv / 12); mv = ((mv % 12) + 12) % 12; S.calYm = yv + '-' + ('0' + (mv + 1)).slice(-2); }
       S.calDay = ''; render(); return;
     }
+    var cy = ev.target.closest('[data-calym]');
+    if (cy) { S.f = 'cal'; S.calYm = cy.getAttribute('data-calym'); S.calDay = ''; render(); var cal = $('cal'); if (cal && cal.scrollIntoView) { try { cal.scrollIntoView({ block: 'start' }); } catch (e) {} } return; }
     var dy = ev.target.closest('[data-day]');
     if (dy) { var dk = dy.getAttribute('data-day'); S.calDay = dk === S.calDay ? '' : dk; render(); if (S.calDay) { var dh = root.querySelector('#cal + .dh'); if (dh && dh.scrollIntoView) { try { dh.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { dh.scrollIntoView(); } } } return; }
     var f = ev.target.closest('[data-f]');
