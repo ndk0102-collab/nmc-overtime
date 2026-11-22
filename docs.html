@@ -154,6 +154,33 @@ b{font-variant-numeric:tabular-nums}
 .tdw{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
 .tdn{margin:10px 0;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:14px}
 @media (max-width:759px){ .bt{white-space:normal;flex:1 1 70%} .bh{flex-wrap:wrap;row-gap:4px} .bh .bd{order:3} .bdo{font-size:14px} }
+/* 세금계산서 품목 · 수량 (v54) */
+.tli{margin:10px 0 12px}
+.tli h3{margin:0 0 6px;font-size:15px;font-weight:800}
+.tli h3 small{margin-left:6px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.tlw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tl th,.tl td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:top}
+.tl th{background:var(--soft);font-size:12.5px;font-weight:800;color:var(--ink2)}
+.tl td.nm{white-space:normal;min-width:6.5em;font-weight:700}
+.tl td.nm small{display:block;font-size:12px;font-weight:500;color:var(--muted)}
+.tl .r{text-align:right}
+.tl tbody tr:last-child td{border-bottom:0}
+.tl tfoot td{border-top:1px solid var(--line);border-bottom:0;background:#FBFAF9;font-weight:800}
+.tln{margin:8px 0 12px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:14px;color:var(--ink2)}
+.it .s.ti{color:var(--ink);font-weight:600}
+@media (max-width:559px){   /* 휴대폰: 품목 한 줄씩 카드처럼 (가로 넘김 없이) */
+  .tl thead{display:none}
+  .tl,.tl tbody,.tl tfoot,.tl tr{display:block;width:100%}
+  .tl tr{padding:8px 10px;border-bottom:1px solid var(--line)}
+  .tl tbody tr:last-child{border-bottom:0}
+  .tl tfoot tr{border-top:1px solid var(--line);border-bottom:0;background:#FBFAF9}
+  .tl td,.tl tfoot td{display:inline-block;padding:0 10px 0 0;border:0;background:none;font-size:13.5px;white-space:nowrap}
+  .tl td.nm{display:block;padding:0 0 3px;font-size:14.5px}
+  .tl tfoot td:first-child{display:block;padding:0 0 3px}
+  .tl td[data-l]::before{content:attr(data-l) ' ';font-weight:600;color:var(--muted)}
+  .tl td:empty{display:none}
+}
 .t-po{--cols:92px minmax(0,170px) minmax(0,1fr) 104px 104px}
 .t-tax{--cols:64px minmax(0,1fr) 110px 92px 118px 132px}
 @media (max-width:759px){
@@ -523,7 +550,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function isNew(e) { return e.t === 'po' ? !!PO_NEW[e.st] : e.state === '새 공문'; }
   function hayOf(e) {
     return (e.t === 'po' ? [e.name, e.result, e.custs.join(' '), e.note, '발주서', e.mail ? e.mail.title : '']
-      : [e.title, e.from, e.to, e.no, e.sum, e.memo, e.att, e.who, e.orig, e.kind, e.td ? [(e.td.d || []).join(' '), e.td.r, e.td.w, e.td.t, TD_LAB[e.td.c]].join(' ') : ''].join(' ')).replace(/\s+/g, '').toLowerCase();
+      : [e.title, e.from, e.to, e.no, e.sum, e.memo, e.att, e.who, e.orig, e.kind, e.td ? [(e.td.d || []).join(' '), e.td.r, e.td.w, e.td.t, TD_LAB[e.td.c], (e.td.L || []).map(function (l) { return l[1] + ' ' + l[2]; }).join(' ')].join(' ') : ''].join(' ')).replace(/\s+/g, '').toLowerCase();
   }
   function isMail(x) { return x.t !== 'po' && (x.kind === '메일' || /^메일\(eml\)/.test(x.how) || (x.files[0] && x.files[0][2] === 'eml')); }
   function findPo(id) { return S.D ? S.D.P.filter(function (p) { return p.id === id; })[0] : null; }
@@ -849,7 +876,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function itemHtml(x, today) {   // 공문함 한 건 = 표 한 줄 (칸은 지금 분류의 머리줄과 같음)
     var mode = listMode(), st = 'st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen');
     var title = '<span class="t">' + (x.imp && x.state !== '처리 완료' ? '<span class="tag imp">중요</span>' : '') + esc(x.title || x.orig) + '</span>';
-    var amt = x.cat === 'tax' ? '<span class="s"><span class="amt' + (x.amt === '' ? ' none">금액 모름' : '">합계 ' + won(x.amt) + '원') + '</span></span>' : '';
+    var il = x.cat === 'tax' ? taxItemsLine(x) : '';
+    var amt = x.cat === 'tax' ? '<span class="s' + (il ? ' ti' : '') + '">' + (il ? esc(il) + ' · ' : '') + '<span class="amt' + (x.amt === '' ? ' none">금액 모름' : '">합계 ' + won(x.amt) + '원') + '</span></span>' : '';
     var h = '<button type="button" class="it ' + st + '" data-open="' + esc(x.id) + '"><span class="cell cd1 l2">' + esc(atCell(x.at)) + '</span>';
     if (mode === 'po') h += '<span class="cell l2"><span class="m">' + esc(x.from || '거래처 미상') + '</span></span><span class="cell tt">' + title + subOf(x) + '</span>';
     else if (x.td && x.cat === 'gong' && TD_LAB[x.td.c]) h += '<span class="cell l2"><span class="lab k-' + x.td.c + '">' + esc(TD_LAB[x.td.c]) + '</span></span>' +
@@ -885,11 +913,58 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var m = LEDST[e[0]] || ['seen', e[0]];
     return '<span class="pill ' + m[0] + '">' + esc(m[1]) + '</span>' + (e[1] || e[2] ? '<span class="s">' + esc([e[1], e[2] ? '분류 추정' : ''].filter(String).join(' · ')) + '</span>' : '');
   }
+  /* ── 품목 · 수량 (서버 v54: 정리 칸의 L = [[날짜, 품목, 규격, 수량, 단가, 공급가액, 세액, 비고]]) ── */
+  function taxL(x) { return x.td && x.td.c === 'tax' && Array.isArray(x.td.L) ? x.td.L : []; }
+  function qtx(n) {   // 수량 · 단가: 소수 셋째 자리까지 그대로
+    if (n == null || n === '' || isNaN(Number(n))) return '';
+    var v = Number(n), p = String(Math.round(Math.abs(v) * 1000) / 1000).split('.');
+    return (v < 0 ? '-' : '') + p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (p[1] ? '.' + p[1] : '');
+  }
+  /** 목록 한 줄: '칼라칩 수량 750 · 고무분말5-7 소포장 수량 175' — 같은 품목 · 규격 · 단가 줄은 수량을 더함(다른 단가는 따로, 단가를 붙여 구분), 3가지까지 */
+  function taxItemsLine(x) {
+    var L = taxL(x);
+    if (!L.length) return '';
+    var G = [], by = {}, nm = {};
+    L.forEach(function (l) {
+      var k = l[1] + '|' + (l[2] || '') + '|' + (l[4] == null ? '' : l[4]), g = by[k];
+      if (!g) { g = by[k] = { n: l[1] || '(품목 이름 없음)', s: l[2] || '', p: l[4], q: 0, has: false }; G.push(g); }
+      if (l[3] != null) { g.q += Number(l[3]); g.has = true; }
+    });
+    G.forEach(function (g) { nm[g.n + '|' + g.s] = (nm[g.n + '|' + g.s] || 0) + 1; });
+    return G.slice(0, 3).map(function (g) {
+      return g.n + (g.s ? ' ' + g.s : '') + (g.has ? ' 수량 ' + qtx(g.q) : '') + (nm[g.n + '|' + g.s] > 1 && g.p != null ? ' (단가 ' + qtx(g.p) + ')' : '');
+    }).join(' · ') + (G.length > 3 ? ' 외 ' + (G.length - 3) + '가지' : '');
+  }
+  /** 한 건 창: 품목 · 규격 · 수량 · 단가 · 공급가액 · 세액 표 */
+  function taxLinesHtml(x) {
+    var L = taxL(x);
+    if (!L.length) {
+      if (/^\[(못 엶|확인|같은 계산서)\]/.test(x.title)) return '';
+      return '<p class="tln">품목 · 수량: ' + (/국세청 메일 자동\(서버가 엶\)/.test(x.how) ? '계산서에 품목 줄이 없습니다.' : '금액만 적힌 알림 메일이라 품목 · 수량을 알 수 없습니다. 같은 계산서가 국세청 메일(잠긴 첨부)로 오면 서버가 열어 채웁니다.') + '</p>';
+    }
+    var day = String(x.date || '').slice(5, 10), showD = L.some(function (l) { return l[0] && l[0] !== day; }), showS = L.some(function (l) { return l[2]; });
+    var sa = 0, st = 0, ka = 0, kt = 0;
+    var rows = L.map(function (l) {
+      if (l[5] != null) { sa += Number(l[5]); ka++; }
+      if (l[6] != null) { st += Number(l[6]); kt++; }
+      return '<tr>' + (showD ? '<td data-l="날짜">' + esc(l[0] ? Number(l[0].slice(0, 2)) + '/' + Number(l[0].slice(3, 5)) : '') + '</td>' : '') +
+        '<td class="nm">' + esc(l[1] || '—') + (l[7] ? '<small>' + esc(l[7]) + '</small>' : '') + '</td>' + (showS ? '<td data-l="규격">' + esc(l[2] || '') + '</td>' : '') +
+        '<td class="r" data-l="수량">' + esc(qtx(l[3]) || '—') + '</td><td class="r" data-l="단가">' + esc(qtx(l[4]) || '—') + '</td>' +
+        '<td class="r" data-l="공급가액">' + (l[5] == null ? '—' : won(l[5])) + '</td><td class="r" data-l="세액">' + (l[6] == null ? '—' : won(l[6])) + '</td></tr>';
+    }).join('');
+    var cs = 3 + (showD ? 1 : 0) + (showS ? 1 : 0);
+    return '<section class="tli" id="taxLines"><h3>품목 · 수량<small>' + L.length + '줄' + (x.td.Ln ? ' — 계산서에는 ' + x.td.Ln + '줄, 나머지는 아래 ‘읽은 글자 전체 보기’' : '') + '</small></h3>' +
+      '<div class="tlw"><table class="tl"><thead><tr>' + (showD ? '<th>날짜</th>' : '') + '<th>품목</th>' + (showS ? '<th>규격</th>' : '') +
+      '<th class="r">수량</th><th class="r">단가</th><th class="r">공급가액</th><th class="r">세액</th></tr></thead><tbody>' + rows + '</tbody>' +
+      (L.length > 1 ? '<tfoot><tr><td colspan="' + cs + '">계 ' + L.length + '줄</td><td class="r" data-l="공급가액">' + (ka ? won(sa) : '—') + '</td><td class="r" data-l="세액">' + (kt ? won(st) : '—') + '</td></tr></tfoot>' : '') +
+      '</table></div></section>';
+  }
   function taxRow(x) {
     var w = taxWhat(x), sp = taxSplit(x), st = 'st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen');
+    var il = taxItemsLine(x), sub = il ? [w[0] && w[0] !== '세금계산서' ? w[0] : '', il].filter(String).join(' · ') : w.filter(String).join(' · ');
     return '<li><button type="button" class="it ' + st + '" data-open="' + esc(x.id) + '"><span class="cell cd1 l2">' + esc(dShort(x.date || x.at)) + '</span>' +
       '<span class="cell tt"><span class="t">' + esc(x.from || (taxDirOf(x) === 'chk' ? '국세청 메일' : '거래처 미상')) + (x.state === '새 공문' ? ' <span class="tag new">새</span>' : '') + '</span>' +
-      '<span class="s">' + esc(w.filter(String).join(' · ')) + '</span></span>' +
+      '<span class="s' + (il ? ' ti' : '') + '">' + esc(sub) + '</span></span>' +
       '<span class="cell n xs">' + (sp ? won(sp[0]) : '—') + '</span><span class="cell n xs">' + (sp ? won(sp[1]) : '—') + '</span>' +
       '<span class="cell n st">' + (x.amt === '' ? '<span class="amt none">금액 모름</span>' : '<span class="amt">' + won(x.amt) + '</span>') + '</span>' +
       '<span class="cell l2">' + ledHtml(x) + '</span><span class="br"></span></button></li>';
@@ -962,7 +1037,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     xs.forEach(function (x) { if (x.amt !== '') { known++; sum += x.amt; } var sp = taxSplit(x); if (sp) { split++; sup += sp[0]; tx += sp[1]; } });
     var h = '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '<small>' + n + '건' + (q ? ' (찾은 것)' : '') + '</small>' + (known ? '<span class="sum">합계 ' + won(sum) + '원</span>' : '') + nav + '</h3>';
     if (!n) return h + '<ul class="list"><li class="empty">' + (q ? '찾는 글자가 들어간 계산서가 없습니다.' : '이 달 ' + DIR[dir] + ' 세금계산서가 없습니다.') + '</li></ul>' + (m.part ? '<p class="tnote">서버가 아직 달 보기를 지원하지 않아 이 화면에 받은 목록으로만 보입니다.</p>' : '') + '</div>';
-    h += '<div class="thr" aria-hidden="true"><span>작성일</span><span>거래처 · 품목</span><span class="r">공급가액</span><span class="r">세액</span><span class="r">합계</span><span>장부</span></div>';
+    h += '<div class="thr" aria-hidden="true"><span>작성일</span><span>거래처 · 품목 · 수량</span><span class="r">공급가액</span><span class="r">세액</span><span class="r">합계</span><span>장부</span></div>';
     h += '<ul class="list">' + xs.map(taxRow).join('') + '</ul>';
     h += '<div class="subt"><span>소계</span><span>' + n + '건' + (n - known ? ' · 금액 모름 ' + (n - known) + '건' : '') + '</span><span class="r xs">' + (split ? won(sup) : '—') + '</span><span class="r xs">' + (split ? won(tx) : '—') + '</span><span class="r">' + won(sum) + '</span><span></span></div>';
     var notes = [];
@@ -1105,6 +1180,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       if (le || /^\[(매입|매출)\]/.test(x.title)) h += '<p class="lednote">장부: ' + (le ? '<b>' + esc((LEDST[le[0]] || ['', le[0]])[1]) + '</b>' + (le[1] ? ' · ' + esc(le[1]) : '') + (le[2] ? ' (분류 추정)' : '') + (le[3] ? '<br><small class="muted">' + esc(le[3]) + '</small>' : '')
         : String(x.date) >= '2026-01-01' ? '반영 대기 — 10분 안에 매출 · 매입 장부에 들어갑니다' : '2026년 전 계산서는 장부에 넣지 않습니다') +
         ' <a class="link" href="ledger.html?view=auto">매출 · 매입 › 자동 수집</a></p>';
+      h += taxLinesHtml(x);
     }
     h += tidyBox(x);
     var mail = isMail(x);
