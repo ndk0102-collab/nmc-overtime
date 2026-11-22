@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="referrer" content="no-referrer">
+<meta name="referrer" content="same-origin"><!-- 바깥(구글 등)에는 주소를 보내지 않고, 앱 안 화면끼리는 보냄 (뒤로 = 온 길로) -->
 <meta name="theme-color" content="#1E5AA8">
 <title>NMC 잔업·급여 관리</title>
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -90,8 +90,9 @@ table.grid { border-collapse: separate; border-spacing: 0; width: 100%; font-siz
 .login input:focus { outline: 2px solid var(--blue); border-color: var(--blue); }
 .login .btn { width: 100%; margin-top: 12px; padding: 12px; font-size: 16px; }
 .login .err { color: var(--err); margin: 12px 0 0; }
-.login .back { margin: 18px 0 0; text-align: center; }
-.login .back a { color: var(--blue); font-weight: 700; text-decoration: none; display: inline-block; padding: 8px 10px; }
+.login .back { margin: 18px 0 0; display: flex; justify-content: center; align-items: center; gap: 10px; }
+.login .back a { color: var(--blue); font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; padding: 8px 10px; }
+.login .back .lgback { color: var(--blue); }
 .home-ic { vertical-align: -3px; margin-right: 3px; }
 
 /* forms */
@@ -222,7 +223,9 @@ table.pl.ot th { padding: .7mm .2mm; }
 .pill.off { background: #EEF0F3; color: #6B7480; }
 .note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
 .note li { margin: 3px 0; }
+.iconbtn.nmc-back { display: inline-flex; min-height: 0; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 11px 6px 7px; font-size: inherit; font-weight: 700; }
 </style>
+<script src="nav.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -355,7 +358,28 @@ table.pl.ot th { padding: .7mm .2mm; }
     if (!S.token || !S.data) { app.innerHTML = viewLogin(); bindLogin(); return; }
     app.innerHTML = viewTop() + viewBanners() + viewTabs() + '<main><section class="panel" id="panel">' + viewTab() + '</section></main>' + (S.edit ? viewEdit() : '') + (S.cell ? viewCell() : '');
     bindMain();
+    navStart();
+    if (window.NMCNav) NMCNav.sync();
   }
+  /* 뒤로 = 온 길로 한 걸음 (공통 nav.js): 기록에 남는 것 = 칸(잔업 기록 · 급여대장 · 명세서 · 직원 설정 …) · 열어 본 창(직원 고치기 · 칸 고치기) */
+  function navStart() {
+    if (!window.NMCNav || navStart.done) return;
+    navStart.done = true;
+    NMCNav.hub('manage.html', '관리자');
+    NMCNav.onBlock = toast;
+    NMCNav.page({
+      get: function () { return { tab: S.tab, sheet: S.edit ? 'edit' : S.cell ? 'cell' : '' }; },
+      set: function (v) {
+        v = v || {};
+        if (v.sheet !== 'edit') S.edit = null;
+        if (v.sheet !== 'cell') S.cell = null;
+        if (v.tab && v.tab !== S.tab && TABS.some(function (t) { return t[0] === v.tab; })) { S.tab = v.tab; S.adjEdit = null; }
+        render();
+      },
+      block: function () { return S.busy ? '저장 중입니다. 완료 후 다시 눌러 주십시오' : ''; }
+    });
+  }
+  if (window.NMCNav) NMCNav.hub('manage.html', '관리자');
 
   function viewLogin() {
     return '<section class="login" aria-labelledby="lt">' +
@@ -366,7 +390,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       '<input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">' +
       '<button class="btn primary" type="submit">로그인</button>' +
       '</form>' + (S.err ? '<p class="err" role="alert">' + esc(S.err) + '</p>' : '') +
-      '<p class="back"><a href="manage.html">← 관리자</a></p></section>';
+      '<p class="back">' + (window.NMCNav ? NMCNav.btn('lgback') : '') + '<a href="manage.html">' + HOME_IC + '관리자</a></p></section>';
   }
   function bindLogin() {
     var f = document.getElementById('loginForm');
@@ -397,6 +421,7 @@ table.pl.ot th { padding: .7mm .2mm; }
   function viewTop() {
     var m = S.month;
     return '<header class="top"><div class="top-in">' +
+      (window.NMCNav ? NMCNav.btn('iconbtn') : '') +   // 뒤로 = 온 길로 한 걸음 (2026-11-22 지시)
       '<a class="iconbtn" href="manage.html" aria-label="관리자">' + HOME_IC + '관리자</a>' +
       '<div class="brand">잔업 · 급여<small>' + esc(m.config.company) + '</small></div>' +
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +

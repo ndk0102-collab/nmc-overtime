@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -127,8 +128,8 @@ button,input,select{font:inherit;color:inherit}
 </head>
 <body>
 <header class="bar">
-  <div class="bin">
-    <a class="home" id="back" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg><span id="backT">관리자</span></a>
+  <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
+    <a class="home" id="back" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span id="backT">관리자</span></a>
     <h1>배합 시뮬레이션<small>MIX</small></h1>
   </div>
 </header>
@@ -367,7 +368,7 @@ button,input,select{font:inherit;color:inherit}
   function total() { return S.bags.reduce(function (a, b) { return a + b.parts; }, 0); }
   function codeText(bags) { return bags.map(function (b) { return b.code + ' ' + COL[b.code].name + ' ' + b.parts; }).join(' : '); }
   function toast(t) { var e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { e.hidden = true; }, 3600); }
-  function setUrl() { try { var qs = new URLSearchParams(location.search); qs.set('m', S.bags.map(function (b) { return b.code + '.' + b.parts; }).join('_')); history.replaceState(null, '', location.pathname + '?' + qs.toString()); } catch (e) {} }
+  function setUrl() { try { var qs = new URLSearchParams(location.search); qs.set('m', S.bags.map(function (b) { return b.code + '.' + b.parts; }).join('_')); history.replaceState(history.state, '', location.pathname + '?' + qs.toString()); } catch (e) {} }
 
   /* ───────── 그리기 ───────── */
   var drawT = 0, frame = 0, rendered = '';
@@ -679,6 +680,7 @@ button,input,select{font:inherit;color:inherit}
     if (!/^\d{4}-\d{3,}$/.test(pjNo)) { card.hidden = true; return; }
     card.hidden = false;
     $('back').href = 'pj.html?no=' + encodeURIComponent(pjNo); $('backT').textContent = '프로젝트';
+    if (window.NMCNav) NMCNav.hub('pj.html?no=' + encodeURIComponent(pjNo), '프로젝트');   // 돌아갈 기록이 없으면 그 프로젝트로
     if (!token) {
       card.innerHTML = '<h2>프로젝트 ' + esc(pjNo) + ' 색상 정하기</h2><div class="login"><p class="hint">프로젝트 도면을 불러오려면 관리자 비밀번호를 입력해 주십시오.</p>' +
         '<form id="loginForm" autocomplete="off"><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100" aria-label="비밀번호"><button class="btn" type="submit">로그인</button></form>' +

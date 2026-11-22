@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -210,8 +211,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
 </head>
 <body class="v-buy">
 <header class="bar">
-  <div class="bin">
-    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>관리자</a>
+  <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
+    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a>
     <h1 id="title">매입</h1>
   </div>
   <nav class="vtabs n5" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
@@ -494,6 +495,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       else { h = viewHtml(d); canAdd = S.view !== 'sum'; }
     }
     root.innerHTML = h;
+    if (window.NMCNav) NMCNav.sync();
     fab.hidden = !canAdd;
     fab.textContent = S.view === 'sales' ? '+ 매출 등록' : S.view === 'recv' ? '+ 입고 등록' : '+ 매입 등록';
     if (!S.authed) { var pw = $('pw'); if (pw && !S.sheet) pw.focus(); }
@@ -825,23 +827,31 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   }
   function openSheet(sh) {
     S.sheet = sh;
-    if (!S.pushed) { try { history.pushState({ ledSheet: 1 }, ''); S.pushed = true; } catch (e) {} }
     renderSheet(true);
-    render();
+    render();   // → 기록에 한 칸 (뒤로 = 창 닫기)
   }
   function closeSheet() {
     if (!S.sheet) return;
-    if (S.pushed) { history.back(); return; }
     closeSheetNow();
+    if (window.NMCNav) NMCNav.sync();   // 앱에서 닫으면 기록도 한 칸 되돌림
   }
   function closeSheetNow() {
     var was = !!S.sheet;
     S.sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = ''; document.body.classList.remove('noscroll');
     if (was && !fab.hidden) fab.focus();
   }
-  window.addEventListener('popstate', function () {
-    if (S.pushed) { S.pushed = false; if (S.sheet) { closeSheetNow(); render(); } }
-  });
+  /* 뒤로 = 온 길로 한 걸음 (2026-11-22 지시, 공통 nav.js): 기록에 남는 것 = 칸(매출 · 매입 · 입고 · 종합 · 자동 수집) · 열어 본 등록/수정 창 */
+  function navGet() { return { view: S.view, sheet: S.sheet ? String(S.sheet.kind || '창') + (S.sheet.id ? ':' + S.sheet.id : '') : '' }; }
+  function navSet(v) {
+    v = v || {};
+    if (S.sheet && !v.sheet) closeSheetNow();
+    if (v.view && v.view !== S.view && VIEWS.some(function (x) { return x[0] === v.view; })) {
+      S.view = v.view; S.filter = ''; S.autoArm = '';
+      if (S.view === 'sum' && S.per.sum === 'd') S.per.sum = 'm';
+      if (S.view === 'auto' && S.auto) needAuto(true);
+    }
+    render();
+  }
 
   /** 금액 칸: 공급가액 · 세액 · 합계 (원, 정수). 틀리면 null */
   function money(f) {
@@ -1235,7 +1245,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     if (S.view === v) return;
     S.view = v; S.filter = '';
     if (S.view === 'sum' && S.per.sum === 'd') S.per.sum = 'm';
-    try { history.replaceState(history.state, '', location.pathname + '?view=' + v); } catch (e) {}
+    if (!window.NMCNav) { try { history.replaceState(history.state, '', location.pathname + '?view=' + v); } catch (e) {} }   // 있으면 nav.js가 새 칸 주소를 ?view= 로
     S.autoArm = '';
     render(); window.scrollTo(0, 0);
     if (v === 'auto' && S.auto) needAuto(true);   // 들어올 때마다 최신으로
@@ -1382,6 +1392,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     reload(true);
   });
 
+  if (window.NMCNav) NMCNav.page({ get: navGet, set: navSet, url: function (v) { return location.pathname + '?view=' + v.view; } });
   function start() {
     S.err = '';
     if (!S.authed) { render(); return; }

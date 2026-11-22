@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -342,8 +343,8 @@ body.pvon{overflow:hidden}
 </head>
 <body>
 <header class="bar">
-  <div class="bin">
-    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>관리자</a>
+  <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
+    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a>
     <h1>거래명세서<small>STATEMENT</small></h1>
   </div>
   <nav class="vtabs" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
@@ -527,7 +528,14 @@ body.pvon{overflow:hidden}
       else if (no) openStmt(no);
       else if (S.tab === 'edit' && !S.F) S.F = blankForm();
       render();
+      navStart();
     }, function (e) { S.loading = false; if (!isAuth(e)) S.err = errText(e); render(); });
+  }
+  function navStart() {   // 첫 자료가 온 뒤부터 기록 (그 전 화면은 '불러오는 중')
+    if (!window.NMCNav || navStart.done) return;
+    navStart.done = true;
+    NMCNav.onBlock = toast;
+    NMCNav.page({ get: navGet, set: navSet, url: navUrl, block: function () { return S.busy ? '저장 중입니다. 완료 후 다시 눌러 주십시오' : ''; } });
   }
   function loadMonth(ym) {
     S.ym = ym; S.mLoading = true; render();
@@ -539,7 +547,31 @@ body.pvon{overflow:hidden}
     call('apiStmtGet', [no]).then(function (d) { S.curLoading = ''; S.cur = d.stmt; setUrl('no=' + encodeURIComponent(no)); render(); window.scrollTo(0, 0); },
       function (e) { S.curLoading = ''; if (!isAuth(e)) toast(errText(e)); render(); });
   }
-  function setUrl(qs) { try { history.replaceState(history.state, '', location.pathname + (qs ? '?' + qs : '')); } catch (e) {} }
+  function setUrl(qs) { if (window.NMCNav) return; try { history.replaceState(history.state, '', location.pathname + (qs ? '?' + qs : '')); } catch (e) {} }   // nav.js가 있으면 칸마다 주소를 nav가 정함
+  /* 뒤로 = 온 길로 한 걸음 (2026-11-22 지시, 공통 nav.js): 기록에 남는 것 = 칸(명세서 · 작성 · 거래처 · 회사 정보) · 열어 본 명세서 · 미리보기 · 거래처 창 */
+  function navGet() {
+    return { tab: S.tab, no: S.tab === 'list' ? (S.cur ? String(S.cur.no) : (S.curLoading || '')) : '', pv: S.pv && S.F ? 1 : 0, sheet: S.sheet ? 'cust' : '' };
+  }
+  function navSet(v) {
+    v = v || {};
+    if (S.sheet && !v.sheet) closeSheet();
+    if (S.pv && !v.pv) { S.pv = false; renderPv(); }
+    if (v.tab && v.tab !== S.tab && TABS.some(function (t) { return t[0] === v.tab; })) {
+      if (v.tab === 'edit' && !S.F) S.F = blankForm();
+      if (v.tab === 'co') { S.co = null; S.coErr = ''; S.coMsg = ''; }
+      S.tab = v.tab; S.cur = null; S.curLoading = ''; S.arm = '';
+    }
+    if (S.tab === 'list') {
+      var no = S.cur ? String(S.cur.no) : (S.curLoading || '');
+      if (!v.no && no) { S.cur = null; S.curLoading = ''; S.arm = ''; }
+      else if (v.no && v.no !== no && S.I) { openStmt(v.no); return; }
+    }
+    render();
+  }
+  function navUrl(v) {
+    if (v.tab === 'edit' && S.tab === 'edit' && S.F && S.F.no) return location.pathname + '?no=' + encodeURIComponent(S.F.no) + '&view=edit';   // 발행한 명세서 고치기 (예전 주소와 같게)
+    return location.pathname + (v.tab === 'list' ? (v.no ? '?no=' + encodeURIComponent(v.no) : '') : '?view=' + v.tab);
+  }
 
   /* ───────── 작성 양식 ───────── */
   function blankForm() {
@@ -644,6 +676,7 @@ body.pvon{overflow:hidden}
     else if (S.tab === 'cust') h = custHtml();
     else h = coHtml();
     root.innerHTML = h;
+    if (window.NMCNav) NMCNav.sync();
     if (S.authed && S.I && S.tab === 'edit' && S.F) { saveEl.innerHTML = saveBarHtml(); saveEl.hidden = false; }
     if (S.tab === 'list' && S.cur) { printEl.innerHTML = docHtml(S.cur); fitPreview(); } else printEl.innerHTML = '';
     if (!S.authed) { var pw = $('pw'); if (pw) pw.focus(); }
@@ -1018,7 +1051,7 @@ body.pvon{overflow:hidden}
     return out;
   }
   function renderPv() {
-    if (!S.pv || !S.F) { pvEl.hidden = true; pvEl.innerHTML = ''; document.body.classList.remove('pvon'); return; }
+    if (!S.pv || !S.F) { pvEl.hidden = true; pvEl.innerHTML = ''; document.body.classList.remove('pvon'); if (window.NMCNav) NMCNav.sync(); return; }
     var F = S.F, st = draftStmt(), edit = !!F.no;
     var h = '<div class="pvh"><button type="button" class="pvx" data-act="pvclose">← 고치기</button><h2>미리보기<small>' + (edit ? '수정 저장 전' : '아직 발행 전') + '</small></h2></div>' +
       '<div class="pvb"><div class="in"><div class="pvsum"><div class="pvt"><b>' + esc(st.cust) + (st.site ? '<em>' + esc(st.site) + '</em>' : '') + '</b><span>' + dateKo(st.date) + ' · ' + st.lines.length + '줄 · 합계 ' + won(st.total) + '</span></div>' +
@@ -1029,6 +1062,7 @@ body.pvon{overflow:hidden}
       '<button type="button" class="btn" data-act="saveprint"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : edit ? '저장하고 인쇄' : '발행하고 인쇄') + '</button></div>';
     pvEl.innerHTML = h; pvEl.hidden = false; document.body.classList.add('pvon');
     fitBox($('pvbox2'), $('pvk2'));
+    if (window.NMCNav) NMCNav.sync();
   }
   function closePv() { S.pv = false; renderPv(); }
   function printCur() {
@@ -1099,8 +1133,9 @@ body.pvon{overflow:hidden}
     h += '</div><div class="sfoot">' + (X.old ? '<button type="button" class="btn ghost" data-act="custdel"' + (S.busy ? ' disabled' : '') + '>' + (X.arm ? '한 번 더 누르면 삭제' : '삭제') + '</button>' : '') +
       '<button type="button" class="btn" data-act="custsave"' + (S.busy ? ' disabled' : '') + '>' + (S.busy ? '저장 중…' : '저장') + '</button></div></div>';
     sheetEl.innerHTML = h; sheetEl.hidden = false;
+    if (window.NMCNav) NMCNav.sync();
   }
-  function closeSheet() { S.sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = ''; }
+  function closeSheet() { S.sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = ''; if (window.NMCNav) NMCNav.sync(); }
   function custSave() {
     var X = S.sheet;
     if (!X || S.busy) return;

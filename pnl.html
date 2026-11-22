@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="payroll.js?v=v10"></script>
+<script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <style>
 /* 남명 월 손익판 (매입·매출) — 회사 숫자(대출·원가·매달 비용·거래처 규칙)는 서버(구글 시트)에만 있고, 관리자 로그인 뒤에 받아 옵니다. */
@@ -165,7 +166,8 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
 .login form{display:flex;gap:8px;margin-top:14px}
 .login input{flex:1;min-width:0;min-height:46px;border:1px solid var(--line);border-radius:8px;padding:0 12px;font-size:16px}
 .login .err{color:var(--bad);font-weight:700}
-.login .back{margin:16px 0 0;font-size:14px}
+.login .back{margin:16px 0 0;font-size:14px;display:flex;align-items:center;gap:12px}
+.login .back .nmc-back{color:var(--ink)}
 .login .back a{color:var(--accent);font-weight:700;text-decoration:none}
 .hidden{position:absolute;left:-9999px}
 #app[hidden],[hidden]{display:none!important}
@@ -181,7 +183,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     <button class="btn" type="submit">로그인</button>
   </form>
   <p class="err" id="loginErr" role="alert"></p>
-  <p class="hint back"><a href="manage.html">← 관리자</a></p>
+  <p class="hint back" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자"><a href="manage.html" style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a></p>
 </div>
 
 <div class="wrap" id="app" hidden>
@@ -190,7 +192,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       <h1><span>NMC</span>월별 손익계산서</h1>
       <p class="sub">판매량은 출고 실적, 인건비는 급여대장 기준입니다. 모든 금액은 부가세를 제외한 공급가액입니다.</p>
     </div>
-    <nav class="nav" aria-label="화면 이동">
+    <nav class="nav" aria-label="화면 이동" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
       <a href="manage.html" aria-label="관리자"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a><button type="button" id="logoutBtn">로그아웃</button>
     </nav>
   </header>
@@ -1092,7 +1094,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     f.textContent = '※ 판매량은 출고 실적(또는 업로드한 매출 자료), 매입 보고서는 등록된 매입 자료 기준입니다. 원가는 설정의 재료비·비율, 인건비는 급여대장(미등록 월은 설정 금액), 전력비·수선비·보험료·인증수수료·카드·리스·수도통신비·세금과공과는 설정의 월 금액을 적용했습니다. 잉여금은 대출 원금 상환액까지 차감한 금액으로 회계상 당기순이익과 다릅니다.';
     el.appendChild(f);
   }
-  function openReport() { var rep = buildReport($('month').value); renderReport(rep); $('report').hidden = false; $('report').scrollIntoView({ behavior: 'smooth' }); return rep; }
+  function openReport() { var rep = buildReport($('month').value); renderReport(rep); $('report').hidden = false; $('report').scrollIntoView({ behavior: 'smooth' }); if (window.NMCNav) NMCNav.sync(); return rep; }
   var PDF_LOADING = null;
   function loadPdfLib() {
     if (window.html2pdf) return Promise.resolve();
@@ -1187,7 +1189,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   $('save').addEventListener('click', saveMonth);
   $('stockBtn').addEventListener('click', function () { var ym = $('month').value; fillFromStock(ym).then(function () { status('출고 실적으로 판매량을 다시 반영했습니다. 저장하려면 [당월 저장]을 누르십시오.'); }, function (e) { status(errText(e)); }); });
   $('reportBtn').addEventListener('click', openReport);
-  $('reportClose').addEventListener('click', function () { $('report').hidden = true; });
+  $('reportClose').addEventListener('click', function () { $('report').hidden = true; if (window.NMCNav) NMCNav.sync(); });
   $('reportPrint').addEventListener('click', function () { if ($('report').hidden) openReport(); window.print(); });
   $('reportPdf').addEventListener('click', function () {
     if ($('report').hidden) openReport();
@@ -1213,6 +1215,8 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
 
   if (DEMO) window.__pnl = { get L() { return L; }, get S() { return S; }, get P() { return P; }, get PAY() { return PAY; }, get records() { return records; }, compute: compute, parsePaste: parsePaste, handleFiles: handleFiles };
   if (token) startApp(); else { $('loginView').hidden = false; $('pw').focus(); }
+  /* 뒤로 = 온 길로 한 걸음 (공통 nav.js): 이 화면 안에서 기록에 남는 것 = 월간 보고서 열기 (뒤로 → 닫고 보던 자리로) */
+  if (window.NMCNav) NMCNav.page({ get: function () { return { report: $('report').hidden ? 0 : 1 }; }, set: function (v) { if (!(v && v.report)) $('report').hidden = true; } });
 })();
 </script>
 </body>

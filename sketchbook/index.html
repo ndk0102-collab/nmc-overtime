@@ -463,13 +463,15 @@ kbd.kk { display: inline-block; font: 700 11px/1.5 var(--mono); padding: 0 6px; 
   .dxfinfo { grid-template-columns: 1fr; }
   .props { grid-template-columns: 1fr; }
 }
+.nmc-back.btn { min-height: 0; border: 1px solid var(--line-2); border-radius: 11px; padding: 7px 12px 7px 8px; font-size: 13px; font-weight: 700; color: var(--ink); background: #fff; }
 </style>
+<script src="../nav.js"></script>
 
 </head>
 <body>
 <div id="app" class="no-right">
-  <header id="top">
-    <a class="brand" href="../manage.html" title="관리자 메뉴로" style="color:inherit;text-decoration:none"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 18l-6-6 6-6"/></svg><span class="nm">NMC</span> 도면</a>
+  <header id="top" data-nmc-slot data-nmc-hub="../manage.html" data-nmc-hub-name="관리자" data-nmc-cls="btn">
+    <a class="brand" href="../manage.html" title="관리자 메뉴로" style="color:inherit;text-decoration:none"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span class="nm">NMC</span> 도면</a>
     <input id="projName" value="새 스케치" aria-label="스케치 이름" spellcheck="false">
     <div class="pjbar" id="pjBar" hidden><a class="btn" id="pjBack" href="../pj.html" title="공사 프로젝트로 돌아가기"><svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg><span class="pjn" id="pjName">프로젝트</span></a><button class="btn" id="pjLoad" type="button" hidden title="이 프로젝트에 저장된 도면을 다시 불러옵니다">저장된 도면 불러오기</button><button class="btn pri" id="pjSave" type="button" title="지금 도면을 이 프로젝트에 저장합니다 (저장 단추 · Ctrl+S 도 같음). 물량은 프로젝트 화면에서 자동 산출됩니다"><span class="cx">프로젝트에 </span>저장</button><button class="btn" id="pjColor" type="button" title="프로젝트에 저장한 뒤 색상 정하기 화면으로 갑니다">색상<span class="cx"> 정하기</span> →</button></div>
     <div class="tb">
@@ -941,7 +943,7 @@ kbd.kk { display: inline-block; font: 700 11px/1.5 var(--mono); padding: 0 6px; 
     <p class="hint" id="gateNote" hidden></p>
     <div class="field"><label for="gateCode">관리자 비밀번호</label><div class="row"><input type="password" id="gateCode" autocomplete="current-password" placeholder="비밀번호" maxlength="100" style="width:220px;letter-spacing:normal;font:600 15px var(--sans,inherit)"><button class="btn pri" id="gateOpen">로그인</button></div></div>
     <p class="hint" id="gateErr" style="color:var(--red);min-height:1.2em"></p>
-    <div class="row"><a class="btn" href="../manage.html">관리자 메뉴로</a></div>
+    <div class="row" data-nmc-slot data-nmc-cls="btn"><a class="btn" href="../manage.html">관리자 메뉴로</a></div>
   </div>
 </dialog>
 <script>(()=>{var M0=Object.create;var _i=Object.defineProperty;var b0=Object.getOwnPropertyDescriptor;var k0=Object.getOwnPropertyNames;var w0=Object.getPrototypeOf,N0=Object.prototype.hasOwnProperty;var E0=(t,e)=>()=>{try{return e||t((e={exports:{}}).exports,e),e.exports}catch(n){throw e=0,n}},v0=(t,e)=>{for(var n in e)_i(t,n,{get:e[n],enumerable:!0})},S0=(t,e,n,o)=>{if(e&&typeof e=="object"||typeof e=="function")for(let s of k0(e))!N0.call(t,s)&&s!==n&&_i(t,s,{get:()=>e[s],enumerable:!(o=b0(e,s))||o.enumerable});return t};var Fi=(t,e,n)=>(n=t!=null?M0(w0(t)):{},S0(e||!t||!t.__esModule?_i(n,"default",{value:t,enumerable:!0}):n,t));var Os=E0((Ui,Ki)=>{(function(t,e){typeof Ui=="object"&&typeof Ki<"u"?Ki.exports=e():typeof define=="function"&&define.amd?define(e):(t=typeof globalThis<"u"?globalThis:t||self,t.polygonClipping=e())})(Ui,(function(){"use strict";function t(F,M){var k={label:0,sent:function(){if(C[0]&1)throw C[1];return C[1]},trys:[],ops:[]},L,$,C,K;return K={next:H(0),throw:H(1),return:H(2)},typeof Symbol=="function"&&(K[Symbol.iterator]=function(){return this}),K;function H(N){return function(v){return x([N,v])}}function x(N){if(L)throw new TypeError("Generator is already executing.");for(;k;)try{if(L=1,$&&(C=N[0]&2?$.return:N[0]?$.throw||((C=$.return)&&C.call($),0):$.next)&&!(C=C.call($,N[1])).done)return C;switch($=0,C&&(N=[N[0]&2,C.value]),N[0]){case 0:case 1:C=N;break;case 4:return k.label++,{value:N[1],done:!1};case 5:k.label++,$=N[1],N=[0];continue;case 7:N=k.ops.pop(),k.trys.pop();continue;default:if(C=k.trys,!(C=C.length>0&&C[C.length-1])&&(N[0]===6||N[0]===2)){k=0;continue}if(N[0]===3&&(!C||N[1]>C[0]&&N[1]<C[3])){k.label=N[1];break}if(N[0]===6&&k.label<C[1]){k.label=C[1],C=N;break}if(C&&k.label<C[2]){k.label=C[2],k.ops.push(N);break}C[2]&&k.ops.pop(),k.trys.pop();continue}N=M.call(F,k)}catch(v){N=[6,v],$=0}finally{L=C=0}if(N[0]&5)throw N[1];return{value:N[0]?N[1]:void 0,done:!0}}}var e=(function(){function F(M,k){this.next=null,this.key=M,this.data=k,this.left=null,this.right=null}return F})();function n(F,M){return F>M?1:F<M?-1:0}function o(F,M,k){for(var L=new e(null,null),$=L,C=L;;){var K=k(F,M.key);if(K<0){if(M.left===null)break;if(k(F,M.left.key)<0){var H=M.left;if(M.left=H.right,H.right=M,M=H,M.left===null)break}C.left=M,C=M,M=M.left}else if(K>0){if(M.right===null)break;if(k(F,M.right.key)>0){var H=M.right;if(M.right=H.left,H.left=M,M=H,M.right===null)break}$.right=M,$=M,M=M.right}else break}return $.right=M.left,C.left=M.right,M.left=L.right,M.right=L.left,M}function s(F,M,k,L){var $=new e(F,M);if(k===null)return $.left=$.right=null,$;k=o(F,k,L);var C=L(F,k.key);return C<0?($.left=k.left,$.right=k,k.left=null):C>=0&&($.right=k.right,$.left=k,k.right=null),$}function i(F,M,k){var L=null,$=null;if(M){M=o(F,M,k);var C=k(M.key,F);C===0?(L=M.left,$=M.right):C<0?($=M.right,M.right=null,L=M):(L=M.left,M.left=null,$=M)}return{left:L,right:$}}function r(F,M,k){return M===null?F:(F===null||(M=o(F.key,M,k),M.left=F),M)}function a(F,M,k,L,$){if(F){L(""+M+(k?"└── ":"├── ")+$(F)+`
@@ -1536,6 +1538,7 @@ var NMCP = (() => {
     document.body.classList.add('pjon');
     P('pjName').textContent = pj ? pj.no + ' ' + pj.name : no;
     P('pjBack').href = '../pj.html?no=' + encodeURIComponent(no);
+    if (window.NMCNav) NMCNav.hub('../pj.html?no=' + encodeURIComponent(no), '프로젝트');   // 돌아갈 기록이 없으면 그 프로젝트로
     P('pjBack').title = pj ? '공사 프로젝트 ' + pj.no + ' 「' + pj.name + '」(으)로 돌아가기' : '공사 프로젝트로 돌아가기';
     P('pjLoad').hidden = !(pj && pj.design);
     const off = busy || !pj || pj.state === '취소';

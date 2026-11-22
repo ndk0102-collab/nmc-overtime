@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <script src="push.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -87,8 +88,8 @@ button,input{font:inherit;color:inherit}
 </head>
 <body>
 <header class="appbar">
-  <div class="ab-in">
-    <a class="home" href="./"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>홈</a>
+  <div class="ab-in" data-nmc-slot data-nmc-hub="./" data-nmc-hub-name="홈">
+    <a class="home" href="./"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>홈</a>
     <h1 class="brand">관리자<small>MANAGEMENT</small></h1>
     <button type="button" class="out" id="outBtn" hidden>로그아웃</button>
   </div>

@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -182,7 +183,7 @@ b{font-variant-numeric:tabular-nums}
 <body>
 <header class="bar">
   <div class="bin">
-    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>관리자</a>
+    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a>
     <h1>공문함</h1>
   </div>
 </header>
@@ -194,6 +195,7 @@ b{font-variant-numeric:tabular-nums}
 <script>
 (function () {
   'use strict';
+  if (window.NMCNav) { NMCNav.hub('manage.html', '관리자'); NMCNav.mount(document.querySelector('header.bar .bin')); }   // 맨 앞 '뒤로' (온 길로)
   var DEMO = window.__SERVER__ || null;   // 시험용 화면에서만
   var API = DEMO ? '' : String(window.NMC_API || '');
   var TOKEN_KEY = 'nmc_pay_token';
@@ -313,7 +315,7 @@ b{font-variant-numeric:tabular-nums}
   function driveView(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
   function load(quiet) {
     if (!quiet) { S.err = ''; render(); }
-    return call('apiDocs', []).then(function (d) { put(d); render(); openFromHash(); }, function (e) { if (String(e && e.message) !== 'auth') { S.err = errText(e); render(); } });
+    return call('apiDocs', []).then(function (d) { put(d); render(); openFromHash(); navStart(); }, function (e) { if (String(e && e.message) !== 'auth') { S.err = errText(e); render(); } });
   }
   function find(id) { return S.D ? S.D.R.filter(function (x) { return x.id === id; })[0] : null; }
   function yy(k) { return S.D && k && k.slice(0, 4) !== S.D.today.slice(0, 4) ? k.slice(0, 4) + '년 ' : ''; }
@@ -453,6 +455,7 @@ b{font-variant-numeric:tabular-nums}
     if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
     h += helpHtml();
     root.innerHTML = h;
+    if (window.NMCNav) NMCNav.sync();
   }
   /* 다음 메일 자동 읽기 (2026-11-21 18:31 지시 "이 컴퓨터 설치해서 메일 자동으로 읽고 가지고 오는 걸로 진행해 봐라")
      사무실 컴퓨터의 메일 읽기 프로그램이 10분마다 다음 메일의 새 메일을 이 공문함으로 보냅니다(메일 한 통 = '메일' 한 건, 첨부는 따로 정리).
@@ -531,12 +534,12 @@ b{font-variant-numeric:tabular-nums}
     S.open = id;
     sheetHtml(x);
     sheet.hidden = false; shade.hidden = false; document.body.classList.add('noscroll');
-    try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch (e) {}
     var t = $('shTitle'); if (t) t.focus();
+    if (window.NMCNav) NMCNav.sync();   // 기록에 한 칸 (주소 끝에 #번호)
   }
   function closeSheet() {
     S.open = ''; sheet.hidden = true; shade.hidden = true; sheet.innerHTML = ''; document.body.classList.remove('noscroll');
-    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    if (window.NMCNav) NMCNav.sync();   // 앱에서 닫으면 기록도 한 칸 되돌림
   }
   function openFromHash() {
     var id = decodeURIComponent(String(location.hash || '').slice(1));
@@ -550,8 +553,24 @@ b{font-variant-numeric:tabular-nums}
     S.open = 'po:' + id;
     sheet.innerHTML = poSheetHtml(p);
     sheet.hidden = false; shade.hidden = false; document.body.classList.add('noscroll');
-    try { history.replaceState(null, '', '#' + encodeURIComponent(id)); } catch (e) {}
     var t = $('shTitle'); if (t) t.focus();
+    if (window.NMCNav) NMCNav.sync();
+  }
+  /* 뒤로 = 온 길로 한 걸음 (2026-11-22 지시): 기록에 남는 것 = 분류 칸 · 상태 칸(전체 달력 포함) · 열어 본 한 건 */
+  function navGet() { return { cat: S.cat, f: S.f, open: S.open || '' }; }
+  function navSet(v) {
+    v = v || {};
+    S.cat = v.cat || 'all'; S.f = v.f || 'open';
+    if (!v.open) { if (S.open) closeSheet(); }
+    else if (v.open !== S.open) { if (v.open.indexOf('po:') === 0) { if (findPo(v.open.slice(3))) openPo(v.open.slice(3)); } else if (find(v.open)) openDoc(v.open); }
+    render();
+  }
+  function navStart() {
+    if (!window.NMCNav || navStart.done) return;
+    navStart.done = true;
+    NMCNav.page({ get: navGet, set: navSet,
+      base: function () { return { cat: S.cat, f: S.f, open: '' }; },
+      url: function (v) { return v.open ? '#' + encodeURIComponent(v.open.replace(/^po:/, '')) : location.pathname + location.search; } });
   }
   function poSheetHtml(p) {
     var todo = !!PO_TODO[p.st];

@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&family=Noto+Sans+Myanmar:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -43,7 +44,8 @@ button{font:inherit;color:inherit}
 .brand{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;font-size:19px;font-weight:800;letter-spacing:-0.01em}
 .tophome{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;min-width:44px;min-height:44px;padding:0 12px 0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700;text-decoration:none;white-space:nowrap}
 .tophome:focus-visible,.toplang:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
-@media (max-width:400px){html:not([lang="ko"]) .tophome span{display:none}html:not([lang="ko"]) .tophome{padding:0}}
+.topback{min-height:44px;border-width:1px;border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.14);font-size:14px;font-weight:700}
+@media (max-width:400px){html:not([lang="ko"]) .tophome span,html:not([lang="ko"]) .topback span{display:none}html:not([lang="ko"]) .tophome{padding:0}html:not([lang="ko"]) .topback{padding:0 4px 0 2px}}
 .logo{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:11px;background:#fff;color:var(--accent);font-size:11px;font-weight:800;letter-spacing:.04em}
 .toplang{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
 .who{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
@@ -274,7 +276,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
   /* ───────── 문구 (5개 언어) ───────── */
   var I18N = {
     ko: {
-      app: 'NMC 잔업', home: '홈', chooseName: '본인 이름을 선택하십시오', nameMissing: '이름이 없으면 사무실에 문의하십시오.',
+      app: 'NMC 잔업', home: '홈', back: '뒤로', chooseName: '본인 이름을 선택하십시오', nameMissing: '이름이 없으면 사무실에 문의하십시오.',
       hello: '{name}님', change: '변경', navRec: '등록', navMine: '내 기록', navAll: '전체 현황',
       pickDay: '날짜를 선택하십시오', today: '오늘', otBadge: '잔업 · {t}부터', holBadge: '휴일 근무',
       howMany: '몇 시간 했나요?', hUnit: '시간', hours: '{h}시간',
@@ -302,7 +304,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       refresh: '새로고침', printBtn: '이 달 표 인쇄', printTitle: '시간 외 근무 시간 (남명)', printedAt: '출력', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
     },
     en: {
-      app: 'NMC Overtime', home: 'Home', chooseName: 'Tap your name', nameMissing: 'If your name is not here, tell the office.',
+      app: 'NMC Overtime', home: 'Home', back: 'Back', chooseName: 'Tap your name', nameMissing: 'If your name is not here, tell the office.',
       hello: 'Hi, {name}', change: 'Change', navRec: 'Record', navMine: 'My record', navAll: 'Everyone',
       pickDay: 'Choose the day', today: 'Today', otBadge: 'Overtime · from {t}', holBadge: 'Holiday work',
       howMany: 'How many hours?', hUnit: 'hours', hours: '{h} h',
@@ -330,7 +332,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       refresh: 'Refresh', printBtn: 'Print this month', printTitle: 'Overtime hours (NMC)', printedAt: 'Printed', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
     },
     th: {
-      app: 'NMC โอที', home: 'หน้าแรก', chooseName: 'แตะชื่อของคุณ', nameMissing: 'ถ้าไม่มีชื่อของคุณ กรุณาแจ้งสำนักงาน',
+      app: 'NMC โอที', home: 'หน้าแรก', back: 'กลับ', chooseName: 'แตะชื่อของคุณ', nameMissing: 'ถ้าไม่มีชื่อของคุณ กรุณาแจ้งสำนักงาน',
       hello: 'สวัสดี {name}', change: 'เปลี่ยน', navRec: 'บันทึก', navMine: 'ของฉัน', navAll: 'ทุกคน',
       pickDay: 'เลือกวัน', today: 'วันนี้', otBadge: 'โอที · เริ่ม {t}', holBadge: 'ทำงานวันหยุด',
       howMany: 'ทำกี่ชั่วโมง?', hUnit: 'ชม.', hours: '{h} ชม.',
@@ -358,7 +360,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       refresh: 'รีเฟรช', printBtn: 'พิมพ์ตารางเดือนนี้', printTitle: 'ชั่วโมงทำงานล่วงเวลา (NMC)', printedAt: 'พิมพ์เมื่อ', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
     },
     vi: {
-      app: 'NMC Tăng ca', home: 'Trang chủ', chooseName: 'Bấm vào tên của bạn', nameMissing: 'Nếu không có tên của bạn, hãy báo văn phòng.',
+      app: 'NMC Tăng ca', home: 'Trang chủ', back: 'Quay lại', chooseName: 'Bấm vào tên của bạn', nameMissing: 'Nếu không có tên của bạn, hãy báo văn phòng.',
       hello: 'Xin chào {name}', change: 'Đổi', navRec: 'Ghi', navMine: 'Của tôi', navAll: 'Mọi người',
       pickDay: 'Chọn ngày', today: 'Hôm nay', otBadge: 'Tăng ca · từ {t}', holBadge: 'Làm ngày nghỉ',
       howMany: 'Bạn làm bao nhiêu giờ?', hUnit: 'giờ', hours: '{h} giờ',
@@ -386,7 +388,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       refresh: 'Làm mới', printBtn: 'In bảng tháng này', printTitle: 'Giờ làm thêm (NMC)', printedAt: 'In lúc', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
     },
     my: {
-      app: 'NMC အချိန်ပို', home: 'ပင်မ', chooseName: 'သင့်အမည်ကို နှိပ်ပါ', nameMissing: 'သင့်အမည် မပါလျှင် ရုံးခန်းသို့ ပြောပါ။',
+      app: 'NMC အချိန်ပို', home: 'ပင်မ', back: 'နောက်သို့', chooseName: 'သင့်အမည်ကို နှိပ်ပါ', nameMissing: 'သင့်အမည် မပါလျှင် ရုံးခန်းသို့ ပြောပါ။',
       hello: 'မင်္ဂလာပါ {name}', change: 'ပြောင်းရန်', navRec: 'ထည့်ရန်', navMine: 'ကျွန်ုပ်၏', navAll: 'အားလုံး',
       pickDay: 'ရက်ရွေးပါ', today: 'ယနေ့', otBadge: 'အချိန်ပို · {t} မှ', holBadge: 'ပိတ်ရက် အလုပ်',
       howMany: 'ဘယ်နှစ်နာရီ လုပ်ခဲ့သလဲ', hUnit: 'နာရီ', hours: '{h} နာရီ',
@@ -571,7 +573,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     }
     try {
       var qs = Object.keys(p).map(function (k) { return k + '=' + encodeURIComponent(p[k]); }).join('&');
-      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+      history.replaceState(history.state, '', location.pathname + (qs ? '?' + qs : '') + location.hash);   // 기록 칸의 상태(뒤로)는 그대로
     } catch (e) {}
   }
   function standalone() {
@@ -606,6 +608,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     if (S.toast) h += '<div class="toast' + (main ? ' up' : '') + '" role="status">' + S.toast + '</div>';
     root.innerHTML = h;
     afterRender();
+    if (window.NMCNav) NMCNav.sync();
   }
 
   function afterRender() {
@@ -628,6 +631,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     var langName = '';
     LANGS.forEach(function (l) { if (l[0] === S.lang) langName = l[1]; });
     var h = '<header class="appbar"><div class="ab-in">' +
+      (window.NMCNav ? NMCNav.btn('topback', tr('back')) : '') +   // 뒤로 = 온 길로 한 걸음 (2026-11-22 지시)
       '<a class="tophome" href="./" aria-label="' + esc(tr('home')) + '">' + ICON.home + '<span>' + esc(tr('home')) + '</span></a>' +
       '<div class="brand"><span class="logo" aria-hidden="true">NMC</span><span>' + esc(tr('app').replace(/^NMC\s*/, '')) + '</span></div>';
     if (S.lang) {
@@ -1144,6 +1148,16 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     if (S.lang) store('nmc_ot_lang', S.lang);
     applyLang();
     render();
+    if (window.NMCNav) {   // 기록에 남는 것 = 아래 칸(등록 · 내 기록 · 전체 현황) · 열어 본 창(언어 · 날짜 고르기 · 삭제 확인 · 설치 안내)
+      NMCNav.hub('./', tr('home'));
+      NMCNav.page({ get: function () { return { tab: S.tab || '', sheet: S.sheet || '' }; },
+        set: function (v) {
+          v = v || {};
+          if (S.sheet && S.sheet !== v.sheet) S.sheet = null;   // 창은 닫기만 (다시 열지는 않음)
+          if (v.tab && v.tab !== S.tab && /^(rec|mine|all)$/.test(v.tab)) { S.tab = v.tab; if (v.tab !== 'rec' && S.ready) ensureMonth(S.viewYm); }
+          render();
+        } });
+    }
     start();
   });
 })();

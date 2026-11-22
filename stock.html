@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
+<script src="nav.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 :root{
@@ -1554,7 +1555,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function render() {
     if (PO_AUTO && S.ready && S.admin && VIEW === 'out' && S.outMode === 'cal' && !S.sheet) {
       PO_AUTO = false;
-      try { history.replaceState(null, '', location.pathname + '?view=out'); } catch (e) {}
+      try { history.replaceState(history.state, '', location.pathname + '?view=out'); } catch (e) {}
       S.poFlash = true;
       setTimeout(function () { S.poFlash = false; var pc = document.getElementById('pocard'); if (pc) pc.classList.remove('flash'); }, 2600);
     }
@@ -1601,7 +1602,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
   }
 
-  function renderSheet() { renderSheet0(); navSync(); }
+  function renderSheet() { renderSheet0(); if (window.NMCNav) NMCNav.sync(); }
   function renderSheet0() {
     if (!S.sheet || !S.ready) { sheetEl.innerHTML = ''; return; }
     var inner = S.sheet.kind === 'review' ? sheetReview()
@@ -1618,17 +1619,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     sheetEl.innerHTML = '<div class="overlay" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title">' + inner + '</div></div>';
   }
 
-  /* ── 뒤로 (2026-11-17) ── */
-  function subLevel() {
-    if (!S.ready || !S.admin) return false;
-    if (VIEW === 'out') return S.outMode === 'label' || S.outMode === 'porev' || S.outMode === 'add' || S.outMode === 'find';
-    if (VIEW === 'all') return !!S.allAdd;
-    return false;
-  }
-  function backTo() {
-    if (VIEW === 'all') return S.allAddFrom === 'stock' ? '현재고' : '예정';
-    return '출고 달력';
-  }
+  /* ── 안쪽 화면에서 한 단계 전으로 (화면 안 '뒤로' 글자 단추 · 아래 nav.js 기록과 함께) ── */
   /** 한 단계 전으로. 돌아갈 곳이 없으면 false */
   function goBack() {
     if (S.sheet && S.ready) { S.sheet = null; render(); return true; }
@@ -1646,31 +1637,37 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     render();
     return false;
   }
-  /* 브라우저 기록: 안쪽 화면 1칸 + 시트 1칸. 앱 안에서 닫으면 그만큼 기록도 되돌림(그때 오는 popstate는 건너뜀) */
-  var NAV_DEPTH = 0, NAV_SKIP = 0;
-  function navDepth() { return (subLevel() ? 1 : 0) + (S.sheet && S.ready ? 1 : 0); }
-  function navSync() {
-    var want = navDepth();
-    try {
-      while (NAV_DEPTH < want) { history.pushState({ nmcNav: NAV_DEPTH + 1 }, ''); NAV_DEPTH++; }
-      if (NAV_DEPTH > want) { var n = NAV_DEPTH - want; NAV_DEPTH = want; NAV_SKIP++; history.go(-n); }
-    } catch (e) { /* 기록을 못 쓰는 곳: 단추로만 */ }
+  /* 뒤로 = 온 길로 한 걸음 (2026-11-22 지시 "전 창구에 뒤로가기 버튼 다 달아라. 그리고 내가 갓던 대로 뒤로 가도록"): 공통 nav.js
+     이 화면 안에서 기록에 남는 것 = 칸(탭) · 안쪽 화면(물표 · 출고 등록 · 발주서 확인 · 찾기 · 전체관리 등록) · 열어 본 창(시트).
+     뒤로 하면 안쪽 화면 · 창은 닫히고 칸은 전에 보던 칸으로, 보던 자리(위치)도 그대로. 다른 화면에서 왔으면 그 화면으로 돌아감. */
+  function navGet() {
+    return { tab: S.tab || '', mode: VIEW === 'out' && S.outMode && S.outMode !== 'cal' ? S.outMode : '', add: VIEW === 'all' ? (S.allAdd || '') : '', sheet: S.sheet && S.ready ? S.sheet.kind : '' };   // 바탕(달력 · 창 없음) = 빈 값
   }
-  window.addEventListener('popstate', function () {
-    if (NAV_SKIP > 0) { NAV_SKIP--; return; }
-    if (NAV_DEPTH > 0) NAV_DEPTH--;
-    if (S.busy) {
-      try { history.pushState({ nmcNav: NAV_DEPTH + 1 }, ''); NAV_DEPTH++; } catch (e) { /* 그대로 */ }
-      toast('저장 중입니다. 완료 후 다시 눌러 주십시오');
-      return;
+  function navSet(v) {
+    v = v || {};
+    if (S.sheet && !v.sheet) S.sheet = null;
+    if (VIEW === 'out' && S.outMode !== 'cal' && (v.mode || 'cal') === 'cal') {   // 안쪽 화면 닫기 (다시 여는 것은 안 함 — 그때의 자료가 없어서)
+      if (S.outMode === 'porev') S.poRev = null;
+      if (S.outMode === 'find') S.fromFind = false;
+      if (S.outMode === 'add') { S.po = false; S.poNeedDate = false; S.poQueue = false; S.pick = null; S.qty = {}; S.price = {}; }
+      S.outMode = 'cal';
     }
-    goBack();
-  });
+    if (VIEW === 'all' && S.allAdd && !v.add) { S.allAdd = ''; S.qty = {}; S.price = {}; }
+    if (v.tab && v.tab !== S.tab && TABS.some(function (t) { return t[0] === v.tab; })) { S.tab = v.tab; store('nmc_inv_tab2', v.tab); S.pick = null; }
+    render();
+  }
+  function navStart() {
+    if (!window.NMCNav || navStart.done) return;
+    navStart.done = true;
+    NMCNav.onBlock = function (m) { toast(m); };
+    NMCNav.page({ get: navGet, set: navSet, block: function () { return S.busy ? '저장 중입니다. 완료 후 다시 눌러 주십시오' : ''; } });
+  }
+  if (window.NMCNav) NMCNav.hub(ADMIN_VIEW ? 'manage.html' : './', ADMIN_VIEW ? '관리자' : '홈');
 
   function header() {
     var sub = VIEW_NAME + (S.today ? ' · ' + fmtDateLong(S.today) : '');
     if (ADMIN_VIEW && S.ready && !S.admin) sub = VIEW_NAME + ' · 관리자';
-    var nav = (subLevel() ? '<button type="button" class="ghost sm navbtn backbtn" data-act="back" aria-label="뒤로 (' + esc(backTo()) + ')">' + ICON.chevL + '<span>뒤로</span></button>' : '') +
+    var nav = (window.NMCNav ? NMCNav.btn('ghost sm navbtn backbtn') : '') +
       (ADMIN_VIEW ? '<a class="ghost sm navbtn" href="manage.html" aria-label="관리자">' + ICON.home + '<span>관리자</span></a>'   // 관리자 화면 → 관리자 창구 (2026-11-20)
         : '<a class="ghost sm navbtn" href="./" aria-label="홈">' + ICON.home + '<span>홈</span></a>');
     if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
@@ -5109,7 +5106,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      등록 안 된 발주서 = 판독 내용 확인 화면을 바로 엶(맞으면 '등록', 이미 들어갔으면 '중복'), 이미 등록 = 수신 발주서에서 그 줄을 찾아 보여 줌, 날짜 대기 = 일자 지정 창 */
   function poGo(id) {
     PO_GO = '';
-    try { history.replaceState(null, '', location.pathname + '?view=out'); } catch (e) {}
+    try { history.replaceState(history.state, '', location.pathname + '?view=out'); } catch (e) {}
     S.outMode = 'cal'; S.poOpening = id; render();
     call('apiPoList').then(function (r) {
       S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [] };
@@ -7741,7 +7738,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     S.fatal = false;
     render();
     if (!ADMIN_VIEW) {
-      formCall().then(function (r) { S.admin = false; applyForm(r); S.ready = true; render(); }, function () { S.fatal = true; render(); });
+      formCall().then(function (r) { S.admin = false; applyForm(r); S.ready = true; render(); navStart(); }, function () { S.fatal = true; render(); });
       return;
     }
     var tok = getToken();
@@ -7753,6 +7750,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       apply(r);
       S.ready = true;
       render();
+      navStart();
       if (PO_GO) poGo(PO_GO);
     }, function (e) {
       if (!isAuth(e)) { S.fatal = true; render(); return; }
