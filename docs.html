@@ -36,18 +36,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 b{font-variant-numeric:tabular-nums}
 [hidden]{display:none!important}
 .bar{position:sticky;top:0;z-index:20;background:var(--vc);color:#fff;padding:10px 12px 12px;box-shadow:0 2px 8px rgba(15,23,42,.18)}
-.bin{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.bin{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:10px}
 .home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
 .bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800}
-.wrap{max-width:820px;margin:0 auto;padding:12px 12px 90px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.wrap{max-width:1040px;margin:0 auto;padding:12px 12px 90px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 12px}
 .card h2{margin:0 0 8px;font-size:18px;font-weight:800}
 .cnt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px}
-.cnt button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:64px;padding:8px 10px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;text-align:left}
-.cnt button b{font-size:22px;font-weight:800;line-height:1.1}
+.cnt button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:64px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;text-align:left}
+.cnt button b{font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
 .cnt button span{font-size:13px;font-weight:700;color:var(--muted)}
 .cnt button.late b{color:var(--bad)} .cnt button.soon b{color:var(--warn)} .cnt button.fresh b{color:var(--vc)}
-.cnt button[aria-pressed="true"]{border-color:var(--vc);background:var(--vsoft)}
+.cnt button[aria-pressed="true"]{border-color:var(--vc);background:var(--vsoft);box-shadow:inset 0 -3px 0 var(--vc)}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 16px;border:0;border-radius:12px;background:var(--vc);color:#fff;font-weight:800;font-size:15.5px;cursor:pointer;text-decoration:none}
 .btn.ghost{background:#fff;color:var(--vc);border:2px solid var(--line)}
@@ -76,15 +76,72 @@ b{font-variant-numeric:tabular-nums}
 .chip{min-height:40px;padding:0 12px;border:2px solid var(--line);border-radius:999px;background:#fff;font-weight:700;font-size:14px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--vc);border-color:var(--vc);color:#fff}
 .list{list-style:none;margin:0;padding:0}
-.it{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 8px;cursor:pointer}
-.it.st-new{border-left-color:var(--vc)} .it.st-done{opacity:.72;border-left-color:#BFC6CE}
-.it .t{display:block;font-size:16.5px;font-weight:800;line-height:1.35}
-.it .m{display:block;margin-top:2px;color:var(--muted);font-size:14px;font-weight:600}
-.it .s{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px;color:var(--ink2);font-size:14px}
+/* 목록 = 표 (2026-11-22 지시 "깔끔하고 보기 좋게 다시 만들어라. 제대로 정리 딱딱딱 기업같이"): 줄마다 같은 칸 · 넓은 화면은 머리줄 · 휴대폰은 두 줄 */
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:0 0 12px}
+.thr,.it{display:grid;grid-template-columns:var(--cols);column-gap:14px;align-items:center}
+.thr{padding:9px 16px;background:#F5F2EF;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:800;color:var(--muted)}
+.thr .r,.it .r{text-align:right}
+.it{width:100%;min-height:52px;padding:9px 16px;margin:0;border:0;border-bottom:1px solid #EEE8E2;border-radius:0;background:var(--card);text-align:left;cursor:pointer;font:inherit;color:inherit}
+.list li:last-child .it{border-bottom:0}
+.it:hover{background:#FAF7F4}
+.it .cell{display:block;min-width:0;font-size:14px;line-height:1.35}
+.it .br{display:none}
+.it .cd1{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.it .t{display:block;min-width:0;font-size:15px;font-weight:700;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it.st-done .t{font-weight:600;color:#45403B}
+.it .s{display:block;margin-top:1px;font-size:12.5px;color:var(--muted);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .s.err{color:var(--bad);font-weight:700}
+.it .m{display:block;font-size:13.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it .n{font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.it .amt{font-weight:800;color:#14532D;font-variant-numeric:tabular-nums}
+.it .amt.none{font-weight:700;color:var(--warn);font-size:12.5px}
+.lab{display:inline-block;max-width:100%;padding:1px 7px;border-radius:5px;font-size:12px;font-weight:800;line-height:1.55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;background:var(--soft);color:var(--ink2)}
+.lab.c-po{background:#E8EFF8;color:#1E5AA8} .lab.c-tax{background:#E6F2EA;color:#1B7A43} .lab.c-gong{background:#F4ECE5;color:#7A3A14}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:800;line-height:1.5;white-space:nowrap;border:1px solid transparent}
+.pill.new{background:var(--vc);color:#fff} .pill.seen{border-color:var(--line);color:var(--ink2);background:#fff} .pill.done{color:#7F7973;background:#F1EEEB}
+.pill.bad{background:var(--bad);color:#fff} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.info{background:var(--blue-soft);color:var(--blue)}
+.pill.imp{background:var(--gold);color:#fff;margin-left:4px}
+.due{font-size:13px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.due.late{color:var(--bad)} .due.soon{color:var(--warn)} .due.none{color:#B9B2AB;font-weight:500}
+.tbl .dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;margin:0;padding:8px 16px;background:#FAF8F6;border-bottom:1px solid var(--line);font-size:14px;font-weight:800;color:var(--ink)}
+.tbl .dh:not(:first-child){border-top:1px solid var(--line)}
+.tbl .dh small{font-size:12.5px;font-weight:700;color:var(--muted)}
+.tbl .dh.today{color:var(--vc)}
+.tbl .dh .sum{margin-left:auto;font-size:13px;font-weight:800;color:#14532D;font-variant-numeric:tabular-nums}
+.tbl .empty{padding:28px 12px}
+.subt{display:grid;grid-template-columns:var(--cols);column-gap:14px;align-items:center;padding:10px 16px;background:#F3F7F4;border-top:2px solid #CFE2D6;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.subt .r{text-align:right}
+.tnote{margin:0;padding:8px 16px 10px;font-size:12.5px;color:var(--muted);background:#FAFCFB;border-top:1px solid #E3EEE7}
+.tbl .cgh{margin:0;padding:7px 16px;border-left-width:4px;border-bottom:1px solid var(--line);background:#FAF8F6;font-size:13.5px}
+.tbl .wait{padding:24px 10px}
+.it .tag{padding:0 6px;font-size:11.5px;margin-right:5px;vertical-align:1px}
+/* 칸: 모두 · 각종 공문 = 받은 시각 · 분류 · 제목 · 발신 · 기한 · 상태 / 발주서 = 받은 시각 · 거래처 · 제목 · 출고 · 상태 / 세금계산서 = 작성일 · 거래처 · 공급가액 · 세액 · 합계 · 장부 */
+.t-all,.t-gong{--cols:92px 86px minmax(0,1fr) minmax(0,180px) 92px 84px}
+.t-po{--cols:92px minmax(0,170px) minmax(0,1fr) 104px 104px}
+.t-tax{--cols:64px minmax(0,1fr) 110px 92px 118px 132px}
+@media (max-width:759px){
+  .thr{display:none}
+  .it,.subt{display:flex;flex-wrap:wrap;align-items:center;column-gap:8px;row-gap:3px;padding:10px 12px}
+  .it .cell{order:3;font-size:12.5px;color:var(--muted)}
+  .it .cell.tt{order:1;flex:1 1 0;min-width:0;color:inherit}
+  .it .cell.st{order:2;flex:none;margin-left:auto}
+  .it .br{display:block;order:2;flex-basis:100%;height:0}
+  .it .cell.xs,.subt .xs{display:none}
+  .it .l2 ~ .l2::before{content:'·';margin-right:8px;color:#C9C2BB}
+  .it .t{font-size:15px}
+  .it .m,.it .due,.it .cd1{font-size:12.5px}
+  .it .m{display:inline;color:var(--muted)}
+  .it .lab{font-size:11.5px}
+  .it .amt{font-size:15px}
+  .subt .r{margin-left:auto}
+  .it .cell.l2 .s{display:inline;margin-left:5px}
+  .dirs{width:100%}
+  .dirs button{flex:1 1 0;padding:0 8px}
+}
 .tag{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12.5px;font-weight:800;vertical-align:2px;margin-right:5px;white-space:nowrap;background:var(--soft);color:var(--ink2)}
 .tag.bad{background:var(--bad);color:#fff} .tag.warn{background:var(--warn-soft);color:var(--warn)} .tag.new{background:var(--vc);color:#fff} .tag.imp{background:var(--gold);color:#fff}
 .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.kind{background:var(--blue-soft);color:var(--blue)}
-.empty{padding:20px 10px;text-align:center;color:var(--muted);font-weight:700}
+.empty{padding:20px 10px;text-align:center;color:var(--muted);font-weight:700;list-style:none}
 .more{margin:4px 0 0}
 .more summary{cursor:pointer;font-weight:800;color:var(--ink2);min-height:36px;display:flex;align-items:center}
 .steps{margin:6px 0 0;padding-left:20px;color:var(--ink2);font-size:14.5px}
@@ -120,24 +177,29 @@ b{font-variant-numeric:tabular-nums}
 .wait{padding:40px 10px;text-align:center;color:var(--muted);font-weight:700}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3);z-index:60}
 /* 분류 · 날짜별 (2026-11-21 22:14 지시: 발주서 · 세금계산서 · 각종 공문으로 나누고, 날짜별로 관리 · 전체는 날짜별로 따로) */
-.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0 0 10px}
-.cats button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:60px;padding:8px 10px;border:2px solid var(--line);border-left-width:6px;border-radius:12px;background:#fff;cursor:pointer;text-align:left}
-.cats button b{font-size:16px;font-weight:800;line-height:1.25}
-.cats button span{font-size:12.5px;font-weight:700;color:var(--muted)}
-.cats .c-all{border-left-color:#5B5550} .cats .c-po{border-left-color:#1E5AA8} .cats .c-tax{border-left-color:#1B7A43} .cats .c-gong{border-left-color:#7A3A14}
-.cats button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
-.cats button[aria-pressed="true"] span{color:#E7E5E4}
+.cats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 12px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cats button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:58px;padding:8px 6px;border:0;border-right:1px solid var(--line);border-radius:0;background:#fff;cursor:pointer;text-align:center;box-shadow:inset 0 -3px 0 transparent}
+.cats button:last-child{border-right:0}
+.cats button b{font-size:15.5px;font-weight:800;line-height:1.25;color:var(--ink2)}
+.cats button span{font-size:12.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.cats .c-all{--cc:#33302D} .cats .c-po{--cc:#1E5AA8} .cats .c-tax{--cc:#1B7A43} .cats .c-gong{--cc:#7A3A14}
+.cats button[aria-pressed="true"]{background:#FBF9F7;box-shadow:inset 0 -3px 0 var(--cc)}
+.cats button[aria-pressed="true"] b{color:var(--cc)}
+.cats button:hover{background:#FAF7F4}
+.segs{display:inline-flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.segs .chip{min-height:40px;border:0;border-right:1px solid var(--line);border-radius:0;padding:0 14px}
+.segs .chip:last-child{border-right:0}
+.segs .chip[aria-pressed="true"]{background:#2D2824;border-color:#2D2824;color:#fff}
 .cats button:focus-visible,.cd:focus-visible,.link:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 .chip.cal{display:inline-flex;align-items:center;gap:5px;border-color:var(--ink2)}
 .chip.cal svg{flex:none}
-.dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:16px 2px 6px;font-size:16px;font-weight:800;color:var(--ink)}
+.dh{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:16px 2px 6px;font-size:15px;font-weight:800;color:var(--ink)}
 .dh small{font-size:13.5px;font-weight:700;color:var(--muted)}
 .dh.today{color:var(--vc)}
 .dh .link{margin-left:auto}
 .link{border:0;background:none;padding:4px 2px;color:var(--blue);font-weight:800;font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .tag.c-po{background:#E6EEF9;color:#1E5AA8} .tag.c-tax{background:#E4F3EA;color:#1B7A43} .tag.c-gong{background:#F6EDE6;color:#7A3A14}
-.it.po{border-left-color:#1E5AA8} .it.po.st-done{border-left-color:#BFC6CE}
-.it .a{display:block;margin-top:4px;color:#1E5AA8;font-size:13.5px;font-weight:700}
+.it .a{color:#1E5AA8;font-weight:700}
 .cgh{margin:12px 2px 6px;font-size:15px;font-weight:800;padding-left:8px;border-left:5px solid}
 .cgh.c-po{border-color:#1E5AA8;color:#1E5AA8} .cgh.c-tax{border-color:#1B7A43;color:#1B7A43} .cgh.c-gong{border-color:#7A3A14;color:#7A3A14}
 /* 전체 — 달력 */
@@ -177,12 +239,12 @@ b{font-variant-numeric:tabular-nums}
 .from{margin:10px 0 0;padding:8px 10px;border-radius:10px;background:#F7F9FC;font-size:14.5px}
 .fd{margin:10px 0 0;border-top:1px solid var(--line);padding-top:4px}
 /* 세금계산서 총 금액 (2026-11-22 지시 "금액이 비어있어도 총 금액만 정리해라") */
-.taxsum{border-left:6px solid #1B7A43}
+.taxsum{border-top:3px solid #1B7A43}
 .taxsum h2 small{display:block;font-size:13.5px;font-weight:700;color:var(--muted);margin-top:2px}
 .tk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 0}
-.tk div{padding:10px 12px;border-radius:12px;background:#F3F8F5;border:1px solid #CFE6D8}
+.tk div{padding:10px 12px;border-radius:8px;background:#F6FAF7;border:1px solid #D7E8DD}
 .tk small{display:block;font-size:13px;font-weight:700;color:var(--muted)}
-.tk b{display:block;font-size:20px;font-weight:800;line-height:1.25;color:#14532D;overflow-wrap:anywhere}
+.tk b{display:block;font-size:20px;font-weight:800;line-height:1.25;color:#14532D;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
 .tk .big{grid-column:span 1}
 .tk .unk b{color:var(--warn)}
 .tk .sale{background:#F2F6FC;border-color:#CCDBF0}
@@ -195,18 +257,36 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 .tm .link{font-size:14.5px;padding:2px 0}
 .tmw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 @media (max-width:520px){.taxsum .tm th{white-space:normal;word-break:keep-all}.taxsum .tm th,.taxsum .tm td{padding:5px 4px}.taxsum table.tm{font-size:13.5px}}
-.it .amt{display:inline-block;margin-top:4px;padding:1px 9px;border-radius:999px;font-size:14px;font-weight:800;background:#E4F3EA;color:#14532D}
-.it .amt.none{background:var(--warn-soft);color:var(--warn)}
 .dh .sum{font-size:13.5px;font-weight:800;color:#14532D}
+/* 세금계산서: 매입 · 매출 따로, 해 · 달마다 (2026-11-22 지시 "세금계산서에 매출과 매입을 따로 관리하도록 해라") */
+.tsh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 0 10px}
+.tsh h2{margin:0;flex:1;min-width:140px}
+.dirs{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.dirs button{min-height:42px;padding:0 16px;border:0;border-right:1px solid var(--line);background:#fff;font-weight:800;font-size:14.5px;cursor:pointer}
+.dirs button:last-child{border-right:0}
+.dirs button small{margin-left:2px;font-size:12.5px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.dirs button[aria-pressed="true"]{background:#1B7A43;color:#fff}
+.dirs button[aria-pressed="true"] small{color:#DDF1E4}
+.dirs button[data-dir="sale"][aria-pressed="true"]{background:#1E3A8A}
+.dirs button[data-dir="sale"][aria-pressed="true"] small{color:#DCE6FA}
+.dirs button[data-dir="chk"][aria-pressed="true"]{background:#8A5300}
+.yrbar{display:flex;align-items:center;gap:8px;margin:12px 0 6px}
+.yrbar b{font-size:16px;font-weight:800;min-width:76px;text-align:center}
+.tm tr.sel td{background:#EEF6F1;font-weight:800}
+.tm tr.tot td{font-weight:800;border-top:2px solid var(--line);background:#FAFAF9}
+.tm td.mute{color:#B9B2AB}
+.mnav{display:flex;align-items:center;gap:8px;margin-left:auto}
+.tbl .dh .sum + .mnav{margin-left:12px}
+.lednote{margin:10px 0 0;padding:9px 12px;border-radius:8px;background:#F6FAF7;border:1px solid #D7E8DD;font-size:14px}
 @media (max-width:520px){.tk{grid-template-columns:1fr 1fr}.tk .big{grid-column:1/-1}}
 .mt12{margin-top:12px}
 /* 지난 발주서 정리 (2026-11-22 지시 "그리고 발주서 들어온거 전부다 정리해라") */
-.posum{border-left:6px solid #1F5FAD}
+.posum{border-top:3px solid #1F5FAD}
 .posum h2 small{display:block;font-size:13.5px;font-weight:700;color:var(--muted);margin-top:2px}
 .posum .tk div{background:#F2F6FC;border-color:#CCDBF0}
 .posum .tk b{color:#173E6E}
 .posum .tm td:nth-child(5){font-size:13px;color:var(--muted)}
-@media (max-width:520px){.cnt{grid-template-columns:repeat(2,minmax(0,1fr))}.fg{grid-template-columns:1fr}.cats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.cnt{grid-template-columns:repeat(2,minmax(0,1fr))}.fg{grid-template-columns:1fr}.cats button{padding:8px 2px}.cats button b{font-size:14px}.cats button span{font-size:11.5px;letter-spacing:-.02em}.segs .chip{padding:0 11px}}
 </style>
 </head>
 <body>
@@ -230,7 +310,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   var TOKEN_KEY = 'nmc_pay_token';
   var $ = function (id) { return document.getElementById(id); };
   var root = $('root'), sheet = $('sheet'), shade = $('shade'), toastEl = $('toast'), fileIn = $('fileIn');
-  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', cat: 'all', calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '' };
+  var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: 'open', cat: 'all', calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '',
+    taxDir: 'buy', taxYear: '', taxYm: '', taxMon: {}, taxBusy: {} };   // 세금계산서: 매입 · 매출 · 확인 필요, 해 · 달 (2026-11-22)
   /* 분류 (2026-11-21 22:14 지시 "공문함에 발주서와 세금계산서 그다음 각종 공문들 정리할 수 있도록 나눠 주고")
      발주서 = 발주서함(출고 화면에서 처리하는 받은 발주서) + 종류가 발주서인 것 + 제목 · 첨부가 발주서인 메일 · 팩스
      세금계산서 = 종류가 세금계산서인 것 + 제목 · 첨부가 세금계산서인 메일 · 팩스, 각종 공문 = 나머지 */
@@ -385,6 +466,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     d.P.forEach(function (p) { p.cat = 'po'; });
     d.E = d.R.concat(d.P);
     S.D = d;
+    Object.keys(S.taxMon).forEach(function (k) { if (S.taxMon[k]) S.taxMon[k].stale = true; });
   }
   function catOf(x, depth) {
     var k = x.kind;
@@ -416,7 +498,13 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (!quiet) { S.err = ''; render(); }
     return call('apiDocs', []).then(function (d) { put(d); render(); openFromHash(); navStart(); }, function (e) { if (String(e && e.message) !== 'auth') { S.err = errText(e); render(); } });
   }
-  function find(id) { return S.D ? S.D.R.filter(function (x) { return x.id === id; })[0] : null; }
+  function find(id) {
+    if (!S.D) return null;
+    var x = S.D.R.filter(function (r) { return r.id === id; })[0];
+    if (x) return x;
+    for (var k in S.taxMon) { var m = S.taxMon[k]; if (m && m.rows) { x = m.rows.filter(function (r) { return r.id === id; })[0]; if (x) return x; } }
+    return null;
+  }
   function yy(k) { return S.D && k && k.slice(0, 4) !== S.D.today.slice(0, 4) ? k.slice(0, 4) + '년 ' : ''; }
   function wdOf(k) { return WD[new Date(Date.UTC(+k.slice(0, 4), +k.slice(5, 7) - 1, +k.slice(8, 10))).getUTCDay()]; }
   function dayHead(k) {
@@ -477,7 +565,29 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     return CATS.filter(function (k) { return c[k]; }).map(function (k) { return ' · ' + CAT[k] + ' ' + c[k]; }).join('');
   }
   function entHtml(e) { return '<li>' + (e.t === 'po' ? poItemHtml(e) : itemHtml(e, S.D.today)) + '</li>'; }
-  function dayList(list, byDue) {
+  /* ── 목록 = 표 (2026-11-22 지시 "깔끔하고 보기 좋게 다시 만들어라. 제대로 정리 딱딱딱 기업같이") ── */
+  function listMode() { return S.cat === 'po' ? 'po' : S.cat === 'gong' ? 'gong' : 'all'; }
+  var THR = { all: ['받은 시각', '분류', '제목', '발신 · 거래처', '기한', '상태'], gong: ['받은 시각', '종류', '제목', '발신', '기한', '상태'], po: ['받은 시각', '거래처', '제목 · 파일', '출고 · 기한', '상태'] };
+  function thrHtml(mode) { return '<div class="thr" aria-hidden="true">' + THR[mode].map(function (t) { return '<span>' + t + '</span>'; }).join('') + '</div>'; }
+  function dShort(s) { s = String(s || ''); return s.length >= 10 ? (S.D && s.slice(0, 4) !== S.D.today.slice(0, 4) ? s.slice(2, 4) + '.' : '') + s.slice(5, 7) + '.' + s.slice(8, 10) : ''; }
+  function atCell(at) { at = String(at || ''); var d = at.slice(0, 10); return (S.D && d === S.D.today ? '오늘' : dShort(d)) + (at.length >= 16 ? ' ' + at.slice(11, 16) : ''); }
+  function dueCell(x, today) {
+    if (!x.due) return '<span class="cell l2 xs"><span class="due none">—</span></span>';
+    if (x.state === '처리 완료') return '<span class="cell l2 xs"><span class="due">' + esc(dShort(x.due)) + '</span></span>';
+    var d = days(today, x.due);
+    return '<span class="cell l2"><span class="due' + (d <= 0 ? ' late' : d <= 3 ? ' soon' : '') + '">' + esc(d < 0 ? '기한 ' + (-d) + '일 지남' : d === 0 ? '오늘 마감' : 'D-' + d + ' · ' + dShort(x.due)) + '</span></span>';
+  }
+  function stPill(x) {
+    var st = x.state === '새 공문' ? ['new', '새 공문'] : x.state === '처리 완료' ? ['done', '처리 완료'] : ['seen', '확인함'];
+    return '<span class="cell st"><span class="pill ' + st[0] + '">' + st[1] + '</span></span>';
+  }
+  function subOf(x) {
+    if ((x.atts || []).length) return '<span class="s a">첨부 ' + esc(x.atts.map(function (a) { return a.name + (a.po ? ' → 발주서 ' + (PO_LAB[a.po.st] || a.po.st) : a.doc ? ' → ' + a.doc.kind : ''); }).join(', ')) + '</span>';
+    if (x.sum) return '<span class="s">' + esc(x.sum) + '</span>';
+    if (!x.chars) return '<span class="s err">글자를 읽지 못했습니다 — 원본을 열어 칸을 채워 주십시오.</span>';
+    return '';
+  }
+  function dayList(list, byDue) {   // 날짜(받은 날 또는 기한) 띠 + 그날 줄들 — 표(.tbl) 안에 넣어 씀
     var D = S.D;
     return groupBy(list, byDue ? function (e) { return e.due; } : function (e) { return String(e.at).slice(0, 10); }, byDue).map(function (g) {
       var ts = S.cat === 'tax' ? g.xs.reduce(function (a, e) { return e.amt !== '' && e.amt != null ? a + e.amt : a; }, 0) : 0;
@@ -487,13 +597,13 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     }).join('');
   }
   function listHtml() {
-    var D = S.D, f = S.f, list = D.E.filter(function (e) { return match(e, f, S.cat); });
+    var D = S.D, f = S.f, mode = listMode(), list = D.E.filter(function (e) { return match(e, f, S.cat); });
     if (!list.length) {
       var anyTax = S.cat === 'tax' && (f === 'open' || f === 'new') && D.E.some(function (e) { return e.cat === 'tax'; });
-      return '<ul class="list" id="list"><li class="empty">' + (anyTax ? '처리할 세금계산서가 없습니다. 받은 세금계산서는 <button type="button" class="link" data-f="done">처리 완료</button> · <button type="button" class="link" data-f="cal">전체 · 날짜별</button>에서 봅니다.'
-        : D.E.length ? '조건에 맞는 것이 없습니다.' : '아직 받은 것이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li></ul>';
+      return '<div class="tbl t-' + mode + '" id="list"><ul class="list"><li class="empty">' + (anyTax ? '처리할 세금계산서가 없습니다. 받은 세금계산서는 <button type="button" class="link" data-f="done">처리 완료</button> · <button type="button" class="link" data-f="cal">전체 · 날짜별</button>에서 봅니다.'
+        : D.E.length ? '조건에 맞는 것이 없습니다.' : '아직 받은 것이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 올리기’를 눌러 주십시오.') + '</li></ul></div>';
     }
-    return '<div id="list">' + dayList(list, f === 'due' || f === 'late' || f === 'soon') + '</div>';
+    return '<div id="list" class="tbl t-' + mode + '">' + thrHtml(mode) + dayList(list, f === 'due' || f === 'late' || f === 'soon') + '</div>';
   }
   /* 전체 (2026-11-21 22:14 지시 "전체는 날짜별로 뭐가 왔는지 전체적으로 볼 수 있도록 따로 만들어 주고"): 달력(날마다 분류별 건수) + 고른 날 · 그 달 목록 */
   function dayChips(xs) {
@@ -527,10 +637,11 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (S.calDay && S.calDay.slice(0, 7) === ym) {
       var dx = (byDay[S.calDay] || []).slice().sort(newest);
       h += '<h3 class="dh' + (S.calDay === D.today ? ' today' : '') + '">' + esc(dayHead(S.calDay)) + '<small>받은 것 ' + dx.length + '건</small><button type="button" class="link" data-day="">' + mo + '월 전체 보기</button></h3>';
+      var cm = listMode();
       if (!dx.length) h += '<p class="empty">이날 받은 것이 없습니다.</p>';
-      else if (S.cat === 'all') h += CATS.map(function (ck) { var g = dx.filter(function (e) { return e.cat === ck; }); return g.length ? '<h4 class="cgh c-' + ck + '">' + CAT[ck] + ' ' + g.length + '건</h4><ul class="list">' + g.map(entHtml).join('') + '</ul>' : ''; }).join('');
-      else h += '<ul class="list">' + dx.map(entHtml).join('') + '</ul>';
-    } else h += inM.length ? dayList(inM, false) : '<p class="empty">' + mo + '월에 받은 것이 없습니다.</p>';
+      else if (S.cat === 'all') h += '<div class="tbl t-all">' + thrHtml('all') + CATS.map(function (ck) { var g = dx.filter(function (e) { return e.cat === ck; }); return g.length ? '<h4 class="cgh c-' + ck + '">' + CAT[ck] + ' ' + g.length + '건</h4><ul class="list">' + g.map(entHtml).join('') + '</ul>' : ''; }).join('') + '</div>';
+      else h += '<div class="tbl t-' + cm + '">' + thrHtml(cm) + '<ul class="list">' + dx.map(entHtml).join('') + '</ul></div>';
+    } else h += inM.length ? '<div class="tbl t-' + listMode() + '">' + thrHtml(listMode()) + dayList(inM, false) + '</div>' : '<p class="empty">' + mo + '월에 받은 것이 없습니다.</p>';
     return h;
   }
   function render() {
@@ -552,14 +663,18 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       return '<button type="button" class="c-' + c[0] + '" data-cat="' + c[0] + '" aria-pressed="' + (S.cat === c[0]) + '"><b>' + c[1] + '</b><span>처리할 것 ' + C.cat[c[0]] + '건</span></button>';
     }).join('') + '</div>';
     var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
-    h += '<div class="filt"><input type="search" id="q" placeholder="제목 · 발신 · 문서번호 · 요약 · 메모 찾기" value="' + esc(S.q) + '" aria-label="공문 찾기">' +
-      '<select id="kindSel" aria-label="종류">' + kinds + '</select></div>';
-    h += '<div class="filt" role="group" aria-label="상태">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료']].map(function (c) {
+    var taxNew = S.cat === 'tax' && Array.isArray(D.taxm);   // 서버 v51부터: 세금계산서는 매입 · 매출 · 해 · 달마다
+    h += '<div class="filt"><input type="search" id="q" placeholder="' + (taxNew ? '거래처 · 품목 · 승인번호 찾기 (고른 달 안에서)' : '제목 · 발신 · 문서번호 · 요약 · 메모 찾기') + '" value="' + esc(S.q) + '" aria-label="찾기">' +
+      (taxNew ? '' : '<select id="kindSel" aria-label="종류">' + kinds + '</select>') + '</div>';
+    if (!taxNew) h += '<div class="filt" role="group" aria-label="상태"><div class="segs">' + [['open', '처리할 것'], ['new', '새 공문'], ['due', '기한 있음'], ['done', '처리 완료']].map(function (c) {
       return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
-    }).join('') + '<button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '전체 · 날짜별</button></div>';
-    if (S.cat === 'tax') h += taxCard();
-    if (S.cat === 'po') h += poCard();
-    h += S.f === 'cal' ? calHtml() : listHtml();
+    }).join('') + '</div><button type="button" class="chip cal" data-f="cal" aria-pressed="' + (S.f === 'cal') + '">' + ICON_CAL + '전체 · 날짜별</button></div>';
+    if (taxNew) h += taxView();
+    else {
+      if (S.cat === 'tax') h += taxCard();
+      if (S.cat === 'po') h += poCard();
+      h += S.f === 'cal' ? calHtml() : listHtml();
+    }
     if (D.noPo) h += '<p class="hint">발주서함(받은 발주서)은 서버를 새로 배포한 뒤 여기에도 함께 보입니다.</p>';
     if (D.total > D.R.length) h += '<p class="hint">오래된 처리 완료 공문 ' + (D.total - D.R.length) + '건은 목록에서 뺐습니다(시트 ‘공문함’에 그대로 있음).</p>';
     h += helpHtml();
@@ -608,26 +723,127 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     return h + '</section>';
   }
   function cb(f, cls, n, t) { return '<button type="button" class="' + cls + '" data-f="' + f + '" aria-pressed="' + (S.f === f) + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
-  function itemHtml(x, today) {
-    var tags = dueTag(x, today) + (x.state === '새 공문' ? '<span class="tag new">새 공문</span>' : '') + (x.imp && x.state !== '처리 완료' ? '<span class="tag imp">중요</span>' : '') +
-      (x.state === '처리 완료' ? '<span class="tag ok">처리 완료</span>' : '');
-    var meta = [x.from || '발신 미상', (S.cat === 'all' && x.cat !== 'gong' ? '<span class="tag c-' + x.cat + '">' + CAT[x.cat] + '</span>' : '') + '<span class="tag kind">' + esc(x.kind) + '</span>' +
-      (x.date ? (x.cat === 'tax' ? '작성 ' : '시행 ') + ymd(x.date) : '받음 ' + md(x.at)), x.state === '확인' ? '확인함' : ''].filter(String);
-    var amt = x.cat === 'tax' ? (x.amt !== '' ? '<span class="amt">합계 ' + won(x.amt) + '원</span>' : '<span class="amt none">금액 모름</span>') : '';
-    var at = (x.atts || []).length ? '<span class="a">첨부 ' + x.atts.map(function (a) { return esc(a.name) + (a.po ? ' → 발주서 ' + esc(PO_LAB[a.po.st] || a.po.st) : a.doc ? ' → ' + esc(a.doc.kind) : ''); }).join(', ') + '</span>' : '';
-    return '<button type="button" class="it st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen') + '" data-open="' + esc(x.id) + '">' +
-      '<span class="t">' + tags + esc(x.title || x.orig) + '</span><span class="m">' + meta.map(function (s, i) { return i === 1 ? s : esc(s); }).join(' · ') + '</span>' + amt + at +
-      (x.sum ? '<span class="s">' + esc(x.sum) + '</span>' : !x.chars ? '<span class="s err">글자를 읽지 못했습니다 — 원본을 열어 칸을 채워 주십시오.</span>' : '') + '</button>';
+  function itemHtml(x, today) {   // 공문함 한 건 = 표 한 줄 (칸은 지금 분류의 머리줄과 같음)
+    var mode = listMode(), st = 'st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen');
+    var title = '<span class="t">' + (x.imp && x.state !== '처리 완료' ? '<span class="tag imp">중요</span>' : '') + esc(x.title || x.orig) + '</span>';
+    var amt = x.cat === 'tax' ? '<span class="s"><span class="amt' + (x.amt === '' ? ' none">금액 모름' : '">합계 ' + won(x.amt) + '원') + '</span></span>' : '';
+    var h = '<button type="button" class="it ' + st + '" data-open="' + esc(x.id) + '"><span class="cell cd1 l2">' + esc(atCell(x.at)) + '</span>';
+    if (mode === 'po') h += '<span class="cell l2"><span class="m">' + esc(x.from || '거래처 미상') + '</span></span><span class="cell tt">' + title + subOf(x) + '</span>';
+    else h += '<span class="cell l2"><span class="lab' + (mode === 'all' ? ' c-' + x.cat : '') + '">' + esc(mode === 'all' && x.cat !== 'gong' ? CAT[x.cat] : x.kind) + '</span></span>' +
+      '<span class="cell tt">' + title + (amt || subOf(x)) + '</span><span class="cell l2"><span class="m">' + esc(x.from || '발신 미상') + '</span></span>';
+    return h + dueCell(x, today) + stPill(x) + '<span class="br"></span></button>';
   }
-  function poItemHtml(p) {
-    var meta = [p.custs.length ? p.custs.join(', ') : '거래처 미상', (S.cat === 'all' ? '<span class="tag c-po">발주서</span>' : '') + '받음 ' + esc(String(p.at).slice(11, 16)),
-      p.dates.length ? '출고 ' + p.dates.map(function (d) { return Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)); }).join('·') : '',
-      p.mail ? '메일 첨부' : p.note === '자동 수집' ? '자동 수집' : '앱에서 올림'].filter(String);
-    return '<button type="button" class="it po st-' + (PO_TODO[p.st] ? 'new' : 'done') + '" data-po="' + esc(p.id) + '">' +
-      '<span class="t"><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st || '?') + '</span>' + esc(p.name) + '</span>' +
-      '<span class="m">' + meta.map(function (v, i) { return i === 1 ? v : esc(v); }).join(' · ') + '</span>' +
-      (p.mail ? '<span class="a">메일: ' + esc(p.mail.title || p.mail.orig) + '</span>' : '') +
-      (p.result ? '<span class="s">' + esc(poRes(p.result)) + '</span>' : '') + '</button>';
+  function poItemHtml(p) {   // 발주서함 한 건 (출고 화면에서 처리)
+    var mode = listMode(), who = p.custs.length ? p.custs.join(', ') : '거래처 미상';
+    var ship = p.dates.length ? '출고 ' + p.dates.map(function (d) { return Number(d.slice(5, 7)) + '/' + Number(d.slice(8, 10)); }).join('·') : '';
+    var sub = p.result ? '<span class="s">' + esc(poRes(p.result)) + '</span>' : p.mail ? '<span class="s a">메일: ' + esc(p.mail.title || p.mail.orig) + '</span>' : '';
+    var h = '<button type="button" class="it po st-' + (PO_TODO[p.st] ? 'new' : 'done') + '" data-po="' + esc(p.id) + '"><span class="cell cd1 l2">' + esc(atCell(p.at)) + '</span>';
+    if (mode === 'po') h += '<span class="cell l2"><span class="m">' + esc(who) + '</span></span><span class="cell tt"><span class="t">' + esc(p.name) + '</span>' + sub + '</span>';
+    else h += '<span class="cell l2"><span class="lab c-po">발주서</span></span><span class="cell tt"><span class="t">' + esc(p.name) + '</span>' + sub + '</span><span class="cell l2"><span class="m">' + esc(who) + '</span></span>';
+    return h + '<span class="cell l2' + (ship ? '' : ' xs') + '"><span class="due' + (ship ? '' : ' none') + '">' + esc(ship || '—') + '</span></span>' +
+      '<span class="cell st"><span class="pill ' + (poTagCls(p.st) || 'done') + '">' + esc(PO_LAB[p.st] || p.st || '?') + '</span></span><span class="br"></span></button>';
+  }
+  /* ── 세금계산서: 매입 · 매출 따로, 해 · 달마다 (2026-11-22 지시 "세금계산서에 매출과 매입을 따로 관리하도록 해라", 서버 v51 taxm · apiDocTaxMonth)
+     달 = 작성일자의 달. 달마다 그달 계산서를 서버에서 모두 받아(공문함 목록 상한과 관계없이) 표로 보이고 소계를 냅니다. 장부 칸 = 자동 수집(매출 · 매입 화면) 상태 ── */
+  var DIR = { buy: '매입', sale: '매출', chk: '확인 필요' };
+  var LEDST = { '장부 반영': ['ok', '장부 반영'], '장부 연결': ['ok', '장부 연결'], '결제 확인': ['ok', '결제 확인'], '출고 대조': ['info', '출고 매출로 셈'],
+    '분류 필요': ['warn', '분류 필요'], '장부 미반영': ['warn', '장부 미반영'], '제외': ['done', '제외'], '승인 취소': ['done', '승인 취소'] };
+  function taxDirOf(x) { var t = String(x.title || ''); return /^\[매출\]/.test(t) ? 'sale' : /^\[(못 엶|확인)\]/.test(t) ? 'chk' : 'buy'; }
+  function taxYmOf(x) { var d = /^\d{4}-\d{2}/.test(String(x.date || '')) ? String(x.date) : String(x.at || ''); return d.slice(0, 7); }
+  function taxSplit(x) { var m = /공급가액 (-?[\d,]+) · 세액 (-?[\d,]+)/.exec(String(x.sum || '')); return m ? [Number(m[1].replace(/,/g, '')), Number(m[2].replace(/,/g, ''))] : null; }
+  function taxWhat(x) { var t = String(x.title || '').replace(/^\[[^\]]*\]\s*/, ''), i = t.indexOf(' — '); return i >= 0 ? [t.slice(0, i), t.slice(i + 3)] : [t, '']; }
+  function ledMap() { var m = S.taxMon[S.taxYm]; return (m && m.led) || (S.D && S.D.led) || null; }
+  function ledOf(x) { var k = String(x.no || '').replace(/\D/g, ''), L = ledMap(); return k.length === 24 && L ? L[k] || null : null; }
+  function ledHtml(x) {
+    var e = ledOf(x);
+    if (!e) return /^\[(매입|매출)\]/.test(x.title) && String(x.date) >= '2026-01-01' ? '<span class="pill seen">반영 대기</span>' : '<span class="due none">—</span>';
+    var m = LEDST[e[0]] || ['seen', e[0]];
+    return '<span class="pill ' + m[0] + '">' + esc(m[1]) + '</span>' + (e[1] || e[2] ? '<span class="s">' + esc([e[1], e[2] ? '분류 추정' : ''].filter(String).join(' · ')) + '</span>' : '');
+  }
+  function taxRow(x) {
+    var w = taxWhat(x), sp = taxSplit(x), st = 'st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen');
+    return '<li><button type="button" class="it ' + st + '" data-open="' + esc(x.id) + '"><span class="cell cd1 l2">' + esc(dShort(x.date || x.at)) + '</span>' +
+      '<span class="cell tt"><span class="t">' + esc(x.from || (taxDirOf(x) === 'chk' ? '국세청 메일' : '거래처 미상')) + (x.state === '새 공문' ? ' <span class="tag new">새</span>' : '') + '</span>' +
+      '<span class="s">' + esc(w.filter(String).join(' · ')) + '</span></span>' +
+      '<span class="cell n xs">' + (sp ? won(sp[0]) : '—') + '</span><span class="cell n xs">' + (sp ? won(sp[1]) : '—') + '</span>' +
+      '<span class="cell n st">' + (x.amt === '' ? '<span class="amt none">금액 모름</span>' : '<span class="amt">' + won(x.amt) + '</span>') + '</span>' +
+      '<span class="cell l2">' + ledHtml(x) + '</span><span class="br"></span></button></li>';
+  }
+  function taxYears() {
+    var ys = {};
+    (S.D.taxm || []).forEach(function (o) { ys[o[0].slice(0, 4)] = 1; });
+    ys[S.D.today.slice(0, 4)] = 1;
+    return Object.keys(ys).sort();
+  }
+  /** 그해 고를 달: 그 방향 계산서가 있는 마지막 달(오늘 달까지), 없으면 그해 오늘 달 또는 12월 */
+  function taxLastYm(y) {
+    var now = S.D.today.slice(0, 7), T = (S.D.taxm || []).filter(function (o) { return o[1] === S.taxDir && o[0].slice(0, 4) === y && o[0] <= now; });
+    return T.length ? T[T.length - 1][0] : y === now.slice(0, 4) ? now : y + '-12';
+  }
+  function needTaxMonth(ym) {
+    if (S.taxBusy[ym]) return;
+    S.taxBusy[ym] = 1;
+    call('apiDocTaxMonth', [ym]).then(function (d) {
+      delete S.taxBusy[ym];
+      S.taxMon[ym] = { rows: (d.rows || []).map(obj).map(function (x) { x.cat = 'tax'; x.atts = []; return x; }), led: d.led || null };
+      if (S.cat === 'tax') render();
+      var y = S.open ? find(S.open) : null;
+      if (y && !sheet.hidden) sheetHtml(y);
+    }, function (e) {
+      delete S.taxBusy[ym];
+      if (String(e && e.message) === 'auth') return;
+      S.taxMon[ym] = { rows: S.D.R.filter(function (x) { return x.cat === 'tax' && taxYmOf(x) === ym; }), led: null, err: String(e && e.message) === 'bad_action' ? '' : errText(e), part: true };
+      if (S.cat === 'tax') render();
+    });
+  }
+  function taxView() {
+    var D = S.D, T = D.taxm, now = D.today.slice(0, 7);
+    if (!S.taxYm) { S.taxYear = taxLastYm(now.slice(0, 4)).slice(0, 4); var all = T.filter(function (o) { return o[1] === S.taxDir && o[0] <= now; }); S.taxYm = all.length ? all[all.length - 1][0] : now; S.taxYear = S.taxYm.slice(0, 4); }
+    var y = S.taxYear, dir = S.taxDir, cnt = { buy: 0, sale: 0, chk: 0 }, M = {}, tot = [0, 0, 0, 0, 0, 0], rows = '';
+    T.forEach(function (o) { if (o[0].slice(0, 4) !== y) return; cnt[o[1]] = (cnt[o[1]] || 0) + o[2]; if (o[1] === dir) M[o[0]] = o; });
+    for (var mo = 1; mo <= 12; mo++) {
+      var ym = y + '-' + ('0' + mo).slice(-2), o = M[ym];
+      if (o) { tot[0] += o[2]; tot[1] += o[3]; tot[2] += o[4]; tot[3] += o[5]; tot[4] += o[6]; tot[5] += o[7]; }
+      rows += '<tr' + (ym === S.taxYm ? ' class="sel"' : '') + '><td><button type="button" class="link" data-tym="' + ym + '">' + mo + '월</button></td>' +
+        (o ? '<td>' + o[2] + '건</td><td>' + (o[7] ? won(o[4]) : '—') + '</td><td>' + (o[7] ? won(o[5]) : '—') + '</td><td>' + (o[3] ? won(o[6]) : '금액 모름') + '</td>'
+          : '<td class="mute">' + (ym > now ? '' : '0건') + '</td><td class="mute"></td><td class="mute"></td><td class="mute"></td>') + '</tr>';
+    }
+    rows += '<tr class="tot"><td>' + y + '년 계</td><td>' + tot[0] + '건</td><td>' + (tot[5] ? won(tot[2]) : '—') + '</td><td>' + (tot[5] ? won(tot[3]) : '—') + '</td><td>' + won(tot[4]) + '</td></tr>';
+    var ys = taxYears(), yi = ys.indexOf(y), unk = tot[0] - tot[1];
+    var h = '<section class="card taxsum" id="taxSum"><div class="tsh"><h2>세금계산서</h2><div class="dirs" role="group" aria-label="매입 · 매출">' +
+      ['buy', 'sale', 'chk'].filter(function (k) { return k !== 'chk' || cnt.chk || dir === 'chk'; }).map(function (k) {
+        return '<button type="button" data-dir="' + k + '" aria-pressed="' + (dir === k) + '">' + DIR[k] + ' <small>' + (cnt[k] || 0) + '</small></button>';
+      }).join('') + '</div></div>' +
+      '<div class="tk"><div class="big' + (dir === 'sale' ? ' sale' : '') + '" id="' + (dir === 'sale' ? 'taxSale' : 'taxBuy') + '"><small>' + y + '년 ' + DIR[dir] + ' 합계 (금액 아는 ' + tot[1] + '건)</small><b>' + won(tot[4]) + '원</b></div>' +
+      '<div><small>' + y + '년 ' + DIR[dir] + '</small><b>' + tot[0] + '건</b></div>' +
+      '<div' + (unk ? ' class="unk"' : '') + '><small>금액 모름</small><b>' + unk + '건</b></div></div>' +
+      '<div class="yrbar"><button type="button" class="btn ghost sm" data-ty="-1"' + (yi <= 0 ? ' disabled' : '') + ' aria-label="이전 해">◀</button><b>' + y + '년</b>' +
+      '<button type="button" class="btn ghost sm" data-ty="1"' + (yi >= ys.length - 1 ? ' disabled' : '') + ' aria-label="다음 해">▶</button><span class="hint" style="margin:0">작성일 기준 · 달을 누르면 아래에 그달 목록</span></div>' +
+      '<div class="tmw" id="taxMonths"><table class="tm"><thead><tr><th>달</th><th>건수</th><th>공급가액</th><th>세액</th><th>합계</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="hint">' + (dir === 'chk' ? '확인 필요 = 회사 사업자번호로 열리지 않은 국세청 메일(못 엶)과 우리 사업자번호가 공급자 · 공급받는자 어디에도 없는 계산서입니다. 합계에 넣지 않습니다.'
+        : '<b>매입과 매출은 서로 더하지 않습니다.</b> 합계 = 금액(공급가액 + 세액)을 아는 계산서만 더한 값, 공급가액 · 세액 = 국세청 계산서를 서버가 열어 나눠 적은 것만 더한 값입니다(금액만 적힌 알림 메일은 빠짐). ' +
+          '2026년 국세청 계산서는 매출 · 매입 장부에 자동으로 반영하고, 장부 칸에 그 상태를 보입니다.') + '</p></section>';
+    return h + taxMonthHtml();
+  }
+  function taxMonthHtml() {
+    var ym = S.taxYm, mo = +ym.slice(5, 7), dir = S.taxDir, m = S.taxMon[ym];
+    if (!m || m.stale) needTaxMonth(ym);
+    var nav = '<span class="mnav"><button type="button" class="btn ghost sm" data-tm="-1" aria-label="이전 달">◀</button><button type="button" class="btn ghost sm" data-tm="1" aria-label="다음 달">▶</button></span>';
+    var title = ym.slice(0, 4) + '년 ' + mo + '월 ' + DIR[dir];
+    if (!m) return '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + nav + '</h3><p class="wait">불러오는 중…</p></div>';
+    var q = S.q ? S.q.replace(/\s+/g, '').toLowerCase() : '';
+    var xs = m.rows.filter(function (x) { return taxDirOf(x) === dir && (!q || hayOf(x).indexOf(q) >= 0); });
+    var n = xs.length, known = 0, sum = 0, split = 0, sup = 0, tx = 0;
+    xs.forEach(function (x) { if (x.amt !== '') { known++; sum += x.amt; } var sp = taxSplit(x); if (sp) { split++; sup += sp[0]; tx += sp[1]; } });
+    var h = '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '<small>' + n + '건' + (q ? ' (찾은 것)' : '') + '</small>' + (known ? '<span class="sum">합계 ' + won(sum) + '원</span>' : '') + nav + '</h3>';
+    if (!n) return h + '<ul class="list"><li class="empty">' + (q ? '찾는 글자가 들어간 계산서가 없습니다.' : '이 달 ' + DIR[dir] + ' 세금계산서가 없습니다.') + '</li></ul>' + (m.part ? '<p class="tnote">서버가 아직 달 보기를 지원하지 않아 이 화면에 받은 목록으로만 보입니다.</p>' : '') + '</div>';
+    h += '<div class="thr" aria-hidden="true"><span>작성일</span><span>거래처 · 품목</span><span class="r">공급가액</span><span class="r">세액</span><span class="r">합계</span><span>장부</span></div>';
+    h += '<ul class="list">' + xs.map(taxRow).join('') + '</ul>';
+    h += '<div class="subt"><span>소계</span><span>' + n + '건' + (n - known ? ' · 금액 모름 ' + (n - known) + '건' : '') + '</span><span class="r xs">' + (split ? won(sup) : '—') + '</span><span class="r xs">' + (split ? won(tx) : '—') + '</span><span class="r">' + won(sum) + '</span><span></span></div>';
+    var notes = [];
+    if (split && split < known) notes.push('공급가액 · 세액은 국세청 계산서 ' + split + '건만 더했습니다(금액만 적힌 알림 ' + (known - split) + '건 제외).');
+    if (m.part) notes.push(m.err ? '달 목록을 받지 못했습니다(' + m.err + ') — 이 화면에 받은 목록으로만 보입니다.' : '서버가 아직 달 보기를 지원하지 않아 이 화면에 받은 목록으로만 보입니다.');
+    return h + (notes.length ? '<p class="tnote">' + esc(notes.join(' ')) + '</p>' : '') + '</div>';
   }
   function helpHtml() {
     return '<section class="card"><details class="more"><summary>넣는 방법 · 정리 기준</summary>' +
@@ -759,6 +975,12 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     h += '<div class="seg" role="group" aria-label="처리 상태">' + D.states.map(function (s) {
       return '<button type="button" data-st="' + esc(s) + '" aria-pressed="' + (x.state === s) + '"' + (busy ? ' disabled' : '') + '>' + esc(s === '확인' ? '확인함' : s) + '</button>';
     }).join('') + '</div>';
+    if (x.cat === 'tax') {   // 장부(자동 수집) 상태 (서버 v51)
+      var le = ledOf(x);
+      if (le || /^\[(매입|매출)\]/.test(x.title)) h += '<p class="lednote">장부: ' + (le ? '<b>' + esc((LEDST[le[0]] || ['', le[0]])[1]) + '</b>' + (le[1] ? ' · ' + esc(le[1]) : '') + (le[2] ? ' (분류 추정)' : '') + (le[3] ? '<br><small class="muted">' + esc(le[3]) + '</small>' : '')
+        : String(x.date) >= '2026-01-01' ? '반영 대기 — 10분 안에 매출 · 매입 장부에 들어갑니다' : '2026년 전 계산서는 장부에 넣지 않습니다') +
+        ' <a class="link" href="ledger.html?view=auto">매출 · 매입 › 자동 수집</a></p>';
+    }
     var mail = isMail(x);
     if (mail) h += mailBox(x) + attBox(x);
     else if (x.mail) h += '<p class="from">메일 첨부로 옴: <button type="button" class="link" data-open="' + esc(x.mail.id) + '">' + esc(x.mail.title || x.mail.orig) + '</button></p>';
@@ -859,6 +1081,14 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (po) { openPo(po.getAttribute('data-po')); return; }
     var ct = ev.target.closest('[data-cat]');
     if (ct) { S.cat = ct.getAttribute('data-cat'); render(); return; }
+    var dr = ev.target.closest('[data-dir]');
+    if (dr) { S.taxDir = dr.getAttribute('data-dir'); render(); return; }
+    var ty = ev.target.closest('[data-ty]');
+    if (ty) { var ys = taxYears(), yi = ys.indexOf(S.taxYear) + Number(ty.getAttribute('data-ty')); if (yi >= 0 && yi < ys.length) { S.taxYear = ys[yi]; S.taxYm = taxLastYm(S.taxYear); } render(); return; }
+    var tyM = ev.target.closest('[data-tym]');
+    if (tyM) { S.taxYm = tyM.getAttribute('data-tym'); S.taxYear = S.taxYm.slice(0, 4); render(); var ls = $('list'); if (ls && ls.scrollIntoView) { try { ls.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { ls.scrollIntoView(); } } return; }
+    var tmv = ev.target.closest('[data-tm]');
+    if (tmv) { var yv0 = +S.taxYm.slice(0, 4), mv0 = +S.taxYm.slice(5, 7) - 1 + Number(tmv.getAttribute('data-tm')); yv0 += Math.floor(mv0 / 12); mv0 = ((mv0 % 12) + 12) % 12; S.taxYm = yv0 + '-' + ('0' + (mv0 + 1)).slice(-2); S.taxYear = S.taxYm.slice(0, 4); render(); return; }
     var cl = ev.target.closest('[data-cal]');
     if (cl) {
       var dv = Number(cl.getAttribute('data-cal')), ym = S.calYm || S.D.today.slice(0, 7);

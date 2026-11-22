@@ -1112,7 +1112,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
 
   /* ───────── 자동 수집 (2026-11-20) ─────────
      회사 컴퓨터의 구글 드라이브 폴더 'NMC 자동 수집'에 저장한 세금계산서 · 통장 · 카드 엑셀을 서버가 10분마다 읽어 장부에 반영합니다.
-     여기서는 상태 확인 · 지금 확인 · 분류 고르기(처음 보는 거래처 한 번) · 되돌리기만 합니다. */
+     여기서는 상태 확인 · 지금 확인 · 분류 고르기(처음 보는 거래처 한 번) · 되돌리기만 합니다.
+     2026-11-22(서버 v51): 국세청 메일로 연 계산서도 여기로 들어오고, 분류를 정한 적 없는 거래처는 손익 규칙으로 추정해 바로 반영 → '분류 추정' 묶음에서 확인 · 고침. */
   var AST = { '장부 반영': 'ok', '장부 연결': 'ok', '결제 확인': 'ok', '출고 대조': 'info', '분류 필요': 'warn' };
   function needAuto(force) {
     if (S.autoLoading || (S.auto && !force)) return;
@@ -1134,8 +1135,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   function autoInvalidate() { S.data = {}; S.loading = {}; }
   function autoHtml() {
     var A = S.auto, L = A.last, h = '';
-    var ask = [], bank = [];
-    A.groups.forEach(function (g, i) { g.i = i; (g.t === 'ask' ? ask : bank).push(g); });
+    var ask = [], guess = [], bank = [];
+    A.groups.forEach(function (g, i) { g.i = i; (g.t === 'ask' ? ask : g.t === 'guess' ? guess : bank).push(g); });
     var nOf = function (a) { return a.reduce(function (t, g) { return t + g.n; }, 0); };
     h += '<section class="card head"><p class="k">자동 수집<small>세금계산서 · 통장 · 카드 엑셀</small></p><ul class="rows">' +
       '<li class="row"><div class="rl"><b>수집 폴더</b><small>' + (A.folder ? '내 드라이브 › ' + esc(A.folder.name) : '아직 만들어지지 않았습니다 (서버 설정 필요)') + '</small></div>' +
@@ -1151,10 +1152,17 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     h += '<section class="card"><h2>분류 필요<small>' + (ask.length ? ask.length + '곳 · ' + nOf(ask) + '건' : '없음') + '</small></h2>';
     if (!ask.length) h += '<p class="hint">분류가 필요한 내역이 없습니다.</p>';
     else {
-      h += '<p class="hint" style="margin:0 0 4px">처음 보는 거래처입니다. 분류를 한 번 선택하면 같은 거래처의 내역은 다음부터 자동으로 장부에 반영됩니다.</p>';
+      h += '<p class="hint" style="margin:0 0 4px">자동으로 정하지 못한 내역입니다(처음 보는 카드 가맹점 · 되돌린 거래처 · 같은 거래처의 금액이 다른 장부 내역 등). 분류를 한 번 선택하면 같은 거래처의 내역은 다음부터 자동으로 장부에 반영됩니다.</p>';
       ask.forEach(function (g, k) { h += groupHtml(g, k === 0); });
     }
     h += '</section>';
+    // 분류 추정으로 넣은 것 (서버 v51)
+    if (guess.length) {
+      h += '<section class="card" id="autoGuess"><h2>분류 추정으로 넣은 내역<small>' + guess.length + '곳 · ' + nOf(guess) + '건</small></h2>' +
+        '<p class="hint" style="margin:0 0 4px">분류를 정한 적 없는 거래처의 세금계산서를 거래처 · 품목 글자로 분류를 추정해 장부에 넣었습니다. 맞으면 그 분류를 한 번 누르면 확정되고, 다르면 맞는 분류를 누르십시오. 같은 거래처의 다음 계산서도 고른 분류로 들어갑니다.</p>';
+      guess.forEach(function (g, k) { h += groupHtml(g, k === 0); });
+      h += '</section>';
+    }
     // 통장 출금 중 장부에 없는 것
     if (bank.length) {
       h += '<section class="card"><details class="more" style="margin:0;border:0;padding:0"' + (S.autoBankOpen ? ' open' : '') + ' id="autoBank"><summary>통장 출금 중 장부에 없는 내역 (' + bank.length + '곳 · ' + nOf(bank) + '건)</summary>' +
@@ -1198,7 +1206,9 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       '<p class="hint">공문 · 팩스 · 메일(PDF · 사진 · 한글 · 워드 · eml)을 이 폴더에 넣으면 장부가 아니라 <a class="link" href="docs.html">공문함</a>에 정리됩니다.</p>' +
       '<p class="hint">조회 기간이 겹쳐도 같은 내역은 한 번만 반영됩니다. 매출 · 매입 구분이 되지 않는 목록은 파일 이름에 ‘매출’ 또는 ‘매입’을 넣어 저장하십시오. 홈택스 · 은행 · 카드사 내려받기는 공동인증서 로그인이 필요하여 담당자가 직접 합니다.</p>' +
       '<h3>장부 반영 기준</h3><ul class="steps"><li>매입 세금계산서 · 카드: 같은 거래처 · 같은 금액의 장부 내역(직접 등록 · 입고)이 있으면 새로 넣지 않고 연결합니다.</li>' +
-      '<li>매출 세금계산서: 시공 · 공사는 장부 매출(시공)로 반영합니다. 제품 매출은 출고 × 단가로 이미 집계하므로 ‘출고 대조’로만 표시합니다.</li>' +
+      '<li>매입 세금계산서의 거래처가 처음이면 거래처 · 품목 글자로 분류를 추정해 바로 장부에 넣고 ‘분류 추정’으로 표시합니다.</li>' +
+      '<li>매출 세금계산서: 시공 · 공사는 장부 매출(시공)로 반영합니다. 제품 매출은 출고 × 단가로 이미 집계하므로, 그 거래처 출고가 그해에 있으면 ‘출고 대조’로만 표시하고, 출고 기록이 없으면 품목으로 분류를 추정해 장부 매출로 넣습니다(‘분류 추정’).</li>' +
+      '<li>국세청 메일로 받은 전자세금계산서(2026년부터)는 서버가 열어 이 기준으로 바로 반영합니다. 홈택스 목록 엑셀과 같은 계산서는 승인번호로 한 번만 들어갑니다.</li>' +
       '<li>통장: 장부 내역의 결제(계좌이체 · 계좌입금)만 표시합니다. 매입 · 매출로 새로 넣지 않습니다.</li></ul></details></section>';
     return h;
   }
@@ -1209,7 +1219,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       '<p class="agm">' + g.n + '건 · 합계 ' + won(g.sum) + ' · ' + esc(spanD(g.from, g.to)) + '</p>';
     if (g.ex.length) h += '<ul class="subs">' + g.ex.map(function (e) { return '<li><span>' + esc(md(e[0]) + (e[1] ? ' · ' + e[1] : '')) + '</span><span>' + won(e[2]) + '</span></li>'; }).join('') + (g.n > g.ex.length ? '<li><span>외 ' + (g.n - g.ex.length) + '건</span><span></span></li>' : '') + '</ul>';
     if (g.memo) h += '<p class="fwarn">' + esc(g.memo) + '</p>';
-    if (g.sug) h += '<p class="hint" style="margin:6px 0 0">추정 분류: <b>' + esc(g.sug === '제외' ? '제외' : g.sug) + '</b> <span class="est">추정</span></p>';
+    if (g.sug) h += '<p class="hint" style="margin:6px 0 0">' + (g.t === 'guess' ? '장부에 넣은 분류' : '추정 분류') + ': <b>' + esc(g.sug === '제외' ? '제외' : g.sug) + '</b> <span class="est">추정</span></p>';
     h += '<div class="chips" style="margin-top:8px">' + cats.map(function (c) {
       return '<button type="button" class="chip sm' + (c[0] === g.sug ? ' sug' : '') + '" data-act="aset" data-i="' + g.i + '" data-v="' + esc(c[0]) + '"' + (S.autoBusy ? ' disabled' : '') + '>' + esc(c[1]) + '</button>';
     }).join('') + '</div></div>';
