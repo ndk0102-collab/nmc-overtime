@@ -4,6 +4,9 @@
  * - 이 파일에는 개인 정보(이름·금액·계좌)가 없습니다. 모두 관리자 로그인 뒤 구글 시트에서 받아옵니다.
  * - 소득세: 소득세법 시행령 [별표 2] 근로소득 간이세액표 (2026.2.27. 개정, 2026.3.1. 이후 지급분)
  * - 4대보험 근로자 부담(2026년): 국민연금 4.75%, 건강보험 3.595%, 장기요양 = 건강보험료 × 0.9448/7.19, 고용보험 0.9%
+ * - 2026-11-22 회사 급여대장 방식 (지시 "급여대장보고 우리 급여 산정해라"):
+ *   생산직(잔업 앱 명단) 기본급 = 그 달 평일 수 × 8시간 × 시급, 주휴수당 = 그 달 일요일 수 × 8시간 × 시급 (209시간 고정이 아님).
+ *   4대보험은 공단 고지 금액을 사람마다 넣으면 그 금액을 뗍니다(비워 두면 급여로 계산). 매월 고정 수당(예: 기타수당)도 사람마다.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -44,7 +47,8 @@
     memoTo: '',               // 받는 분 통장 표시 (빈칸이면 '남명11월급여' 식)
     memoFrom: '',             // 내 통장 표시 (빈칸이면 직원 이름)
     dayHours: 8,              // 근태(2026-11-22): 하루 소정근로시간 — 결근 · 무급 휴가 하루 = 8시간
-    absentWeekly: true        // 결근한 주는 주휴(하루치)도 뺌 (2026-11-22 결정: 근로기준법상 주휴는 그 주 개근 때만)
+    absentWeekly: true,       // 결근한 주는 주휴(하루치)도 뺌 (2026-11-22 결정: 근로기준법상 주휴는 그 주 개근 때만)
+    hourMonth: true           // 생산직(잔업 앱 명단) 기본급 = 그 달 평일 수 × 8시간, 주휴 = 일요일 수 × 8시간 (2026-11-22 급여대장 방식)
   };
 
   /* 기준 화면에 보여 줄 항목: [키, 이름, 종류, 최소, 최대] */
@@ -256,12 +260,39 @@
   }
   function dayBefore(date) { return ymdOf(utc(date) - 86400000); }
 
+  /** 그 달 평일(월~금) 수 · 주휴일(일요일) 수 — 생산직 기본급 · 주휴수당 시간 (급여대장 방식, 2026-11-22).
+      공휴일이 평일이면 유급휴일이라 평일에 셉니다. 그 달에 입사했으면 입사일부터 셈하고,
+      주휴는 그 주(월~일)를 처음부터 다닌 주만(입사일 ≤ 그 주 월요일). 그 달 뒤 입사면 0. */
+  function monthDays(ym, joined) {
+    var y = Number(String(ym).slice(0, 4)), m = Number(String(ym).slice(5, 7));
+    var last = new Date(Date.UTC(y, m, 0)).getUTCDate(), d0 = 1;
+    var J = parseJoined(joined);
+    if (J && J > ym + '-' + pad2(last)) return { weekdays: 0, sundays: 0, from: J };
+    if (J && J.slice(0, 7) === ym) d0 = Number(J.slice(8, 10));
+    var wd = 0, sun = 0;
+    for (var d = d0; d <= last; d++) {
+      var w = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+      if (w >= 1 && w <= 5) wd++;
+      else if (w === 0 && (d0 === 1 || d - 6 >= d0)) sun++;
+    }
+    return { weekdays: wd, sundays: sun, from: d0 > 1 ? J : '' };
+  }
+  /** 고지 금액 칸: 빈칸 = 없음(null, 급여로 계산), 숫자 = 그 금액(원) */
+  function fixedAmt(v) {
+    if (v == null) return null;
+    var s = String(v).replace(/[,\s원]/g, '');
+    if (s === '' || !/^\d+$/.test(s)) return null;
+    return Number(s);
+  }
+
   /** 이 달 근태 → 월급에서 뺄 돈. 시간당 = 기본급 ÷ 월 소정근로시간(209) (기본급이 없으면 통상시급).
       결근: 하루 8시간 + (결근한 주마다 주휴 8시간, 한 주에 한 번) · 무급 휴가: 하루 8시간 · 지각·조퇴: 못 한 시간.
       평일이 아닌 날(토 · 일 · 공휴일)의 결근 · 무급 휴가 · 지각은 빼지 않습니다. 기본급보다 많이 빼지 않습니다.
-      달을 걸친 주(예: 11/30 월 · 12/1 화 결근): 그 주 주휴는 먼저 결근한 달에서 한 번만 뺍니다 — prior = 지난달까지의 근태. */
-  function attOf(atts, e, cfg, baseHourly, holidays, prior, ym) {
-    var rate = e.base > 0 ? e.base / cfg.monthlyHours : baseHourly;
+      달을 걸친 주(예: 11/30 월 · 12/1 화 결근): 그 주 주휴는 먼저 결근한 달에서 한 번만 뺍니다 — prior = 지난달까지의 근태.
+      mh = { rate, cap }: 생산직 그 달 시간 방식(급여대장 방식) — 시간당 = 통상시급, 최대 = 그 달 기본급 + 주휴수당. */
+  function attOf(atts, e, cfg, baseHourly, holidays, prior, ym, mh) {
+    var rate = mh ? mh.rate : e.base > 0 ? e.base / cfg.monthlyHours : baseHourly;
+    var cap = mh ? mh.cap : e.base;
     var absent = [], unpaid = [], paid = [], half = [], weeks = {}, lateMin = 0, late = [], skipped = [];
     (atts || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }).forEach(function (a) {
       var k = ATT_KINDS[a.kind];
@@ -282,7 +313,7 @@
     var carried = Object.keys(weeks).filter(function (k) { return chargedBefore[k]; }).length;
     var nWeeks = cfg.absentWeekly ? Object.keys(weeks).length - carried : 0;
     var hours = cfg.dayHours * (absent.length + unpaid.length + nWeeks) + lateMin / 60;
-    var amount = Math.min(Math.round(rate * hours), Math.max(0, e.base));
+    var amount = Math.min(Math.round(rate * hours), Math.max(0, cap));
     var parts = [];
     if (absent.length) parts.push('결근 ' + absent.length + '일(' + absent.map(mdTxt).join(', ') + ')');
     if (nWeeks) parts.push('결근한 주 주휴 ' + nWeeks + '일');
@@ -383,19 +414,35 @@
 
   /* ───────── 한 사람 계산 ───────── */
 
+  /* ctx.monthHours = 이 사람을 '그 달 시간' 방식으로(생산직 · 잔업 앱 명단), ctx.ext = 이 사람의 고지 금액 · 고정 수당 (서버 '급여고지' 시트):
+     { np, hi, ltc, ei: 고지 금액(빈칸 = 계산), allow: 매월 고정 수당(원), allowLabel: 그 이름 } */
   function calcEmployee(empIn, recs, adjs, ctx, atts) {
     var cfg = ctx.config;
     var e = employee(empIn);
+    var ext = ctx.ext || {};
     var h = hoursOf(recs, ctx.holidays, cfg);
     var baseHourly = e.hourly > 0 ? e.hourly : cfg.hourly;
     var hourly = baseHourly + (cfg.bonusOrdinary && e.bonus > 0 ? e.bonus / cfg.monthlyHours : 0);
     var hTxt = fmtRate(hourly) + '원';
     var pay = [], ded = [], warn = [];
+    var mh = null, basePay = e.base, juhuPay = 0, baseH = 0, juhuH = 0;
 
-    pay.push({
-      key: 'base', label: '기본급', en: 'Basic pay', amount: e.base,
-      how: e.base === Math.round(baseHourly * cfg.monthlyHours) ? cfg.monthlyHours + '시간 × ' + fmtRate(baseHourly) + '원' : '월 고정'
-    });
+    if (ctx.monthHours && ctx.ym) {   // 급여대장 방식: 평일 수 × 8시간 + 주휴(일요일 수 × 8시간)
+      var md = monthDays(ctx.ym, e.joined), dh = cfg.dayHours > 0 ? cfg.dayHours : 8;
+      baseH = md.weekdays * dh; juhuH = md.sundays * dh;
+      basePay = Math.round(baseHourly * baseH); juhuPay = Math.round(baseHourly * juhuH);
+      mh = { rate: baseHourly, cap: basePay + juhuPay };
+      pay.push({
+        key: 'base', label: '기본급', en: 'Basic pay', amount: basePay,
+        how: '평일 ' + md.weekdays + '일 × ' + dh + '시간 = ' + baseH + '시간 × ' + fmtRate(baseHourly) + '원' + (md.from ? ' (' + mdTxt(md.from) + ' 입사)' : '')
+      });
+      if (juhuH) pay.push({ key: 'juhu', label: '주휴수당', en: 'Weekly holiday pay', amount: juhuPay, how: '일요일 ' + md.sundays + '번 × ' + dh + '시간 = ' + juhuH + '시간 × ' + fmtRate(baseHourly) + '원' });
+    } else {
+      pay.push({
+        key: 'base', label: '기본급', en: 'Basic pay', amount: e.base,
+        how: e.base === Math.round(baseHourly * cfg.monthlyHours) ? cfg.monthlyHours + '시간 × ' + fmtRate(baseHourly) + '원' : '월 고정'
+      });
+    }
     var otPay = Math.round(hourly * cfg.otRate * h.otMin / 60);
     var nightPay = Math.round(hourly * cfg.nightAdd * h.nightMin / 60);
     var hol8 = Math.round(hourly * cfg.holRate * h.holMin / 60);
@@ -410,6 +457,8 @@
       });
     }
     if (e.bonus) pay.push({ key: 'bonus', label: '성과급', en: 'Bonus', amount: e.bonus, how: '매월 고정' });
+    var allow = Math.max(0, Math.round(num(ext.allow)));
+    if (allow) pay.push({ key: 'allow', label: String(ext.allowLabel || '').trim() || '고정수당', en: 'Fixed allowance', amount: allow, how: '매월 고정' });
 
     var nonTaxPay = 0, minus = 0, otherDed = [];
     (adjs || []).forEach(function (a) {
@@ -422,7 +471,7 @@
       else if (a.kind === 'deduct') otherDed.push({ key: 'adjded', label: a.label, en: '', amount: amt, how: memo, id: a.id });
     });
 
-    var att = attOf(atts, e, cfg, baseHourly, ctx.holidays, ctx.attPrior, ctx.ym);
+    var att = attOf(atts, e, cfg, baseHourly, ctx.holidays, ctx.attPrior, ctx.ym, mh);
     if (att.amount) {
       pay.push({ key: 'att', label: '근태 공제', en: 'Absence / late', amount: -att.amount, how: att.how }); minus += att.amount;
       if ((adjs || []).some(function (a) { return a.kind === 'minus' && Math.round(num(a.amount)); })) warn.push('추가·공제에 「빼기」 항목도 있습니다 — 근태 공제와 같은 결근을 두 번 빼지 않았는지 확인하십시오');
@@ -431,7 +480,7 @@
 
     var gross = sum(pay);
     var premium = otPay + nightPay + hol8 + holOver;
-    var monthlyFixed = e.base + e.bonus - minus;
+    var monthlyFixed = basePay + juhuPay + e.bonus + allow - minus;
     var exempt = 0;
     if (cfg.otExempt && premium > 0) {
       if (!e.otExemptOk) {
@@ -446,18 +495,20 @@
     var insBase = e.insBase > 0 ? e.insBase : taxable;
 
     var pBase = pensionBase(insBase, cfg);
-    var np = e.np ? floor10(pBase * cfg.pension / 100) : 0;
-    var hi = e.hi ? floor10(insBase * cfg.health / 100) : 0;
-    var ltc = e.hi && e.ltc ? floor10(hi * cfg.ltc / cfg.healthTotal) : 0;
-    var ei = e.ei ? floor10(insBase * cfg.employ / 100) : 0;
+    var fx = { np: fixedAmt(ext.np), hi: fixedAmt(ext.hi), ltc: fixedAmt(ext.ltc), ei: fixedAmt(ext.ei) };   // 공단 고지 금액 (있으면 그 금액)
+    var np = !e.np ? 0 : fx.np != null ? fx.np : floor10(pBase * cfg.pension / 100);
+    var hi = !e.hi ? 0 : fx.hi != null ? fx.hi : floor10(insBase * cfg.health / 100);
+    var ltc = !(e.hi && e.ltc) ? 0 : fx.ltc != null ? fx.ltc : floor10(hi * cfg.ltc / cfg.healthTotal);
+    var ei = !e.ei ? 0 : fx.ei != null ? fx.ei : floor10(insBase * cfg.employ / 100);
     var it = incomeTax(taxable, e.family, e.kids, e.taxRatio, cfg);
     var lt = floor10(it * 0.1);
     var baseTxt = (e.insBase > 0 ? '신고 보수 ' : '') + fmt(insBase) + '원';
 
-    if (np) ded.push({ key: 'np', label: '국민연금', en: 'National pension', amount: np, how: fmt(pBase) + '원 × ' + cfg.pension + '%' });
-    if (hi) ded.push({ key: 'hi', label: '건강보험', en: 'Health insurance', amount: hi, how: baseTxt + ' × ' + cfg.health + '%' });
-    if (ltc) ded.push({ key: 'ltc', label: '장기요양보험', en: 'Long-term care', amount: ltc, how: '건강보험료 × ' + cfg.ltc + '/' + cfg.healthTotal });
-    if (ei) ded.push({ key: 'ei', label: '고용보험', en: 'Employment insurance', amount: ei, how: baseTxt + ' × ' + cfg.employ + '%' });
+    var FX = '공단 고지 금액';
+    if (np) ded.push({ key: 'np', label: '국민연금', en: 'National pension', amount: np, how: fx.np != null ? FX : fmt(pBase) + '원 × ' + cfg.pension + '%' });
+    if (hi) ded.push({ key: 'hi', label: '건강보험', en: 'Health insurance', amount: hi, how: fx.hi != null ? FX : baseTxt + ' × ' + cfg.health + '%' });
+    if (ltc) ded.push({ key: 'ltc', label: '장기요양보험', en: 'Long-term care', amount: ltc, how: fx.ltc != null ? FX : '건강보험료 × ' + cfg.ltc + '/' + cfg.healthTotal });
+    if (ei) ded.push({ key: 'ei', label: '고용보험', en: 'Employment insurance', amount: ei, how: fx.ei != null ? FX : baseTxt + ' × ' + cfg.employ + '%' });
     if (it) {
       ded.push({
         key: 'it', label: '소득세', en: 'Income tax', amount: it,
@@ -474,20 +525,20 @@
     if (!e.bank || !String(e.account).replace(/[^0-9]/g, '')) warn.push('계좌 정보 없음');
     if (!e.nation) warn.push('국적 미입력 — 국민연금 적용 여부 확인');
     else if (e.np && PENSION_EXEMPT.indexOf(e.nation) >= 0) warn.push(e.nation + ' 국적은 보통 국민연금 적용 제외입니다 — 확인');
-    if (e.base > 0 && e.base < Math.round(cfg.minWage * cfg.monthlyHours)) warn.push('기본급이 최저임금 월 환산액(' + fmt(Math.round(cfg.minWage * cfg.monthlyHours)) + '원)보다 적습니다');
+    if (!mh && e.base > 0 && e.base < Math.round(cfg.minWage * cfg.monthlyHours)) warn.push('기본급이 최저임금 월 환산액(' + fmt(Math.round(cfg.minWage * cfg.monthlyHours)) + '원)보다 적습니다');
     if (baseHourly < cfg.minWage) warn.push('통상시급이 최저임금(' + fmt(cfg.minWage) + '원)보다 낮습니다');
     if (net < 0) warn.push('실지급액이 0원보다 적습니다');
     if (!e.active) warn.push('재직 아님으로 되어 있지만 이번 달 기록이 있습니다');
 
     function amt(key) { var s = 0; pay.concat(ded).forEach(function (x) { if (x.key === key) s += x.amount; }); return s; }
     return {
-      name: e.name, emp: e, hourly: hourly, att: att,
-      hours: { ot: h.otMin / 60, night: h.nightMin / 60, hol: h.holMin / 60, holOver: h.holOverMin / 60, days: h.days },
+      name: e.name, emp: e, hourly: hourly, att: att, monthHours: !!mh, fixedIns: fx,
+      hours: { ot: h.otMin / 60, night: h.nightMin / 60, hol: h.holMin / 60, holOver: h.holOverMin / 60, days: h.days, base: baseH, juhu: juhuH },
       pay: pay, ded: ded, gross: gross, nonTax: nonTaxPay + exempt, otExempt: exempt, taxable: taxable, insBase: insBase,
       dedTotal: dedTotal, net: net, warnings: warn,
       col: {
-        base: e.base, ot: otPay, night: nightPay, hol: hol8 + holOver, bonus: e.bonus, att: amt('att'),
-        otherPay: amt('adj') + amt('adjnt') + amt('minus'), gross: gross,
+        base: basePay, juhu: juhuPay, ot: otPay, night: nightPay, hol: hol8 + holOver, bonus: e.bonus, att: amt('att'),
+        otherPay: amt('allow') + amt('adj') + amt('adjnt') + amt('minus'), gross: gross,
         np: np, hi: hi, ltc: ltc, ei: ei, it: it, lt: lt, dorm: e.dorm, otherDed: amt('adjded'),
         dedTotal: dedTotal, net: net
       }
@@ -514,6 +565,8 @@
       (recs[r.name] = recs[r.name] || []).push(r);
     });
     (d.adjustments || []).forEach(function (a) { if (a && a.name) (adjs[a.name] = adjs[a.name] || []).push(a); });
+    var exts = {};   // 사람마다 공단 고지 금액 · 고정 수당 (서버 '급여고지' 시트, 2026-11-22)
+    (d.payExt || []).forEach(function (x) { if (x && x.name) exts[x.name] = x; });
     (d.att || []).forEach(function (a) {
       if (!a || !a.name) return;
       (attAll[a.name] = attAll[a.name] || []).push(a);
@@ -540,11 +593,12 @@
       e.name = n;
       if (!e.active && !recs[n] && !adjs[n] && !atts[n]) return;
       var salaried = workers.indexOf(n) < 0 && !!settings[n];
-      if (salaried && !(e.base > 0) && !recs[n] && !adjs[n]) {
+      if (salaried && !(e.base > 0) && !(exts[n] && Number(exts[n].allow) > 0) && !recs[n] && !adjs[n]) {
         others.push({ name: n, emp: e, salaried: true, noPay: true, leave: leaveOf(e, attAll[n] || [], asOf) });
         return;
       }
-      var r = calcEmployee(e, recs[n], adjs[n], Object.assign({}, ctx, { attPrior: attAll[n] || [] }), atts[n]);
+      var r = calcEmployee(e, recs[n], adjs[n], Object.assign({}, ctx, { attPrior: attAll[n] || [], ext: exts[n] || null,
+        monthHours: !!cfg.hourMonth && !salaried }), atts[n]);
       r.salaried = salaried;
       r.leave = leaveOf(e, attAll[n] || [], asOf);
       rows.push(r);
@@ -569,7 +623,7 @@
 
   var LEDGER_COLS = [
     ['name', '이름'], ['otH', '연장(시간)'], ['holH', '휴일(시간)'],
-    ['base', '기본급'], ['ot', '연장근로'], ['night', '야간근로'], ['hol', '휴일근로'], ['bonus', '성과급'], ['att', '근태공제'], ['otherPay', '기타지급'], ['gross', '지급합계'],
+    ['base', '기본급'], ['juhu', '주휴수당'], ['ot', '연장근로'], ['night', '야간근로'], ['hol', '휴일근로'], ['bonus', '성과급'], ['att', '근태공제'], ['otherPay', '기타지급'], ['gross', '지급합계'],
     ['np', '국민연금'], ['hi', '건강보험'], ['ltc', '장기요양'], ['ei', '고용보험'], ['it', '소득세'], ['lt', '지방소득세'], ['dorm', '기숙사비'], ['otherDed', '기타공제'],
     ['dedTotal', '공제합계'], ['net', '실지급액']
   ];
@@ -630,6 +684,6 @@
     config: config, employee: employee, bankCode: bankCode, dayType: dayType, hoursOf: hoursOf,
     incomeTax: incomeTax, pensionBase: pensionBase, floor10: floor10, fmt: fmt, fmtRate: fmtRate, hrs: hrs,
     calcEmployee: calcEmployee, computeMonth: computeMonth, ledger: ledger, bankRows: bankRows, attOf: attOf, leaveOf: leaveOf, parseJoined: parseJoined, minTxt: minTxt, weekKey: weekKey,
-    maskAccount: maskAccount, nextMonthDay: nextMonthDay, monthLabel: monthLabel
+    maskAccount: maskAccount, nextMonthDay: nextMonthDay, monthLabel: monthLabel, monthDays: monthDays, fixedAmt: fixedAmt
   };
 });

@@ -246,7 +246,8 @@ details.bulk summary { cursor: pointer; min-height: 40px; display: flex; align-i
 details.bulk textarea { display: block; width: 100%; margin: 8px 0; padding: 8px 10px; border: 1px solid #B8C4D4; border-radius: 8px; font: 14px/1.6 ui-monospace, Consolas, monospace; resize: vertical; }
 details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
 .bulkbar { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; }
-#bulkTable td, #bulkTable th { white-space: nowrap; }
+#bulkTable td, #bulkTable th, #payTable td.name { white-space: nowrap; }
+#payTable td.chg { white-space: normal; min-width: 280px; }
 .bulkmsg { margin: 8px 0 10px; font-weight: 700; color: var(--ok); }
 .iconbtn.nmc-back { display: inline-flex; min-height: 0; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 11px 6px 7px; font-size: inherit; font-weight: 700; }
 </style>
@@ -376,10 +377,14 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
   function load(ym) {
     var attP = call('stock.call', { fn: 'apiAttList', args: [] }).then(function (r) { return { list: (r && r.att) || [] }; },
       function (e) { return { err: String((e && e.message) || e || 'server') }; });
-    return guard(Promise.all([call('data', ym ? { ym: ym } : {}), attP])).then(function (res) {
+    var extP = call('stock.call', { fn: 'apiPayExtList', args: [] }).then(function (r) { return { list: (r && r.ext) || [] }; },
+      function (e) { return { err: String((e && e.message) || e || 'server') }; });
+    return guard(Promise.all([call('data', ym ? { ym: ym } : {}), attP, extP])).then(function (res) {
       var d = res[0];
       d.att = res[1].list || [];
+      d.payExt = res[2].list || [];
       S.attErr = res[1].err || '';
+      S.extErr = res[2].err || '';
       S.data = d;
       if (!S.slip || d.employees.indexOf(S.slip) < 0) S.slip = '';
       recompute();
@@ -481,6 +486,10 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     if (S.attErr) {
       out.push(['err', (S.attErr === 'bad_action' ? '근태 기록 서버가 아직 새 버전으로 올라가지 않았습니다.' : '근태 기록을 불러오지 못했습니다 (' + esc(errText(S.attErr)) + ').') +
         ' <b>지금 보이는 급여에는 근태 공제(결근 · 지각 등)가 들어가 있지 않습니다.</b> 이체 전에 [새로 불러오기]로 다시 확인하십시오.']);
+    }
+    if (S.extErr) {
+      out.push(['err', (S.extErr === 'bad_action' ? '4대보험 고지 금액 서버가 아직 새 버전으로 올라가지 않았습니다.' : '4대보험 고지 금액 · 고정 수당을 불러오지 못했습니다 (' + esc(errText(S.extErr)) + ').') +
+        ' <b>지금 보이는 4대보험은 그 달 급여로 계산한 금액이고, 고정 수당이 빠져 있습니다.</b> 이체 전에 [새로고침]으로 다시 확인하십시오.']);
     }
     var nw = m.rows.filter(function (r) { return r.warnings.length; }).length;
     if (nw) out.push(['warn', '확인할 것이 있는 직원 ' + nw + '명 — 급여대장 하단 목록을 확인하십시오.']);
@@ -768,21 +777,26 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
   function viewStaff() {
     var cfg = S.month.config;
     var list = staffList();
-    var head = ['이름', '구분', '입사일', '재직', '국적', '기본급', '통상시급', '성과급', '기숙사비', '국민연금', '건강', '장기요양', '고용', '가족', '은행', '계좌번호', ''];
+    var head = ['이름', '구분', '입사일', '재직', '국적', '기본급', '통상시급', '성과급', '고정 수당', '기숙사비', '국민연금', '건강', '장기요양', '고용', '가족', '은행', '계좌번호', ''];
     return '<div class="toolbar"><h2>직원 급여 설정</h2><span class="muted">수정 내용은 구글 시트 「급여설정」에 저장되며, 모든 월 계산에 적용됩니다.</span></div>' +
-      bulkHtml() +
-      '<div class="scroll"><table class="grid sticky1"><thead><tr>' + head.map(function (h, i) { return '<th' + (i >= 5 && i <= 8 ? ' class="n"' : '') + '>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      bulkHtml() + payBulkHtml() +
+      '<div class="scroll"><table class="grid sticky1" id="staffTable"><thead><tr>' + head.map(function (h, i) { return '<th' + (i >= 5 && i <= 13 ? ' class="n"' : '') + '>' + h + '</th>'; }).join('') + '</tr></thead><tbody>' +
       list.map(function (e) {
-        function yn(v) { return v ? '<span class="pill ok">적용</span>' : '<span class="pill off">안 함</span>'; }
-        var sal = isSalaried(e.name);
+        var sal = isSalaried(e.name), x = extOf(e.name);
+        function ins(k, on) {   // 가입 안 함 · 공단 고지 금액 · (고지 금액 없음) 급여로 계산
+          if (!on) return '<span class="pill off">안 함</span>';
+          var v = P.fixedAmt(x[k]);
+          return v != null ? fmt(v) : '<span class="pill ok">계산</span>';
+        }
         return '<tr><td class="name">' + esc(e.name) + '</td>' +
           '<td>' + (sal ? '<span class="pill off">월급제</span>' : '잔업 앱') + '</td>' +
           '<td style="white-space:nowrap">' + (e.joined ? esc(dotDate(e.joined) || e.joined) : '<span class="pill bad">없음</span>') + '</td>' +
           '<td>' + (e.active ? '재직' : '<span class="pill off">퇴사</span>') + '</td>' +
           '<td>' + (e.nation ? esc(e.nation) : '<span class="pill bad">미입력</span>') + '</td>' +
-          '<td class="n">' + (sal && !(e.base > 0) ? '<span class="pill bad">미입력</span>' : fmt(e.base)) + '</td><td class="n">' + P.fmtRate(e.hourly || cfg.hourly) + '</td>' +
-          '<td class="n">' + (e.bonus ? fmt(e.bonus) : '') + '</td><td class="n">' + (e.dorm ? fmt(e.dorm) : '없음') + '</td>' +
-          '<td>' + yn(e.np) + '</td><td>' + yn(e.hi) + '</td><td>' + yn(e.hi && e.ltc) + '</td><td>' + yn(e.ei) + '</td>' +
+          '<td class="n">' + (sal ? (e.base > 0 ? fmt(e.base) : '<span class="pill bad">미입력</span>') : cfg.hourMonth ? hourBaseCell(e) : fmt(e.base)) + '</td><td class="n">' + P.fmtRate(e.hourly || cfg.hourly) + '</td>' +
+          '<td class="n">' + (e.bonus ? fmt(e.bonus) : '') + '</td><td class="n">' + (Number(x.allow) > 0 ? '<span class="muted">' + esc(x.allowLabel || '고정수당') + '</span> ' + fmt(Number(x.allow)) : '') + '</td>' +
+          '<td class="n">' + (e.dorm ? fmt(e.dorm) : '없음') + '</td>' +
+          '<td class="n">' + ins('np', e.np) + '</td><td class="n">' + ins('hi', e.hi) + '</td><td class="n">' + ins('ltc', e.hi && e.ltc) + '</td><td class="n">' + ins('ei', e.ei) + '</td>' +
           '<td class="n">' + e.family + (e.kids ? ' (자녀 ' + e.kids + ')' : '') + '</td>' +
           '<td>' + (e.bank ? esc(e.bank) : '<span class="pill bad">없음</span>') + '</td>' +
           '<td>' + (e.account ? esc(P.maskAccount(e.account)) : '<span class="pill bad">없음</span>') + '</td>' +
@@ -790,7 +804,139 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
       }).join('') + '</tbody></table></div>' +
       '<ul class="note"><li><b>잔업 앱</b> = 잔업 앱 명단(구글 시트 「직원」)에 있어 휴대폰으로 잔업을 기록하는 직원. <b>월급제</b> = 명단에 없어 잔업을 기록하지 않는 직원 — 월급(기본급)을 넣기 전까지는 급여대장 · 명세서 · 이체 파일에 들어가지 않고, 근태 · 연차에만 들어갑니다.</li>' +
       '<li>국민연금은 국적에 따라 다릅니다: 태국·베트남·캄보디아·인도네시아·필리핀·스리랑카 등은 적용, 미얀마·네팔·방글라데시·파키스탄 등은 적용 제외 (국민연금공단 국가별 적용 현황). 국적을 선택하면 자동으로 설정됩니다.</li>' +
-      '<li>E-9 근로자가 장기요양보험 가입 제외를 신청한 경우 「장기요양」을 해제하십시오.</li></ul>';
+      '<li>E-9 근로자가 장기요양보험 가입 제외를 신청한 경우 「장기요양」을 해제하십시오.</li>' +
+      '<li><b>기본급(잔업 앱 직원)</b> = 그 달 평일 수 × 8시간 × 시급, <b>주휴수당</b> = 그 달 일요일 수 × 8시간 × 시급 — 회사 급여대장 방식입니다 (예: 11월 = 평일 21일 168시간 + 주휴 40시간). 결근 · 지각은 「근태·연차」에서 뺍니다.</li>' +
+      '<li><b>4대보험 칸의 금액</b> = 공단 고지 금액 그대로 뗍니다. 「계산」 = 고지 금액을 넣지 않아 그 달 급여(또는 보험 기준월액)로 계산합니다. 고지서 금액이 바뀌면 [수정]에서 고치십시오.</li></ul>';
+  }
+  /** 이 사람의 고지 금액 · 고정 수당 (서버 '급여고지' 시트) */
+  function extOf(name) {
+    var out = {};
+    (S.data.payExt || []).forEach(function (x) { if (x && x.name === name) out = x; });
+    return out;
+  }
+  /** 생산직 기본급 칸: 그 달 시간 (예: 11월 208시간 = 기본 168 + 주휴 40) */
+  function hourBaseCell(e) {
+    var md = P.monthDays(S.month.ym, e.joined), h = md.weekdays * 8 + md.sundays * 8;
+    return '<span class="muted" title="그 달 평일 ' + md.weekdays + '일 × 8시간 + 주휴(일요일 ' + md.sundays + '번 × 8시간)">' + Number(S.month.ym.slice(5, 7)) + '월 ' + h + '시간</span> ' +
+      fmt(Math.round((e.hourly || S.month.config.hourly) * h));
+  }
+
+  /* 급여 조건 여러 명 한꺼번에 (2026-11-22 지시 "급여대장보고 우리 급여 산정해라"): 월급 · 성과급 · 숙식비 · 4대보험 고지 금액 · 고정 수당 · 가족 수.
+     한 줄 = 「이름」 다음에 「항목 값」을 이어 씀. 4대보험 값: 숫자 = 공단 고지 금액(가입), X = 가입 안 함, 계산 = 가입 · 급여로 계산.
+     목록에 없는 이름은 넣지 않습니다(먼저 위 입사일 칸에서 더함). 미리 보기 → 저장: 사람마다 「급여설정」, 고지 금액 · 고정 수당은 「급여고지」(한 번에). */
+  var PAY_KEYS = { '월급': 'base', '기본급': 'base', '성과급': 'bonus', '숙식비': 'dorm', '기숙사비': 'dorm', '연금': 'np', '국민연금': 'np', '건강': 'hi', '건강보험': 'hi',
+    '장기': 'ltc', '장기요양': 'ltc', '고용': 'ei', '고용보험': 'ei', '수당': 'allow', '고정수당': 'allow', '가족': 'family' };
+  var PAY_TXT = { base: '월급', bonus: '성과급', dorm: '숙식비', np: '국민연금', hi: '건강보험', ltc: '장기요양', ei: '고용보험', allow: '고정 수당', family: '가족 수' };
+  var PAY_INS = ['np', 'hi', 'ltc', 'ei'];
+  function payNum(t) { var v = String(t || '').replace(/[,원]/g, ''); return /^\d{1,9}$/.test(v) ? Number(v) : null; }
+  function payPlan(text) {
+    var by = {}, seen = {}, out = [];
+    staffList().forEach(function (e) { by[e.name] = e; });
+    function insTxt(on, fix) { return !on ? '안 함' : fix === '' || fix == null ? '계산' : '고지 ' + fmt(fix); }
+    String(text || '').split(/\r?\n/).forEach(function (line) {
+      var tk = line.replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+      if (!tk.length) return;
+      var s = tk.join(' '), name = tk[0], e = by[name], val = {}, bad = '';
+      if (!e) { out.push({ line: s, kind: 'bad', why: '직원 목록에 없는 이름입니다 (먼저 위 칸에서 입사일과 함께 더하십시오)' }); return; }
+      if (seen[name]) { out.push({ line: s, kind: 'bad', why: '같은 이름이 두 번 있습니다' }); return; }
+      seen[name] = true;
+      for (var i = 1; i < tk.length; i++) {
+        var k = PAY_KEYS[tk[i]], v = tk[i + 1];
+        if (!k) { bad = '「' + tk[i] + '」 — 모르는 항목입니다'; break; }
+        if (v == null) { bad = tk[i] + ' 값이 없습니다'; break; }
+        if (k in val) { bad = tk[i] + '이(가) 두 번 있습니다'; break; }
+        i++;
+        if (PAY_INS.indexOf(k) >= 0) {
+          var n = payNum(v);
+          if (/^[Xx×]$/.test(v)) val[k] = { on: false, fix: '' };
+          else if (v === '계산') val[k] = { on: true, fix: '' };
+          else if (n != null && n <= 10000000) val[k] = { on: true, fix: n };
+          else { bad = tk[i - 1] + ' 값은 금액 · X · 계산 중 하나입니다'; break; }
+        } else if (k === 'allow') {
+          if (payNum(v) == null) { bad = '수당 값은 금액입니다 (없애려면 0)'; break; }
+          val.allow = { amt: payNum(v) || '' };
+          if (tk[i + 1] && !PAY_KEYS[tk[i + 1]] && payNum(tk[i + 1]) == null) { i++; val.allow.label = tk[i].slice(0, 20); }
+        } else if (k === 'family') {
+          var f = payNum(v);
+          if (!(f >= 1 && f <= 20)) { bad = '가족 수는 1~20입니다'; break; }
+          val.family = f;
+        } else {
+          if (payNum(v) == null) { bad = tk[i - 1] + ' 값은 금액입니다'; break; }
+          val[k] = payNum(v);
+        }
+      }
+      if (bad) { out.push({ line: s, kind: 'bad', why: bad }); return; }
+      var x = extOf(name), emp = {}, ext = {}, chg = [];
+      Object.keys(val).forEach(function (k) {
+        var v = val[k];
+        if (PAY_INS.indexOf(k) >= 0) {
+          var curFix = x[k] == null ? '' : x[k];
+          if (v.on !== !!e[k]) emp[k] = v.on;
+          if (String(v.fix) !== String(curFix)) ext[k] = v.fix;
+          if ((k in emp) || (k in ext)) chg.push(PAY_TXT[k] + ' ' + insTxt(v.on, v.fix) + ' (지금 ' + insTxt(!!e[k], curFix) + ')');
+        } else if (k === 'allow') {
+          var curA = x.allow == null ? '' : x.allow, curL = String(x.allowLabel || '');
+          if (String(v.amt) !== String(curA)) ext.allow = v.amt;
+          if (v.label != null && v.label !== curL) ext.allowLabel = v.label;
+          if (('allow' in ext) || ('allowLabel' in ext)) chg.push('고정 수당 ' + (v.amt === '' ? '없음' : (v.label || curL || '고정수당') + ' ' + fmt(v.amt)) + ' (지금 ' + (curA === '' ? '없음' : fmt(curA)) + ')');
+        } else if (v !== e[k]) {
+          emp[k] = v;
+          chg.push(PAY_TXT[k] + ' ' + (k === 'family' ? e[k] + '명 → ' + v + '명' : fmt(e[k] || 0) + ' → ' + fmt(v)));
+        }
+      });
+      out.push({ line: s, name: name, emp: emp, ext: ext, chg: chg, kind: chg.length ? 'pay' : 'same' });
+    });
+    return out;
+  }
+  function payBulkHtml() {
+    var B = S.pbulk || {}, plan = B.plan || [], todo = plan.filter(function (p) { return p.kind === 'pay'; });
+    return '<details class="bulk" id="payBox"' + (B.open ? ' open' : '') + '><summary>여러 명 한꺼번에 넣기 — 월급 · 성과급 · 숙식비 · 4대보험 고지 금액 · 고정 수당</summary>' +
+      '<p class="muted">한 줄에 한 사람: <b>이름</b> 다음에 <b>항목 값</b>을 이어 씁니다. 항목 = <code>월급</code> <code>성과급</code> <code>숙식비</code> <code>연금</code> <code>건강</code> <code>장기</code> <code>고용</code> <code>수당</code> <code>가족</code>. ' +
+      '4대보험 값은 <b>공단 고지 금액</b>(숫자), <code>X</code>(가입 안 함), <code>계산</code>(급여로 계산) 중 하나. 쓰지 않은 항목은 그대로 둡니다.</p>' +
+      '<textarea id="payText" rows="6" spellcheck="false" aria-label="이름 항목 값 (한 줄에 한 사람)" placeholder="홍길동 월급 2400000 연금 108000 건강 86000 장기 11300 고용 21600&#10;김철수 성과급 300000 숙식비 200000 연금 X 수당 100000 직책수당">' + esc(B.text || '') + '</textarea>' +
+      '<div class="bulkbar"><button type="button" class="btn" data-act="payCheck">미리 보기</button>' +
+      (todo.length ? '<button type="button" class="btn primary" data-act="paySave">저장 (' + todo.length + '명)</button>' : '') + '</div>' +
+      (plan.length ? '<div class="scroll"><table class="grid" id="payTable"><thead><tr><th>이름</th><th>바뀌는 것</th><th>할 일</th></tr></thead><tbody>' +
+        plan.map(function (p) {
+          if (p.kind === 'bad') return '<tr><td colspan="2">' + esc(p.line) + '</td><td><span class="pill bad">' + esc(p.why) + '</span></td></tr>';
+          return '<tr><td class="name">' + esc(p.name) + '</td><td class="chg">' + esc(p.chg.join(' · ') || '-') + '</td><td><span class="pill ' + (p.kind === 'same' ? 'off' : 'ok') + '">' + (p.kind === 'same' ? '바뀔 것 없음' : '저장') + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>' : '') +
+      (B.msg ? '<p class="bulkmsg" role="status">' + esc(B.msg) + '</p>' : '') + '</details>';
+  }
+  function paySave() {
+    var plan = ((S.pbulk || {}).plan || []).filter(function (p) { return p.kind === 'pay'; });
+    if (!plan.length) return;
+    var exts = plan.filter(function (p) { return Object.keys(p.ext).length; }).map(function (p) { return Object.assign({ name: p.name }, p.ext); });
+    if (exts.length && S.extErr) { alert('4대보험 고지 금액 · 고정 수당을 저장할 서버가 아직 준비되지 않았습니다 (' + errText(S.extErr) + '). 새로고침한 뒤 다시 하십시오.'); return; }
+    var done = 0;
+    var chain = plan.reduce(function (pr, p) {
+      if (!Object.keys(p.emp).length) return pr;
+      return pr.then(function () {
+        var cur = staffList().filter(function (e) { return e.name === p.name; })[0], e = {};
+        Object.keys(P.EMP_DEFAULTS).forEach(function (k) { e[k] = cur[k]; });
+        e.name = p.name;
+        Object.keys(p.emp).forEach(function (k) { e[k] = p.emp[k]; });
+        return call('saveEmployee', { emp: e }).then(function (saved) {
+          var list = S.data.settings || [], i = -1;
+          list.forEach(function (s, j) { if (s.name === saved.name) i = j; });
+          if (i >= 0) list[i] = saved; else list.push(saved);
+          S.data.settings = list;
+          done++;
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      if (!exts.length) return;
+      return call('stock.call', { fn: 'apiPayExtSave', args: [exts] }).then(function (r) { S.data.payExt = (r && r.ext) || []; S.extErr = ''; });
+    });
+    guard(chain).then(function () {
+      S.pbulk = { open: true, text: '', plan: [], msg: plan.length + '명 급여 조건을 저장했습니다.' };
+      recompute();
+      toast(plan.length + '명 저장했습니다');
+    }, function () {
+      S.pbulk.plan = payPlan(S.pbulk.text);
+      S.pbulk.msg = '저장하지 못한 것이 있습니다 (급여설정 ' + done + '명까지 저장). 미리 보기를 다시 확인하십시오.';
+      recompute();
+    });
   }
   function staffList() {
     var d = S.data, names = [], by = {};
@@ -884,6 +1030,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
 
   function viewEdit() {
     var e = S.edit, cfg = S.month.config;
+    S.editExt = Object.assign({ np: '', hi: '', ltc: '', ei: '', allow: '', allowLabel: '' }, extOf(e.name));
     function txt(k, label, hint, extra) {
       return '<div class="field"><label for="f_' + k + '">' + label + '</label><input type="text" id="f_' + k + '" name="' + k + '" value="' + esc(e[k] == null ? '' : e[k]) + '"' + (extra || '') + '>' + (hint ? '<div class="hint">' + hint + '</div>' : '') + '</div>';
     }
@@ -893,6 +1040,11 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     }
     function chk(k, label) {
       return '<label class="check"><input type="checkbox" name="' + k + '"' + (e[k] ? ' checked' : '') + '> ' + label + '</label>';
+    }
+    function xmoney(k, label, hint) {   // 급여고지 칸 (빈칸 = 없음)
+      var v = S.editExt[k] === '' || S.editExt[k] == null ? '' : fmt(Number(S.editExt[k]));
+      return '<div class="field"><label for="x_' + k + '">' + label + '</label><input type="text" inputmode="numeric" class="money" id="x_' + k + '" name="x_' + k + '" value="' + v + '"' + (S.extErr ? ' disabled' : '') + '>' +
+        '<div class="hint">' + (S.extErr ? '서버가 아직 준비되지 않아 고칠 수 없습니다' : hint) + '</div></div>';
     }
     var nations = ['<option value="">(선택)</option>'].concat(P.NATIONS.map(function (n) { return '<option' + (e.nation === n ? ' selected' : '') + '>' + n + '</option>'; }));
     if (e.nation && P.NATIONS.indexOf(e.nation) < 0) nations.push('<option selected>' + esc(e.nation) + '</option>');
@@ -906,14 +1058,19 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
       txt('joined', '입사일', '예: 2024-03-02', ' maxlength="20"') +
       '</div></fieldset>' +
       '<fieldset><legend>급여</legend><div class="form">' +
-      money('base', '기본급 (월)', '209시간 × 10,320원 = 2,156,880원') +
+      (!isSalaried(e.name) && cfg.hourMonth ? '<input type="hidden" name="base" value="' + (e.base || 0) + '"><div class="field"><label>기본급</label><div class="hint" style="margin-top:6px">잔업 앱 직원은 <b>그 달 평일 수 × 8시간 × 시급 + 주휴수당(일요일 수 × 8시간 × 시급)</b>으로 계산합니다 (회사 급여대장 방식).</div></div>'
+        : money('base', '기본급 (월)', '월급제: 매월 고정 금액')) +
       money('hourly', '통상시급 (잔업수당 기준)', '2026년 최저임금 10,320원') +
       money('bonus', '성과급 (매월)', '없으면 0') +
       money('dorm', '기숙사비 (매월 공제)', '없으면 0') +
+      xmoney('allow', '고정 수당 (매월 지급)', '예: 기타수당 · 직책수당. 없으면 빈칸') +
+      '<div class="field"><label for="x_allowLabel">고정 수당 이름</label><input type="text" id="x_allowLabel" name="x_allowLabel" maxlength="20" value="' + esc(S.editExt.allowLabel || '') + '" placeholder="기타수당"></div>' +
       '</div></fieldset>' +
       '<fieldset><legend>4대보험 · 세금</legend><div class="form">' +
       '<div class="checks">' + chk('np', '국민연금') + chk('hi', '건강보험') + chk('ltc', '장기요양보험') + chk('ei', '고용보험') + '</div>' +
-      money('insBase', '보험 기준월액 (미입력 시 당월 급여)', '공단에 신고한 보수월액을 입력하면 고지서와 일치합니다') +
+      xmoney('np', '국민연금 고지 금액', '공단 고지서 금액 (빈칸 = 계산)') + xmoney('hi', '건강보험 고지 금액', '빈칸 = 계산') +
+      xmoney('ltc', '장기요양 고지 금액', '빈칸 = 건강보험료 × 0.9448/7.19') + xmoney('ei', '고용보험 고지 금액', '빈칸 = 계산') +
+      money('insBase', '보험 기준월액 (고지 금액이 빈칸일 때)', '비우면 그 달 급여로 계산합니다') +
       '<div class="field"><label for="f_family">공제대상 가족 수 (본인 포함)</label><input type="text" inputmode="numeric" id="f_family" name="family" value="' + e.family + '"></div>' +
       '<div class="field"><label for="f_kids">그중 8~20세 자녀 수</label><input type="text" inputmode="numeric" id="f_kids" name="kids" value="' + e.kids + '"></div>' +
       '<div class="field"><label for="f_taxRatio">소득세 원천징수 비율</label><select id="f_taxRatio" name="taxRatio">' + [80, 100, 120].map(function (v) { return '<option value="' + v + '"' + (e.taxRatio === v ? ' selected' : '') + '>' + v + '%</option>'; }).join('') + '</select></div>' +
@@ -1164,7 +1321,8 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     return '<div class="toolbar"><h2>계산 기준</h2><span class="muted">2026년 기준값이 입력되어 있습니다. 요율이 변경되면 여기서 수정하십시오.</span></div>' +
       '<form id="cfgForm" autocomplete="off"><div class="form">' + fields + '</div>' +
       '<div class="modal-actions"><button type="button" class="btn" data-act="cfgDefaults">2026년 기본값으로</button><button type="submit" class="btn primary">기준 저장</button></div></form>' +
-      '<ul class="note"><li>국민연금 4.75% · 건강보험 3.595% · 장기요양 = 건강보험료 × 0.9448/7.19 · 고용보험 0.9% (2026년 근로자 부담). 국민연금 기준소득월액은 41만~659만원 (2026.7~2027.6).</li>' +
+      '<ul class="note"><li><b>잔업 앱 직원 기본급</b>: 그 달 평일 수 × 8시간 × 시급 + 주휴수당(일요일 수 × 8시간 × 시급) — 회사 급여대장 방식 (월 209시간 고정이 아님). 4대보험은 직원 설정에 넣은 <b>공단 고지 금액</b>을 먼저 씁니다.</li>' +
+      '<li>국민연금 4.75% · 건강보험 3.595% · 장기요양 = 건강보험료 × 0.9448/7.19 · 고용보험 0.9% (2026년 근로자 부담). 국민연금 기준소득월액은 41만~659만원 (2026.7~2027.6).</li>' +
       '<li>토요일: 근로계약서에 「매주 토요일 휴일」로 되어 있어 휴일근로(8시간까지 ×1.5, 넘으면 ×2.0)로 계산합니다. 토요일이 무급 휴무일이면 해제하십시오 (해제 시 연장근로 ×1.5).</li>' +
       '<li>생산직 연장근로수당 비과세(월정액급여 260만원 이하, 전년 총급여 3,700만원 이하, 연 240만원 한도)는 세무사 확인 후 설정하십시오.</li></ul>' +
       '<fieldset style="margin-top:18px"><legend>관리자 비밀번호 변경</legend>' +
@@ -1277,6 +1435,9 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     var bt = document.getElementById('bulkText'), bb = document.getElementById('bulkBox');
     if (bt) bt.addEventListener('input', function () { S.bulk = S.bulk || {}; S.bulk.text = bt.value; });
     if (bb) bb.addEventListener('toggle', function () { S.bulk = S.bulk || {}; S.bulk.open = bb.open; });
+    var pt = document.getElementById('payText'), pb = document.getElementById('payBox');
+    if (pt) pt.addEventListener('input', function () { S.pbulk = S.pbulk || {}; S.pbulk.text = pt.value; });
+    if (pb) pb.addEventListener('toggle', function () { S.pbulk = S.pbulk || {}; S.pbulk.open = pb.open; });
     app.querySelectorAll('input.money').forEach(function (inp) {
       inp.addEventListener('blur', function () {
         var s = inp.value.replace(/[^0-9]/g, '');
@@ -1296,12 +1457,26 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
         ev.preventDefault();
         var e = readEditForm(ef);
         if (e.account && !/^[0-9\- ]{6,30}$/.test(e.account)) { alert(ERR.bad_account); return; }
-        guard(call('saveEmployee', { emp: e })).then(function (saved) {
+        var xw = S.editExt || {}, xn = { name: e.name }, xch = false;
+        ['np', 'hi', 'ltc', 'ei', 'allow'].forEach(function (k) {
+          var el = ef.elements['x_' + k];
+          if (!el || el.disabled) return;
+          var v = String(el.value || '').replace(/[^0-9]/g, ''), nv = v === '' ? '' : Number(v);
+          if (k === 'allow' && nv === 0) nv = '';
+          xn[k] = nv;
+          if (String(nv) !== String(xw[k] == null ? '' : xw[k])) xch = true;
+        });
+        var lb = ef.elements.x_allowLabel;
+        if (lb && !lb.disabled) { xn.allowLabel = String(lb.value || '').trim().slice(0, 20); if (xn.allowLabel !== String(xw.allowLabel || '')) xch = true; }
+        guard(call('saveEmployee', { emp: e }).then(function (saved) {
           var list = S.data.settings || [];
           var i = -1;
           list.forEach(function (s, j) { if (s.name === saved.name) i = j; });
           if (i >= 0) list[i] = saved; else list.push(saved);
           S.data.settings = list;
+          if (!xch || S.extErr) return saved;
+          return call('stock.call', { fn: 'apiPayExtSave', args: [[xn]] }).then(function (r) { S.data.payExt = (r && r.ext) || []; return saved; });
+        })).then(function (saved) {
           S.edit = null;
           recompute();
           toast(saved.name + ' 설정을 저장했습니다');
@@ -1381,6 +1556,15 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
         break;
       }
       case 'bulkSave': bulkSave(); break;
+      case 'payCheck': {
+        var ptx = document.getElementById('payText');
+        S.pbulk = { open: true, text: ptx ? ptx.value : '' };
+        S.pbulk.plan = payPlan(S.pbulk.text);
+        if (!S.pbulk.plan.length) S.pbulk.msg = '넣을 줄이 없습니다.';
+        render();
+        break;
+      }
+      case 'paySave': paySave(); break;
       case 'printOt': printNow('ledger', otPrintHtml()); break;
       case 'cancelAdj': S.adjEdit = null; render(); break;
       case 'printLedger': printLedger(); break;
