@@ -117,6 +117,43 @@ b{font-variant-numeric:tabular-nums}
 .it .tag{padding:0 6px;font-size:11.5px;margin-right:5px;vertical-align:1px}
 /* 칸: 모두 · 각종 공문 = 받은 시각 · 분류 · 제목 · 발신 · 기한 · 상태 / 발주서 = 받은 시각 · 거래처 · 제목 · 출고 · 상태 / 세금계산서 = 작성일 · 거래처 · 공급가액 · 세액 · 합계 · 장부 */
 .t-all,.t-gong{--cols:92px 86px minmax(0,1fr) minmax(0,180px) 92px 84px}
+/* 정리 (v52, 2026-11-22 19:20 지시 "니가 분류하고 정리를 해라 … 자동으로 정리해서 딱 할수있도록") */
+.brd h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}
+.brd h2 small{font-size:13px;font-weight:600;color:var(--muted)}
+.bsec{margin:12px 0 0}
+.bsec>h3,.bsec>summary{display:flex;align-items:center;gap:6px;margin:0 0 6px;font-size:15px;font-weight:800}
+.bsec>summary{cursor:pointer;color:var(--ink2);list-style:revert}
+.bsec h3 .bn{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 7px;border-radius:999px;background:var(--vc);color:#fff;font-size:12.5px}
+.bsec h3 small{font-size:12.5px;font-weight:600;color:var(--muted)}
+.bl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.bi{display:flex;flex-direction:column;gap:3px;width:100%;padding:10px 12px;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;background:#fff;text-align:left;cursor:pointer;font:inherit;color:inherit}
+.bi:hover{background:#FAF7F4}
+.bi:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.bi.k-todo{border-left-color:var(--vc)} .bi.k-meet{border-left-color:var(--blue)} .bi.k-deal{border-left-color:#6D28D9} .bi.k-pick{border-left-color:var(--gold)} .bi.k-note{border-left-color:var(--ok)}
+.bh{display:flex;align-items:center;gap:8px;min-width:0}
+.bt{flex:1;min-width:0;font-weight:800;font-size:15px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bd{flex:none;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--ink2);font-size:12.5px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+.bd.late{background:var(--bad);color:#fff} .bd.soon{background:var(--warn-soft);color:var(--warn)}
+.bdo{display:flex;flex-direction:column;gap:1px;font-size:14.5px;line-height:1.45;color:var(--ink)}
+.bm{font-size:12.5px;line-height:1.4;color:var(--muted)}
+.bempty{margin:0;padding:10px 12px;border-radius:10px;background:var(--soft);color:var(--ink2);font-size:14px}
+.bauto{margin:12px 0 0;font-size:13px;color:var(--muted)}
+.bauto .btn{margin-left:6px;vertical-align:middle}
+.lab.k-todo{background:var(--vsoft);color:var(--vc)} .lab.k-meet{background:var(--blue-soft);color:var(--blue)} .lab.k-deal{background:#EFE7FB;color:#6D28D9}
+.lab.k-pick{background:#F8F0DC;color:#7A5C0E} .lab.k-note{background:var(--ok-soft);color:var(--ok)} .lab.k-info,.lab.k-ad,.lab.k-att,.lab.k-self{background:#F1EEEB;color:#7F7973}
+.it .s.td{color:var(--ink2);font-weight:700}
+.tdb{margin:10px 0 12px;padding:12px 14px;border:1px solid var(--line);border-left:4px solid var(--vc);border-radius:12px;background:#FFFCF9}
+.tdb.k-meet{border-left-color:var(--blue)} .tdb.k-deal{border-left-color:#6D28D9} .tdb.k-pick{border-left-color:var(--gold)} .tdb.k-note{border-left-color:var(--ok)}
+.tdb.k-info,.tdb.k-ad,.tdb.k-self{border-left-color:#C9C2BB;background:#FBFAF9}
+.tdh{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 6px}
+.tdg{font-size:12.5px;font-weight:700;color:var(--muted)}
+.tdd{margin:4px 0 8px;padding-left:22px;font-size:15.5px;font-weight:700;line-height:1.5}
+.tdb .kv{margin:6px 0 0}
+.tdm{margin:10px 0 0;font-size:13.5px}
+.tdm ol{margin:4px 0 0;padding-left:20px} .tdm li{margin:2px 0} .tdm li.me>button{font-weight:800}
+.tdw{margin:8px 0 0;font-size:12.5px;color:var(--muted)}
+.tdn{margin:10px 0;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:14px}
+@media (max-width:759px){ .bt{white-space:normal;flex:1 1 70%} .bh{flex-wrap:wrap;row-gap:4px} .bh .bd{order:3} .bdo{font-size:14px} }
 .t-po{--cols:92px minmax(0,170px) minmax(0,1fr) 104px 104px}
 .t-tax{--cols:64px minmax(0,1fr) 110px 92px 118px 132px}
 @media (max-width:759px){
@@ -372,7 +409,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function obj(r) {
     return { id: r[0], at: r[1], kind: r[2], from: r[3], to: r[4], no: r[5], date: r[6], title: r[7], due: r[8], dueWhy: r[9], imp: !!r[10], state: r[11], sum: r[12],
       who: r[13], att: r[14], memo: r[15], files: r[16] || [], orig: r[17], chars: Number(r[18]) || 0, how: r[19], seen: r[20], done: r[21], edited: r[22],
-      amt: r[23] === '' || r[23] == null || !isFinite(Number(r[23])) ? '' : Number(r[23]) };
+      amt: r[23] === '' || r[23] == null || !isFinite(Number(r[23])) ? '' : Number(r[23]), td: r[24] && typeof r[24] === 'object' ? r[24] : null };
   }
   function won(n) { return String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   /** 세금계산서 총 금액: 서버가 공문함 전체로 셈한 것(서버 v46부터). 예전 서버면 화면에 받은 목록으로 셈합니다 */
@@ -486,7 +523,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function isNew(e) { return e.t === 'po' ? !!PO_NEW[e.st] : e.state === '새 공문'; }
   function hayOf(e) {
     return (e.t === 'po' ? [e.name, e.result, e.custs.join(' '), e.note, '발주서', e.mail ? e.mail.title : '']
-      : [e.title, e.from, e.to, e.no, e.sum, e.memo, e.att, e.who, e.orig, e.kind]).join(' ').replace(/\s+/g, '').toLowerCase();
+      : [e.title, e.from, e.to, e.no, e.sum, e.memo, e.att, e.who, e.orig, e.kind, e.td ? [(e.td.d || []).join(' '), e.td.r, e.td.w, e.td.t, TD_LAB[e.td.c]].join(' ') : ''].join(' ')).replace(/\s+/g, '').toLowerCase();
   }
   function isMail(x) { return x.t !== 'po' && (x.kind === '메일' || /^메일\(eml\)/.test(x.how) || (x.files[0] && x.files[0][2] === 'eml')); }
   function findPo(id) { return S.D ? S.D.P.filter(function (p) { return p.id === id; })[0] : null; }
@@ -582,6 +619,9 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     return '<span class="cell st"><span class="pill ' + st[0] + '">' + st[1] + '</span></span>';
   }
   function subOf(x) {
+    var t = x.td;
+    if (t && x.cat === 'gong' && x.state !== '처리 완료' && t.d && t.d.length && /^(todo|meet|deal|pick|note)$/.test(t.c)) return '<span class="s td">' + esc((t.c === 'pick' ? '' : '할 일: ') + t.d[0]) + '</span>';
+    if (t && t.byw && x.cat === 'gong') return '<span class="s">끝남: ' + esc(t.byw) + '</span>';
     if ((x.atts || []).length) return '<span class="s a">첨부 ' + esc(x.atts.map(function (a) { return a.name + (a.po ? ' → 발주서 ' + (PO_LAB[a.po.st] || a.po.st) : a.doc ? ' → ' + a.doc.kind : ''); }).join(', ')) + '</span>';
     if (x.sum) return '<span class="s">' + esc(x.sum) + '</span>';
     if (!x.chars) return '<span class="s err">글자를 읽지 못했습니다 — 원본을 열어 칸을 채워 주십시오.</span>';
@@ -650,6 +690,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var D = S.D, C = counts(), h = '';
     h += '<div class="cnt" role="group" aria-label="빨리 보기">' +
       cb('new', 'fresh', C.fresh, '새 공문') + cb('late', 'late', C.late, '기한 지남') + cb('soon', 'soon', C.soon, '3일 안 기한') + cb('open', '', C.open, '처리할 것') + '</div>';
+    if ((S.cat === 'all' || S.cat === 'gong') && S.f === 'open' && !S.q && !S.kind) h += boardHtml();
     h += '<section class="card"><div class="tools">' +
       '<button type="button" class="btn" data-act="pick"' + (S.up ? ' disabled' : '') + '>' + (S.up ? esc(S.up) : '공문 파일 올리기') + '</button>' +
       '<button type="button" class="btn ghost" data-act="run"' + (S.busy === 'run' ? ' disabled' : '') + '>' + (S.busy === 'run' ? '확인 중…' : '폴더 지금 확인') + '</button>' +
@@ -722,6 +763,88 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     }
     return h + '</section>';
   }
+  /* ── 정리 (서버 v52): 메일 · 공문마다 서버가 읽어 붙인 분류 · 할 일 · 기한 · 어디서 · 사유 · 연락처 ── */
+  var TD_LAB = { todo: '할 일', meet: '일정', deal: '거래 문의', pick: '검토', note: '알림', info: '참고', ad: '광고', att: '첨부', self: '내부', po: '발주서' };
+  function tdTitle(x) {
+    return String(x.title || x.orig || '').replace(/\[(?:POTENTIAL PHISHING|외부\s*메일)\]\s*/gi, '').replace(/^(?:\s*(?:RE|Re|re|FW|Fw|Fwd|fwd|답장|전달)\s*:\s*)+/, '')
+      .replace(/\s*\b(?:RE|Re|FW|Fwd)\s*:\s*/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function tdMd(s) {   // 'yyyy-MM-dd[ HH:mm]' → '11/26(목) 14:00'
+    s = String(s || '');
+    return /^\d{4}-\d{2}-\d{2}/.test(s) ? Number(s.slice(5, 7)) + '/' + Number(s.slice(8, 10)) + '(' + wdOf(s.slice(0, 10)) + ')' + (s.length >= 16 ? ' ' + s.slice(11, 16) : '') : '';
+  }
+  function tdWhen(x, today) {   // → { k: 정렬 열쇠, h: 날짜 표 }
+    var t = x.td || {}, d;
+    if (t.c === 'meet' && t.e) { d = days(today, t.e.slice(0, 10)); return { k: t.e, h: '<span class="bd' + (d < 0 ? '' : d <= 1 ? ' late' : d <= 3 ? ' soon' : '') + '">' + esc((d === 0 ? '오늘 ' : d === 1 ? '내일 ' : '') + tdMd(t.e)) + '</span>' }; }
+    if (x.due) { d = days(today, x.due); return { k: x.due, h: '<span class="bd' + (d < 0 ? ' late' : d <= 3 ? ' soon' : '') + '">' + esc(d < 0 ? '기한 ' + (-d) + '일 지남' : d === 0 ? '오늘 마감' : (t.c === 'pick' ? '마감 ' : '기한 ') + tdMd(x.due) + ' · D-' + d) + '</span>' }; }
+    if (t.e) return { k: t.e, h: '<span class="bd">' + esc(tdMd(t.e)) + '</span>' };
+    return { k: '9999', h: '' };
+  }
+  function tdItem(x, today, mini) {
+    var t = x.td, w = tdWhen(x, today), meta = [];
+    var h = '<li><button type="button" class="bi k-' + t.c + '" data-open="' + esc(x.id) + '"><span class="bh"><span class="lab k-' + t.c + '">' + esc(TD_LAB[t.c] || '') + '</span><span class="bt">' + esc(tdTitle(x)) + '</span>' + w.h + '</span>';
+    if (t.d && t.d.length && !mini) h += '<span class="bdo">' + t.d.map(function (a, i) { return '<span>' + (t.d.length > 1 ? (i + 1) + '. ' : '') + esc(a) + '</span>'; }).join('') + '</span>';
+    if (t.r) meta.push((/반려/.test(t.why || '') ? '사유: ' : '') + t.r);
+    if (mini && t.byw) meta.push(t.byw);
+    if (!mini && t.w) meta.push('어디서: ' + t.w);
+    if (!mini && t.t) meta.push('연락: ' + t.t);
+    meta.push((x.from || '보낸 곳 모름') + ' · ' + dShort(x.at) + ' 받음');
+    return h + '<span class="bm">' + esc(meta.join(' · ')) + '</span></button></li>';
+  }
+  function boardHtml() {
+    var D = S.D, today = D.today;
+    var R = D.R.filter(function (x) { return x.td && x.cat === 'gong'; });
+    if (!R.length) return '';
+    var key = function (x) { return tdWhen(x, today).k; };
+    var byWhen = function (a, b) { var A = key(a), B = key(b); return A < B ? -1 : A > B ? 1 : newest(a, b); };
+    var open = function (x) { return x.state !== '처리 완료'; };
+    var todo = R.filter(function (x) { return /^(todo|meet|deal)$/.test(x.td.c) && x.td.s === 'todo' && open(x); }).sort(byWhen);
+    var pick = R.filter(function (x) { return x.td.c === 'pick' && x.td.s === 'todo' && open(x); }).sort(byWhen);
+    var wait = R.filter(function (x) { return x.td.s === 'wait' && days(String(x.at).slice(0, 10), today) <= 30; }).sort(newest);
+    var note = R.filter(function (x) { return x.td.c === 'note' && x.td.d && x.td.d.length && days(String(x.at).slice(0, 10), today) <= 7; }).sort(newest);
+    var chk = R.filter(function (x) { return x.td.chk && x.state === '처리 완료'; }).sort(newest);
+    var A = { ad: 0, info: 0, note: 0, att: 0, self: 0 }, ym = today.slice(0, 7);
+    R.forEach(function (x) { if (A[x.td.c] != null && String(x.at).slice(0, 7) === ym && x.state === '처리 완료') A[x.td.c]++; });
+    var sec = function (title, sub, xs, mini) {
+      return '<div class="bsec"><h3>' + title + ' <span class="bn">' + xs.length + '</span>' + (sub ? '<small>' + sub + '</small>' : '') + '</h3>' +
+        (xs.length ? '<ul class="bl">' + xs.map(function (x) { return tdItem(x, today, mini); }).join('') + '</ul>' : '<p class="bempty">없습니다.</p>') + '</div>';
+    };
+    var h = '<section class="card brd" id="brd"><h2>정리<small>받은 메일 · 공문을 읽고 할 일만 모았습니다 (누르면 메일 · 정리 내용)</small></h2>';
+    h += sec('할 일', '기한 · 일시가 가까운 것부터', todo, false);
+    if (pick.length) h += sec('검토', '신청 · 참가할지 정할 것', pick, true);
+    if (wait.length) h += sec('진행 중', '보낸 뒤 결과를 기다리는 것', wait, true);
+    if (note.length) h += sec('확인만', '최근 7일 알림', note, false);
+    if (chk.length) h += '<details class="bsec"><summary>지난 메일 중 부탁이 있던 것 ' + chk.length + '건 — 처리했는지 확인만</summary><ul class="bl">' + chk.map(function (x) { return tdItem(x, today, false); }).join('') + '</ul></details>';
+    var an = A.ad + A.info + A.note + A.att + A.self;
+    h += '<p class="bauto">' + (an ? '이번 달 자동으로 정리한 것 ' + an + '건(광고 ' + A.ad + ' · 참고 ' + A.info + ' · 알림 ' + A.note + ' · 첨부 ' + A.att + ' · 우리 회사 사진 ' + A.self + ') — ‘처리 완료’에 있습니다.' : '') +
+      '<button type="button" class="btn ghost sm" data-act="tidy"' + (S.busy === 'tidy' ? ' disabled' : '') + '>' + (S.busy === 'tidy' ? '정리 중…' : '다시 정리') + '</button></p>';
+    return h + '</section>';
+  }
+  function tidyBox(x) {
+    var t = x.td;
+    if (!t || x.cat !== 'gong') return '';
+    if (t.c === 'att') return t.p ? '<p class="tdn">메일 첨부입니다. 할 일은 메일 건에 정리했습니다. <button type="button" class="link" data-open="' + esc(t.p) + '">메일 보기</button></p>' : '';
+    var h = '<section class="tdb k-' + t.c + '"><div class="tdh"><span class="lab k-' + t.c + '">' + esc(TD_LAB[t.c] || t.c) + '</span>' + (t.g ? '<span class="tdg">' + esc(t.g) + '</span>' : '') +
+      (t.s === 'done' ? '<span class="pill done">끝남</span>' : t.s === 'wait' ? '<span class="pill info">진행 중</span>' : t.s === 'todo' ? '<span class="pill warn">해야 함</span>' : '') + '</div>';
+    if (t.d && t.d.length) h += '<ol class="tdd">' + t.d.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ol>';
+    var kv = [];
+    if (t.c === 'meet' && t.e) kv.push(['일시', tdMd(t.e)]);
+    else if (x.due) kv.push([t.c === 'pick' ? '마감' : '기한', tdMd(x.due) + (x.dueWhy ? ' — ' + String(x.dueWhy).replace(/^정리:\s*/, '') : '')]);
+    if (t.e && t.c !== 'meet') kv.push(['일시', tdMd(t.e)]);
+    if (t.r) kv.push([/반려/.test(t.why || '') ? '사유' : '요점', t.r]);
+    if (t.w) kv.push(['어디서', t.w]);
+    if (t.t) kv.push(['연락처', t.t]);
+    if (t.byw) kv.push([t.s === 'done' ? '끝난 까닭' : '진행', t.byw]);
+    if (kv.length) h += '<dl class="kv">' + kv.map(function (p) { return '<dt>' + esc(p[0]) + '</dt><dd>' + esc(p[1]) + '</dd>'; }).join('') + '</dl>';
+    if (t.m && t.mn > 1) {
+      var xs = S.D.R.filter(function (y) { return y.td && y.td.m === t.m; }).sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
+      if (xs.length > 1) h += '<div class="tdm"><b>같은 건 메일 ' + xs.length + '통</b><ol>' + xs.map(function (y) {
+        return '<li' + (y.id === x.id ? ' class="me"' : '') + '><button type="button" class="link" data-open="' + esc(y.id) + '">' + esc(dShort(y.at) + ' ' + String(y.at).slice(11, 16) + ' · ' + tdTitle(y)) + '</button> ' +
+          (y.td.s === 'done' ? '<span class="pill done">끝남</span>' : y.td.s === 'wait' ? '<span class="pill info">진행 중</span>' : y.td.s === 'todo' ? '<span class="pill warn">해야 함</span>' : '') + '</li>';
+      }).join('') + '</ol></div>';
+    }
+    return h + '<p class="tdw">자동 정리: ' + esc(t.why || TD_LAB[t.c] || '') + (t.hand ? ' · 상태는 사람이 바꾼 그대로 둡니다' : '') + ' — 글자를 보고 짐작한 것이라 틀릴 수 있습니다. 틀리면 상태를 직접 바꿔 주십시오.</p></section>';
+  }
   function cb(f, cls, n, t) { return '<button type="button" class="' + cls + '" data-f="' + f + '" aria-pressed="' + (S.f === f) + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
   function itemHtml(x, today) {   // 공문함 한 건 = 표 한 줄 (칸은 지금 분류의 머리줄과 같음)
     var mode = listMode(), st = 'st-' + (x.state === '새 공문' ? 'new' : x.state === '처리 완료' ? 'done' : 'seen');
@@ -729,6 +852,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var amt = x.cat === 'tax' ? '<span class="s"><span class="amt' + (x.amt === '' ? ' none">금액 모름' : '">합계 ' + won(x.amt) + '원') + '</span></span>' : '';
     var h = '<button type="button" class="it ' + st + '" data-open="' + esc(x.id) + '"><span class="cell cd1 l2">' + esc(atCell(x.at)) + '</span>';
     if (mode === 'po') h += '<span class="cell l2"><span class="m">' + esc(x.from || '거래처 미상') + '</span></span><span class="cell tt">' + title + subOf(x) + '</span>';
+    else if (x.td && x.cat === 'gong' && TD_LAB[x.td.c]) h += '<span class="cell l2"><span class="lab k-' + x.td.c + '">' + esc(TD_LAB[x.td.c]) + '</span></span>' +
+      '<span class="cell tt">' + title + (amt || subOf(x)) + '</span><span class="cell l2"><span class="m">' + esc(x.from || '발신 미상') + '</span></span>';
     else h += '<span class="cell l2"><span class="lab' + (mode === 'all' ? ' c-' + x.cat : '') + '">' + esc(mode === 'all' && x.cat !== 'gong' ? CAT[x.cat] : x.kind) + '</span></span>' +
       '<span class="cell tt">' + title + (amt || subOf(x)) + '</span><span class="cell l2"><span class="m">' + esc(x.from || '발신 미상') + '</span></span>';
     return h + dueCell(x, today) + stPill(x) + '<span class="br"></span></button>';
@@ -981,6 +1106,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
         : String(x.date) >= '2026-01-01' ? '반영 대기 — 10분 안에 매출 · 매입 장부에 들어갑니다' : '2026년 전 계산서는 장부에 넣지 않습니다') +
         ' <a class="link" href="ledger.html?view=auto">매출 · 매입 › 자동 수집</a></p>';
     }
+    h += tidyBox(x);
     var mail = isMail(x);
     if (mail) h += mailBox(x) + attBox(x);
     else if (x.mail) h += '<p class="from">메일 첨부로 옴: <button type="button" class="link" data-open="' + esc(x.mail.id) + '">' + esc(x.mail.title || x.mail.orig) + '</button></p>';
@@ -1127,6 +1253,14 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(kv).then(done, fall); else fall();
     }
     else if (a === 'pick') { fileIn.value = ''; fileIn.click(); }
+    else if (a === 'tidy') {
+      S.busy = 'tidy'; render();
+      call('apiDocTidy', []).then(function (d) {
+        S.busy = ''; put(d); render();
+        var r = d.tidyRun || {};
+        toast('다시 정리했습니다 — ' + (r.n || 0) + '건 읽음 · ' + (r.w || 0) + '건 바뀜.');
+      }, function (e) { S.busy = ''; render(); toast(errText(e)); });
+    }
     else if (a === 'run') {
       S.busy = 'run'; render();
       call('apiDocRun', []).then(function (d) {
