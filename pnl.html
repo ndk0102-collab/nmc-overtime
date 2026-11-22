@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
 </script>
-<script src="payroll.js?v=v10"></script>
+<script src="payroll.js?v=v11"></script>
 <script src="nav.js"></script>
 <!--PREVIEW_SERVER-->
 <style>
@@ -409,12 +409,16 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     var c = payCache[ym];
     if (c && Date.now() - c.t < 300000) return Promise.resolve(c.v);
     if (!window.NMCPay || !window.NMCPay.computeMonth) return Promise.resolve(null);
-    return post({ action: 'data', ym: ym }).then(function (d) {
+    // 근태(결근 · 지각 공제, 2026-11-22)도 같이 — 못 불러오면 공제 없이 셈하고, 다음에 다시 불러오도록 저장하지 않음
+    var attP = post({ action: 'stock.call', fn: 'apiAttList', args: [] }).then(function (r) { return (r && r.att) || []; }, function () { return null; });
+    return Promise.all([post({ action: 'data', ym: ym }), attP]).then(function (res) {
+      var d = res[0];
+      d.att = res[1] || [];
       var m = window.NMCPay.computeMonth(d), gross = 0;
       (m.rows || []).forEach(function (r) { gross += num(r.col && r.col.gross); });
       var used = !m.future && (m.lastRecord || d.ledgerSaved);
       var out = used && gross > 0 ? { gross: Math.round(gross), n: (m.rows || []).length, partial: !!m.partial } : null;
-      payCache[ym] = { t: Date.now(), v: out };
+      if (res[1]) payCache[ym] = { t: Date.now(), v: out };
       return out;
     }, function (e) { if (String(e && e.message) === 'auth') throw e; return null; });
   }

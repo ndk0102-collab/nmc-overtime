@@ -42,7 +42,9 @@
     kid2: 45830,              // 2명
     kidMore: 33330,           // 3명부터 1명당 추가
     memoTo: '',               // 받는 분 통장 표시 (빈칸이면 '남명11월급여' 식)
-    memoFrom: ''              // 내 통장 표시 (빈칸이면 직원 이름)
+    memoFrom: '',             // 내 통장 표시 (빈칸이면 직원 이름)
+    dayHours: 8,              // 근태(2026-11-22): 하루 소정근로시간 — 결근 · 무급 휴가 하루 = 8시간
+    absentWeekly: true        // 결근한 주는 주휴(하루치)도 뺌 (2026-11-22 결정: 근로기준법상 주휴는 그 주 개근 때만)
   };
 
   /* 기준 화면에 보여 줄 항목: [키, 이름, 종류, 최소, 최대] */
@@ -97,6 +99,11 @@
     ['전북은행', '037'], ['경남은행', '039'], ['새마을금고', '045'], ['신협', '048'], ['저축은행', '050'],
     ['우체국', '071'], ['케이뱅크', '089'], ['카카오뱅크', '090'], ['토스뱅크', '092']
   ];
+
+  /* 근태 (2026-11-22 지시: "정규시간에 일 못했을때 … 기록해서 월급에 반영하도록 하고 연차기록도 넣어라")
+     day = 하루 무급(결근 · 무급 휴가), min = 못 한 시간(지각·조퇴·외출), paid = 유급 하루(연차), half = 유급 반나절(반차), adj = 연차 개수 맞추기(± 일수) */
+  var ATT_KINDS = { '결근': 'day', '지각·조퇴': 'min', '무급 휴가': 'day', '연차': 'paid', '반차': 'half', '연차 조정': 'adj' };
+  var ATT_ORDER = ['결근', '지각·조퇴', '무급 휴가', '연차', '반차', '연차 조정'];
 
   var KINDS = {
     pay: '지급 (세금 붙음)',
@@ -222,6 +229,111 @@
     return h;
   }
 
+  /* ───────── 근태 · 연차 ───────── */
+
+  function ymdOk(s) { return /^\d{4}-\d{2}-\d{2}$/.test(String(s || '')); }
+  function utc(date) { var p = String(date).split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); }
+  function ymdOf(t) { var d = new Date(t); return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
+  /** 그 주(월~일)의 월요일 */
+  function weekKey(date) { var t = utc(date), wd = new Date(t).getUTCDay(); return ymdOf(t - ((wd + 6) % 7) * 86400000); }
+  function mdTxt(date) { return Number(date.slice(5, 7)) + '/' + Number(date.slice(8, 10)); }
+  function minTxt(m) { var h = Math.floor(m / 60), r = m % 60; return (h ? h + '시간' : '') + (r ? (h ? ' ' : '') + r + '분' : '') || '0분'; }
+  /** 입사일 글자(2024-03-02 · 2024.3.2 · 20240302) → YYYY-MM-DD, 못 읽으면 '' */
+  function parseJoined(s) {
+    var m = String(s || '').match(/(\d{4})\D*(\d{1,2})\D*(\d{1,2})/);
+    if (!m) return '';
+    var y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+    if (mo < 1 || mo > 12 || d < 1 || d > 31 || y < 1950) return '';
+    var t = Date.UTC(y, mo - 1, d);
+    return new Date(t).getUTCDate() === d ? ymdOf(t) : '';
+  }
+  /** n달 뒤 같은 날 (그 달에 없는 날이면 말일) */
+  function addMonths(date, n) {
+    var y = Number(date.slice(0, 4)), m = Number(date.slice(5, 7)) - 1 + n, d = Number(date.slice(8, 10));
+    var yy = y + Math.floor(m / 12), mm = ((m % 12) + 12) % 12;
+    var last = new Date(Date.UTC(yy, mm + 1, 0)).getUTCDate();
+    return yy + '-' + pad2(mm + 1) + '-' + pad2(Math.min(d, last));
+  }
+  function dayBefore(date) { return ymdOf(utc(date) - 86400000); }
+
+  /** 이 달 근태 → 월급에서 뺄 돈. 시간당 = 기본급 ÷ 월 소정근로시간(209) (기본급이 없으면 통상시급).
+      결근: 하루 8시간 + (결근한 주마다 주휴 8시간, 한 주에 한 번) · 무급 휴가: 하루 8시간 · 지각·조퇴: 못 한 시간.
+      평일이 아닌 날(토 · 일 · 공휴일)의 결근 · 무급 휴가 · 지각은 빼지 않습니다. 기본급보다 많이 빼지 않습니다.
+      달을 걸친 주(예: 11/30 월 · 12/1 화 결근): 그 주 주휴는 먼저 결근한 달에서 한 번만 뺍니다 — prior = 지난달까지의 근태. */
+  function attOf(atts, e, cfg, baseHourly, holidays, prior, ym) {
+    var rate = e.base > 0 ? e.base / cfg.monthlyHours : baseHourly;
+    var absent = [], unpaid = [], paid = [], half = [], weeks = {}, lateMin = 0, late = [], skipped = [];
+    (atts || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; }).forEach(function (a) {
+      var k = ATT_KINDS[a.kind];
+      if (!k || !ymdOk(a.date)) return;
+      var work = dayType(a.date, holidays, cfg) === 'weekday';
+      if (k === 'day' || k === 'min') { if (!work) { skipped.push(a); return; } }
+      if (a.kind === '결근') { absent.push(a.date); weeks[weekKey(a.date)] = 1; }
+      else if (k === 'day') unpaid.push(a.date);
+      else if (k === 'min') { var mm = Math.max(0, Math.round(num(a.min))); if (mm) { lateMin += mm; late.push({ date: a.date, min: mm }); } }
+      else if (k === 'paid') paid.push(a.date);
+      else if (k === 'half') half.push(a.date);
+    });
+    var first = ym ? ym + '-01' : '';
+    var chargedBefore = {};
+    if (first) (prior || []).forEach(function (a) {
+      if (a.kind === '결근' && ymdOk(a.date) && a.date < first && dayType(a.date, holidays, cfg) === 'weekday') chargedBefore[weekKey(a.date)] = 1;
+    });
+    var carried = Object.keys(weeks).filter(function (k) { return chargedBefore[k]; }).length;
+    var nWeeks = cfg.absentWeekly ? Object.keys(weeks).length - carried : 0;
+    var hours = cfg.dayHours * (absent.length + unpaid.length + nWeeks) + lateMin / 60;
+    var amount = Math.min(Math.round(rate * hours), Math.max(0, e.base));
+    var parts = [];
+    if (absent.length) parts.push('결근 ' + absent.length + '일(' + absent.map(mdTxt).join(', ') + ')');
+    if (nWeeks) parts.push('결근한 주 주휴 ' + nWeeks + '일');
+    if (cfg.absentWeekly && carried) parts.push('주휴 ' + carried + '일은 지난달에 뺌');
+    if (unpaid.length) parts.push('무급 휴가 ' + unpaid.length + '일(' + unpaid.map(mdTxt).join(', ') + ')');
+    if (lateMin) parts.push('지각·조퇴 ' + minTxt(lateMin) + '(' + late.map(function (x) { return mdTxt(x.date); }).join(', ') + ')');
+    return {
+      amount: amount, rate: rate, hours: hours, absent: absent, unpaid: unpaid, weeks: nWeeks, lateMin: lateMin, late: late,
+      paid: paid, half: half, skipped: skipped,
+      how: parts.length ? parts.join(' · ') + ' = ' + hrs(Math.round(hours * 60)) + '시간 × ' + fmtRate(rate) + '원' : ''
+    };
+  }
+
+  /** 연차 (입사일 기준, 근로기준법 제60조 — 2026-11-22 결정)
+      1년 미만: 한 달 개근(그 한 달에 결근 없음)마다 1일, 최대 11일, 입사 1년 되는 날 사라짐.
+      1년부터: 해마다 입사일에 15일, 3년차부터 2년마다 1일 더 (최대 25일), 1년 뒤 사라짐.
+      사용 = 그 기간의 연차 1일 · 반차 0.5일, 조정 = 그 기간의 '연차 조정'(± 일수). asOf 날 기준. */
+  function leaveOf(empIn, atts, asOf) {
+    var J = parseJoined(empIn && empIn.joined);
+    if (!J || !ymdOk(asOf) || J > asOf) return null;
+    var years = 0;
+    while (addMonths(J, 12 * (years + 1)) <= asOf) years++;
+    var start, end, accrued, months = [], note = '';
+    if (years === 0) {
+      start = J; end = dayBefore(addMonths(J, 12));
+      for (var k = 1; k <= 11; k++) {
+        var mEnd = addMonths(J, k);
+        if (mEnd > asOf) break;
+        var mStart = addMonths(J, k - 1);
+        var broke = (atts || []).some(function (a) { return a.kind === '결근' && a.date >= mStart && a.date < mEnd; });
+        months.push({ on: mEnd, ok: !broke });
+      }
+      accrued = months.filter(function (x) { return x.ok; }).length;
+    } else {
+      start = addMonths(J, 12 * years); end = dayBefore(addMonths(J, 12 * (years + 1)));
+      accrued = Math.min(25, 15 + Math.floor((years - 1) / 2));
+      var prevStart = addMonths(J, 12 * (years - 1));
+      var absentPrev = (atts || []).filter(function (a) { return a.kind === '결근' && a.date >= prevStart && a.date < start; }).length;
+      if (absentPrev > 50) note = '지난 1년 결근 ' + absentPrev + '일 — 출근율 80% 미만이면 연차가 줄어듭니다. 확인하십시오';
+    }
+    var used = 0, adj = 0, usedList = [];
+    (atts || []).forEach(function (a) {
+      if (!ymdOk(a.date) || a.date < start || a.date > end) return;
+      if (a.kind === '연차') { used += 1; usedList.push(a); }
+      else if (a.kind === '반차') { used += 0.5; usedList.push(a); }
+      else if (a.kind === '연차 조정') adj += num(a.days);
+    });
+    return { joined: J, years: years, start: start, end: end, accrued: accrued, months: months, used: used, adj: adj,
+      left: accrued + adj - used, firstYear: years === 0, usedList: usedList, note: note };
+  }
+
   /* ───────── 세금·보험 ───────── */
 
   function taxRow(k) {
@@ -271,7 +383,7 @@
 
   /* ───────── 한 사람 계산 ───────── */
 
-  function calcEmployee(empIn, recs, adjs, ctx) {
+  function calcEmployee(empIn, recs, adjs, ctx, atts) {
     var cfg = ctx.config;
     var e = employee(empIn);
     var h = hoursOf(recs, ctx.holidays, cfg);
@@ -309,6 +421,13 @@
       else if (a.kind === 'minus') { pay.push({ key: 'minus', label: a.label, en: '', amount: -amt, how: memo, id: a.id }); minus += amt; }
       else if (a.kind === 'deduct') otherDed.push({ key: 'adjded', label: a.label, en: '', amount: amt, how: memo, id: a.id });
     });
+
+    var att = attOf(atts, e, cfg, baseHourly, ctx.holidays, ctx.attPrior, ctx.ym);
+    if (att.amount) {
+      pay.push({ key: 'att', label: '근태 공제', en: 'Absence / late', amount: -att.amount, how: att.how }); minus += att.amount;
+      if ((adjs || []).some(function (a) { return a.kind === 'minus' && Math.round(num(a.amount)); })) warn.push('추가·공제에 「빼기」 항목도 있습니다 — 근태 공제와 같은 결근을 두 번 빼지 않았는지 확인하십시오');
+    }
+    if (att.skipped.length) warn.push('휴일에 적힌 근태 ' + att.skipped.length + '건은 빼지 않았습니다 (' + att.skipped.map(function (a) { return mdTxt(a.date) + ' ' + a.kind; }).join(', ') + ')');
 
     var gross = sum(pay);
     var premium = otPay + nightPay + hol8 + holOver;
@@ -362,12 +481,12 @@
 
     function amt(key) { var s = 0; pay.concat(ded).forEach(function (x) { if (x.key === key) s += x.amount; }); return s; }
     return {
-      name: e.name, emp: e, hourly: hourly,
+      name: e.name, emp: e, hourly: hourly, att: att,
       hours: { ot: h.otMin / 60, night: h.nightMin / 60, hol: h.holMin / 60, holOver: h.holOverMin / 60, days: h.days },
       pay: pay, ded: ded, gross: gross, nonTax: nonTaxPay + exempt, otExempt: exempt, taxable: taxable, insBase: insBase,
       dedTotal: dedTotal, net: net, warnings: warn,
       col: {
-        base: e.base, ot: otPay, night: nightPay, hol: hol8 + holOver, bonus: e.bonus,
+        base: e.base, ot: otPay, night: nightPay, hol: hol8 + holOver, bonus: e.bonus, att: amt('att'),
         otherPay: amt('adj') + amt('adjnt') + amt('minus'), gross: gross,
         np: np, hi: hi, ltc: ltc, ei: ei, it: it, lt: lt, dorm: e.dorm, otherDed: amt('adjded'),
         dedTotal: dedTotal, net: net
@@ -389,12 +508,17 @@
     var ctx = { config: cfg, holidays: d.holidays || [], ym: d.ym };
     var settings = {};
     (d.settings || []).forEach(function (s) { if (s && s.name) settings[s.name] = s; });
-    var recs = {}, adjs = {};
+    var recs = {}, adjs = {}, atts = {}, attAll = {};
     (d.records || []).forEach(function (r) {
       if (!r || String(r.date).slice(0, 7) !== d.ym) return;
       (recs[r.name] = recs[r.name] || []).push(r);
     });
     (d.adjustments || []).forEach(function (a) { if (a && a.name) (adjs[a.name] = adjs[a.name] || []).push(a); });
+    (d.att || []).forEach(function (a) {
+      if (!a || !a.name) return;
+      (attAll[a.name] = attAll[a.name] || []).push(a);
+      if (String(a.date).slice(0, 7) === d.ym && ATT_KINDS[a.kind] !== 'adj') (atts[a.name] = atts[a.name] || []).push(a);
+    });
 
     var names = [];
     function addName(n) { if (n && names.indexOf(n) < 0) names.push(n); }
@@ -402,24 +526,29 @@
     Object.keys(settings).forEach(function (n) { if (employee(settings[n]).active) addName(n); });
     Object.keys(recs).forEach(addName);
     Object.keys(adjs).forEach(addName);
+    Object.keys(atts).forEach(addName);
 
+    var today = d.today || '';
+    var monthEnd = d.ym + '-' + pad2(new Date(Date.UTC(Number(d.ym.slice(0, 4)), Number(d.ym.slice(5, 7)), 0)).getUTCDate());
+    var asOf = today && today < monthEnd ? today : monthEnd;   // 연차는 그 달 말일(이번 달이면 오늘) 기준
     var rows = [];
     names.forEach(function (n) {
       var e = employee(settings[n] || { name: n });
       e.name = n;
-      if (!e.active && !recs[n] && !adjs[n]) return;
-      rows.push(calcEmployee(e, recs[n], adjs[n], ctx));
+      if (!e.active && !recs[n] && !adjs[n] && !atts[n]) return;
+      var r = calcEmployee(e, recs[n], adjs[n], Object.assign({}, ctx, { attPrior: attAll[n] || [] }), atts[n]);
+      r.leave = leaveOf(e, attAll[n] || [], asOf);
+      rows.push(r);
     });
 
     var totals = {};
     rows.forEach(function (r) {
       Object.keys(r.col).forEach(function (k) { totals[k] = (totals[k] || 0) + r.col[k]; });
     });
-    var today = d.today || '';
     var lastRecord = '';
     (d.records || []).forEach(function (r) { if (String(r.date).slice(0, 7) === d.ym && r.date > lastRecord) lastRecord = r.date; });
     return {
-      ym: d.ym, config: cfg, rows: rows, totals: totals,
+      ym: d.ym, config: cfg, rows: rows, totals: totals, leaveAsOf: asOf,
       payDate: nextMonthDay(d.ym, cfg.payDay),
       lastRecord: lastRecord,
       partial: !!today && today.slice(0, 7) === d.ym,
@@ -431,7 +560,7 @@
 
   var LEDGER_COLS = [
     ['name', '이름'], ['otH', '연장(시간)'], ['holH', '휴일(시간)'],
-    ['base', '기본급'], ['ot', '연장근로'], ['night', '야간근로'], ['hol', '휴일근로'], ['bonus', '성과급'], ['otherPay', '기타지급'], ['gross', '지급합계'],
+    ['base', '기본급'], ['ot', '연장근로'], ['night', '야간근로'], ['hol', '휴일근로'], ['bonus', '성과급'], ['att', '근태공제'], ['otherPay', '기타지급'], ['gross', '지급합계'],
     ['np', '국민연금'], ['hi', '건강보험'], ['ltc', '장기요양'], ['ei', '고용보험'], ['it', '소득세'], ['lt', '지방소득세'], ['dorm', '기숙사비'], ['otherDed', '기타공제'],
     ['dedTotal', '공제합계'], ['net', '실지급액']
   ];
@@ -488,10 +617,10 @@
   return {
     TAX: TAX,
     CONFIG_DEFAULTS: CONFIG_DEFAULTS, CONFIG_FIELDS: CONFIG_FIELDS, EMP_DEFAULTS: EMP_DEFAULTS,
-    PENSION_EXEMPT: PENSION_EXEMPT, NATIONS: NATIONS, BANKS: BANKS, KINDS: KINDS, LEDGER_COLS: LEDGER_COLS,
+    PENSION_EXEMPT: PENSION_EXEMPT, NATIONS: NATIONS, BANKS: BANKS, KINDS: KINDS, LEDGER_COLS: LEDGER_COLS, ATT_KINDS: ATT_KINDS, ATT_ORDER: ATT_ORDER,
     config: config, employee: employee, bankCode: bankCode, dayType: dayType, hoursOf: hoursOf,
     incomeTax: incomeTax, pensionBase: pensionBase, floor10: floor10, fmt: fmt, fmtRate: fmtRate, hrs: hrs,
-    calcEmployee: calcEmployee, computeMonth: computeMonth, ledger: ledger, bankRows: bankRows,
+    calcEmployee: calcEmployee, computeMonth: computeMonth, ledger: ledger, bankRows: bankRows, attOf: attOf, leaveOf: leaveOf, parseJoined: parseJoined, minTxt: minTxt, weekKey: weekKey,
     maskAccount: maskAccount, nextMonthDay: nextMonthDay, monthLabel: monthLabel
   };
 });

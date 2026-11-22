@@ -222,6 +222,21 @@ table.pl.ot th { padding: .7mm .2mm; }
 .pill.bad { background: var(--err-bg); color: var(--err); }
 .pill.off { background: #EEF0F3; color: #6B7480; }
 .note { font-size: 13px; color: var(--muted); margin: 12px 0 0; }
+/* 근태 · 연차 (2026-11-22) */
+.field input[type=date], .field input[type=number] { width: 100%; padding: 8px 10px; border: 1px solid #B8C4D4; border-radius: 8px; background: #fff; font: inherit; }
+.attm { display: inline-block; font-size: 10px; font-weight: 800; line-height: 14px; padding: 0 3px; border-radius: 4px; margin-left: 2px; vertical-align: 1px; }
+.attm.a-un { background: #FDE7E7; color: #B42318; }
+.attm.a-pd { background: #E3F2E8; color: #1E6B34; }
+.attprev { grid-column: 1 / -1; margin: 0; padding: 10px 12px; border-radius: 10px; background: #F5F8FC; border: 1px solid var(--line); font-size: 14px; }
+.attprev:empty { display: none; }
+.attprev.minus { background: var(--warn-bg); color: var(--warn); border-color: transparent; }
+.grid td.neg { color: var(--err); font-weight: 800; }
+.attcell { margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: #F5F8FC; font-size: 14px; }
+.attcell ul { margin: 4px 0 8px; padding-left: 18px; }
+#attSum th, #attSum td, #attList th, #attList td, #leaveTable th, #leaveTable td { white-space: nowrap; }
+#attSum td:last-child { white-space: normal; min-width: 280px; }
+#attList td:nth-child(5) { white-space: normal; min-width: 150px; }
+#leaveTable td[colspan] { white-space: normal; }
 .note li { margin: 3px 0; }
 .iconbtn.nmc-back { display: inline-flex; min-height: 0; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 11px 6px 7px; font-size: inherit; font-weight: 700; }
 </style>
@@ -231,7 +246,7 @@ table.pl.ot th { padding: .7mm .2mm; }
 <div id="app"></div>
 <div id="print" aria-hidden="true"></div>
 <script>window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";</script>
-<script src="payroll.js?v=v10"></script>
+<script src="payroll.js?v=v11"></script>
 <script>
 (function () {
   'use strict';
@@ -239,7 +254,7 @@ table.pl.ot th { padding: .7mm .2mm; }
   var API = String(window.NMC_API || '');
   var app = document.getElementById('app');
   var TOKEN_KEY = 'nmc_pay_token';
-  var S = { token: '', data: null, month: null, tab: 'ot', slip: '', busy: 0, err: '', edit: null, adjEdit: null, cell: null };
+  var S = { token: '', data: null, month: null, tab: 'ot', slip: '', busy: 0, err: '', edit: null, adjEdit: null, cell: null, attErr: '', attForm: null };
   try { S.token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { S.token = ''; }
 
   var ERR = {
@@ -253,6 +268,14 @@ table.pl.ot th { padding: .7mm .2mm; }
     bad_value: '입력값을 확인해 주십시오 (숫자 범위·글자 수).',
     bad_account: '계좌번호는 숫자와 - 만 6~30자로 입력해 주십시오.',
     weak_pw: '새 비밀번호는 8자 이상으로 설정해 주십시오.',
+    need_name: '직원을 선택해 주십시오.',
+    bad_date: '날짜를 확인해 주십시오.',
+    bad_kind: '근태 종류를 다시 골라 주십시오.',
+    bad_min: '지각·조퇴 시간은 10분 단위로, 10분부터 8시간까지 넣어 주십시오.',
+    bad_days: '연차 조정 일수는 0.5일 단위로 −30일부터 +30일까지 넣어 주십시오 (0일은 안 됩니다).',
+    att_dup: '그 직원 그날에는 이미 근태가 적혀 있습니다. 결근 · 무급 휴가 · 연차(하루짜리)는 다른 근태와 같이 적을 수 없고, 같은 종류는 하루에 한 번만 적습니다.',
+    not_found: '이미 지워졌거나 없는 기록입니다. [새로 불러오기]를 눌러 주십시오.',
+    bad_action: '서버가 아직 새 버전이 아닙니다 (근태 기능이 없는 버전).',
     server: '서버에서 처리하지 못했습니다. 잠시 후 다시 시도해 주십시오.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다: ' + c); }
@@ -341,7 +364,12 @@ table.pl.ot th { padding: .7mm .2mm; }
   }
 
   function load(ym) {
-    return guard(call('data', ym ? { ym: ym } : {})).then(function (d) {
+    var attP = call('stock.call', { fn: 'apiAttList', args: [] }).then(function (r) { return { list: (r && r.att) || [] }; },
+      function (e) { return { err: String((e && e.message) || e || 'server') }; });
+    return guard(Promise.all([call('data', ym ? { ym: ym } : {}), attP])).then(function (res) {
+      var d = res[0];
+      d.att = res[1].list || [];
+      S.attErr = res[1].err || '';
       S.data = d;
       if (!S.slip || d.employees.indexOf(S.slip) < 0) S.slip = '';
       recompute();
@@ -440,6 +468,10 @@ table.pl.ot th { padding: .7mm .2mm; }
     } else if (m.future) {
       out.push(['info', '아직 오지 않은 달입니다.']);
     }
+    if (S.attErr) {
+      out.push(['err', (S.attErr === 'bad_action' ? '근태 기록 서버가 아직 새 버전으로 올라가지 않았습니다.' : '근태 기록을 불러오지 못했습니다 (' + esc(errText(S.attErr)) + ').') +
+        ' <b>지금 보이는 급여에는 근태 공제(결근 · 지각 등)가 들어가 있지 않습니다.</b> 이체 전에 [새로 불러오기]로 다시 확인하십시오.']);
+    }
     var nw = m.rows.filter(function (r) { return r.warnings.length; }).length;
     if (nw) out.push(['warn', '확인할 것이 있는 직원 ' + nw + '명 — 급여대장 하단 목록을 확인하십시오.']);
     if (d.ledgerSaved) out.push(['ok', esc(d.ledgerSaved)]);
@@ -447,7 +479,7 @@ table.pl.ot th { padding: .7mm .2mm; }
     return '<div class="banners">' + out.map(function (b) { return '<div class="banner ' + b[0] + '">' + b[1] + '</div>'; }).join('') + '</div>';
   }
 
-  var TABS = [['ot', '잔업 기록'], ['ledger', '급여대장'], ['slips', '명세서'], ['staff', '직원 설정'], ['adjust', '추가·공제'], ['bank', '은행 이체 파일'], ['config', '기준·비밀번호']];
+  var TABS = [['ot', '잔업 기록'], ['att', '근태·연차'], ['ledger', '급여대장'], ['slips', '명세서'], ['staff', '직원 설정'], ['adjust', '추가·공제'], ['bank', '은행 이체 파일'], ['config', '기준·비밀번호']];
   function viewTabs() {
     return '<nav class="tabs" role="tablist">' + TABS.map(function (t) {
       return '<button class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (S.tab === t[0]) + '">' + t[1] + '</button>';
@@ -461,6 +493,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       case 'bank': return viewBank();
       case 'config': return viewConfig();
       case 'ledger': return viewLedger();
+      case 'att': return viewAtt();
       default: return viewOt();
     }
   }
@@ -514,12 +547,14 @@ table.pl.ot th { padding: .7mm .2mm; }
     var head = '<tr><th scope="col">이름</th>' + t.days.map(function (dt) {
       return '<th class="n' + (isHol(dt) ? ' hol' : '') + '" scope="col">' + dayHead(dt) + '</th>';
     }).join('') + '<th class="sum1" scope="col">평일</th><th class="sum1" scope="col">휴일</th><th class="sum1" scope="col">합계</th></tr>';
+    var am = attMap();
     var body = t.rows.map(function (r) {
       return '<tr><td class="name">' + esc(r.name) + '</td>' + r.cells.map(function (v, i) {
-        var dt = t.days[i], cls = (isHol(dt) ? 'hol' : '');
-        if (dt > today) return '<td class="future ' + cls + '"></td>';
-        return '<td class="' + cls + '"><button class="cellbtn" data-cell="' + esc(r.name) + '|' + dt + '" aria-label="' +
-          esc(r.name + ' ' + md(dt) + (v ? ' ' + P.hrs(v) + '시간' : ' 기록 없음')) + '">' + hTxt(v) + '</button></td>';
+        var dt = t.days[i], cls = (isHol(dt) ? 'hol' : ''), at = (am[r.name] || {})[dt] || [];
+        if (dt > today && !at.length) return '<td class="future ' + cls + '"></td>';
+        return '<td class="' + (dt > today ? 'future ' : '') + cls + '"><button class="cellbtn" data-cell="' + esc(r.name) + '|' + dt + '" aria-label="' +
+          esc(r.name + ' ' + md(dt) + (v ? ' ' + P.hrs(v) + '시간' : ' 기록 없음') + (at.length ? ' · ' + at.map(attLabel).join(', ') : '')) + '"' +
+          (at.length ? ' title="' + esc(at.map(attLabel).join(', ')) + '"' : '') + '>' + hTxt(v) + at.map(attMark).join('') + '</button></td>';
       }).join('') + '<td class="sum1">' + hTxt(r.wk) + '</td><td class="sum1">' + hTxt(r.hol) + '</td><td class="sum1"><b>' + hTxt(r.wk + r.hol) + '</b></td></tr>';
     }).join('');
     var foot = '<tr><td>합계</td>' + t.dayTot.map(function (v, i) { return '<td class="' + (isHol(t.days[i]) ? 'hol' : '') + '">' + hTxt(v) + '</td>'; }).join('') +
@@ -536,6 +571,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       '<div class="scroll"><table class="grid otgrid sticky1" id="otTable"><thead>' + head + '</thead><tbody>' + body + '</tbody><tfoot>' + foot + '</tfoot></table></div>' +
       '<ul class="note"><li>직원이 휴대폰 앱에서 입력한 기록입니다. <b>칸을 누르면 관리자가 수정할 수 있으며</b>, 수정 내용은 급여 계산에 즉시 반영됩니다.</li>' +
       '<li>빨간 열은 토·일·공휴일(휴일 근무 시간), 나머지는 평일 17:30부터의 잔업 시간입니다. 빗금 칸은 아직 오지 않은 날입니다.</li>' +
+      '<li>칸 안의 <span class="attm a-un">결</span> <span class="attm a-un">지</span> <span class="attm a-un">무</span> <span class="attm a-pd">연</span> <span class="attm a-pd">반</span> = 근태 (결근 · 지각·조퇴 · 무급 휴가 · 연차 · 반차). 칸을 누르거나 「근태·연차」 칸에서 적습니다.</li>' +
       '<li>관리자 수정 내용은 구글 시트 「변경이력」에 「관리자 수정」으로 기록됩니다.</li></ul>' +
       '<h3 class="h3">최근 변경 기록 (이 달)</h3>' +
       (hist.length ? histTable(hist.slice(0, 10), minTxt) +
@@ -567,6 +603,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       '<div class="field"><label for="c_min">시간</label><select id="c_min" name="minutes">' + opts.join('') + '</select>' +
       '<div class="hint">' + (hol ? '휴일은 당일 근무 시간 전체 (최대 ' + P.hrs(max) + '시간)' : '평일은 17:30부터의 잔업 시간 (최대 ' + P.hrs(max) + '시간)') + '</div></div>' +
       '<p class="note">현재 기록: ' + (c.minutes ? P.hrs(c.minutes) + '시간' : '없음') + '</p>' +
+      cellAttHtml(c) +
       '<div class="modal-actions"><button type="button" class="btn" data-act="closeCell">닫기</button><button type="submit" class="btn primary">저장</button></div></form></div>';
   }
   function otPrintHtml() {
@@ -587,7 +624,7 @@ table.pl.ot th { padding: .7mm .2mm; }
   }
 
   /* 급여대장 */
-  var PAY_KEYS = ['base', 'ot', 'night', 'hol', 'bonus', 'otherPay', 'gross'];
+  var PAY_KEYS = ['base', 'ot', 'night', 'hol', 'bonus', 'att', 'otherPay', 'gross'];
   var DED_KEYS = ['np', 'hi', 'ltc', 'ei', 'it', 'lt', 'dorm', 'otherDed', 'dedTotal'];
   var KEEP_COLS = ['name', 'base', 'gross', 'dedTotal', 'net'];
   function viewLedger() {
@@ -681,6 +718,7 @@ table.pl.ot th { padding: .7mm .2mm; }
       '</div>' +
       '<div class="slip-net"><div>실지급액 Net pay&nbsp; <span class="v">' + fmt(r.net) + '원</span></div><div class="acct">입금 계좌 ' + acct + '</div></div>' +
       '<div class="slip-days"><b>근무 기록 Work record</b> ' + hourTxt + (days ? ' — ' + esc(days) : '') + '</div>' +
+      slipLeaveHtml(r) +
       '<p class="slip-note">통상시급 ' + P.fmtRate(r.hourly) + '원 기준 · 연장근로 ×' + cfg.otRate + ' · 야간(22시~) +' + cfg.nightAdd +
       ' · 휴일 8시간까지 ×' + cfg.holRate + ', 8시간 넘으면 ×' + cfg.holOverRate +
       (r.otExempt ? ' · 비과세 연장근로수당 ' + fmt(r.otExempt) + '원' : '') + '</p>' +
@@ -792,6 +830,157 @@ table.pl.ot th { padding: .7mm .2mm; }
   }
 
   /* 추가·공제 */
+  /* ───────── 근태 · 연차 (2026-11-22) ─────────
+     시트 '근태'(서버 Stock.gs apiAttList/apiAttSave/apiAttDel, 관리자만)에 사실만 적고, 월급에서 뺄 돈 · 남은 연차는 payroll.js(attOf · leaveOf)가 셈합니다. */
+  var ATT_MARK = { '결근': ['결', 'a-un'], '지각·조퇴': ['지', 'a-un'], '무급 휴가': ['무', 'a-un'], '연차': ['연', 'a-pd'], '반차': ['반', 'a-pd'] };
+  function attLabel(a) { return a.kind + (a.kind === '지각·조퇴' && a.min ? ' ' + P.minTxt(a.min) : ''); }
+  function attMark(a) { var k = ATT_MARK[a.kind]; return k ? '<span class="attm ' + k[1] + '" aria-hidden="true">' + k[0] + '</span>' : ''; }
+  function attMap() {
+    var out = {};
+    (S.data.att || []).forEach(function (a) {
+      if (!ATT_MARK[a.kind] || String(a.date).slice(0, 7) !== S.month.ym) return;
+      var n = (out[a.name] = out[a.name] || {});
+      (n[a.date] = n[a.date] || []).push(a);
+    });
+    return out;
+  }
+  function dotDate(s) { var p = String(s || '').split('-'); return p.length === 3 ? Number(p[0]) + '.' + Number(p[1]) + '.' + Number(p[2]) : ''; }
+  function dayNum(v) { var r = Math.round(v * 10) / 10; return (r > 0 ? '' : r < 0 ? '−' : '') + String(Math.abs(r)); }
+  function cellAttHtml(c) {
+    var list = (S.data.att || []).filter(function (a) { return a.name === c.name && a.date === c.date && ATT_MARK[a.kind]; });
+    return '<div class="attcell"><b>이 날 근태</b>' + (list.length ? '<ul>' + list.map(function (a) { return '<li>' + esc(attLabel(a)) + (a.memo ? ' — ' + esc(a.memo) : '') + '</li>'; }).join('') + '</ul>' : ' 없음<br>') +
+      '<button type="button" class="btn small" data-act="attFromCell">이 날 근태 적기 (결근 · 지각·조퇴 · 연차 …)</button></div>';
+  }
+  function attNames() {
+    var names = S.month.rows.map(function (r) { return r.name; });
+    staffList().forEach(function (e) { if (e.active && names.indexOf(e.name) < 0) names.push(e.name); });
+    return names;
+  }
+  function attEmp(name) {
+    var r = S.month.rows.filter(function (x) { return x.name === name; })[0];
+    if (r) return r.emp;
+    var e = staffList().filter(function (x) { return x.name === name; })[0];
+    return e || P.employee({ name: name });
+  }
+  /** 저장 전에 보여 줄 말: 이 한 건으로 이번 달 월급(세전)에서 얼마가 더 빠지는지 · 연차가 얼마나 줄어드는지 */
+  function attPreview(rec) {
+    var k = P.ATT_KINDS[rec.kind];
+    if (!rec.name || !rec.date || !k) return ['', ''];
+    if (k === 'paid' || k === 'half') return ['', rec.kind + ': 월급에서 빼지 않습니다 (유급 휴가). 남은 연차에서 ' + (k === 'half' ? '0.5' : '1') + '일 줄어듭니다.'];
+    if (k === 'adj') return ['', rec.days ? '월급과는 관계없고, 남은 연차가 ' + (rec.days > 0 ? '+' : '−') + Math.abs(rec.days) + '일 바뀝니다.' : '일수를 넣어 주십시오.'];
+    if (k === 'min' && !(rec.min > 0)) return ['', '못 한 시간을 골라 주십시오.'];
+    if (isHol(rec.date)) return ['', '이 날은 토 · 일 · 공휴일이라 월급에서 빼지 않습니다.'];
+    var e = P.employee(attEmp(rec.name)), cfg = S.month.config, all = (S.data.att || []).filter(function (a) { return a.name === rec.name; });
+    var mine = all.filter(function (a) { return String(a.date).slice(0, 7) === S.month.ym && P.ATT_KINDS[a.kind] !== 'adj'; });
+    var hourly = e.hourly > 0 ? e.hourly : cfg.hourly;
+    var before = P.attOf(mine, e, cfg, hourly, S.data.holidays || [], all, S.month.ym);
+    var after = P.attOf(mine.concat([rec]), e, cfg, hourly, S.data.holidays || [], all, S.month.ym);
+    var diff = after.amount - before.amount;
+    if (!(e.base > 0)) return ['', '이 직원은 기본급이 0원이라 뺄 돈이 없습니다.'];
+    var why = k === 'min' ? P.minTxt(rec.min) : rec.kind === '결근' ? (after.weeks > before.weeks ? '그날 8시간 + 그 주 주휴 8시간' : '그날 8시간 (그 주 주휴는 이미 빠짐)') : '그날 8시간';
+    return ['minus', '저장하면 이번 달 월급(세전)에서 <b>' + fmt(diff) + '원</b>이 더 빠집니다 — ' + esc(why) + ' × 시간당 ' + P.fmtRate(after.rate) + '원' +
+      (before.amount ? ' (이 직원 이번 달 근태 공제 ' + fmt(before.amount) + '원 → ' + fmt(after.amount) + '원)' : '') + '. 4대보험 · 소득세는 줄어든 급여로 다시 셈합니다.'];
+  }
+  function readAttForm(f) {
+    var el = f.elements, kind = el.kind.value;
+    var rec = { name: el.name.value, date: el.date.value, kind: kind, memo: String(el.memo.value || '').trim() };
+    if (kind === '지각·조퇴') rec.min = Number(el.h.value) * 60 + Number(el.m.value);
+    if (kind === '연차 조정') rec.days = Number(String(el.days.value || '').replace(/[^0-9.\-]/g, '')) || 0;
+    return rec;
+  }
+  function attCheck(rec) {
+    if (!rec.name) return 'need_name';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(rec.date) || rec.date.slice(0, 7) !== S.month.ym) return 'bad_date';
+    if (rec.kind === '지각·조퇴' && (!(rec.min >= 10 && rec.min <= 480) || rec.min % 10)) return 'bad_min';
+    if (rec.kind === '연차 조정' && (!rec.days || Math.abs(rec.days) > 30 || Math.round(rec.days * 2) !== rec.days * 2)) return 'bad_days';
+    return '';
+  }
+  function leaveRowsHtml() {
+    var rows = S.month.rows.filter(function (r) { return r.emp.active || r.leave; });
+    return rows.map(function (r) {
+      var L = r.leave;
+      if (!L) {
+        return '<tr><td class="name">' + esc(r.name) + '</td><td colspan="7"><span class="muted">입사일이 없어 연차를 셀 수 없습니다 — </span>' +
+          '<button class="linkish" data-editemp="' + esc(r.name) + '">직원 설정에서 입사일 넣기</button></td></tr>';
+      }
+      var mOk = L.months.filter(function (x) { return x.ok; }).length;
+      var used = L.usedList.map(function (a) { return md(a.date) + ' ' + a.kind; }).join(', ');
+      return '<tr><td class="name">' + esc(r.name) + '</td><td>' + dotDate(L.joined) + '</td>' +
+        '<td>' + (L.firstYear ? '1년 미만 · 개근 ' + mOk + '/' + L.months.length + '달' : L.years + '년') + '</td>' +
+        '<td style="white-space:nowrap">' + dotDate(L.start) + ' ~ ' + dotDate(L.end) + '</td>' +
+        '<td class="n">' + L.accrued + '일</td><td class="n"' + (used ? ' title="' + esc(used) + '"' : '') + '>' + dayNum(L.used) + '일</td>' +
+        '<td class="n">' + (L.adj ? (L.adj > 0 ? '+' : '') + dayNum(L.adj) + '일' : '') + '</td>' +
+        '<td class="n' + (L.left < 0 ? ' neg' : '') + '"><b>' + dayNum(L.left) + '일</b></td></tr>' +
+        (L.note ? '<tr><td></td><td colspan="7" class="muted">⚠ ' + esc(L.note) + '</td></tr>' : '');
+    }).join('');
+  }
+  function viewAtt() {
+    var ym = S.month.ym, f = S.attForm || {}, names = attNames();
+    var first = ym + '-01', last = ym + '-' + String(new Date(Date.UTC(Number(ym.slice(0, 4)), Number(ym.slice(5, 7)), 0)).getUTCDate());
+    var date = f.date && f.date.slice(0, 7) === ym ? f.date : (S.data.today && S.data.today.slice(0, 7) === ym ? S.data.today : first);
+    var kind = P.ATT_KINDS[f.kind] ? f.kind : '결근';
+    var hOpts = '', mOpts = '';
+    for (var h = 0; h <= 8; h++) hOpts += '<option value="' + h + '"' + ((f.h || 0) === h ? ' selected' : '') + '>' + h + '시간</option>';
+    for (var mm = 0; mm < 60; mm += 10) mOpts += '<option value="' + mm + '"' + ((f.m || 0) === mm ? ' selected' : '') + '>' + mm + '분</option>';
+    var list = (S.data.att || []).filter(function (a) { return String(a.date).slice(0, 7) === ym; });
+    var sumRows = S.month.rows.filter(function (r) { return r.att && (r.att.amount || r.att.paid.length || r.att.half.length || r.att.skipped.length); });
+    return '<div class="toolbar"><h2>' + ymTitle(ym) + ' 근태 · 연차</h2><span class="muted">정규시간(하루 8시간)에 일하지 못한 날 · 시간과 연차를 적습니다. 급여대장 · 명세서에 바로 들어갑니다.</span></div>' +
+      (S.attErr ? '<p class="banner err" style="margin:0 0 12px">근태 기록을 쓰거나 볼 수 없습니다: ' + esc(errText(S.attErr)) + '</p>' : '') +
+      '<form id="attForm" class="form" autocomplete="off" style="margin-bottom:16px">' +
+      '<div class="field"><label for="t_name">직원</label><select id="t_name" name="name" required><option value="">(선택)</option>' +
+      names.map(function (n) { return '<option' + (f.name === n ? ' selected' : '') + '>' + esc(n) + '</option>'; }).join('') + '</select></div>' +
+      '<div class="field"><label for="t_date">날짜</label><input type="date" id="t_date" name="date" required min="' + first + '" max="' + last + '" value="' + date + '"></div>' +
+      '<div class="field"><label for="t_kind">종류</label><select id="t_kind" name="kind">' + P.ATT_ORDER.map(function (k) {
+        return '<option value="' + esc(k) + '"' + (k === kind ? ' selected' : '') + '>' + esc(k) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field" id="t_minBox"' + (kind === '지각·조퇴' ? '' : ' hidden') + '><label for="t_h">못 한 시간</label><div style="display:flex;gap:6px">' +
+      '<select id="t_h" name="h" aria-label="시간">' + hOpts + '</select><select id="t_m" name="m" aria-label="분">' + mOpts + '</select></div>' +
+      '<div class="hint">늦게 온 · 일찍 간 · 자리를 비운 시간 (10분 단위)</div></div>' +
+      '<div class="field" id="t_daysBox"' + (kind === '연차 조정' ? '' : ' hidden') + '><label for="t_days">조정 일수</label><input type="number" id="t_days" name="days" step="0.5" min="-30" max="30" value="' + esc(f.days || '') + '">' +
+      '<div class="hint">더하면 +, 빼면 − (예: 이 프로그램 전에 쓴 연차 3일 → −3)</div></div>' +
+      '<div class="field"><label for="t_memo">메모</label><input type="text" id="t_memo" name="memo" maxlength="200" value="' + esc(f.memo || '') + '" placeholder="예: 병원, 연락 없이 안 나옴"></div>' +
+      '<div class="field" style="display:flex;align-items:flex-end;gap:8px"><button class="btn primary" type="submit">근태 저장</button></div>' +
+      '<p class="attprev" id="attPrev" aria-live="polite"></p>' +
+      '</form>' +
+      '<h3 class="h3">이번 달 근태 공제 (직원별)</h3>' +
+      (sumRows.length ? '<div class="scroll"><table class="grid" id="attSum"><thead><tr><th>직원</th><th class="n">결근</th><th class="n">무급 휴가</th><th class="n">지각·조퇴</th><th class="n">연차 · 반차</th><th class="n">월급에서 뺀 돈</th><th>계산</th></tr></thead><tbody>' +
+        sumRows.map(function (r) {
+          var a = r.att, lv = a.paid.length + a.half.length * 0.5;
+          return '<tr><td class="name"><button class="linkish" data-slip="' + esc(r.name) + '">' + esc(r.name) + '</button></td>' +
+            '<td class="n">' + (a.absent.length ? a.absent.length + '일' : '') + '</td><td class="n">' + (a.unpaid.length ? a.unpaid.length + '일' : '') + '</td>' +
+            '<td class="n">' + (a.lateMin ? esc(P.minTxt(a.lateMin)) : '') + '</td><td class="n">' + (lv ? dayNum(lv) + '일' : '') + '</td>' +
+            '<td class="n">' + (a.amount ? '<b>−' + fmt(a.amount) + '</b>' : '0') + '</td><td>' + esc(a.how || (a.skipped.length ? '휴일 기록만 있음 (빼지 않음)' : '유급 휴가만 있음')) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '<p class="muted">이번 달 근태 공제가 없습니다.</p>') +
+      '<h3 class="h3">이번 달 근태 기록 (' + list.length + '건)</h3>' +
+      (list.length ? '<div class="scroll"><table class="grid" id="attList"><thead><tr><th>날짜</th><th>직원</th><th>종류</th><th class="n">시간 · 일수</th><th>메모</th><th>적은 시각</th><th></th></tr></thead><tbody>' +
+        list.map(function (a) {
+          var amt = a.kind === '지각·조퇴' ? P.minTxt(a.min) : a.kind === '연차 조정' ? (a.days > 0 ? '+' : '') + dayNum(a.days) + '일' : dayNum(a.days || 1) + '일';
+          return '<tr><td style="white-space:nowrap">' + esc(md(a.date)) + (isHol(a.date) && ATT_MARK[a.kind] ? ' <span class="pill off">휴일</span>' : '') + '</td><td class="name">' + esc(a.name) + '</td>' +
+            '<td>' + attMark(a) + ' ' + esc(a.kind) + '</td><td class="n">' + esc(amt) + '</td><td>' + esc(a.memo) + '</td><td class="muted" style="white-space:nowrap">' + esc(a.at) + '</td>' +
+            '<td><button class="btn small danger" data-delatt="' + esc(a.id) + '">지우기</button></td></tr>';
+        }).join('') + '</tbody></table></div>' : '<p class="muted">이번 달 근태 기록이 없습니다.</p>') +
+      '<h3 class="h3">연차 현황 <span class="muted" style="font-size:13px;font-weight:600">(' + esc(dotDate(S.month.leaveAsOf)) + ' 기준 · 입사일 기준)</span></h3>' +
+      '<div class="scroll"><table class="grid" id="leaveTable"><thead><tr><th>직원</th><th>입사일</th><th>근속</th><th>이번 연차 기간</th><th class="n">생긴 연차</th><th class="n">쓴 연차</th><th class="n">조정</th><th class="n">남은 연차</th></tr></thead><tbody>' +
+      leaveRowsHtml() + '</tbody></table></div>' +
+      '<ul class="note">' +
+      '<li><b>결근</b>: 그날 8시간 + 그 주(월~일) 주휴 8시간을 뺍니다. 한 주에 결근이 여러 날이어도 주휴는 한 번만 뺍니다 (근로기준법상 주휴수당은 그 주 개근 때만).</li>' +
+      '<li><b>지각·조퇴</b>: 못 한 시간만큼만 뺍니다 (10분 단위). <b>무급 휴가</b>: 회사가 허락한 무급 휴가 — 그날 8시간만 빼고 주휴는 빼지 않습니다.</li>' +
+      '<li>시간당 금액 = 기본급 ÷ 월 소정근로시간(' + S.month.config.monthlyHours + '시간). 토 · 일 · 공휴일에 적은 근태는 빼지 않고, 기본급보다 많이 빼지 않습니다.</li>' +
+      '<li><b>연차 · 반차</b>는 유급이라 월급에서 빼지 않고, 남은 연차에서 1일 · 0.5일 줄어듭니다.</li>' +
+      '<li><b>연차 계산 (입사일 기준, 근로기준법 제60조)</b>: 입사 1년 미만 — 한 달 개근(결근 없음)마다 1일, 최대 11일, 입사 1년 되는 날 사라집니다. 1년이 되면 15일, 근속 3년부터 2년마다 1일씩 더 (3년 16일 · 5년 17일 …, 최대 25일). 쓰지 못한 연차는 1년 뒤 사라지는 것으로 셉니다.</li>' +
+      '<li><b>연차 조정</b>: 이 프로그램을 쓰기 전에 쓴 연차, 회사가 더 준 연차 등을 맞출 때 씁니다 (그 날짜가 속한 연차 기간에 들어감).</li>' +
+      '<li>기록은 구글 시트 「근태」에 남고, 지우면 줄은 그대로 두고 「지움」 칸에 시각을 적습니다.</li></ul>';
+  }
+  function slipLeaveHtml(r) {
+    var a = r.att || { paid: [], half: [] }, L = r.leave, bits = [];
+    if (a.paid.length) bits.push('연차 ' + a.paid.map(function (d) { return md(d); }).join(', '));
+    if (a.half.length) bits.push('반차 ' + a.half.map(function (d) { return md(d); }).join(', '));
+    if (!L && !bits.length) return '';
+    return '<div class="slip-days"><b>연차 Annual leave</b> ' +
+      (L ? '남은 연차 <b>' + dayNum(L.left) + '일</b> left (' + dotDate(L.start) + ' ~ ' + dotDate(L.end) + ' · 생긴 ' + L.accrued + ' · 쓴 ' + dayNum(L.used) + (L.adj ? ' · 조정 ' + (L.adj > 0 ? '+' : '') + dayNum(L.adj) : '') + ')' : '') +
+      (bits.length ? (L ? ' — ' : '') + '이번 달 This month: ' + esc(bits.join(' · ')) : '') + '</div>';
+  }
+
   function viewAdjust() {
     var d = S.data, a = S.adjEdit || { name: '', kind: 'pay', label: '', amount: '', memo: '' };
     var names = S.month.rows.map(function (r) { return r.name; });
@@ -929,6 +1118,43 @@ table.pl.ot th { padding: .7mm .2mm; }
     app.querySelectorAll('[data-act]').forEach(function (b) {
       b.addEventListener('click', function (ev) { act(b.getAttribute('data-act'), ev); });
     });
+    var tf = document.getElementById('attForm');
+    if (tf) {
+      var showPrev = function () {
+        var rec = readAttForm(tf), box = document.getElementById('attPrev');
+        document.getElementById('t_minBox').hidden = rec.kind !== '지각·조퇴';
+        document.getElementById('t_daysBox').hidden = rec.kind !== '연차 조정';
+        var pv = attPreview(rec);
+        box.className = 'attprev' + (pv[0] ? ' ' + pv[0] : '');
+        box.innerHTML = pv[1];
+      };
+      tf.addEventListener('change', showPrev);
+      tf.addEventListener('input', showPrev);
+      showPrev();
+      tf.addEventListener('submit', function (ev) {
+        ev.preventDefault();
+        var rec = readAttForm(tf), bad = attCheck(rec);
+        if (bad) { alert(ERR[bad]); return; }
+        guard(call('stock.call', { fn: 'apiAttSave', args: [rec] })).then(function (r) {
+          S.data.att = r.att || []; S.attErr = '';
+          S.attForm = { name: rec.name, date: rec.date, kind: rec.kind };
+          recompute();
+          toast(rec.name + ' ' + md(rec.date) + ' ' + attLabel(rec) + ' — 저장했습니다');
+        }).catch(function () {});
+      });
+    }
+    app.querySelectorAll('[data-delatt]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var id = b.getAttribute('data-delatt');
+        var x = (S.data.att || []).filter(function (a) { return a.id === id; })[0];
+        if (!x || !confirm(x.name + ' ' + md(x.date) + ' ' + attLabel(x) + ' 기록을 지울까요?')) return;
+        guard(call('stock.call', { fn: 'apiAttDel', args: [id] })).then(function (r) {
+          S.data.att = r.att || [];
+          recompute();
+          toast('지웠습니다 — 월급 계산에서도 빠졌습니다');
+        }).catch(function () {});
+      });
+    });
     app.querySelectorAll('input.money').forEach(function (inp) {
       inp.addEventListener('blur', function () {
         var s = inp.value.replace(/[^0-9]/g, '');
@@ -1023,6 +1249,7 @@ table.pl.ot th { padding: .7mm .2mm; }
         break;
       case 'closeEdit': S.edit = null; render(); break;
       case 'closeCell': S.cell = null; render(); break;
+      case 'attFromCell': if (S.cell) { S.attForm = { name: S.cell.name, date: S.cell.date }; S.cell = null; S.tab = 'att'; render(); } break;
       case 'printOt': printNow('ledger', otPrintHtml()); break;
       case 'cancelAdj': S.adjEdit = null; render(); break;
       case 'printLedger': printLedger(); break;
