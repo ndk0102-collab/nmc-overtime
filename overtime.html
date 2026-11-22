@@ -229,11 +229,42 @@ button.cday{cursor:pointer}
 button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-offset:2px}
 .printbtn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 12px}
 .printhead{display:none}
+/* 정규시간에 빠진 시간 (2026-11-22) */
+.day{position:relative}
+.day .dm{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:var(--hol);box-shadow:0 0 0 2px #fff}
+.miss .sec2{margin:16px 0 8px;font-size:15px;font-weight:800;color:var(--ink2)}
+.whys{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.whybtn{min-height:54px;padding:6px 6px;border-radius:14px;border:2px solid var(--line);background:#fff;font-size:15px;font-weight:800;line-height:1.25;cursor:pointer;overflow-wrap:anywhere}
+.whybtn[aria-pressed="true"]{background:var(--hol);border-color:var(--hol);color:#fff}
+.hml{display:block;margin:10px 0 6px;font-size:13px;font-weight:800;color:var(--muted)}
+.hrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mrow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.hmbtn{min-height:48px;padding:0;border-radius:12px;border:2px solid var(--line);background:#fff;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;cursor:pointer}
+.hmbtn[aria-pressed="true"]{background:var(--hol);border-color:var(--hol);color:#fff}
+.misstot{margin:14px 2px 0;font-size:19px;font-weight:800;color:var(--hol)}
+.memo{display:block;margin:14px 0 0}
+.memo span{display:block;margin:0 0 6px;font-size:13px;font-weight:800;color:var(--muted)}
+.memo input{width:100%;min-height:48px;padding:0 12px;border-radius:12px;border:2px solid var(--line);background:#fff;font:inherit;font-size:16px}
+.primary.missbtn{background:var(--hol);box-shadow:0 4px 12px rgba(194,39,45,.25)}
+.ghost.wide{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;color:var(--hol);border-color:#F3C5C0}
+.note.miss{background:#FDECEC;color:#8A1C1C}
+.attlist{margin:0 0 4px;padding:0;list-style:none}
+.attlist li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+.attlist li:first-child{border-top:0}
+.attlist .ad{font-weight:800;font-variant-numeric:tabular-nums}
+.attlist b{color:var(--hol)}
+.attlist b.pd{color:#1E6B34}
+.attlist small{flex-basis:100%;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.attlist .by{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted)}
+.cday .cm{position:absolute;right:4px;bottom:3px;font-size:11px;font-weight:800;line-height:1;color:var(--hol);font-variant-numeric:tabular-nums}
+.cday .cdot{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--hol)}
+.cday .cdot.pd{background:#1E8E4E}
+.cday.sel .cm{color:#fff}
 @media print{
   @page{size:A4 landscape;margin:9mm}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   html,body{background:#fff}
-  .appbar,.nav,.demo,.toast,.overlay,.monthbar,.stats,.legend,.printbtn,.install,.foot{display:none!important}
+  .appbar,.nav,.demo,.toast,.overlay,.monthbar,.stats,.legend,.printbtn,.install,.foot,.miss,.attmon{display:none!important}
   .wrap,.wrap.wide,.wrap.withnav{max-width:none;margin:0;padding:0}
   .card,.board{border:0;border-radius:0;box-shadow:none;padding:0;margin:0;overflow:visible}
   .printhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 6px}
@@ -301,7 +332,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: '아이폰은 사파리(Safari)에서 설치합니다. 이 링크를 사파리로 연 다음: 아래쪽 공유 버튼 → "홈 화면에 추가"',
       desktopTip: 'PC에서는 크롬 주소창 오른쪽의 설치 아이콘을 누르면 됩니다. 휴대폰에 설치하려면 이 링크를 휴대폰에서 여십시오.',
       wd: ['일', '월', '화', '수', '목', '금', '토'], wds: ['일', '월', '화', '수', '목', '금', '토'],
-      refresh: '새로고침', printBtn: '이 달 표 인쇄', printTitle: '시간 외 근무 시간 (남명)', printedAt: '출력', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘'
+      refresh: '새로고침', printBtn: '이 달 표 인쇄', printTitle: '시간 외 근무 시간 (남명)', printedAt: '출력', language: '언어', prevMonth: '이전 달', nextMonth: '다음 달', todayMark: '오늘',
+      /* 정규시간에 빠진 시간 (2026-11-22) */
+      missTitle: '정규시간에 빠진 시간', missAsk: '정규시간(08:00–17:00)에 늦게 오거나, 일찍 가거나, 중간에 나간 시간이 있으면 적으십시오.', missOpen: '빠진 시간 적기', missWhy: '왜 빠졌나요? (여러 개 골라도 됩니다)',
+      why_late: '늦게 옴', why_early: '일찍 감', why_out: '중간에 나감', missHow: '모두 얼마나 빠졌나요?',
+      missH: '시간', missM: '분', mins: '{m}분', missTotal: '합계 {t}',
+      missSave: '빠진 시간 등록하기', missUpdate: '빠진 시간 수정하기', missMemo: '메모 (안 써도 됩니다)', missMemoPh: '예: 병원',
+      missPay: '빠진 시간만큼 월급에서 빠집니다.', missDayOff: '하루 전부 쉰 날(결근 · 연차 · 휴가)은 사무실에서 적습니다.', missOffice: '사무실에서 적은 기록입니다. 고칠 것이 있으면 사무실에 말하십시오.', missHas: '이 날 빠진 시간 {t}이 등록되어 있습니다',
+      missSaved: '빠진 시간을 등록했습니다', missUpdated: '빠진 시간을 수정했습니다', missDeleted: '빠진 시간을 삭제했습니다', missPickWhy: '왜 빠졌는지 먼저 고르십시오',
+      missPickTime: '빠진 시간을 먼저 고르십시오', confirmDelMiss: '빠진 시간 기록을 삭제할까요?', kAbsent: '결근', kMiss: '빠진 시간',
+      kUnpaid: '무급 휴가', kAnnual: '연차', kHalf: '반차', byMe: '본인 적음',
+      byOffice: '사무실 적음', missMonth: '이번 달 근태', missSum: '빠진 시간 합계 {t}', missLabel: '근태 기록 있음',
+      errOffice: '이 날은 사무실에서 이미 근태를 적었습니다. 사무실에 말하십시오.', errWeekend: '토요일 · 일요일에는 적을 수 없습니다.'
     },
     en: {
       app: 'NMC Overtime', home: 'Home', back: 'Back', chooseName: 'Tap your name', nameMissing: 'If your name is not here, tell the office.',
@@ -329,7 +371,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'On iPhone, install from Safari. Open this link in Safari, then: Share button → "Add to Home Screen"',
       desktopTip: 'On a PC, click the install icon at the right end of the Chrome address bar. To install on a phone, open this link on the phone.',
       wd: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      refresh: 'Refresh', printBtn: 'Print this month', printTitle: 'Overtime hours (NMC)', printedAt: 'Printed', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today'
+      refresh: 'Refresh', printBtn: 'Print this month', printTitle: 'Overtime hours (NMC)', printedAt: 'Printed', language: 'Language', prevMonth: 'Previous month', nextMonth: 'Next month', todayMark: 'Today',
+      /* 정규시간에 빠진 시간 (2026-11-22) */
+      missTitle: 'Time missed in regular hours', missAsk: 'If you came late, left early, or went out during regular hours (08:00–17:00), record it here.', missOpen: 'Record missed time', missWhy: 'Why? (you can pick more than one)',
+      why_late: 'Came late', why_early: 'Left early', why_out: 'Went out', missHow: 'How long in total?',
+      missH: 'Hours', missM: 'Minutes', mins: '{m} min', missTotal: 'Total {t}',
+      missSave: 'Save missed time', missUpdate: 'Update missed time', missMemo: 'Note (optional)', missMemoPh: 'e.g. hospital',
+      missPay: 'Missed time is taken off your pay.', missDayOff: 'A whole day off (absence, annual leave, other leave) is recorded by the office.', missOffice: 'Recorded by the office. If something is wrong, tell the office.', missHas: '{t} of missed time is saved for this day',
+      missSaved: 'Missed time saved', missUpdated: 'Missed time updated', missDeleted: 'Missed time deleted', missPickWhy: 'Choose why first',
+      missPickTime: 'Choose how long first', confirmDelMiss: 'Delete this missed-time record?', kAbsent: 'Absent', kMiss: 'Missed time',
+      kUnpaid: 'Unpaid leave', kAnnual: 'Annual leave', kHalf: 'Half-day leave', byMe: 'You recorded',
+      byOffice: 'Office recorded', missMonth: 'Attendance this month', missSum: 'Missed time in total {t}', missLabel: 'attendance record',
+      errOffice: 'The office has already recorded attendance for this day. Tell the office.', errWeekend: 'You cannot record on Saturday or Sunday.'
     },
     th: {
       app: 'NMC โอที', home: 'หน้าแรก', back: 'กลับ', chooseName: 'แตะชื่อของคุณ', nameMissing: 'ถ้าไม่มีชื่อของคุณ กรุณาแจ้งสำนักงาน',
@@ -357,7 +410,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'บน iPhone ให้ติดตั้งจาก Safari เปิดลิงก์นี้ใน Safari แล้ว: ปุ่มแชร์ → "เพิ่มไปยังหน้าจอโฮม"',
       desktopTip: 'บนคอมพิวเตอร์ ให้คลิกไอคอนติดตั้งทางขวาของแถบที่อยู่ใน Chrome หากจะติดตั้งในโทรศัพท์ ให้เปิดลิงก์นี้ในโทรศัพท์',
       wd: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'], wds: ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'],
-      refresh: 'รีเฟรช', printBtn: 'พิมพ์ตารางเดือนนี้', printTitle: 'ชั่วโมงทำงานล่วงเวลา (NMC)', printedAt: 'พิมพ์เมื่อ', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้'
+      refresh: 'รีเฟรช', printBtn: 'พิมพ์ตารางเดือนนี้', printTitle: 'ชั่วโมงทำงานล่วงเวลา (NMC)', printedAt: 'พิมพ์เมื่อ', language: 'ภาษา', prevMonth: 'เดือนก่อน', nextMonth: 'เดือนถัดไป', todayMark: 'วันนี้',
+      /* 정규시간에 빠진 시간 (2026-11-22) */
+      missTitle: 'เวลาที่ขาดในเวลางานปกติ', missAsk: 'ถ้ามาสาย กลับก่อน หรือออกไประหว่างเวลางานปกติ (08:00–17:00) ให้บันทึกที่นี่', missOpen: 'บันทึกเวลาที่ขาด', missWhy: 'เพราะอะไร? (เลือกได้หลายข้อ)',
+      why_late: 'มาสาย', why_early: 'กลับก่อน', why_out: 'ออกไประหว่างงาน', missHow: 'รวมแล้วขาดไปนานเท่าไร?',
+      missH: 'ชั่วโมง', missM: 'นาที', mins: '{m} นาที', missTotal: 'รวม {t}',
+      missSave: 'บันทึกเวลาที่ขาด', missUpdate: 'แก้ไขเวลาที่ขาด', missMemo: 'หมายเหตุ (ไม่ต้องใส่ก็ได้)', missMemoPh: 'เช่น ไปโรงพยาบาล',
+      missPay: 'เวลาที่ขาดจะถูกหักจากเงินเดือน', missDayOff: 'ถ้าหยุดทั้งวัน (ขาดงาน ลาพักร้อน ลาอื่น ๆ) สำนักงานจะเป็นผู้บันทึก', missOffice: 'สำนักงานเป็นผู้บันทึก ถ้ามีอะไรผิด กรุณาแจ้งสำนักงาน', missHas: 'วันที่นี้บันทึกเวลาที่ขาดไว้แล้ว {t}',
+      missSaved: 'บันทึกเวลาที่ขาดแล้ว', missUpdated: 'แก้ไขเวลาที่ขาดแล้ว', missDeleted: 'ลบเวลาที่ขาดแล้ว', missPickWhy: 'กรุณาเลือกสาเหตุก่อน',
+      missPickTime: 'กรุณาเลือกเวลาก่อน', confirmDelMiss: 'ลบบันทึกเวลาที่ขาดนี้ใช่ไหม', kAbsent: 'ขาดงาน', kMiss: 'เวลาที่ขาด',
+      kUnpaid: 'ลาไม่รับค่าจ้าง', kAnnual: 'ลาพักร้อน', kHalf: 'ลาครึ่งวัน', byMe: 'คุณบันทึก',
+      byOffice: 'สำนักงานบันทึก', missMonth: 'การมาทำงานเดือนนี้', missSum: 'รวมเวลาที่ขาด {t}', missLabel: 'มีบันทึกการมาทำงาน',
+      errOffice: 'สำนักงานบันทึกวันที่นี้ไว้แล้ว กรุณาแจ้งสำนักงาน', errWeekend: 'บันทึกวันเสาร์และวันอาทิตย์ไม่ได้'
     },
     vi: {
       app: 'NMC Tăng ca', home: 'Trang chủ', back: 'Quay lại', chooseName: 'Bấm vào tên của bạn', nameMissing: 'Nếu không có tên của bạn, hãy báo văn phòng.',
@@ -385,7 +449,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'Trên iPhone, hãy cài bằng Safari. Mở link này bằng Safari, rồi: nút Chia sẻ → "Thêm vào MH chính"',
       desktopTip: 'Trên máy tính, bấm biểu tượng cài đặt ở cuối thanh địa chỉ Chrome. Để cài trên điện thoại, hãy mở link này trên điện thoại.',
       wd: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'], wds: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
-      refresh: 'Làm mới', printBtn: 'In bảng tháng này', printTitle: 'Giờ làm thêm (NMC)', printedAt: 'In lúc', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay'
+      refresh: 'Làm mới', printBtn: 'In bảng tháng này', printTitle: 'Giờ làm thêm (NMC)', printedAt: 'In lúc', language: 'Ngôn ngữ', prevMonth: 'Tháng trước', nextMonth: 'Tháng sau', todayMark: 'Hôm nay',
+      /* 정규시간에 빠진 시간 (2026-11-22) */
+      missTitle: 'Thời gian vắng trong giờ làm chính', missAsk: 'Nếu bạn đến muộn, về sớm hoặc ra ngoài trong giờ làm chính (08:00–17:00), hãy ghi ở đây.', missOpen: 'Ghi thời gian vắng', missWhy: 'Vì sao? (có thể chọn nhiều)',
+      why_late: 'Đến muộn', why_early: 'Về sớm', why_out: 'Ra ngoài giữa giờ', missHow: 'Tổng cộng vắng bao lâu?',
+      missH: 'Giờ', missM: 'Phút', mins: '{m} phút', missTotal: 'Tổng {t}',
+      missSave: 'Lưu thời gian vắng', missUpdate: 'Sửa thời gian vắng', missMemo: 'Ghi chú (không bắt buộc)', missMemoPh: 'Ví dụ: đi bệnh viện',
+      missPay: 'Thời gian vắng sẽ bị trừ vào lương.', missDayOff: 'Nghỉ cả ngày (vắng mặt, nghỉ phép năm, nghỉ khác) do văn phòng ghi.', missOffice: 'Văn phòng đã ghi. Nếu có gì sai, hãy báo văn phòng.', missHas: 'Ngày này đã lưu {t} thời gian vắng',
+      missSaved: 'Đã lưu thời gian vắng', missUpdated: 'Đã sửa thời gian vắng', missDeleted: 'Đã xóa thời gian vắng', missPickWhy: 'Hãy chọn lý do trước',
+      missPickTime: 'Hãy chọn thời gian trước', confirmDelMiss: 'Xóa bản ghi thời gian vắng này?', kAbsent: 'Vắng mặt', kMiss: 'Thời gian vắng',
+      kUnpaid: 'Nghỉ không lương', kAnnual: 'Nghỉ phép năm', kHalf: 'Nghỉ nửa ngày', byMe: 'Bạn ghi',
+      byOffice: 'Văn phòng ghi', missMonth: 'Chuyên cần tháng này', missSum: 'Tổng thời gian vắng {t}', missLabel: 'có ghi chuyên cần',
+      errOffice: 'Văn phòng đã ghi ngày này rồi. Hãy báo văn phòng.', errWeekend: 'Không thể ghi vào thứ Bảy và Chủ nhật.'
     },
     my: {
       app: 'NMC အချိန်ပို', home: 'ပင်မ', back: 'နောက်သို့', chooseName: 'သင့်အမည်ကို နှိပ်ပါ', nameMissing: 'သင့်အမည် မပါလျှင် ရုံးခန်းသို့ ပြောပါ။',
@@ -413,7 +488,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       iosOther: 'iPhone တွင် Safari မှ ထည့်သွင်းပါ။ ဤလင့်ခ်ကို Safari ဖြင့်ဖွင့်ပြီး မျှဝေရန် ခလုတ် → "Add to Home Screen"',
       desktopTip: 'ကွန်ပျူတာတွင် Chrome လိပ်စာဘား၏ ညာဘက်ရှိ ထည့်သွင်းရန် အိုင်ကွန်ကို နှိပ်ပါ။ ဖုန်းတွင် ထည့်သွင်းရန် ဤလင့်ခ်ကို ဖုန်းဖြင့် ဖွင့်ပါ။',
       wd: ['တနင်္ဂနွေ', 'တနင်္လာ', 'အင်္ဂါ', 'ဗုဒ္ဓဟူး', 'ကြာသပတေး', 'သောကြာ', 'စနေ'], wds: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      refresh: 'ပြန်ဖွင့်ရန်', printBtn: 'ဤလဇယားကို ပုံနှိပ်ရန်', printTitle: 'အချိန်ပို နာရီ (NMC)', printedAt: 'ပုံနှိပ်ချိန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့'
+      refresh: 'ပြန်ဖွင့်ရန်', printBtn: 'ဤလဇယားကို ပုံနှိပ်ရန်', printTitle: 'အချိန်ပို နာရီ (NMC)', printedAt: 'ပုံနှိပ်ချိန်', language: 'ဘာသာစကား', prevMonth: 'ယခင်လ', nextMonth: 'နောက်လ', todayMark: 'ယနေ့',
+      /* 정규시간에 빠진 시간 (2026-11-22) */
+      missTitle: 'ပုံမှန်အလုပ်ချိန်တွင် ပျက်ကွက်ချိန်', missAsk: 'ပုံမှန်အလုပ်ချိန် (08:00–17:00) အတွင်း နောက်ကျရောက်ခြင်း၊ စောပြန်ခြင်း၊ အပြင်ထွက်ခြင်း ရှိလျှင် ဤနေရာတွင် ထည့်ပါ။', missOpen: 'ပျက်ကွက်ချိန် ထည့်ရန်', missWhy: 'ဘာကြောင့်လဲ (တစ်ခုထက်ပို ရွေးနိုင်သည်)',
+      why_late: 'နောက်ကျရောက်', why_early: 'စောပြန်', why_out: 'အလုပ်ချိန်အတွင်း အပြင်ထွက်', missHow: 'စုစုပေါင်း ဘယ်လောက်ကြာလဲ',
+      missH: 'နာရီ', missM: 'မိနစ်', mins: '{m} မိနစ်', missTotal: 'စုစုပေါင်း {t}',
+      missSave: 'ပျက်ကွက်ချိန် သိမ်းမည်', missUpdate: 'ပျက်ကွက်ချိန် ပြင်မည်', missMemo: 'မှတ်ချက် (မထည့်လည်းရ)', missMemoPh: 'ဥပမာ - ဆေးရုံ',
+      missPay: 'ပျက်ကွက်ချိန်ကို လစာမှ နုတ်ပါမည်။', missDayOff: 'တစ်နေ့လုံး မလာသောရက် (ပျက်ကွက်၊ နှစ်စဉ်ခွင့်၊ အခြားခွင့်) ကို ရုံးခန်းမှ ထည့်ပါမည်။', missOffice: 'ရုံးခန်းမှ ထည့်ထားသော မှတ်တမ်းဖြစ်သည်။ မှားနေလျှင် ရုံးခန်းသို့ ပြောပါ။', missHas: 'ဤရက်အတွက် ပျက်ကွက်ချိန် {t} သိမ်းပြီးသား',
+      missSaved: 'ပျက်ကွက်ချိန် သိမ်းပြီးပါပြီ', missUpdated: 'ပျက်ကွက်ချိန် ပြင်ပြီးပါပြီ', missDeleted: 'ပျက်ကွက်ချိန် ဖျက်ပြီးပါပြီ', missPickWhy: 'အကြောင်းရင်းကို အရင် ရွေးပါ',
+      missPickTime: 'အချိန်ကို အရင် ရွေးပါ', confirmDelMiss: 'ဤပျက်ကွက်ချိန် မှတ်တမ်းကို ဖျက်မလား', kAbsent: 'အလုပ်ပျက်', kMiss: 'ပျက်ကွက်ချိန်',
+      kUnpaid: 'လစာမဲ့ခွင့်', kAnnual: 'နှစ်စဉ်ခွင့်', kHalf: 'နေ့တစ်ဝက်ခွင့်', byMe: 'ကိုယ်တိုင် ထည့်',
+      byOffice: 'ရုံးခန်းမှ ထည့်', missMonth: 'ဤလ တက်ရောက်မှု', missSum: 'ပျက်ကွက်ချိန် စုစုပေါင်း {t}', missLabel: 'တက်ရောက်မှု မှတ်တမ်းရှိ',
+      errOffice: 'ဤရက်ကို ရုံးခန်းမှ ထည့်ပြီးသားဖြစ်သည်။ ရုံးခန်းသို့ ပြောပါ။', errWeekend: 'စနေ၊ တနင်္ဂနွေ နေ့များတွင် ထည့်၍ မရပါ။'
     }
   };
   var MONTHS = {
@@ -441,7 +527,8 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     cal: svg('<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>', 24),
     grid: svg('<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 10h18M3 15h18M9 4v16"/>', 24),
     print: svg('<path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>', 22),
-    phone: svg('<rect x="6.5" y="2" width="11" height="20" rx="2.5"/><path d="M12 6.5v7M9 10.5l3 3 3-3"/><path d="M10.5 18h3"/>', 26)
+    phone: svg('<rect x="6.5" y="2" width="11" height="20" rx="2.5"/><path d="M12 6.5v7M9 10.5l3 3 3-3"/><path d="M10.5 18h3"/>', 26),
+    minus: svg('<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>', 22)
   };
 
   /* ───────── 상태 ───────── */
@@ -456,7 +543,8 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     ready: false, fatal: false, started: false,
     tab: 'rec', date: '', minutes: 0, viewYm: '',
     busy: false, sheet: null, toast: null, toastTimer: null,
-    boardYm: null, boardScroll: null
+    boardYm: null, boardScroll: null,
+    att: {}, attLoading: {}, attErr: {}, attOff: false, miss: null, busyMiss: false   // 정규시간에 빠진 시간 (이 사람 · 달마다)
   };
 
   function T() { return I18N[S.lang] || I18N.ko; }
@@ -551,6 +639,108 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     });
   }
 
+  /* ───────── 정규시간에 빠진 시간 (2026-11-22 지시 "정규시간빠진거기록할수있도록해라") ─────────
+     통합 서버(v49)의 apiAttMine · apiAttMineSave · apiAttMineDel 을 부릅니다. 서버가 옛 판이면(auth) 이 칸을 숨깁니다.
+     적는 것은 '지각·조퇴'(빠진 시간) 하나 — 하루 전부(결근 · 연차 · 휴가)는 사무실에서. 고치기 · 지우기는 본인이 적은 것만. */
+  var ATT_ON = !!API;
+  var DAY_KINDS = { '결근': 1, '무급 휴가': 1, '연차': 1 };
+  function apiPost(fn, args) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 30000) : null;
+    return fetch(API, { method: 'POST', body: JSON.stringify({ action: 'stock.call', fn: fn, args: args }), cache: 'no-store', redirect: 'follow', credentials: 'omit', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (res) { if (!res.ok) throw new Error('http_' + res.status); return res.json(); })
+      .then(function (r) {
+        if (timer) clearTimeout(timer);
+        if (r && r.ok) return r.data;
+        throw new Error((r && r.error) || 'bad_response');
+      }, function (err) {
+        if (timer) clearTimeout(timer);
+        throw err;
+      });
+  }
+  function attDay(date) { var l = S.att[ymOf(date)]; return l ? l.filter(function (a) { return a.date === date; }) : []; }
+  function myMiss(date) { return attDay(date).filter(function (a) { return a.by === 'me' && a.kind === '지각·조퇴'; })[0] || null; }
+  function minTxt(min) {
+    var h = Math.floor(min / 60), m = min % 60;
+    return (h ? tr('hours', { h: h }) : '') + (h && m ? ' ' : '') + (m || !h ? tr('mins', { m: m }) : '');
+  }
+  function kindTxt(a) {
+    if (a.kind === '지각·조퇴') return tr('kMiss') + ' ' + minTxt(a.min);
+    return tr({ '결근': 'kAbsent', '무급 휴가': 'kUnpaid', '연차': 'kAnnual', '반차': 'kHalf' }[a.kind] || 'kMiss');
+  }
+  function attErrText(code) {
+    if (code === 'bad_name') return tr('errName');
+    if (code === 'att_office') return tr('errOffice');
+    if (code === 'att_weekend') return tr('errWeekend');
+    if (code === 'future_date' || code === 'bad_date') return tr('errDate');
+    return tr('errConn');
+  }
+  function loadAtt(ym) {
+    if (!ATT_ON || S.attOff || !S.me || S.attLoading[ym]) return;
+    var me = S.me;
+    S.attLoading[ym] = true;
+    apiPost('apiAttMine', [me, ym]).then(function (r) {
+      S.attLoading[ym] = false;
+      if (S.me !== me) return;
+      S.att[r.ym] = r.att || [];
+      S.attErr[r.ym] = '';
+      if (S.miss && !S.miss.dirty && ymOf(S.miss.date) === r.ym) S.miss = null;
+      render();
+    }, function (err) {
+      S.attLoading[ym] = false;
+      var m = String((err && err.message) || err || '');
+      if (m === 'auth' || m === 'bad_action') S.attOff = true;   // 서버가 아직 이 기능이 없는 판
+      else S.attErr[ym] = m || 'net';
+      render();
+    });
+  }
+  function ensureAtt(ym) { if (ym && !S.att[ym] && !S.attErr[ym]) loadAtt(ym); }
+  /** 그날 입력 칸 상태 (본인이 적은 것이 있으면 그 값으로 채움). 손대기 전(dirty 아님)에는 서버 기록을 따름 */
+  function missState(date) {
+    var cur = S.miss;
+    if (cur && cur.date === date && (cur.dirty || cur.loaded === !!S.att[ymOf(date)])) return cur;
+    var own = myMiss(date);
+    S.miss = { date: date, loaded: !!S.att[ymOf(date)], dirty: false, open: !!own,
+      why: own && own.why ? own.why.slice() : [], h: own ? Math.floor(own.min / 60) : 0, m: own ? own.min % 60 : 0, note: own ? own.note || '' : '' };
+    return S.miss;
+  }
+  function missSave() {
+    var st = S.miss, date = S.date;
+    if (!st || st.date !== date || S.busy) return;
+    if (!st.why.length) { toast(tr('missPickWhy')); return; }
+    var min = st.h * 60 + st.m;
+    if (!min) { toast(tr('missPickTime')); return; }
+    var had = !!myMiss(date);
+    S.busy = true; S.busyMiss = true;
+    render();
+    apiPost('apiAttMineSave', [S.me, { date: date, min: min, why: st.why.slice(), note: st.note }]).then(function (r) {
+      S.busy = false; S.busyMiss = false;
+      S.att[r.ym] = r.att || [];
+      S.miss = null;
+      toastOk(tr(had ? 'missUpdated' : 'missSaved') + ' · ' + fmtDate(date) + ' · ' + minTxt(min));
+    }, function (err) {
+      S.busy = false; S.busyMiss = false;
+      var m = String((err && err.message) || err || '');
+      if (m === 'att_office') { S.miss = null; loadAtt(ymOf(date)); }
+      toast(attErrText(m));
+    });
+  }
+  function missDel() {
+    var own = myMiss(S.date), date = S.date;
+    if (!own || S.busy) return;
+    S.busy = true; S.busyMiss = true;
+    render();
+    apiPost('apiAttMineDel', [S.me, own.id]).then(function (r) {
+      S.busy = false; S.busyMiss = false;
+      S.att[r.ym] = r.att || [];
+      S.miss = null;
+      toastOk(tr('missDeleted') + ' · ' + fmtDate(date));
+    }, function (err) {
+      S.busy = false; S.busyMiss = false;
+      toast(attErrText(String((err && err.message) || err || '')));
+    });
+  }
+
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
   function stored(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function readUrl(cb) {
@@ -605,6 +795,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     if (S.sheet === 'confirm') h += sheetConfirm();
     if (S.sheet === 'install') h += sheetInstall();
     if (S.sheet === 'pick') h += sheetPick();
+    if (S.sheet === 'missdel') h += sheetMissDel();
     if (S.toast) h += '<div class="toast' + (main ? ' up' : '') + '" role="status">' + S.toast + '</div>';
     root.innerHTML = h;
     afterRender();
@@ -701,9 +892,10 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     }
     if (days.indexOf(S.date) < 0) days.unshift(S.date);   // '다른 날짜'에서 고른 지난 날짜
     days.forEach(function (d) {
-      var e = myEntry(d), dh = isHol(d), w = parseYmd(d);
+      var e = myEntry(d), dh = isHol(d), w = parseYmd(d), at = attDay(d).length;
       var label = d === S.today ? tr('today') : (ymOf(d) !== ymOf(S.today) ? (w.getMonth() + 1) + '/' : '') + T().wds[w.getDay()];
-      h += '<button type="button" class="day' + (dh ? ' hol' : '') + '" aria-pressed="' + (S.date === d) + '" data-act="day" data-v="' + d + '" aria-label="' + esc(fmtDate(d)) + (e ? ' · ' + esc(hrs(e.minutes)) : '') + '">' +
+      h += '<button type="button" class="day' + (dh ? ' hol' : '') + '" aria-pressed="' + (S.date === d) + '" data-act="day" data-v="' + d + '" aria-label="' + esc(fmtDate(d)) + (e ? ' · ' + esc(hrs(e.minutes)) : '') + (at ? ' · ' + esc(tr('missLabel')) : '') + '">' +
+        (at ? '<span class="dm" aria-hidden="true"></span>' : '') +
         '<span class="dw">' + esc(label) + '</span>' +
         '<span class="dn">' + w.getDate() + '</span>' +
         (e ? '<span class="dh ' + (dh ? 'hol' : 'ot') + '">' + fmtH(e.minutes) + '</span>' : '<span class="dh"></span>') + '</button>';
@@ -725,6 +917,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       (S.busy ? esc(tr('saving')) : esc(tr(ex ? 'update' : 'save'))) + '</button>';
     if (ex) h += '<button type="button" class="secondary" data-act="askdel"' + (S.busy ? ' disabled' : '') + '>' + ICON.trash + '<span>' + esc(tr('del')) + '</span></button>';
     h += '</section>';
+    if (ATT_ON && !S.attOff && !hol) h += missCard();
 
     h += '<div class="foot"><p class="wk">' + ICON.clock + '<span>' + esc(tr('work', { t: S.otStart })) + '</span></p>';
     if (!standalone() && !showCard) {
@@ -733,6 +926,69 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
         '<p>' + esc(tr('installAndroid')) + '</p><p>' + esc(tr('installSamsung')) + '</p><p>' + esc(tr('installIphone')) + '</p></details>';
     }
     return h + '</div>';
+  }
+
+  /** 정규시간에 빠진 시간 칸 (평일만) */
+  function missCard() {
+    var date = S.date, ym = ymOf(date), list = S.att[ym];
+    var h = '<section class="card miss" id="missCard"><h2 class="sec">' + esc(tr('missTitle')) + '</h2>';
+    if (!list) {
+      h += '<p class="muted">' + esc(S.attErr[ym] ? attErrText(S.attErr[ym]) : tr('loading')) + '</p>';
+      if (S.attErr[ym]) h += '<button type="button" class="ghost wide" data-act="attretry">' + esc(tr('retry')) + '</button>';
+      return h + '</section>';
+    }
+    var office = attDay(date).filter(function (a) { return a.by !== 'me'; }), own = myMiss(date), st = missState(date);
+    if (office.length) {
+      h += '<ul class="attlist">' + office.map(function (a) {
+        return '<li><b' + (a.kind === '연차' || a.kind === '반차' ? ' class="pd"' : '') + '>' + esc(kindTxt(a)) + '</b><span class="by">' + esc(tr('byOffice')) + '</span></li>';
+      }).join('') + '</ul><p class="hint" style="margin-top:4px">' + esc(tr('missOffice')) + '</p>';
+      if (office.some(function (a) { return a.kind === '지각·조퇴' || DAY_KINDS[a.kind]; })) return h + '</section>';
+    }
+    if (!st.open) {
+      return h + '<p class="muted">' + esc(tr('missAsk')) + '</p>' +
+        '<button type="button" class="ghost wide" data-act="missopen">' + ICON.minus + '<span>' + esc(tr('missOpen')) + '</span></button>' +
+        '<p class="hint">' + esc(tr('missDayOff')) + '</p></section>';
+    }
+    if (own) h += '<p class="note miss">' + ICON.check + '<span>' + esc(tr('missHas', { t: minTxt(own.min) })) + '</span></p>';
+    h += '<p class="sec2">' + esc(tr('missWhy')) + '</p><div class="whys">';
+    ['late', 'early', 'out'].forEach(function (k) {
+      h += '<button type="button" class="whybtn" aria-pressed="' + (st.why.indexOf(k) >= 0) + '" data-act="misswhy" data-v="' + k + '">' + esc(tr('why_' + k)) + '</button>';
+    });
+    h += '</div><p class="sec2">' + esc(tr('missHow')) + '</p><span class="hml">' + esc(tr('missH')) + '</span><div class="hrow">';
+    for (var i = 0; i <= 7; i++) h += '<button type="button" class="hmbtn" aria-pressed="' + (st.h === i) + '" data-act="missh" data-v="' + i + '" aria-label="' + esc(tr('hours', { h: i })) + '">' + i + '</button>';
+    h += '</div><span class="hml">' + esc(tr('missM')) + '</span><div class="mrow">';
+    [0, 10, 20, 30, 40, 50].forEach(function (v) { h += '<button type="button" class="hmbtn" aria-pressed="' + (st.m === v) + '" data-act="missm" data-v="' + v + '" aria-label="' + esc(tr('mins', { m: v })) + '">' + v + '</button>'; });
+    var tot = st.h * 60 + st.m;
+    h += '</div><p class="misstot" aria-live="polite">' + esc(tr('missTotal', { t: tot ? minTxt(tot) : '—' })) + '</p>';
+    h += '<label class="memo"><span>' + esc(tr('missMemo')) + '</span><input type="text" id="missNote" maxlength="100" autocomplete="off" value="' + esc(st.note) + '" placeholder="' + esc(tr('missMemoPh')) + '"></label>';
+    h += '<button type="button" class="primary missbtn" data-act="misssave"' + (S.busy ? ' disabled' : '') + '>' + esc(S.busyMiss ? tr('saving') : tr(own ? 'missUpdate' : 'missSave')) + '</button>';
+    if (own) h += '<button type="button" class="secondary" data-act="missaskdel"' + (S.busy ? ' disabled' : '') + '>' + ICON.trash + '<span>' + esc(tr('del')) + '</span></button>';
+    else h += '<button type="button" class="linkbtn" data-act="missclose">' + esc(tr('cancel')) + '</button>';
+    return h + '<p class="hint">' + esc(tr('missPay')) + ' ' + esc(tr('missDayOff')) + '</p></section>';
+  }
+  /** 내 기록: 이번 달 근태 목록 */
+  function attMonthCard(ym) {
+    if (!ATT_ON || S.attOff) return '';
+    var list = S.att[ym];
+    if (!list) return S.attErr[ym] ? '<section class="card attmon"><p class="muted">' + esc(attErrText(S.attErr[ym])) + '</p><button type="button" class="ghost wide" data-act="attretry" data-v="' + ym + '">' + esc(tr('retry')) + '</button></section>' : '';
+    if (!list.length) return '';
+    var tot = 0;
+    var h = '<section class="card attmon"><h2 class="sec">' + esc(tr('missMonth')) + '</h2><ul class="attlist">';
+    list.forEach(function (a) {
+      if (a.kind === '지각·조퇴') tot += a.min;
+      var why = a.by === 'me' && a.why && a.why.length ? a.why.map(function (k) { return tr('why_' + k); }).join(' · ') : '';
+      var note = a.by === 'me' && a.note ? a.note : '';
+      h += '<li><span class="ad">' + esc(fmtDate(a.date)) + '</span><b' + (a.kind === '연차' || a.kind === '반차' ? ' class="pd"' : '') + '>' + esc(kindTxt(a)) + '</b>' +
+        '<span class="by">' + esc(tr(a.by === 'me' ? 'byMe' : 'byOffice')) + '</span>' + (why || note ? '<small>' + esc(why + (why && note ? ' — ' : '') + note) + '</small>' : '') + '</li>';
+    });
+    return h + '</ul>' + (tot ? '<p class="misstot">' + esc(tr('missSum', { t: minTxt(tot) })) + '</p>' : '') + '</section>';
+  }
+  function sheetMissDel() {
+    var own = myMiss(S.date);
+    var h = '<div class="overlay" data-act="close"><div class="sheet" data-act="noop" role="alertdialog" aria-modal="true" aria-label="' + esc(tr('confirmDelMiss')) + '">';
+    h += '<p class="h2">' + esc(tr('confirmDelMiss')) + '</p>';
+    if (own) h += '<p class="muted">' + esc(fmtDate(S.date)) + ' · ' + esc(minTxt(own.min)) + '</p>';
+    return h + '<div class="two"><button type="button" class="ghost" data-act="close">' + esc(tr('cancel')) + '</button><button type="button" class="danger" data-act="missdel">' + esc(tr('del')) + '</button></div></div></div>';
   }
 
   function installCard() {
@@ -832,17 +1088,21 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     for (i = 0; i < first; i++) h += '<span class="cblank"></span>';
     var n = daysIn(ym);
     for (var d = 1; d <= n; d++) {
-      var date = ym + '-' + pad(d), v = mine[date], dh = isHol(date);
+      var date = ym + '-' + pad(d), v = mine[date], dh = isHol(date), at = attDay(date);
       var cls = 'cday ' + (dh ? 'hol' : 'ot') + (v ? ' has' : '') + (date === S.today ? ' today' : '');
-      var inner = '<span class="cd">' + d + '</span>' + (v ? '<span class="ch ' + (dh ? 'hol' : 'ot') + '">' + fmtH(v) + '</span>' : '');
+      var lateMin = 0, dot = '';
+      at.forEach(function (a) { if (a.kind === '지각·조퇴') lateMin += a.min; else dot = dot || (a.kind === '연차' || a.kind === '반차' ? 'pd' : 'un'); });
+      var inner = '<span class="cd">' + d + '</span>' + (v ? '<span class="ch ' + (dh ? 'hol' : 'ot') + '">' + fmtH(v) + '</span>' : '') +
+        (lateMin ? '<span class="cm" aria-hidden="true">−' + fmtH(lateMin) + '</span>' : '') + (dot ? '<span class="cdot' + (dot === 'pd' ? ' pd' : '') + '" aria-hidden="true"></span>' : '');
+      var atLabel = at.length ? ' · ' + at.map(kindTxt).join(', ') : '';
       if (editable(date)) {
-        h += '<button type="button" class="' + cls + '" data-act="caledit" data-v="' + date + '" aria-label="' + esc(fmtDate(date)) + (v ? ' · ' + esc(hrs(v)) : '') + '">' + inner + '</button>';
+        h += '<button type="button" class="' + cls + '" data-act="caledit" data-v="' + date + '" aria-label="' + esc(fmtDate(date)) + (v ? ' · ' + esc(hrs(v)) : '') + esc(atLabel) + '">' + inner + '</button>';
       } else {
         h += '<div class="' + cls + '">' + inner + '</div>';
       }
     }
     h += '</div><p class="hint">' + esc(tr('tapToEdit', { n: S.backDays })) + '</p></section>';
-    return h;
+    return h + attMonthCard(ym);
   }
 
   function viewAll() {
@@ -954,6 +1214,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       S.ready = true;
       render();
       syncUrl();
+      ensureAtt(ymOf(S.date));
     }, function () { S.fatal = true; render(); });
   }
 
@@ -981,6 +1242,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     S.date = d;
     S.minutes = pickedMinutesFor(d);
     if (!S.months[ymOf(d)]) ensureMonth(ymOf(d), function () { if (S.date === d) S.minutes = pickedMinutesFor(d); });
+    ensureAtt(ymOf(d));
     render();
   }
 
@@ -995,6 +1257,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
   }
 
   function setMe(n) {
+    if (n !== S.me) { S.att = {}; S.attErr = {}; S.attLoading = {}; S.miss = null; }
     S.me = n;
     store('nmc_ot_me', n);
     S.tab = 'rec';
@@ -1003,6 +1266,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     syncUrl();
     render();
     window.scrollTo(0, 0);
+    ensureAtt(ymOf(S.date));
   }
 
   function save() {
@@ -1049,17 +1313,30 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       case 'close': S.sheet = null; render(); return;
       case 'retry': loadInit(); return;
       case 'me': setMe(v); return;
-      case 'changeme': S.me = null; store('nmc_ot_me', null); syncUrl(); render(); window.scrollTo(0, 0); return;
-      case 'tab': S.tab = v; if (v !== 'rec') ensureMonth(S.viewYm); render(); window.scrollTo(0, 0); return;
+      case 'changeme': S.me = null; S.att = {}; S.attErr = {}; S.attLoading = {}; S.miss = null; store('nmc_ot_me', null); syncUrl(); render(); window.scrollTo(0, 0); return;
+      case 'tab': S.tab = v; if (v !== 'rec') ensureMonth(S.viewYm); if (v === 'mine') ensureAtt(S.viewYm); render(); window.scrollTo(0, 0); return;
       case 'day': setDate(v); return;
       case 'min': S.minutes = Number(v); render(); return;
       case 'save': save(); return;
       case 'askdel': S.sheet = 'confirm'; render(); return;
       case 'del': S.sheet = null; del(); return;
-      case 'mprev': S.viewYm = addMonths(S.viewYm, -1); ensureMonth(S.viewYm); render(); return;
+      case 'mprev': S.viewYm = addMonths(S.viewYm, -1); ensureMonth(S.viewYm); if (S.tab === 'mine') ensureAtt(S.viewYm); render(); return;
       case 'mnext':
-        if (S.viewYm < ymOf(S.today)) { S.viewYm = addMonths(S.viewYm, 1); ensureMonth(S.viewYm); render(); }
+        if (S.viewYm < ymOf(S.today)) { S.viewYm = addMonths(S.viewYm, 1); ensureMonth(S.viewYm); if (S.tab === 'mine') ensureAtt(S.viewYm); render(); }
         return;
+      case 'missopen': { var mo = missState(S.date); mo.open = true; mo.dirty = true; render(); return; }
+      case 'missclose': S.miss = { date: S.date, loaded: !!S.att[ymOf(S.date)], dirty: true, open: false, why: [], h: 0, m: 0, note: '' }; render(); return;
+      case 'misswhy': {
+        var mw = missState(S.date), wi = mw.why.indexOf(v);
+        if (wi >= 0) mw.why.splice(wi, 1); else mw.why.push(v);
+        mw.dirty = true; render(); return;
+      }
+      case 'missh': { var mh = missState(S.date); mh.h = Number(v); mh.dirty = true; render(); return; }
+      case 'missm': { var mm = missState(S.date); mm.m = Number(v); mm.dirty = true; render(); return; }
+      case 'misssave': missSave(); return;
+      case 'missaskdel': S.sheet = 'missdel'; render(); return;
+      case 'missdel': S.sheet = null; missDel(); return;
+      case 'attretry': { var ry = v || ymOf(S.date); S.attErr[ry] = ''; loadAtt(ry); render(); return; }
       case 'refresh': S.monthErr[S.viewYm] = false; render(); loadMonth(S.viewYm); return;
       case 'caledit':
         if (editable(v)) { S.tab = 'rec'; setDate(v); window.scrollTo(0, 0); }
@@ -1106,6 +1383,10 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
     }
   });
 
+  document.addEventListener('input', function (ev) {
+    if (ev.target && ev.target.id === 'missNote' && S.miss) { S.miss.note = ev.target.value; S.miss.dirty = true; }
+  });
+
   /* 크롬이 '앱 설치'를 허락하면 화면에 설치 버튼을 보여 줍니다. */
   window.addEventListener('beforeinstallprompt', function (ev) {
     ev.preventDefault();
@@ -1126,6 +1407,7 @@ button:focus-visible,summary:focus-visible{outline:3px solid #8FB3E8;outline-off
       var viewYm = S.viewYm;
       applyInit(r);
       if (viewYm !== ymOf(S.today) && S.months[viewYm]) loadMonth(viewYm);
+      Object.keys(S.att).forEach(function (ym) { loadAtt(ym); });
       render();
     }, function () {});
   });

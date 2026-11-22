@@ -531,12 +531,21 @@
     var today = d.today || '';
     var monthEnd = d.ym + '-' + pad2(new Date(Date.UTC(Number(d.ym.slice(0, 4)), Number(d.ym.slice(5, 7)), 0)).getUTCDate());
     var asOf = today && today < monthEnd ? today : monthEnd;   // 연차는 그 달 말일(이번 달이면 오늘) 기준
-    var rows = [];
+    // 월급제 (2026-11-22 지시 "나머지는 월급제이므로 잔업기록 안해도되니"): 잔업 앱 명단('직원' 시트)에 없고 급여설정에만 있는 사람.
+    // 월급(기본급)을 아직 넣지 않았으면 급여대장 · 명세서 · 이체에는 넣지 않고(others), 근태 · 연차에만 씁니다.
+    var workers = d.employees || [];
+    var rows = [], others = [];
     names.forEach(function (n) {
       var e = employee(settings[n] || { name: n });
       e.name = n;
       if (!e.active && !recs[n] && !adjs[n] && !atts[n]) return;
+      var salaried = workers.indexOf(n) < 0 && !!settings[n];
+      if (salaried && !(e.base > 0) && !recs[n] && !adjs[n]) {
+        others.push({ name: n, emp: e, salaried: true, noPay: true, leave: leaveOf(e, attAll[n] || [], asOf) });
+        return;
+      }
       var r = calcEmployee(e, recs[n], adjs[n], Object.assign({}, ctx, { attPrior: attAll[n] || [] }), atts[n]);
+      r.salaried = salaried;
       r.leave = leaveOf(e, attAll[n] || [], asOf);
       rows.push(r);
     });
@@ -548,7 +557,7 @@
     var lastRecord = '';
     (d.records || []).forEach(function (r) { if (String(r.date).slice(0, 7) === d.ym && r.date > lastRecord) lastRecord = r.date; });
     return {
-      ym: d.ym, config: cfg, rows: rows, totals: totals, leaveAsOf: asOf,
+      ym: d.ym, config: cfg, rows: rows, others: others, totals: totals, leaveAsOf: asOf,
       payDate: nextMonthDay(d.ym, cfg.payDay),
       lastRecord: lastRecord,
       partial: !!today && today.slice(0, 7) === d.ym,
