@@ -148,16 +148,16 @@ details.card.set[open]>summary{margin-bottom:8px}
   var root = $('root'), toastEl = $('toast');
   var S = { mode: '', brief: null, noti: null, dev: null, at: 0, loginErr: '', busy: '', docAll: false, setOpen: false };
   var ERR = {
-    auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
+    auth: '로그인 유효 시간이 만료되었습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 일치하지 않습니다.', locked: '비밀번호 입력 오류 횟수 초과로 15분간 잠금되었습니다.',
     net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
     bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', not_found: '해당 기기가 목록에 없습니다. 새로고침해 주십시오.',
     noti_endpoint: '이 브라우저의 알림 주소를 서버가 받지 않았습니다. 크롬 · 엣지 · 사파리(홈 화면 앱)에서 다시 시도해 주십시오.',
-    noti_many: '등록된 기기가 너무 많습니다. 쓰지 않는 기기를 목록에서 지워 주십시오.',
-    denied: '이 브라우저에서 알림이 막혀 있습니다. 주소창 왼쪽 자물쇠(사이트 설정) → 알림 → 허용으로 바꾼 뒤 다시 눌러 주십시오.',
+    noti_many: '등록 기기 수가 한도를 초과했습니다. 사용하지 않는 기기를 목록에서 삭제하십시오.',
+    denied: '이 브라우저의 알림이 차단되어 있습니다. 주소창 왼쪽 자물쇠(사이트 설정) → 알림 → 허용으로 변경한 뒤 다시 누르십시오.',
     dismissed: '알림 허용 창을 닫았습니다. 다시 눌러 \'허용\'을 선택해 주십시오.',
-    'ios-install': '아이폰은 사파리에서 공유 버튼 → \'홈 화면에 추가\'를 한 뒤, 홈 화면의 NMC 아이콘으로 열어서 알림 받기를 눌러 주십시오.',
-    unsupported: '이 브라우저는 알림을 지원하지 않습니다. 크롬 · 엣지(컴퓨터 · 안드로이드)나 아이폰 홈 화면 앱을 써 주십시오.',
-    no_key: '서버 알림 열쇠를 만들지 못했습니다. 잠시 후 다시 시도해 주십시오.', noti_crypto: '서버의 알림 서명 계산 확인에 실패했습니다. 관리자에게 알려 주십시오(알림을 보내지 않음).',
+    'ios-install': '아이폰은 사파리에서 공유 버튼 → \'홈 화면에 추가\'를 한 뒤, 홈 화면의 NMC 아이콘으로 실행한 뒤 \'이 기기 알림 등록\'을 누르십시오.',
+    unsupported: '이 브라우저는 알림을 지원하지 않습니다. 크롬 · 엣지(컴퓨터 · 안드로이드) 또는 아이폰 홈 화면 앱을 사용하십시오.',
+    no_key: '서버 알림 키 생성 실패. 잠시 후 다시 시도해 주십시오.', noti_crypto: '서버 알림 서명 검증 실패. 관리자에게 문의하십시오(알림 미발송).',
     bad_input: '입력 값을 확인해 주십시오.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + ')'); }
@@ -214,7 +214,7 @@ details.card.set[open]>summary{margin-bottom:8px}
       if (!cfg || !cfg.key) { S.mode = 'login'; render(); return; }
       S.mode = 'dev-wait'; render();
       post({ action: 'stock.call', fn: 'apiBriefDev', args: [cfg.key] }).then(function (d) { S.mode = 'device'; S.brief = d.brief; S.at = Date.now(); render(); },
-        function (e) { S.mode = 'login'; S.loginErr = String(e && e.message) === 'auth' ? '이 기기의 알림 등록이 지워졌습니다. 로그인한 뒤 알림 받기를 다시 눌러 주십시오.' : errText(e); render(); });
+        function (e) { S.mode = 'login'; S.loginErr = String(e && e.message) === 'auth' ? '이 기기의 알림 등록이 삭제되었습니다. 로그인 후 알림 등록을 다시 진행하십시오.' : errText(e); render(); });
     });
   }
   function devState() {
@@ -231,11 +231,11 @@ details.card.set[open]>summary{margin-bottom:8px}
     if (S.mode === 'error') { root.innerHTML = '<p class="err">' + esc(S.loginErr) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 시도</button></div>'; return; }
     if (!b) { root.innerHTML = '<p class="wait">불러오는 중…</p>'; return; }
     var h = '';
-    if (S.mode === 'device') h += '<p class="note">알림을 등록한 기기로 보는 화면입니다. 알림 시각 · 기기 설정은 <a class="link" href="manage.html" style="min-height:0;padding:0">관리자 로그인</a> 뒤 바꿀 수 있습니다.</p>';
+    if (S.mode === 'device') h += '<p class="note">알림 등록 기기용 화면입니다. 알림 시각 · 기기 설정은 <a class="link" href="manage.html" style="min-height:0;padding:0">관리자 로그인</a> 후 변경할 수 있습니다.</p>';
     var none = !b.out.length && !b.made.length && !b.pj.length && !b.docs.length && !b.late;
-    if (none) h += '<section class="card"><p class="allnone">오늘 예정된 출고 · 입고와 처리할 공문이 없습니다.</p></section>';
+    if (none) h += '<section class="card"><p class="allnone">오늘 예정된 출고 · 입고 및 처리 대기 공문이 없습니다.</p></section>';
     if (!none) h += tilesHtml(b);
-    if (b.late) h += '<p class="late"><span>지난 출고예정 ' + b.late + '건(' + b.lateCust + '곳)이 아직 출고 처리되지 않았습니다.</span><a class="link" style="min-height:0;color:var(--warn)" href="stock.html?view=out">출고 화면 →</a></p>';
+    if (b.late) h += '<p class="late"><span>미처리 출고예정 ' + b.late + '건(' + b.lateCust + '곳) — 출고 처리가 완료되지 않았습니다.</span><a class="link" style="min-height:0;color:var(--warn)" href="stock.html?view=out">출고 화면 →</a></p>';
     h += outHtml(b) + inHtml(b) + docHtml(b);
     if (S.mode === 'admin') h += setHtml();
     root.innerHTML = h;
@@ -244,12 +244,21 @@ details.card.set[open]>summary{margin-bottom:8px}
   function tilesHtml(b) {
     var late = b.docs.filter(function (d) { return d.d != null && d.d < 0; }).length, nin = b.made.length + b.pj.length;
     var t = function (go, cls, big, lab, sub, red) { return '<button type="button" class="tile ' + cls + '" data-go="' + go + '"><b>' + big + '</b><span>' + lab + '</span>' + (sub ? '<small' + (red ? ' class="r"' : '') + '>' + esc(sub) + '</small>' : '') + '</button>'; };
-    return '<nav class="tiles" id="tiles" aria-label="오늘 한눈에">' +
+    return '<nav class="tiles" id="tiles" aria-label="오늘 현황">' +
       t('sOut', 'out', b.out.length ? b.out.length + '곳' : '없음', '오늘 출고', b.outKg || '') +
       t('sIn', 'in', nin ? nin + '건' : '없음', '오늘 입고', b.madeKg ? '생산 ' + b.madeKg : b.pj.length ? '공사 자재 ' + b.pj.length + '건' : '') +
-      t('sDoc', 'doc', b.docs.length ? b.docs.length + '건' : '없음', '공문 할 일', late ? '기한 지남 ' + late + '건' : b.docs.length ? '급한 것부터' : '', late > 0) + '</nav>';
+      t('sDoc', 'doc', b.docs.length ? b.docs.length + '건' : '없음', '공문 처리 대기', late ? '기한 경과 ' + late + '건' : b.docs.length ? '기한순' : '', late > 0) + '</nav>';
   }
-  var KIND_T = { todo: '할 일', meet: '일정', deal: '거래 문의', pick: '신청 · 참가' };
+  /** 자동 분류 문구 → 업무 용어 (v57: 2026-11-22 지시 "무조건 기업적인 단어만 사용하라") */
+  var BIZ = [[/^정리:\s*/, ''], [/(신청|참가|참여|회신)할지 결정/g, '$1 여부 결정'], [/견적 · 문의에 회신 여부 결정/g, '견적 · 문의 회신 여부 결정'],
+    [/보완 · 수정해 다시 제출/g, '보완 · 수정 후 재제출'], [/\(보안 메일 · 첨부를 열어\)/g, '(보안 메일 · 첨부 확인)'],
+    [/우리가 로그인한 것이 맞는지 확인 \(아니면 비밀번호 변경\)/g, '자사 로그인 여부 확인 (미확인 시 비밀번호 변경)'], [/성적서 내려받아 보관/g, '성적서 다운로드 · 보관'],
+    [/공문 내용 확인 — 해야 할 일이 있는지 보기/g, '공문 내용 확인 — 조치 사항 여부 확인'], [/글자를 읽지 못했습니다 — 원본 파일을 열어 내용 확인/g, '판독 실패 — 원본 파일에서 내용 확인'],
+    [/처리했는지 확인/g, '처리 여부 확인'], [/같은 안내가 다시 옴/g, '동일 안내 재수신'], [/같은 메일 줄의 뒤 메일로 이어짐/g, '동일 메일 스레드의 후속 메일로 연결'],
+    [/ 뒤 메일: 다시 접수됨/g, ' 후속 메일: 재접수 확인'], [/ 뒤 메일: /g, ' 후속 메일: '], [/(\d+)일 지남\(마감 표시 없음\)/g, '$1일 경과(마감 미표기)'],
+    [/회의 날짜 지남/g, '회의 일자 경과'], [/마감 지남/g, '마감 경과'], [/\(받은 날 기준 계산\)/g, '(수신일 기준 산정)']];
+  function bizTxt(s) { s = String(s == null ? '' : s); BIZ.forEach(function (r) { s = s.replace(r[0], r[1]); }); return s; }
+  var KIND_T = { todo: '조치 요청', meet: '일정', deal: '거래 문의', pick: '신청 · 참가' };
   function cleanTitle(t) { return String(t || '').replace(/\[(?:POTENTIAL PHISHING|외부\s*메일)\]\s*/gi, '').replace(/^(?:\s*(?:RE|Re|re|FW|Fw|Fwd|fwd|답장|전달)\s*:\s*)+/, '').replace(/\s+/g, ' ').trim(); }
   function outHtml(b) {
     if (!b.out.length) return none('out', '출고', '오늘 출고예정이 없습니다.');
@@ -269,41 +278,41 @@ details.card.set[open]>summary{margin-bottom:8px}
     }
     if (b.pj.length) {
       h += '<h3>공사 자재 입고 예정</h3><ul class="rows">' + b.pj.map(function (x) {
-        return '<li class="row"><div class="rl"><b>' + (x.late ? '<span class="tag bad">납품일 지남</span>' : '') + esc(x.sup) + ' · ' + esc(x.first) + (x.n > 1 ? ' 외 ' + (x.n - 1) + '품목' : '') + '</b>' +
+        return '<li class="row"><div class="rl"><b>' + (x.late ? '<span class="tag bad">납품일 경과</span>' : '') + esc(x.sup) + ' · ' + esc(x.first) + (x.n > 1 ? ' 외 ' + (x.n - 1) + '품목' : '') + '</b>' +
           '<small>' + esc(x.name) + ' (' + esc(x.no) + ') · 발주 ' + esc(x.id) + ' · 납품일 ' + md(x.due) + '</small></div></li>';
       }).join('') + '</ul><a class="link" href="pj.html">공사 프로젝트 열기 →</a>';
     }
     return h + '</section>';
   }
   function dueTag(d) {
-    if (d.d == null) return d.cat ? '<span class="tag">기한 없음</span>' : '<span class="tag new">새 · 중요</span>';
-    if (d.cat === 'meet') return '<span class="tag meet">' + (d.d < 0 ? '지난 일정 · ' : d.d === 0 ? '오늘 ' : d.d === 1 ? '내일 ' : '') + md(d.due) + '</span>';
-    if (d.d < 0) return '<span class="tag bad">기한 ' + (-d.d) + '일 지남</span>';
-    if (d.d === 0) return '<span class="tag bad">오늘까지</span>';
-    if (d.d === 1) return '<span class="tag warn">내일까지</span>';
-    return '<span class="tag warn">' + d.d + '일 남음 · ' + md(d.due) + '까지</span>';
+    if (d.d == null) return d.cat ? '<span class="tag">기한 미지정</span>' : '<span class="tag new">신규 · 중요</span>';
+    if (d.cat === 'meet') return '<span class="tag meet">' + (d.d < 0 ? '경과 일정 · ' : d.d === 0 ? '오늘 ' : d.d === 1 ? '내일 ' : '') + md(d.due) + '</span>';
+    if (d.d < 0) return '<span class="tag bad">기한 ' + (-d.d) + '일 경과</span>';
+    if (d.d === 0) return '<span class="tag bad">오늘 마감</span>';
+    if (d.d === 1) return '<span class="tag warn">내일 마감</span>';
+    return '<span class="tag warn">D-' + d.d + ' · ' + md(d.due) + ' 마감</span>';
   }
   function docHtml(b) {
-    if (!b.docs.length) return none('doc', '공문 할 일', '지금 해야 할 공문 · 메일이 없습니다.' + pickLine(b));
+    if (!b.docs.length) return none('doc', '공문 처리 대기', '처리 대기 중인 공문 · 메일이 없습니다.' + pickLine(b));
     var n = b.docs.length, L = S.docAll ? b.docs : b.docs.slice(0, 6);
-    var h = '<section class="card doc" id="sDoc"><h2>공문 할 일 <small>' + n + '건 · 급한 것부터 (메일 포함)</small></h2><ul class="dcl">';
+    var h = '<section class="card doc" id="sDoc"><h2>공문 처리 대기 <small>' + n + '건 · 기한순 (메일 포함)</small></h2><ul class="dcl">';
     L.forEach(function (d) {
-      var sm = String(d.sum || ''), todo = /^할 일:\s*/.test(sm) ? sm.replace(/^할 일:\s*/, '') : '';
+      var sm = String(d.sum || ''), todo = /^할 일:\s*/.test(sm) ? bizTxt(sm.replace(/^할 일:\s*/, '')) : '';
       h += '<li class="dc' + (d.cat === 'meet' ? ' meet' : d.d != null && d.d < 0 ? ' late' : d.d != null && d.d <= 3 ? ' soon' : '') + '"><div class="dct">' + dueTag(d) + '<span class="kd">' + esc(KIND_T[d.cat] || d.kind || '공문') + '</span></div>' +
-        '<b class="dtt">' + esc(cleanTitle(d.title)) + '</b>' + (todo ? '<p class="ddo"><b>할 일</b>' + esc(todo) + '</p>' : sm ? '<p class="dsum">' + esc(sm) + '</p>' : '') +
-        '<p class="dwho"><span>' + esc(d.from || '') + '</span>' + (S.mode === 'admin' ? '<a class="link" href="docs.html#' + encodeURIComponent(d.id) + '">자세히 · 처리 완료 →</a>' : '') + '</p></li>';
+        '<b class="dtt">' + esc(cleanTitle(d.title)) + '</b>' + (todo ? '<p class="ddo"><b>조치</b>' + esc(todo) + '</p>' : sm ? '<p class="dsum">' + esc(sm) + '</p>' : '') +
+        '<p class="dwho"><span>' + esc(d.from || '') + '</span>' + (S.mode === 'admin' ? '<a class="link" href="docs.html#' + encodeURIComponent(d.id) + '">상세 · 처리 →</a>' : '') + '</p></li>';
     });
-    return h + '</ul>' + (n > L.length ? '<button type="button" class="btn ghost wide" data-act="docall">나머지 ' + (n - L.length) + '건 더 보기</button>' : '') + pickLine(b) +
+    return h + '</ul>' + (n > L.length ? '<button type="button" class="btn ghost wide" data-act="docall">' + (n - L.length) + '건 더 보기</button>' : '') + pickLine(b) +
       (S.mode === 'admin' ? '<a class="link" href="docs.html">공문함 열기 →</a>' : '') + '</section>';
   }
   function pickLine(b) {   // 교육 · 행사 · 지원사업 신청 · 참가할지 정할 것 (서버 v56부터)
     var p = b.pick;
-    return p && p.n ? '<p class="hint" id="pickLine">이 밖에 신청 · 참가할지 정할 교육 · 행사 · 지원사업 안내 ' + p.n + '건' + (p.soon ? '(마감 3일 안 ' + p.soon + '건)' : '') + ' — 공문함 ‘해야 할 일’ 아래에 있습니다.</p>' : '';
+    return p && p.n ? '<p class="hint" id="pickLine">별도: 신청 · 참가 검토 대상(교육 · 행사 · 지원사업) ' + p.n + '건' + (p.soon ? '(3일 이내 마감 ' + p.soon + '건)' : '') + ' — 공문함 ‘처리 대기’ 하단에서 확인</p>' : '';
   }
   function none(k, t, msg) { return '<section class="card ' + k + '" id="' + ({ out: 'sOut', 'in': 'sIn', doc: 'sDoc' }[k] || '') + '"><h2>' + (k === 'doc' ? '' : '오늘 ') + t + '</h2><p class="empty">' + msg + '</p></section>'; }
 
   /* 알림 설정 (관리자) */
-  var DEV_TXT = { on: ['받는 중', 'on'], off: ['안 받음', 'off'], denied: ['브라우저에서 알림이 막혀 있음', 'bad'], 'ios-install': ['홈 화면 앱에서만 받을 수 있음', 'off'], unsupported: ['이 브라우저는 알림을 지원하지 않음', 'bad'] };
+  var DEV_TXT = { on: ['수신 중', 'on'], off: ['미등록', 'off'], denied: ['브라우저 알림 차단', 'bad'], 'ios-install': ['홈 화면 앱에서만 수신 가능', 'off'], unsupported: ['알림 미지원 브라우저', 'bad'] };
   function setHtml() {
     var N = S.noti || {}, dv = S.dev || { state: '' }, busy = !!S.busy;
     var me = dv.cfg && dv.cfg.id ? dv.cfg.id : '';
@@ -311,8 +320,8 @@ details.card.set[open]>summary{margin-bottom:8px}
     var t = DEV_TXT[dv.state] || ['확인 중…', 'off'];
     var h = '<details class="card set" id="sSet"' + (S.setOpen ? ' open' : '') + '><summary>아침 알림 설정 <small>' + (N.on === true ? '매일 ' + esc(N.at) + ' 켜짐' : N.on === false ? '꺼짐' : '권한 승인 전') + ' · 이 기기: ' + t[0] + '</small></summary>';
     h += '<div class="devbox"><p>이 기기' + (P ? ' (' + esc(P.devName()) + ')' : '') + ': <span class="st ' + t[1] + '" id="devSt">' + t[0] + '</span></p>';
-    if (dv.state === 'on') h += '<div class="tools"><button type="button" class="btn sm" data-act="test-me"' + (busy ? ' disabled' : '') + '>이 기기로 시험 알림</button><button type="button" class="btn danger sm" data-act="off-me"' + (busy ? ' disabled' : '') + '>이 기기 알림 끄기</button></div>';
-    else if (dv.state === 'off') h += '<div class="tools"><button type="button" class="btn" data-act="on-me"' + (busy ? ' disabled' : '') + '>' + (S.busy === 'on-me' ? '등록 중…' : '이 기기에서 알림 받기') + '</button></div><p class="hint">누르면 브라우저가 알림 허용을 묻습니다. \'허용\'을 눌러 주십시오.</p>';
+    if (dv.state === 'on') h += '<div class="tools"><button type="button" class="btn sm" data-act="test-me"' + (busy ? ' disabled' : '') + '>이 기기로 시험 알림</button><button type="button" class="btn danger sm" data-act="off-me"' + (busy ? ' disabled' : '') + '>이 기기 알림 해제</button></div>';
+    else if (dv.state === 'off') h += '<div class="tools"><button type="button" class="btn" data-act="on-me"' + (busy ? ' disabled' : '') + '>' + (S.busy === 'on-me' ? '등록 중…' : '이 기기 알림 등록') + '</button></div><p class="hint">누르면 브라우저가 알림 허용을 묻습니다. \'허용\'을 눌러 주십시오.</p>';
     else if (dv.state === 'ios-install') h += '<p class="hint">' + esc(ERR['ios-install']) + '</p>';
     else if (dv.state === 'denied') h += '<p class="hint">' + esc(ERR.denied) + '</p>';
     else if (dv.state === 'unsupported') h += '<p class="hint">' + esc(ERR.unsupported) + '</p>';
@@ -323,26 +332,26 @@ details.card.set[open]>summary{margin-bottom:8px}
     h += '<div class="setrow"><label for="atSel"><b>매일 알림 시각</b></label><select id="atSel"' + (busy ? ' disabled' : '') + '>' + opts + '</select>' +
       (N.on === false ? '<button type="button" class="btn sm" data-act="trig-on"' + (busy ? ' disabled' : '') + '>매일 알림 켜기</button>' : N.on === true ? '<button type="button" class="btn ghost sm" data-act="trig-off"' + (busy ? ' disabled' : '') + '>매일 알림 끄기</button>' : '') + '</div>';
     var L = N.last;
-    h += '<p class="hint">' + (L && L.at ? '마지막 알림: ' + esc(dtx(L.at)) + ' · 보냄 ' + L.ok + (L.fail ? ' · 보내지 못함 ' + L.fail : '') + (L.gone ? ' · 등록 끝남 ' + L.gone : '') : '아직 보낸 아침 알림이 없습니다.') +
-      ' 정한 시각부터 ' + (N.every || 5) + '분 안에 보냅니다(서버가 ' + (N.every || 5) + '분마다 확인).</p>';
+    h += '<p class="hint">' + (L && L.at ? '최종 알림: ' + esc(dtx(L.at)) + ' · 발송 ' + L.ok + (L.fail ? ' · 발송 실패 ' + L.fail : '') + (L.gone ? ' · 등록 만료 ' + L.gone : '') : '아침 알림 발송 이력이 없습니다.') +
+      ' 설정 시각부터 ' + (N.every || 5) + '분 이내 발송(서버 ' + (N.every || 5) + '분 주기 확인).</p>';
     var D = N.devices || [];
     h += '<h3>등록된 기기 ' + D.length + '대</h3>';
-    if (!D.length) h += '<p class="empty">아직 등록된 기기가 없습니다. 알림을 받을 휴대폰 · 컴퓨터마다 이 화면을 열어 \'이 기기에서 알림 받기\'를 한 번 눌러 주십시오.</p>';
+    if (!D.length) h += '<p class="empty">등록된 기기가 없습니다. 알림을 수신할 휴대폰 · 컴퓨터에서 각각 이 화면을 열어 \'이 기기 알림 등록\'을 누르십시오.</p>';
     else {
-      h += '<table class="devs"><thead><tr><th>기기</th><th>상태 · 마지막 결과</th><th></th></tr></thead><tbody>' + D.map(function (d) {
-        var st = d[3] === '받는 중' ? '<span class="tag ok">받는 중</span>' : '<span class="tag ' + (d[3] === '만료' ? 'warn' : 'bad') + '">' + esc(d[3]) + '</span>';
+      h += '<table class="devs"><thead><tr><th>기기</th><th>상태 · 최종 결과</th><th></th></tr></thead><tbody>' + D.map(function (d) {
+        var st = d[3] === '받는 중' ? '<span class="tag ok">수신 중</span>' : '<span class="tag ' + (d[3] === '만료' ? 'warn' : 'bad') + '">' + esc(d[3]) + '</span>';
         return '<tr><td><b>' + esc(d[1]) + (d[0] === me ? ' (이 기기)' : '') + '</b><br><small class="hint" style="margin:0">등록 ' + esc(md(d[2])) + '</small></td>' +
-          '<td>' + st + '<br><small>' + esc(d[4] ? dtx(d[4]) + ' ' + d[5] : '아직 보낸 알림 없음') + '</small></td>' +
+          '<td>' + st + '<br><small>' + esc(d[4] ? dtx(d[4]) + ' ' + d[5] : '발송 이력 없음') + '</small></td>' +
           '<td class="acts"><button type="button" class="btn ghost sm" data-act="test" data-id="' + esc(d[0]) + '"' + (busy ? ' disabled' : '') + '>시험</button> ' +
-          '<button type="button" class="btn danger sm" data-act="del" data-id="' + esc(d[0]) + '"' + (busy ? ' disabled' : '') + '>지우기</button></td></tr>';
+          '<button type="button" class="btn danger sm" data-act="del" data-id="' + esc(d[0]) + '"' + (busy ? ' disabled' : '') + '>삭제</button></td></tr>';
       }).join('') + '</tbody></table>';
     }
-    h += '<p class="hint">휴대폰: 안드로이드는 크롬, 아이폰은 사파리에서 \'홈 화면에 추가\'한 NMC 앱으로 등록합니다. 컴퓨터: 크롬 · 엣지에서 등록하며, 브라우저가 켜져 있거나 백그라운드 실행이 켜져 있어야 알림이 뜹니다. 알림을 누르면 이 화면이 열립니다.</p>';
-    h += '<p class="hint">알림 신호에는 내용이 없고, 기기가 신호를 받으면 이 서버에서 오늘 할 일을 받아 띄웁니다(외부로 회사 자료를 보내지 않음).</p>';
+    h += '<p class="hint">휴대폰: 안드로이드는 크롬, 아이폰은 사파리에서 \'홈 화면에 추가\'한 NMC 앱으로 등록합니다. 컴퓨터: 크롬 · 엣지에서 등록하며, 브라우저 실행 또는 백그라운드 실행 상태에서 알림이 표시됩니다. 알림을 누르면 이 화면이 열립니다.</p>';
+    h += '<p class="hint">알림 신호에는 내용이 포함되지 않으며, 기기가 신호 수신 시 이 서버에서 오늘 할 일을 조회해 표시합니다(회사 자료 외부 전송 없음).</p>';
     return h + '</details>';
   }
   function loginHtml() {
-    return '<section class="login" aria-labelledby="lh"><h2 id="lh">관리자 로그인</h2><p>오늘 출고 · 입고 · 처리할 공문과 아침 알림 설정을 봅니다.</p>' +
+    return '<section class="login" aria-labelledby="lh"><h2 id="lh">관리자 로그인</h2><p>오늘 출고 · 입고 · 처리 대기 공문과 아침 알림 설정을 확인합니다.</p>' +
       '<form id="loginForm" autocomplete="off"><label for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
       '<p class="err" role="alert">' + esc(S.loginErr) + '</p></section>';
   }
@@ -353,7 +362,7 @@ details.card.set[open]>summary{margin-bottom:8px}
     return p.then(function (d) { S.busy = ''; if (ok) ok(d); render(); return d; }, function (e) { S.busy = ''; render(); toast(errText(e)); });
   }
   function reload(quiet) {
-    if (S.mode === 'admin') return call('apiBrief', []).then(function (d) { S.brief = d.brief; S.noti = d.noti; S.at = Date.now(); render(); devState(); if (!quiet) toast('새로 받았습니다.'); }, function (e) { toast(errText(e)); });
+    if (S.mode === 'admin') return call('apiBrief', []).then(function (d) { S.brief = d.brief; S.noti = d.noti; S.at = Date.now(); render(); devState(); if (!quiet) toast('최신 정보로 갱신했습니다.'); }, function (e) { toast(errText(e)); });
     S.mode = ''; start();
   }
   root.addEventListener('toggle', function (ev) { if (ev.target && ev.target.id === 'sSet') S.setOpen = ev.target.open; }, true);
@@ -370,26 +379,26 @@ details.card.set[open]>summary{margin-bottom:8px}
     if (act === 'retry') { S.mode = ''; start(); return; }
     if (act === 'docall') { S.docAll = true; render(); return; }
     if (act === 'on-me') {
-      busy('on-me', P.enable(call, API), function (d) { if (d && d.data) S.noti = d.data; toast('이 기기에서 매일 아침 알림을 받습니다. \'이 기기로 시험 알림\'으로 확인해 보십시오.'); })
+      busy('on-me', P.enable(call, API), function (d) { if (d && d.data) S.noti = d.data; toast('이 기기에 매일 아침 알림을 등록했습니다. \'이 기기로 시험 알림\'으로 확인하십시오.'); })
         .then(function () { devState(); });   // 허용 · 거절 · 닫기 뒤 이 기기 상태를 다시 봄
       return;
     }
     if (act === 'off-me') {
-      if (!window.confirm('이 기기에서 아침 알림을 끄시겠습니까? 다른 기기는 그대로 받습니다.')) return;
-      busy('off-me', P.disable(call).then(function () { return call('apiNoti', []); }), function (d) { S.noti = d; toast('이 기기 알림을 껐습니다.'); devState(); });
+      if (!window.confirm('이 기기의 아침 알림을 해제하시겠습니까? 다른 기기는 계속 수신합니다.')) return;
+      busy('off-me', P.disable(call).then(function () { return call('apiNoti', []); }), function (d) { S.noti = d; toast('이 기기 알림을 해제했습니다.'); devState(); });
       return;
     }
     if (act === 'test-me' || act === 'test') {
       var tid = act === 'test' ? id : (S.dev && S.dev.cfg && S.dev.cfg.id);
       if (!tid) return;
-      busy(act, call('apiNotiTest', [tid]), function (d) { S.noti = d; toast(d.sent && d.sent.ok ? '시험 알림을 보냈습니다. 몇 초 안에 그 기기에 뜹니다.' : '보내지 못했습니다. 기기 목록의 결과를 확인해 주십시오.'); });
+      busy(act, call('apiNotiTest', [tid]), function (d) { S.noti = d; toast(d.sent && d.sent.ok ? '시험 알림을 발송했습니다. 수 초 내 해당 기기에 표시됩니다.' : '발송 실패. 기기 목록의 결과를 확인하십시오.'); });
       return;
     }
     if (act === 'del') {
-      if (!window.confirm('이 기기를 목록에서 지우시겠습니까? 그 기기는 더 이상 알림을 받지 않습니다.')) return;
+      if (!window.confirm('이 기기를 목록에서 삭제하시겠습니까? 해당 기기는 더 이상 알림을 수신하지 않습니다.')) return;
       var mine = S.dev && S.dev.cfg && S.dev.cfg.id === id;
       busy('del', call('apiNotiDel', [id]).then(function (d) { return mine && P ? P.disable(null).then(function () { return d; }) : d; }),
-        function (d) { S.noti = d; toast(mine ? '이 기기를 지웠습니다. 이 기기는 더 이상 알림을 받지 않습니다.' : '지웠습니다.'); devState(); });
+        function (d) { S.noti = d; toast(mine ? '이 기기를 삭제했습니다. 이 기기는 더 이상 알림을 수신하지 않습니다.' : '삭제했습니다.'); devState(); });
       return;
     }
     if (act === 'trig-on' || act === 'trig-off') {
@@ -399,7 +408,7 @@ details.card.set[open]>summary{margin-bottom:8px}
   root.addEventListener('change', function (ev) {
     if (ev.target.id !== 'atSel') return;
     var v = ev.target.value;
-    busy('at', call('apiNotiSet', [{ at: v }]), function (d) { S.noti = d; toast('매일 ' + v + '에 알림을 보냅니다.'); });
+    busy('at', call('apiNotiSet', [{ at: v }]), function (d) { S.noti = d; toast('매일 ' + v + '에 알림을 발송합니다.'); });
   });
   root.addEventListener('submit', function (ev) {
     if (ev.target.id !== 'loginForm') return;

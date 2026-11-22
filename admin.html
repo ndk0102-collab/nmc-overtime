@@ -1149,7 +1149,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     var before = P.attOf(mine, e, cfg, hourly, S.data.holidays || [], all, S.month.ym);
     var after = P.attOf(mine.concat([rec]), e, cfg, hourly, S.data.holidays || [], all, S.month.ym);
     var diff = after.amount - before.amount;
-    if (!(e.base > 0)) return ['', isSalaried(rec.name) ? '월급제 직원이라 월급(기본급)을 넣기 전에는 뺄 돈을 셈하지 않습니다. 기록은 남고 연차 계산에는 들어갑니다.' : '이 직원은 기본급이 0원이라 뺄 돈이 없습니다.'];
+    if (!(e.base > 0)) return ['', isSalaried(rec.name) ? '월급제 직원은 기본급 입력 전에는 차감액을 계산하지 않습니다. 기록은 유지되며 연차 계산에는 반영됩니다.' : '이 직원은 기본급이 0원이라 차감액이 없습니다.'];
     var why = k === 'min' ? P.minTxt(rec.min) : rec.kind === '결근' ? (after.weeks > before.weeks ? '그날 8시간 + 그 주 주휴 8시간' : '그날 8시간 (그 주 주휴는 이미 빠짐)') : '그날 8시간';
     return ['minus', '저장하면 이번 달 월급(세전)에서 <b>' + fmt(diff) + '원</b>이 더 빠집니다 — ' + esc(why) + ' × 시간당 ' + P.fmtRate(after.rate) + '원' +
       (before.amount ? ' (이 직원 이번 달 근태 공제 ' + fmt(before.amount) + '원 → ' + fmt(after.amount) + '원)' : '') + '. 4대보험 · 소득세는 줄어든 급여로 다시 셈합니다.'];
@@ -1216,7 +1216,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
       '<p class="attprev" id="attPrev" aria-live="polite"></p>' +
       '</form>' +
       '<h3 class="h3">이번 달 근태 공제 (직원별)</h3>' +
-      (sumRows.length ? '<div class="scroll"><table class="grid" id="attSum"><thead><tr><th>직원</th><th class="n">결근</th><th class="n">무급 휴가</th><th class="n">지각·조퇴</th><th class="n">연차 · 반차</th><th class="n">월급에서 뺀 돈</th><th>계산</th></tr></thead><tbody>' +
+      (sumRows.length ? '<div class="scroll"><table class="grid" id="attSum"><thead><tr><th>직원</th><th class="n">결근</th><th class="n">무급 휴가</th><th class="n">지각·조퇴</th><th class="n">연차 · 반차</th><th class="n">급여 차감액</th><th>계산</th></tr></thead><tbody>' +
         sumRows.map(function (r) {
           var a = r.att, lv = a.paid.length + a.half.length * 0.5;
           return '<tr><td class="name"><button class="linkish" data-slip="' + esc(r.name) + '">' + esc(r.name) + '</button></td>' +
@@ -1280,7 +1280,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
             '<td style="white-space:nowrap"><button class="btn small" data-editadj="' + esc(x.id) + '">수정</button> <button class="btn small danger" data-deladj="' + esc(x.id) + '">삭제</button></td></tr>';
         }).join('') + '</tbody></table></div>' : '<p class="muted">당월 등록된 추가·공제 항목이 없습니다.</p>') +
       '<ul class="note"><li><b>지급 (세금 붙음)</b>: 상여금·추가 수당 — 4대보험·소득세 계산에 들어갑니다.</li>' +
-      '<li><b>지급 (비과세)</b>: 실비 등 세금이 없는 돈.</li>' +
+      '<li><b>지급 (비과세)</b>: 실비 등 비과세 금액.</li>' +
       '<li><b>차감 (결근 등, 세전)</b>: 결근·중도 입사처럼 급여 자체가 감소하는 금액 — 세금도 함께 감소합니다.</li>' +
       '<li><b>공제 (가불 등, 세금 후)</b>: 가불 상환처럼 세금 계산 뒤에 빼는 금액.</li></ul>';
   }

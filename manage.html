@@ -71,7 +71,7 @@ button,input{font:inherit;color:inherit}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
 @media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
-  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 돈 · 손익은 잔업 바로 아래 */
+  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 재무는 잔업 바로 아래 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -100,7 +100,7 @@ button,input{font:inherit;color:inherit}
   <p class="wait" id="wait">확인 중…</p>
   <section class="login" id="login" hidden aria-labelledby="lh">
     <h2 id="lh">관리자 로그인</h2>
-    <p>관리자 비밀번호를 입력하면 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면이 모두 열립니다.</p>
+    <p>관리자 비밀번호 입력 시 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면을 모두 이용할 수 있습니다.</p>
     <form id="loginForm" autocomplete="off">
       <label for="pw" style="position:absolute;left:-9999px">비밀번호</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">
@@ -114,10 +114,10 @@ button,input{font:inherit;color:inherit}
       <section class="sect dc" aria-labelledby="h-dc">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><h2 id="h-dc">오늘 · 공문</h2></div>
         <div class="gos">
-          <a class="go" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small id="tdSum">오늘 출고 · 입고 · 공문 할 일 · 매일 아침 휴대폰 · 컴퓨터 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-          <a class="go" href="docs.html"><span class="t"><b>공문함</b><small id="dcSum">메일 · 팩스 공문 — 해야 할 일 · 세금계산서 · 발주서 · 찾기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small id="tdSum">오늘 출고 · 입고 · 공문 처리 대기 · 매일 아침 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go" href="docs.html"><span class="t"><b>공문함</b><small id="dcSum">메일 · 팩스 공문 — 처리 대기 · 세금계산서 · 발주서 · 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         </div>
-        <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에서 매일 아침 알림을 받으시겠습니까?</span><button type="button" id="pushBtn">이 기기에서 알림 받기</button></p>
+        <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에 매일 아침 알림을 등록하시겠습니까?</span><button type="button" id="pushBtn">이 기기 알림 등록</button></p>
       </section>
       <section class="sect ot" aria-labelledby="h-ot">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h2 id="h-ot">잔업</h2></div>
@@ -127,28 +127,28 @@ button,input{font:inherit;color:inherit}
       <section class="sect st" aria-labelledby="h-st">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span><h2 id="h-st">재고</h2></div>
         <a class="go" href="stock.html?view=out"><span class="t"><b>출고</b><small>발주서 업로드 · 출고 예정 · 물표 · 거래처 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b><small>생산한 칼라칩 · SBR 고무분말 · 분철을 재고에 넣기 (색상별 kg)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b><small>생산품 반입 등록 — 칼라칩 · SBR 고무분말 · 분철 (색상별 kg)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=recv"><span class="t"><b>입고</b><small>폐타이어 · 원자재 · 부자재 (금액은 매입에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="stock.html?view=all"><span class="t"><b>전체관리</b><small>현황 · 분석 · 현재고 · 예정 · 기록 · 매출·매입 합계</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
 
       <section class="sect cs" aria-labelledby="h-cs">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span><h2 id="h-cs">공사</h2></div>
-        <a class="go" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료하면 매출에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료 시 매출 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="sketchbook/"><span class="t"><b>도면</b><small>도면 기반 바닥 색상 설계 · 면적 산출표 · 3D 놀이터</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색을 포대 비율로 섞어 바닥 미리 보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색상 포대 비율 배합 · 바닥 미리보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
 
       <section class="sect pl" aria-labelledby="h-pl">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h2 id="h-pl">돈 · 손익</h2></div>
+        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h2 id="h-pl">재무</h2></div>
         <a class="go" href="ledger.html?view=sales"><span class="t"><b>매출</b><small>일별 · 월별 · 분기별 · 반기별 · 연간 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 뒤 남는 돈</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 후 잉여금</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
     </div>
     <p class="legend"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>한 번 로그인하면 위 화면이 모두 바로 열립니다. 창을 닫거나 유효 시간이 지나면 다시 로그인해야 합니다.</span></p>
+      <span>1회 로그인으로 위 화면을 모두 이용할 수 있습니다. 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
   </div>
 </main>
 <p class="toast" id="toast" role="status" hidden></p>
@@ -160,8 +160,8 @@ button,input{font:inherit;color:inherit}
   var KEY = 'nmc_pay_token';   // 모든 관리자 화면이 같이 쓰는 열쇠
   var $ = function (id) { return document.getElementById(id); };
   var waitEl = $('wait'), loginEl = $('login'), menuEl = $('menu'), outBtn = $('outBtn'), toastEl = $('toast');
-  var ERR = { bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.', net: '인터넷 연결을 확인해 주십시오.',
-    expired: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.' };
+  var ERR = { bad_pw: '비밀번호가 일치하지 않습니다.', locked: '비밀번호 입력 오류 횟수 초과로 15분간 잠금되었습니다.', net: '인터넷 연결을 확인해 주십시오.',
+    expired: '로그인 유효 시간이 만료되었습니다. 비밀번호를 다시 입력해 주십시오.' };
 
   function getToken() { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
   function setToken(t) { try { if (t) sessionStorage.setItem(KEY, t); else sessionStorage.removeItem(KEY); } catch (e) {} }
@@ -209,8 +209,8 @@ button,input{font:inherit;color:inherit}
       var late = b.docs.filter(function (x) { return x.d != null && x.d < 0; }).length, nin = (b.made || []).length + (b.pj || []).length;
       var n = function (v, u) { return '<b>' + v + '</b>' + u; };
       var td = $('tdSum'), dc = $('dcSum');
-      if (td) { td.className = 'live'; td.innerHTML = '오늘 출고 ' + n(b.out.length, '곳') + ' · 입고 ' + n(nin, '건') + ' · 공문 할 일 ' + n(b.docs.length, '건') + (b.late ? ' · <b class="r">지난 출고예정 ' + b.late + '건</b>' : ''); }
-      if (dc) { dc.className = 'live'; dc.innerHTML = '해야 할 일 ' + n(b.docs.length, '건') + (late ? ' · <b class="r">기한 지남 ' + late + '건</b>' : '') + (b.pick && b.pick.n ? ' · 신청 · 참가 정할 것 ' + b.pick.n + '건' : ''); }
+      if (td) { td.className = 'live'; td.innerHTML = '오늘 출고 ' + n(b.out.length, '곳') + ' · 입고 ' + n(nin, '건') + ' · 공문 처리 대기 ' + n(b.docs.length, '건') + (b.late ? ' · <b class="r">미처리 출고예정 ' + b.late + '건</b>' : ''); }
+      if (dc) { dc.className = 'live'; dc.innerHTML = '처리 대기 ' + n(b.docs.length, '건') + (late ? ' · <b class="r">기한 경과 ' + late + '건</b>' : '') + (b.pick && b.pick.n ? ' · 신청 · 참가 검토 ' + b.pick.n + '건' : ''); }
     }, function () { /* 숫자는 보조 — 못 받으면 설명 그대로 */ });
   }
   function pushCheck() {
@@ -223,11 +223,11 @@ button,input{font:inherit;color:inherit}
     b.disabled = true; b.textContent = '등록 중…';
     window.NMCPush.enable(call, API).then(function () {
       $('pushLine').hidden = true;
-      say('이 기기에서 매일 아침 알림을 받습니다');
+      say('이 기기에 매일 아침 알림을 등록했습니다');
     }, function (e) {
-      b.disabled = false; b.textContent = '이 기기에서 알림 받기';
+      b.disabled = false; b.textContent = '이 기기 알림 등록';
       var c = String((e && e.message) || '');
-      say(c === 'denied' ? '브라우저에서 알림이 막혀 있습니다 (사이트 설정 → 알림 → 허용)' : c === 'dismissed' ? '알림 허용 창에서 허용을 눌러 주십시오' : '등록하지 못했습니다 (' + c + ')');
+      say(c === 'denied' ? '브라우저 알림 차단 상태입니다 (사이트 설정 → 알림 → 허용)' : c === 'dismissed' ? '알림 허용 창에서 허용을 누르십시오' : '등록 실패 (' + c + ')');
     });
   });
   $('loginForm').addEventListener('submit', function (ev) {
