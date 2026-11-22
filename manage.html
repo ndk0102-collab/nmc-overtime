@@ -65,11 +65,13 @@ button,input{font:inherit;color:inherit}
 .go b{font-size:18px;font-weight:800;line-height:1.3}
 .go small{font-size:13.5px;font-weight:600;line-height:1.4;color:var(--muted)}
 .go .chev{flex-shrink:0;color:var(--muted)}
-.go.new b::after{content:'신규';margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--gold);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;vertical-align:3px}
+.go small.live{color:var(--ink2);font-weight:700}
+.go small.live b{font-size:inherit;font-weight:800;color:var(--dc)}
+.go small.live b.r{color:#B42318}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
 @media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
-  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 손익계산서는 잔업 바로 아래 */
+  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 돈 · 손익은 잔업 바로 아래 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -112,8 +114,8 @@ button,input{font:inherit;color:inherit}
       <section class="sect dc" aria-labelledby="h-dc">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><h2 id="h-dc">오늘 · 공문</h2></div>
         <div class="gos">
-          <a class="go new" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small>오늘 출고 · 입고 · 처리할 공문 · 매일 아침 휴대폰 · 컴퓨터 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-          <a class="go new" href="docs.html"><span class="t"><b>공문함</b><small>메일 · 팩스 공문 자동 정리 · 기한 · 처리 상태 · 파일 올리기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small id="tdSum">오늘 출고 · 입고 · 공문 할 일 · 매일 아침 휴대폰 · 컴퓨터 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go" href="docs.html"><span class="t"><b>공문함</b><small id="dcSum">메일 · 팩스 공문 — 해야 할 일 · 세금계산서 · 발주서 · 찾기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         </div>
         <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에서 매일 아침 알림을 받으시겠습니까?</span><button type="button" id="pushBtn">이 기기에서 알림 받기</button></p>
       </section>
@@ -125,24 +127,24 @@ button,input{font:inherit;color:inherit}
       <section class="sect st" aria-labelledby="h-st">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span><h2 id="h-st">재고</h2></div>
         <a class="go" href="stock.html?view=out"><span class="t"><b>출고</b><small>발주서 업로드 · 출고 예정 · 물표 · 거래처 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b><small>생산한 칼라칩 · SBR 고무분말 · 분철을 재고에 넣기 (색상별 kg)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="ledger.html?view=recv"><span class="t"><b>입고</b><small>폐타이어 · 원자재 · 부자재 (금액은 매입에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go new" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="ledger.html?view=sales"><span class="t"><b>매출</b><small>일별 · 월별 · 분기별 · 반기별 · 연간 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="stock.html?view=all"><span class="t"><b>전체관리</b><small>현황 · 분석 · 현재고 · 예정 · 기록 · 매출·매입 합계</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
 
       <section class="sect cs" aria-labelledby="h-cs">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span><h2 id="h-cs">공사</h2></div>
-        <a class="go new" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료하면 매출에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료하면 매출에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="sketchbook/"><span class="t"><b>도면</b><small>도면 기반 바닥 색상 설계 · 면적 산출표 · 3D 놀이터</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go new" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색을 포대 비율로 섞어 바닥 미리 보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색을 포대 비율로 섞어 바닥 미리 보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
 
       <section class="sect pl" aria-labelledby="h-pl">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h2 id="h-pl">손익계산서</h2></div>
-        <a class="go" href="pnl.html"><span class="t"><b>손익계산서 조회</b><small>월별 매출 · 원가 · 영업이익</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h2 id="h-pl">돈 · 손익</h2></div>
+        <a class="go" href="ledger.html?view=sales"><span class="t"><b>매출</b><small>일별 · 월별 · 분기별 · 반기별 · 연간 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 뒤 남는 돈</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
     </div>
     <p class="legend"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
@@ -193,12 +195,24 @@ button,input{font:inherit;color:inherit}
     if (!t) { show('login'); return; }
     show('menu');
     post({ action: 'stock.call', fn: 'apiForm', args: [], token: t }).then(function (d) {
-      if (d && d.admin === true) { pushCheck(); return; }
+      if (d && d.admin === true) { pushCheck(); liveSum(); return; }
       setToken(''); show('login', ERR.expired);
     }, function (e) { if (String(e && e.message) !== 'net') { setToken(''); show('login', ERR.expired); } });
   }
   /* 아침 알림 (2026-11-21): 알림을 이미 허용한 브라우저인데 등록이 없으면 묻지 않고 다시 등록, 아직 안 받는 기기면 한 번 누르게 */
   function call(fn, args) { return post({ action: 'stock.call', fn: fn, args: args || [], token: getToken() }); }
+  /* 오늘 숫자 (v56, 2026-11-22 22:10 지시 "우리가 무조건 컨트롤하기 쉽고 알아보기 쉽도록"): 들어오자마자 오늘 출고 · 입고 · 공문 할 일이 몇 건인지 */
+  function liveSum() {
+    call('apiBrief', []).then(function (d) {
+      var b = d && d.brief;
+      if (!b || !Array.isArray(b.docs)) return;
+      var late = b.docs.filter(function (x) { return x.d != null && x.d < 0; }).length, nin = (b.made || []).length + (b.pj || []).length;
+      var n = function (v, u) { return '<b>' + v + '</b>' + u; };
+      var td = $('tdSum'), dc = $('dcSum');
+      if (td) { td.className = 'live'; td.innerHTML = '오늘 출고 ' + n(b.out.length, '곳') + ' · 입고 ' + n(nin, '건') + ' · 공문 할 일 ' + n(b.docs.length, '건') + (b.late ? ' · <b class="r">지난 출고예정 ' + b.late + '건</b>' : ''); }
+      if (dc) { dc.className = 'live'; dc.innerHTML = '해야 할 일 ' + n(b.docs.length, '건') + (late ? ' · <b class="r">기한 지남 ' + late + '건</b>' : '') + (b.pick && b.pick.n ? ' · 신청 · 참가 정할 것 ' + b.pick.n + '건' : ''); }
+    }, function () { /* 숫자는 보조 — 못 받으면 설명 그대로 */ });
+  }
   function pushCheck() {
     var P = window.NMCPush, line = $('pushLine');
     if (!P || !P.supported()) { line.hidden = true; return; }
@@ -221,7 +235,7 @@ button,input{font:inherit;color:inherit}
     var v = $('pw').value;
     if (!v) return;
     var b = loginEl.querySelector('button'); b.disabled = true; b.textContent = '확인 중…';
-    post({ action: 'login', pw: v, dev: devId() }).then(function (r) { setToken(r.token); show('menu'); },
+    post({ action: 'login', pw: v, dev: devId() }).then(function (r) { setToken(r.token); show('menu'); liveSum(); },
       function (e) { var c = String((e && e.message) || ''); show('login', ERR[c] || ('로그인하지 못했습니다 (' + c + ')')); });
   });
   outBtn.addEventListener('click', function () {
