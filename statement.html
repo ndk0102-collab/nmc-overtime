@@ -243,6 +243,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .it td.c{text-align:center}.it td.r{text-align:right;font-variant-numeric:tabular-nums}
 .it td.b{font-weight:700;color:#1B3A6B}
 .it td.nm{font-weight:700}
+.it td.q{font-weight:700}
 .it td.mm{font-size:6.6pt;color:#5B6474;text-align:center}
 .it td.no{color:#8A93A3;text-align:center;font-size:6.8pt}
 .it tfoot td{height:5.2mm;background:#E4ECF8;border-top:.5mm solid #1B3A6B;font-weight:800;color:#1B3A6B;font-size:7.4pt}
@@ -265,6 +266,53 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .ft i{font-style:normal;margin:0 1.6mm}
 .cp.noamt .mt .am{display:none}
 #print{display:none}
+
+/* 한 장 두 부(반쪽) — 품목 칸을 크게 (2026-11-23 지시 "반쪽으로 하니까 품명하고 이걸 극대화시켜라. 아래 전달사항은 없어도 되고 …
+   품명 들어가는 그 칸을 좀 더 확보 … 우리 주소 상대편 주소는 좀 줄여도 된다"): 머리 · 공급자 · 공급받는자 칸을 줄이고(3줄),
+   전달사항 칸을 없애고 인수자 확인은 합계금액 줄 오른쪽으로, 남은 높이를 품목 표(줄 높이 · 글자)와 품명 칸 폭에 씀 */
+.cp.h{padding:6mm 11mm 4mm}
+.cp.h .hd{height:13.5mm;padding-bottom:1.2mm;border-bottom-width:.5mm}
+.cp.h .hd .lgo{height:12mm}
+.cp.h .tt b{font-size:15pt}
+.cp.h .tt i{font-size:5pt;margin:.4mm -.36em .7mm 0}
+.cp.h .tt .bd{font-size:6.4pt;padding:.3mm 2.2mm}
+.cp.h .mt .am{display:none}
+.cp.h .mt p{font-size:8.8pt;margin-bottom:.9mm}
+.cp.h .mt p span{font-size:6.6pt}
+.cp.h .pt{gap:4mm;margin-top:2mm}
+.pb.pc th{width:12mm;height:4.3mm;font-size:6.2pt;letter-spacing:0}
+.pb.pc th.vt{width:5.4mm;padding:0;background:#1B3A6B;color:#fff;font-size:6.6pt;font-weight:800;line-height:1.08;white-space:normal;border-top:0}
+.pb.pc th.vt span{display:block;width:1.05em;margin:0 auto;word-break:break-all;text-align:center}
+.pb.pc td{height:4.3mm;font-size:7.2pt}
+.pb.pc td.b{font-size:8.6pt}
+.pb.pc td small{margin-left:1.8mm;font-size:6.4pt;font-weight:500;color:#5B6474}
+.pb.pc td.ad{font-size:6.3pt;white-space:nowrap;line-height:1.25}
+.pb.pc td.sc{width:14.4mm;padding:0;position:relative;overflow:visible}
+.pb.pc td.sc i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:6.8pt;color:#8A93A3}
+.pb.pc td.sc .sl{position:absolute;left:50%;top:50%;width:12.4mm;height:12.4mm;max-width:none;transform:translate(-50%,-50%);mix-blend-mode:multiply;pointer-events:none}
+.cp.h .si{margin-top:1.8mm;height:6.2mm}
+.cp.h .si span{width:17.4mm;font-size:6.8pt}
+.cp.h .si b{font-size:9.4pt}
+.cp.h table.it{margin-top:2.2mm}
+.cp.h .it thead th{height:6mm;font-size:7.6pt}
+.cp.h .it td{padding:0 1.6mm;font-size:10pt}
+.cp.h .it td.nm{font-size:11.2pt}
+.cp.h .it td.c{font-size:8.8pt}
+.cp.h .it td.r{padding:0 1.2mm;font-size:9.4pt}
+.cp.h .it td.q{font-size:10pt}
+.cp.h .it td.no{font-size:8pt}
+.cp.h .it td.mm{font-size:7.4pt}
+.cp.h .it tfoot td{height:6.8mm;font-size:9pt}
+.cp.h .it tfoot td.r{font-size:8.6pt}
+.cp.h .bt{display:flex;align-items:stretch;gap:3mm;margin-top:2mm}
+.cp.h .sumbar{flex:1;min-width:0;height:9.4mm}
+.cp.h .sumbar span{width:20mm;font-size:8.2pt}
+.cp.h .sumbar em{font-size:8.4pt}
+.cp.h .sumbar b{font-size:14pt}
+.cp.h .rcv{width:46mm;flex-shrink:0;margin-left:auto;display:flex;align-items:center;height:9.4mm;border:.25mm solid #9FB0C9}
+.cp.h .rcv span{width:14mm;flex-shrink:0;height:100%;display:flex;align-items:center;justify-content:center;background:#EDF2FA;color:#1B3A6B;font-size:6.8pt;font-weight:800}
+.cp.h .rcv em{margin-left:auto;padding-right:2.6mm;font-style:normal;font-size:7.4pt;color:#8A93A3}
+.cp.h .ft{padding-top:1mm;font-size:6.4pt}
 
 /* 한 부씩 크게 (품목 8줄부터, 2026-11-21): A4 한 장에 한 부 · 칸 20줄 · 글자와 줄 높이를 키움 */
 .pg.f .cp,.pg.f .cp.b{top:0;height:297mm;padding:13mm 14mm 10mm}
@@ -765,7 +813,7 @@ body.pvon{overflow:hidden}
      각각 A4 한 장 (칸 20줄 · 글자와 줄 높이를 키움). 20줄이 넘으면 그 부가 다음 장으로 이어집니다 (최대 40줄 = 부마다 2장). */
   var HALF_MAX = 7, FULL_ROWS = 20;
   function layoutOf(n) {
-    if (n <= HALF_MAX) return { full: false, per: HALF_MAX, rh: 5.4, k: 1, sheets: 1 };
+    if (n <= HALF_MAX) return { full: false, per: HALF_MAX, rh: 9.8, k: 1, sheets: 1 };   // 2026-11-23: 5.4 → 9.8mm (품목 칸 키움)
     var k = Math.ceil(n / FULL_ROWS);
     return { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k * 2 };
   }
@@ -788,6 +836,16 @@ body.pvon{overflow:hidden}
         (r[2] === 'seal' ? (seal ? '<i class="on">(인)<img class="sl" src="' + seal + '" alt=""></i>' : '<i>(인)</i>') : '') + '</td></tr>';
     }).join('') + '</table></div>';
   }
+  /** 반쪽용 공급자 · 공급받는자 3줄: 상호(대표) · 등록번호(전화) · 주소 — 세로 제목 칸 (2026-11-23 "주소는 좀 줄여도 된다") */
+  function partyCompact(title, x, seal, sealRow) {
+    var tel = [x.tel ? 'TEL ' + x.tel : '', x.fax ? 'FAX ' + x.fax : ''].filter(Boolean).join(' · ');
+    return '<div class="pb pc"><table>' +
+      '<tr><th class="vt" rowspan="3"><span>' + title + '</span></th><th>상 호</th><td class="b">' + esc(x.name || '') +
+        (x.ceo ? '<small>대표 ' + esc(x.ceo) + '</small>' : '') + '</td>' +
+        (sealRow ? '<td class="sc" rowspan="3"><i>(인)' + (seal ? '<img class="sl" src="' + seal + '" alt="">' : '') + '</i></td>' : '') + '</tr>' +
+      '<tr><th>등록번호</th><td>' + esc(x.biz || '') + (tel ? '<small>' + esc(tel) + '</small>' : '') + '</td></tr>' +
+      '<tr><th>주 소</th><td class="ad">' + esc(x.addr || '') + '</td></tr></table></div>';
+  }
   /** 회사 도장 그림 (서버가 관리자에게만 보냄 · PNG data URL만 받음). 취소한 명세서에는 찍지 않음 */
   function sealSrc(st) {
     var s = S.I && S.I.seal;
@@ -795,18 +853,19 @@ body.pvon{overflow:hidden}
     return typeof s === 'string' && s.length < 400000 && /^data:image\/png;base64,[A-Za-z0-9+\/]+={0,2}$/.test(s) ? s : '';
   }
   function copyHtml(st, co, cu, pl, pi, pn, L, pos) {
-    var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, i, l;
-    var h = '<div class="cp ' + pos + (amt ? '' : ' noamt') + '" style="--rh:' + L.rh + 'mm">';
+    var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, half = !L.full, i, l;
+    var h = '<div class="cp ' + pos + (half ? ' h' : '') + (amt ? '' : ' noamt') + '" style="--rh:' + L.rh + 'mm">';
     h += '<div class="hd"><img class="lgo" src="icons/nmc-logo-print.png" alt="">' +
       '<div class="tt"><b>거래명세표</b><i>TRANSACTION STATEMENT</i><span class="bd ' + pos + '">' + (pos === 't' ? '공급받는자 보관용' : '공급자 보관용') + '</span></div>' +
       '<div class="mt"><p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
       '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + fmt(st.total) + '</b></p></div></div>';
-    h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
+    if (half) h += '<div class="pt">' + partyCompact('공급자', co, sealSrc(st), true) + partyCompact('공급받는자', { name: st.cust, ceo: cu.ceo, biz: cu.biz, addr: cu.addr, tel: cu.tel }, '', false) + '</div>';
+    else h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
       ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]], sealSrc(st)) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
     h += '<div class="si"><span>납품장소</span><b>' + esc(st.site || '') + '</b></div>';
     var cols = L.full ? (amt ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['8mm', '', '30mm', '12mm', '22mm', '34mm'])
-      : (amt ? ['7mm', '', '21mm', '9mm', '16mm', '14mm', '21mm', '18mm', '15mm'] : ['7mm', '', '28mm', '11mm', '20mm', '30mm']);
+      : (amt ? ['6mm', '', '14mm', '10mm', '16mm', '13mm', '21mm', '18mm', '14mm'] : ['6mm', '', '20mm', '11mm', '20mm', '26mm']);   // 2026-11-23 품명 칸 확보 (67 → 76mm · 금액 없음 92 → 105mm)
     h += '<table class="it"><colgroup>' + cols.map(function (w) { return '<col' + (w ? ' style="width:' + w + '"' : '') + '>'; }).join('') + '</colgroup>' +
       '<thead><tr><th>No.</th><th>품명</th><th>규격</th><th>포대</th><th>수량(kg)</th>' + (amt ? '<th>단가</th><th>공급가액</th><th>세액</th>' : '') + '<th>비고</th></tr></thead><tbody>';
     for (i = 0; i < per; i++) {
@@ -814,7 +873,7 @@ body.pvon{overflow:hidden}
       if (!l) { h += '<tr><td></td><td></td><td></td><td></td><td></td>' + (amt ? '<td></td><td></td><td></td>' : '') + '<td></td></tr>'; continue; }
       var q = l.k === 's' ? fmtQ(l.qty) : (l.qty != null && l.qty !== '' ? fmtQ(l.qty) + (l.unit ? ' ' + l.unit : '') : (l.unit || ''));
       h += '<tr><td class="no">' + (base + i + 1) + '</td><td class="nm">' + esc(l.name || pname(l.prod, l.color)) + '</td><td class="c">' + esc(l.spec || '') + '</td>' +
-        '<td class="c">' + esc(bagsOf(l)) + '</td><td class="r">' + esc(q) + '</td>' +
+        '<td class="c">' + esc(bagsOf(l)) + '</td><td class="r q">' + esc(q) + '</td>' +
         (amt ? '<td class="r">' + (l.price == null || l.price === '' ? '' : fmt(l.price)) + '</td><td class="r b">' + (l.supply || l.price != null ? fmt(l.supply) : '') + '</td><td class="r">' + (l.supply || l.price != null ? fmt(l.tax) : '') + '</td>' : '') +
         '<td class="mm">' + esc(l.memo || '') + '</td></tr>';
     }
@@ -828,9 +887,11 @@ body.pvon{overflow:hidden}
     } else h += '<td colspan="' + (amt ? 9 : 6) + '" class="cont">다음 장에 계속 (' + (pi + 1) + '/' + pn + ')</td>';
     h += '</tr></tfoot></table>';
     var memo = [st.memo, co.bank ? '입금 계좌: ' + co.bank : '', co.note || ''].filter(Boolean).join('\n');
-    h += '<div class="bt">' + (amt && last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + numKo(st.total) + '원정</em><small>공급가액 ' + fmt(st.supply) + ' + 세액 ' + fmt(st.tax) + '</small><b>₩' + fmt(st.total) + '</b></div>' : '') +
+    if (half) h += '<div class="bt">' + (amt ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + numKo(st.total) + '원정</em><b>₩' + fmt(st.total) + '</b></div>' : '') +
+      '<div class="rcv"><span>인수자</span><em>(인)</em></div></div>';
+    else h += '<div class="bt">' + (amt && last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + numKo(st.total) + '원정</em><small>공급가액 ' + fmt(st.supply) + ' + 세액 ' + fmt(st.tax) + '</small><b>₩' + fmt(st.total) + '</b></div>' : '') +
       '<div class="lo"><div class="memo"><span class="lb">전달사항</span><p>' + esc(memo) + '</p></div><div class="sign"><span class="lb">인수자 확인</span><p><i></i><em>(인)</em></p></div></div></div>';
-    h += '<div class="ft">' + [co.name, co.addr, co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : '', co.web].filter(Boolean).map(esc).join('<i>·</i>') + '</div>';
+    h += '<div class="ft">' + [co.name, co.addr, co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : '', co.web, half && co.bank ? '입금 계좌 ' + co.bank : ''].filter(Boolean).map(esc).join('<i>·</i>') + '</div>';
     return h + '</div>';
   }
 
@@ -864,7 +925,7 @@ body.pvon{overflow:hidden}
       '<p class="fwarn" id="tNo"' + (T.noPrice ? '' : ' hidden') + '>단가 없는 줄 <b id="tNoN">' + T.noPrice + '</b>개 — 명세서에는 빈칸으로 찍히고, 손익계산서에는 기준 단가(추정)로 계산됩니다.</p>' +
       '<div class="opts"><label class="chk"><input type="checkbox" data-f="vatnone"' + (F.vat === 'none' ? ' checked' : '') + '>부가세 없음 (영세율 · 면세)</label>' +
       '<label class="chk"><input type="checkbox" data-f="noamt"' + (F.amt ? '' : ' checked') + '>단가 · 금액 없이 인쇄 (인수증용)</label></div>' +
-      '<label class="fld" style="margin-top:8px"><span>전달사항 <small>명세서 아래 칸에 찍힘</small></span><textarea class="inp" data-f="memo" maxlength="200" rows="2">' + esc(F.memo) + '</textarea></label></section>';
+      '<label class="fld" style="margin-top:8px"><span>전달사항 <small>품목 8줄 이상(한 부씩 크게)일 때만 아래 칸에 찍힘</small></span><textarea class="inp" data-f="memo" maxlength="200" rows="2">' + esc(F.memo) + '</textarea></label></section>';
     return h;
   }
   function dateNote(d) {
