@@ -72,8 +72,8 @@ button,input{font:inherit;color:inherit}
 .go small.live b.r{color:#B42318}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
-@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
-  .sect.dc,.sect.wk{grid-column:1/-1}.sect.dc .gos,.sect.wk .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 재무는 잔업 바로 아래 */
+@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.sect.pl,.sect.st,.sect.cs{grid-row:3}.sect.pl{grid-column:1}.sect.st{grid-column:2}.sect.cs{grid-column:3}
+  .sect.dc,.sect.wk{grid-column:1/-1}.sect.dc .gos,.sect.wk .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 왼쪽 재무 · 가운데 재고 · 오른쪽 공사 (2026-11-23 '잔업 확인 · 급여'를 재무의 '직원 급여'로 옮김) */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -102,7 +102,7 @@ button,input{font:inherit;color:inherit}
   <p class="wait" id="wait">확인 중…</p>
   <section class="login" id="login" hidden aria-labelledby="lh">
     <h2 id="lh">관리자 로그인</h2>
-    <p>관리자 비밀번호 입력 시 부서 업무 · 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면을 모두 이용할 수 있습니다.</p>
+    <p>관리자 비밀번호 입력 시 부서 업무 · 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 도면 화면을 이용할 수 있습니다. 직원 급여(잔업 확인 · 급여)는 직원 급여 비밀번호를 한 번 더 입력합니다.</p>
     <form id="loginForm" autocomplete="off">
       <label for="pw" style="position:absolute;left:-9999px">비밀번호</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">
@@ -128,10 +128,6 @@ button,input{font:inherit;color:inherit}
           <a class="go" href="work.html?d=%EB%8C%80%EC%99%B8%EC%82%AC%EC%97%85%EB%B6%80"><span class="t"><b>대외사업부</b><small>업무 지시 · 업무 목록 · 일정 달력</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         </div>
       </section>
-      <section class="sect ot" aria-labelledby="h-ot">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h2 id="h-ot">잔업</h2></div>
-        <a class="go" href="admin.html"><span class="t"><b>잔업 확인 · 급여</b><small>직원 잔업 기록 확인 · 수정 · 급여 명세서</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-      </section>
 
       <section class="sect st" aria-labelledby="h-st">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span><h2 id="h-st">재고</h2></div>
@@ -154,10 +150,11 @@ button,input{font:inherit;color:inherit}
         <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 후 잉여금</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="admin.html"><span class="t"><b>직원 급여</b><small>잔업 확인 · 근태 · 급여대장 · 명세서 · 은행 이체 (직원 급여 비밀번호 별도)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
     </div>
     <p class="legend"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>1회 로그인으로 위 화면을 모두 이용할 수 있습니다. 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
+      <span>1회 로그인으로 위 화면을 이용할 수 있습니다(직원 급여는 별도 비밀번호). 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
   </div>
 </main>
 <p class="toast" id="toast" role="status" hidden></p>
@@ -167,6 +164,7 @@ button,input{font:inherit;color:inherit}
   'use strict';
   var API = window.NMC_API || '';
   var KEY = 'nmc_pay_token';   // 모든 관리자 화면이 같이 쓰는 열쇠
+  var PKEY = 'nmc_payroll_token';   // 직원 급여 비밀번호 열쇠 (v59) — 관리자 로그아웃 · 만료 때 같이 지움
   var $ = function (id) { return document.getElementById(id); };
   var CHEV = '<svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
   var waitEl = $('wait'), loginEl = $('login'), menuEl = $('menu'), outBtn = $('outBtn'), toastEl = $('toast');
@@ -174,7 +172,7 @@ button,input{font:inherit;color:inherit}
     expired: '로그인 유효 시간이 만료되었습니다. 비밀번호를 다시 입력해 주십시오.' };
 
   function getToken() { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
-  function setToken(t) { try { if (t) sessionStorage.setItem(KEY, t); else sessionStorage.removeItem(KEY); } catch (e) {} }
+  function setToken(t) { try { if (t) sessionStorage.setItem(KEY, t); else { sessionStorage.removeItem(KEY); sessionStorage.removeItem(PKEY); } } catch (e) {} }
   function post(body) {
     return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit' })
       .then(function (res) { if (!res.ok) throw new Error('net'); return res.json(); }, function () { throw new Error('net'); })
@@ -258,8 +256,10 @@ button,input{font:inherit;color:inherit}
       function (e) { var c = String((e && e.message) || ''); show('login', ERR[c] || ('로그인하지 못했습니다 (' + c + ')')); });
   });
   outBtn.addEventListener('click', function () {
-    var t = getToken();
+    var t = getToken(), pt = '';
+    try { pt = sessionStorage.getItem(PKEY) || ''; } catch (e) {}
     setToken('');
+    if (t && pt) post({ action: 'pay.logout', token: t, ptoken: pt }).catch(function () {});
     if (t) post({ action: 'logout', token: t }).catch(function () {});
     show('login');
     say('로그아웃되었습니다');

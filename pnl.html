@@ -51,6 +51,10 @@ input[type=month]{background:var(--panel);border:1px solid var(--line);border-ra
 .banner{border-radius:10px;padding:10px 14px;font-size:14px;margin:0}
 .banner.info{background:var(--accent-soft);border:1px solid #B9D3EA}
 .banner.warn{background:var(--warn-soft);border:1px solid var(--warn)}
+.paylock{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-top:8px}
+.paylock .payrow{display:flex;gap:6px;flex-wrap:wrap}
+.paylock input{min-height:42px;min-width:0;padding:0 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:var(--panel)}
+.sr{position:absolute;left:-9999px}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px;align-items:start}
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)} .result{order:-1}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
@@ -204,6 +208,11 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   </div>
   <p class="status" id="status" role="status"></p>
   <p class="banner info" id="srcBanner" hidden></p>
+  <form class="banner info paylock" id="payBanner" hidden autocomplete="off">
+    <span id="payBannerTxt"></span>
+    <span class="payrow" id="payRow"><label for="payPw" class="sr">직원 급여 비밀번호</label><input type="password" id="payPw" placeholder="직원 급여 비밀번호" maxlength="100" autocomplete="current-password"><button class="btn" type="submit" id="payGo">급여대장 반영</button></span>
+    <span class="status" id="payMsg" role="status"></span>
+  </form>
 
   <details class="panel paste" id="pastePanel">
     <summary>엑셀 업로드 · 붙여넣기 — 매출·매입 자동 분류</summary>
@@ -319,6 +328,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   var DEMO = window.__SERVER__ || null;   // 시험용 화면에서만
   var API = DEMO ? '' : String(window.NMC_API || '');
   var TOKEN_KEY = 'nmc_pay_token';
+  var PTOKEN_KEY = 'nmc_payroll_token';   // 직원 급여 비밀번호 열쇠 (v59) — 급여대장 연결에만
   var ITEMS = [
     { k: 'nm', g: 'EPDM 칩', name: 'EPDM 칩 (일반·NM·KS·재생)' },
     { k: 'lok', g: 'EPDM 칩', name: '락칩 (LOK-CHIP)' },
@@ -342,6 +352,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   var records = {};        // ym -> 저장된 달
   var L = {}, P = null, SR = null, BR = null, PAY = null, PAY_YM = '', SRC = '', PASTE = null;
   var payCache = {};       // ym -> {gross, n} | 'none'
+  var PAY_LOCK = '';       // v59: 직원 급여 비밀번호 확인 전 'pay_auth' · 설정 전 'pay_unset'
   var token = '';
   try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
 
@@ -364,6 +375,8 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다: ' + c); }
   function post(body) {
     if (token && body.action !== 'login') body.token = token;
+    var pt = ''; try { pt = sessionStorage.getItem(PTOKEN_KEY) || ''; } catch (e) {}
+    if (pt && body.action !== 'login' && body.action !== 'pay.login') body.ptoken = pt;
     if (DEMO) {
       return new Promise(function (res, rej) {
         setTimeout(function () {
@@ -385,7 +398,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   }
   function setToken(t) {
     token = t || '';
-    try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else { sessionStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(PTOKEN_KEY); } } catch (e) {}
   }
   function devId() {
     var k = 'nmc_dev', v = '';
@@ -414,13 +427,19 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     return Promise.all([post({ action: 'data', ym: ym }), attP]).then(function (res) {
       var d = res[0];
       d.att = res[1] || [];
+      PAY_LOCK = '';
       var m = window.NMCPay.computeMonth(d), gross = 0;
       (m.rows || []).forEach(function (r) { gross += num(r.col && r.col.gross); });
       var used = !m.future && (m.lastRecord || d.ledgerSaved);
       var out = used && gross > 0 ? { gross: Math.round(gross), n: (m.rows || []).length, partial: !!m.partial } : null;
       if (res[1]) payCache[ym] = { t: Date.now(), v: out };
       return out;
-    }, function (e) { if (String(e && e.message) === 'auth') throw e; return null; });
+    }, function (e) {
+      var c = String(e && e.message);
+      if (c === 'auth') throw e;
+      if (c === 'pay_auth' || c === 'pay_unset') PAY_LOCK = c;   // 직원 급여 비밀번호 전: 설정값(또는 저장된 값)으로
+      return null;
+    });
   }
 
   /* ───────── 판매량 표 ───────── */
@@ -519,6 +538,17 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     return { q: q, sales: sales, eSales: eSales, tSales: tSales, sSales: sSales, eMat: eMat, tMat: tMat, sMat: sMat, total: total, mat: mat, F: F, fx: fx, lab: lab, fE: fE, fT: fT,
       bank: bank, out: out, left: left, eKg: eKg, eMargin: eMargin, beKg: beKg, goalKg: goalKg, eLeft: eSales - eMat - fE, tLeft: tSales - tMat - fT, sLeft: sSales - sMat };
   }
+  /** 직원 급여 비밀번호 띠 (v59) */
+  function payBannerSync() {
+    var b = $('payBanner'); if (!b) return;
+    b.hidden = !PAY_LOCK;
+    if (!PAY_LOCK) return;
+    var unset = PAY_LOCK === 'pay_unset';
+    $('payBannerTxt').textContent = unset ? '직원 급여 비밀번호가 아직 설정되지 않아 인건비는 설정값을 적용했습니다. 관리자 → 재무 → 직원 급여에서 처음 설정하십시오.'
+      : PAY ? '인건비는 저장된 급여대장 값입니다. 최신 급여대장을 반영하려면 직원 급여 비밀번호를 입력하십시오.'
+      : '인건비는 설정값을 적용했습니다. 급여대장을 반영하려면 직원 급여 비밀번호를 입력하십시오.';
+    $('payRow').hidden = unset;
+  }
   function addRow(list, color, label, value, bold, note) {
     var d = document.createElement('span'); d.className = 'dot'; d.style.background = color;
     var t = document.createElement('span'); t.textContent = label;
@@ -528,7 +558,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     list.appendChild(d); list.appendChild(t); list.appendChild(n);
   }
   function calc() {
-    var r = compute(L, S, PAY); updateAmounts();
+    var r = compute(L, S, PAY); updateAmounts(); payBannerSync();
     $('slipTotal').textContent = comma(r.total) + '원';
     $('resMonth').textContent = '· ' + fmtYM($('month').value);
     $('vSales').textContent = won(r.total); $('vOut').textContent = won(r.out); $('vPrin').textContent = won(num(S.principal));
@@ -552,7 +582,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       if (k === 'labor' && r.lab.pay) {
         addRow(list, 'var(--fix)', '인건비', r.lab.total, false, '급여대장 ' + r.lab.pay.n + '명 지급합계 ' + won(r.lab.pay.gross) + (r.lab.pay.partial ? ' (당월 누계)' : '') +
           ' + 급여대장 외 ' + won(r.lab.other) + (r.lab.est ? ' (추정: 설정 인건비 − 급여대장)' : ''));
-      } else addRow(list, 'var(--fix)', FIXED_LABELS[k] + (k === 'labor' ? ' (설정값)' : ''), r.fx[k]);
+      } else addRow(list, 'var(--fix)', FIXED_LABELS[k] + (k === 'labor' ? (PAY_LOCK ? ' (설정값 — 직원 급여 비밀번호 확인 전)' : ' (설정값)') : ''), r.fx[k]);
     });
     addRow(list, 'var(--bank)', '이자비용', num(S.interest));
     addRow(list, 'var(--bank)', '약정 원금 상환', num(S.principal));
@@ -1136,7 +1166,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       rec = makeRec();
       return pnl('saveMonth', { ym: ym, rec: rec });
     }).then(function (r) {
-      rec.savedAt = r.savedAt; records[ym] = rec; renderHist(); status(fmtYM(ym) + ' 실적이 저장되었습니다.');
+      rec.savedAt = r.savedAt; records[ym] = rec; renderHist(); status(fmtYM(ym) + ' 실적이 저장되었습니다.' + (PAY_LOCK && !rec.pay ? ' 인건비는 설정값으로 저장했습니다(직원 급여 비밀번호 확인 전).' : ''));
     }, function (e) { status('저장에 실패했습니다. ' + errText(e)); }).then(function () { $('save').disabled = false; calc(); });
   }
   function removeMonth(ym) {
@@ -1189,6 +1219,26 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       function (e) { $('loginErr').textContent = errText(e); });
   });
   $('logoutBtn').addEventListener('click', function () { post({ action: 'logout' }).catch(function () {}); logoutLocal(''); });
+  $('payBanner').addEventListener('submit', function (ev) {   // v59: 직원 급여 비밀번호 → 급여대장 반영 (판매량 표는 그대로)
+    ev.preventDefault();
+    var v = $('payPw').value; $('payPw').value = ''; if (!v) return;
+    $('payMsg').textContent = '확인하는 중…'; $('payGo').disabled = true;
+    post({ action: 'pay.login', pw: v, dev: devId() }).then(function (r) {
+      try { sessionStorage.setItem(PTOKEN_KEY, r.ptoken); } catch (e) {}
+      $('payMsg').textContent = ''; PAY_LOCK = ''; payCache = {};
+      var ym = $('month').value;
+      return payOf(ym).then(function (p) {
+        if ($('month').value !== ym) return;
+        if (p) PAY = p;
+        PAY_YM = ym; calc();
+        if (!PAY_LOCK) status('급여대장을 반영했습니다.');
+      });
+    }, function (e) {
+      var c = String((e && e.message) || '');
+      if (c === 'auth') { logoutLocal(ERR.auth); return; }
+      $('payMsg').textContent = c === 'bad_pw' ? '직원 급여 비밀번호가 맞지 않습니다.' : c === 'pay_unset' ? '직원 급여 비밀번호가 아직 설정되지 않았습니다.' : errText(e);
+    }).then(function () { $('payGo').disabled = false; });
+  });
   $('month').addEventListener('change', function () { loadMonth(); });
   $('save').addEventListener('click', saveMonth);
   $('stockBtn').addEventListener('click', function () { var ym = $('month').value; fillFromStock(ym).then(function () { status('출고 실적으로 판매량을 다시 반영했습니다. 저장하려면 [당월 저장]을 누르십시오.'); }, function (e) { status(errText(e)); }); });
