@@ -26,7 +26,7 @@ if ('serviceWorker' in navigator) {
 :root{
   --bg:#EEF2F7; --card:#FFFFFF; --ink:#0F172A; --ink2:#334155; --muted:#5B6474; --line:#DCE3EC;
   --navy:#1B3A6B; --gold:#B08A35;
-  --ot:#1E5AA8; --ot-soft:#E6EFFB; --st:#1B7A43; --st-soft:#E4F3EA; --pl:#9A5B16; --pl-soft:#FBEFE1; --cs:#0E7490; --cs-soft:#E0F2F7; --dc:#7A3A14; --dc-soft:#F6EDE6;
+  --ot:#1E5AA8; --ot-soft:#E6EFFB; --st:#1B7A43; --st-soft:#E4F3EA; --pl:#9A5B16; --pl-soft:#FBEFE1; --cs:#0E7490; --cs-soft:#E0F2F7; --dc:#7A3A14; --dc-soft:#F6EDE6; --wk:#3F3D8F; --wk-soft:#ECEBF7;
   --bad:#B42318;
 }
 *{box-sizing:border-box}
@@ -51,6 +51,8 @@ button,input{font:inherit;color:inherit}
 .sect.pl{--c:var(--pl);--soft:var(--pl-soft)}
 .sect.cs{--c:var(--cs);--soft:var(--cs-soft)}
 .sect.dc{--c:var(--dc);--soft:var(--dc-soft)}
+.sect.wk{--c:var(--wk);--soft:var(--wk-soft)}
+.go small.live b.w{color:var(--wk)}
 .gos{display:grid;gap:10px}
 .gos .go{margin:0}
 .pushline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:10px 12px;border-radius:14px;background:var(--dc-soft);font-size:14.5px;font-weight:700;color:var(--ink2)}
@@ -70,8 +72,8 @@ button,input{font:inherit;color:inherit}
 .go small.live b.r{color:#B42318}
 .go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.go:hover{border-color:var(--c)}}
-@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
-  .sect.dc{grid-column:1/-1}.sect.dc .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 재무는 잔업 바로 아래 */
+@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto auto auto 1fr;align-items:start}.sect.st,.sect.cs{grid-row:span 2}
+  .sect.dc,.sect.wk{grid-column:1/-1}.sect.dc .gos,.sect.wk .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 가운데 재고 · 오른쪽 공사는 두 줄을 차지, 재무는 잔업 바로 아래 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -100,7 +102,7 @@ button,input{font:inherit;color:inherit}
   <p class="wait" id="wait">확인 중…</p>
   <section class="login" id="login" hidden aria-labelledby="lh">
     <h2 id="lh">관리자 로그인</h2>
-    <p>관리자 비밀번호 입력 시 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면을 모두 이용할 수 있습니다.</p>
+    <p>관리자 비밀번호 입력 시 부서 업무 · 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 잔업 확인 · 급여 · 도면 화면을 모두 이용할 수 있습니다.</p>
     <form id="loginForm" autocomplete="off">
       <label for="pw" style="position:absolute;left:-9999px">비밀번호</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">
@@ -118,6 +120,13 @@ button,input{font:inherit;color:inherit}
           <a class="go" href="docs.html"><span class="t"><b>공문함</b><small id="dcSum">메일 · 팩스 공문 — 처리 대기 · 세금계산서 · 발주서 · 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         </div>
         <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에 매일 아침 알림을 등록하시겠습니까?</span><button type="button" id="pushBtn">이 기기 알림 등록</button></p>
+      </section>
+      <section class="sect wk" aria-labelledby="h-wk">
+        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></span><h2 id="h-wk">부서 업무</h2></div>
+        <div class="gos" id="wkGos">
+          <a class="go" href="work.html?d=%EA%B4%80%EB%A6%AC%EB%B6%80"><span class="t"><b>관리부</b><small>업무 지시 · 업무 목록 · 일정 달력</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+          <a class="go" href="work.html?d=%EB%8C%80%EC%99%B8%EC%82%AC%EC%97%85%EB%B6%80"><span class="t"><b>대외사업부</b><small>업무 지시 · 업무 목록 · 일정 달력</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        </div>
       </section>
       <section class="sect ot" aria-labelledby="h-ot">
         <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><h2 id="h-ot">잔업</h2></div>
@@ -159,6 +168,7 @@ button,input{font:inherit;color:inherit}
   var API = window.NMC_API || '';
   var KEY = 'nmc_pay_token';   // 모든 관리자 화면이 같이 쓰는 열쇠
   var $ = function (id) { return document.getElementById(id); };
+  var CHEV = '<svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
   var waitEl = $('wait'), loginEl = $('login'), menuEl = $('menu'), outBtn = $('outBtn'), toastEl = $('toast');
   var ERR = { bad_pw: '비밀번호가 일치하지 않습니다.', locked: '비밀번호 입력 오류 횟수 초과로 15분간 잠금되었습니다.', net: '인터넷 연결을 확인해 주십시오.',
     expired: '로그인 유효 시간이 만료되었습니다. 비밀번호를 다시 입력해 주십시오.' };
@@ -212,6 +222,15 @@ button,input{font:inherit;color:inherit}
       if (td) { td.className = 'live'; td.innerHTML = '오늘 출고 ' + n(b.out.length, '곳') + ' · 입고 ' + n(nin, '건') + ' · 공문 처리 대기 ' + n(b.docs.length, '건') + (b.late ? ' · <b class="r">미처리 출고예정 ' + b.late + '건</b>' : ''); }
       if (dc) { dc.className = 'live'; dc.innerHTML = '처리 대기 ' + n(b.docs.length, '건') + (late ? ' · <b class="r">기한 경과 ' + late + '건</b>' : '') + (b.pick && b.pick.n ? ' · 신청 · 참가 검토 ' + b.pick.n + '건' : ''); }
     }, function () { /* 숫자는 보조 — 못 받으면 설명 그대로 */ });
+    call('apiWorkSum', []).then(function (w) {   // v58: 부서 업무 — 담당 · 처리 대기 · 기한 경과 · 오늘 일정
+      if (!w || !w.depts || !w.depts.length) return;
+      var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+      $('wkGos').innerHTML = w.depts.map(function (d) {
+        var t = (d.head ? '담당 ' + e(d.head) + ' · ' : '') + (d.open ? '처리 대기 <b class="w">' + d.open + '</b>건' : '처리 대기 없음') +
+          (d.late ? ' · <b class="r">기한 경과 ' + d.late + '건</b>' : '') + (d.ev ? ' · 오늘 일정 <b class="w">' + d.ev + '</b>건' : '');
+        return '<a class="go" href="work.html?d=' + encodeURIComponent(d.name) + '"><span class="t"><b>' + e(d.name) + '</b><small class="live">' + t + '</small></span>' + CHEV + '</a>';
+      }).join('');
+    }, function () { /* 서버가 아직 v58 전이면 설명 그대로 */ });
   }
   function pushCheck() {
     var P = window.NMCPush, line = $('pushLine');
