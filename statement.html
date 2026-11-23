@@ -270,7 +270,8 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .sign p em{position:absolute;right:2.4mm;bottom:1.2mm;font-style:normal;font-size:6.8pt;color:#8A93A3}
 .ft{margin-top:auto;padding-top:1.2mm;border-top:.4mm solid #B08A35;text-align:center;font-size:6.2pt;color:#8A93A3;white-space:nowrap;overflow:hidden}
 .ft i{font-style:normal;margin:0 1.6mm}
-.cp.noamt .mt .am{display:none}
+.sumbar .sb{display:inline-block;width:34mm}   /* 단가 · 금액 빈칸 인쇄: 일금 ____ 원정 (2026-11-24) */
+.sumbar small .sb{width:16mm}
 #print{display:none}
 
 /* 한 장 두 부(반쪽) — 품목 칸을 크게 (2026-11-23 지시 "반쪽으로 하니까 품명하고 이걸 극대화시켜라. 아래 전달사항은 없어도 되고 …
@@ -876,23 +877,24 @@ body.pvon{overflow:hidden}
     h += '<div class="hd"><img class="lgo" src="icons/nmc-logo-print.png" alt="">' +
       '<div class="tt"><b>거래명세표</b><i>TRANSACTION STATEMENT</i><span class="bd ' + pos + '">' + (pos === 't' ? '공급받는자 보관용' : '공급자 보관용') + '</span></div>' +
       '<div class="mt"><p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
-      '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + fmt(st.total) + '</b></p></div></div>';
+      '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + (amt ? fmt(st.total) : '') + '</b></p></div></div>';
     if (half) h += '<div class="pt">' + partyCompact('공급자', co, sealSrc(st), true) + partyCompact('공급받는자', { name: st.cust, ceo: cu.ceo, biz: cu.biz, addr: cu.addr, tel: cu.tel }, '', false) + '</div>';
     else h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
       ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]], sealSrc(st)) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
     h += '<div class="si"><span>납품장소</span><b>' + siteHtml(st) + '</b></div>';
-    var cols = L.full ? (amt ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['8mm', '', '30mm', '12mm', '22mm', '34mm'])
-      : (amt ? ['6mm', '', '14mm', '10mm', '16mm', '13mm', '21mm', '18mm', '14mm'] : ['6mm', '', '20mm', '11mm', '20mm', '26mm']);   // 2026-11-23 품명 칸 확보 (67 → 76mm · 금액 없음 92 → 105mm)
+    // 2026-11-23 품명 칸 확보 (67 → 76mm). 2026-11-24 지시 "단가 금액없이 체크해도 거래명세서 양식은 단가 하고 그대로 … 금액하고 공란으로":
+    //  단가 · 금액 빈칸 인쇄도 칸은 그대로(같은 폭) 두고 값만 비움
+    var cols = L.full ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['6mm', '', '14mm', '10mm', '16mm', '13mm', '21mm', '18mm', '14mm'];
     h += '<table class="it"><colgroup>' + cols.map(function (w) { return '<col' + (w ? ' style="width:' + w + '"' : '') + '>'; }).join('') + '</colgroup>' +
-      '<thead><tr><th>No.</th><th>품명</th><th>규격</th><th>포대</th><th>수량(kg)</th>' + (amt ? '<th>단가</th><th>공급가액</th><th>세액</th>' : '') + '<th>비고</th></tr></thead><tbody>';
+      '<thead><tr><th>No.</th><th>품명</th><th>규격</th><th>포대</th><th>수량(kg)</th><th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>';
     for (i = 0; i < per; i++) {
       l = pl[i];
-      if (!l) { h += '<tr><td></td><td></td><td></td><td></td><td></td>' + (amt ? '<td></td><td></td><td></td>' : '') + '<td></td></tr>'; continue; }
+      if (!l) { h += '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'; continue; }
       var q = l.k === 's' ? fmtQ(l.qty) : (l.qty != null && l.qty !== '' ? fmtQ(l.qty) + (l.unit ? ' ' + l.unit : '') : (l.unit || ''));
       h += '<tr><td class="no">' + (base + i + 1) + '</td><td class="nm">' + esc(l.name || pname(l.prod, l.color)) + '</td><td class="c">' + esc(l.spec || '') + '</td>' +
         '<td class="c">' + esc(bagsOf(l)) + '</td><td class="r q">' + esc(q) + '</td>' +
-        (amt ? '<td class="r">' + (l.price == null || l.price === '' ? '' : fmt(l.price)) + '</td><td class="r b">' + (l.supply || l.price != null ? fmt(l.supply) : '') + '</td><td class="r">' + (l.supply || l.price != null ? fmt(l.tax) : '') + '</td>' : '') +
+        (amt ? '<td class="r">' + (l.price == null || l.price === '' ? '' : fmt(l.price)) + '</td><td class="r b">' + (l.supply || l.price != null ? fmt(l.supply) : '') + '</td><td class="r">' + (l.supply || l.price != null ? fmt(l.tax) : '') + '</td>' : '<td class="r"></td><td class="r b"></td><td class="r"></td>') +
         '<td class="mm">' + esc(l.memo || '') + '</td></tr>';
     }
     h += '</tbody><tfoot><tr>';
@@ -901,13 +903,13 @@ body.pvon{overflow:hidden}
       (st.lines || []).forEach(function (x) { var b = bagsOf(x); if (b !== '') { bags += b; hasBag = true; } if (x.k === 's') { gs[grpOf(x.prod)] = 1; kg += Number(x.qty) || 0; } });
       var oneG = Object.keys(gs).length === 1;   // 칼라칩 · SBR 고무분말 · 분철 kg은 서로 더하지 않음
       h += '<td colspan="3" class="lab">합계</td><td class="c">' + (hasBag ? fmt(bags) : '') + '</td><td class="r">' + (oneG ? fmtQ(kg) : '') + '</td>' +
-        (amt ? '<td></td><td class="r">' + fmt(st.supply) + '</td><td class="r">' + fmt(st.tax) + '</td>' : '') + '<td></td>';
-    } else h += '<td colspan="' + (amt ? 9 : 6) + '" class="cont">다음 장에 계속 (' + (pi + 1) + '/' + pn + ')</td>';
+        '<td></td><td class="r">' + (amt ? fmt(st.supply) : '') + '</td><td class="r">' + (amt ? fmt(st.tax) : '') + '</td><td></td>';
+    } else h += '<td colspan="9" class="cont">다음 장에 계속 (' + (pi + 1) + '/' + pn + ')</td>';
     h += '</tr></tfoot></table>';
     var memo = [st.memo, co.bank ? '입금 계좌: ' + co.bank : '', co.note || ''].filter(Boolean).join('\n');
-    if (half) h += '<div class="bt">' + (amt ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + numKo(st.total) + '원정</em><b>₩' + fmt(st.total) + '</b></div>' : '') +
+    if (half) h += '<div class="bt">' + '<div class="sumbar"><span>합계금액</span><em>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><b>₩' + (amt ? fmt(st.total) : '') + '</b></div>' +
       '<div class="rcv"><span>인수자</span><em>(인)</em></div></div>';
-    else h += '<div class="bt">' + (amt && last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + numKo(st.total) + '원정</em><small>공급가액 ' + fmt(st.supply) + ' + 세액 ' + fmt(st.tax) + '</small><b>₩' + fmt(st.total) + '</b></div>' : '') +
+    else h += '<div class="bt">' + (last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><small>공급가액 ' + (amt ? fmt(st.supply) : '<i class="sb"></i>') + ' + 세액 ' + (amt ? fmt(st.tax) : '<i class="sb"></i>') + '</small><b>₩' + (amt ? fmt(st.total) : '') + '</b></div>' : '') +
       '<div class="lo"><div class="memo"><span class="lb">전달사항</span><p>' + esc(memo) + '</p></div><div class="sign"><span class="lb">인수자 확인</span><p><i></i><em>(인)</em></p></div></div></div>';
     h += '<div class="ft">' + [co.name, co.addr, co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : '', co.web, half && co.bank ? '입금 계좌 ' + co.bank : ''].filter(Boolean).map(esc).join('<i>·</i>') + '</div>';
     return h + '</div>';
@@ -943,7 +945,7 @@ body.pvon{overflow:hidden}
       '<div class="t"><span>합계금액</span><b id="tTot">' + fmt(T.total) + '</b></div></div><p class="han" id="tHan">' + (T.total ? '일금 ' + numKo(T.total) + '원정' : '') + '</p>' +
       '<p class="fwarn" id="tNo"' + (T.noPrice ? '' : ' hidden') + '>단가 없는 줄 <b id="tNoN">' + T.noPrice + '</b>개 — 명세서에는 빈칸으로 찍히고, 손익계산서에는 기준 단가(추정)로 계산됩니다.</p>' +
       '<div class="opts"><label class="chk"><input type="checkbox" data-f="vatnone"' + (F.vat === 'none' ? ' checked' : '') + '>부가세 없음 (영세율 · 면세)</label>' +
-      '<label class="chk"><input type="checkbox" data-f="noamt"' + (F.amt ? '' : ' checked') + '>단가 · 금액 없이 인쇄 (인수증용)</label></div>' +
+      '<label class="chk"><input type="checkbox" data-f="noamt"' + (F.amt ? '' : ' checked') + '>단가 · 금액 빈칸으로 인쇄 (인수증용 · 양식은 그대로)</label></div>' +
       '<label class="fld" style="margin-top:8px"><span>전달사항 <small>품목 8줄 이상(한 부씩 크게)일 때만 아래 칸에 찍힘</small></span><textarea class="inp" data-f="memo" maxlength="200" rows="2">' + esc(F.memo) + '</textarea></label></section>';
     return h;
   }
