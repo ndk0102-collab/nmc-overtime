@@ -200,17 +200,18 @@ select.inp{padding-right:30px}
 .login input{flex:1;min-width:0;min-height:52px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:17px}
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3)}
 
-/* ───────── 인쇄 모양: A4 한 장에 위 '공급받는자 보관용' · 아래 '공급자 보관용' (회사 거래명세표 양식의 남색 · 금색) ───────── */
+/* ───────── 인쇄 모양: A4 한 장에 위 '공급받는자 보관용' · 아래 '공급자 보관용' (회사 거래명세표 양식의 남색 · 금색) ─────────
+   머리 칸: 로고 · 제목 · No.·일자·합계 — 양쪽 칸 폭을 같게 해 제목이 종이 한가운데 오도록 (2026-11-23 지시 "거래명세서가 중앙에 딱 위치해야") */
 .pg{position:relative;width:210mm;height:297mm;background:#fff;overflow:hidden;color:#1E2430;font-family:var(--font);font-size:8pt;line-height:1.25;word-break:keep-all}
 .cp{position:absolute;left:0;width:210mm;height:148.5mm;padding:7mm 11mm 5mm;display:flex;flex-direction:column}
 .cp.t{top:0}.cp.b{top:148.5mm}
 .cut{position:absolute;left:6mm;right:6mm;top:148.5mm;height:0;border-top:.3mm dashed #9FB0C9}
 .cut span{position:absolute;left:50%;top:-1.9mm;transform:translateX(-50%);padding:0 2.4mm;background:#fff;font-size:5.8pt;color:#8A93A3;letter-spacing:.3em;white-space:nowrap}
-.hd{display:grid;grid-template-columns:30mm 1fr 58mm;align-items:center;gap:3mm;height:18.5mm;padding-bottom:1.6mm;border-bottom:.6mm solid #B08A35}
+.hd{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:3mm;height:18.5mm;padding-bottom:1.6mm;border-bottom:.6mm solid #B08A35}
 .hd .lgo{display:block;height:16.4mm;width:auto;justify-self:start}
 .tt{text-align:center}
 .tt b{display:block;font-size:17pt;font-weight:800;color:#1B3A6B;letter-spacing:.42em;margin-right:-.42em;line-height:1.15}
-.tt i{display:block;font-style:normal;font-size:5.6pt;font-weight:700;color:#B08A35;letter-spacing:.36em;margin:.7mm 0 1.1mm}
+.tt i{display:block;font-style:normal;font-size:5.6pt;font-weight:700;color:#B08A35;letter-spacing:.36em;margin:.7mm -.36em 1.1mm 0}
 .tt .bd{display:inline-block;padding:.5mm 2.6mm;border-radius:.6mm;font-size:7pt;font-weight:800;color:#fff;background:#1B3A6B;letter-spacing:.06em}
 .tt .bd.b{background:#B08A35}
 .mt{text-align:right}
@@ -267,10 +268,10 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 
 /* 한 부씩 크게 (품목 8줄부터, 2026-11-21): A4 한 장에 한 부 · 칸 20줄 · 글자와 줄 높이를 키움 */
 .pg.f .cp,.pg.f .cp.b{top:0;height:297mm;padding:13mm 14mm 10mm}
-.pg.f .hd{grid-template-columns:40mm 1fr 70mm;height:26mm;padding-bottom:2.4mm;border-bottom-width:.8mm}
+.pg.f .hd{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);height:26mm;padding-bottom:2.4mm;border-bottom-width:.8mm}
 .pg.f .hd .lgo{height:22mm}
 .pg.f .tt b{font-size:22pt}
-.pg.f .tt i{font-size:7pt;margin:1mm 0 1.6mm}
+.pg.f .tt i{font-size:7pt;margin:1mm -.36em 1.6mm 0}
 .pg.f .tt .bd{font-size:9pt;padding:.8mm 3.4mm}
 .pg.f .mt p{font-size:10pt;margin-bottom:.8mm}
 .pg.f .mt p span{font-size:7.6pt}
