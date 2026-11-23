@@ -925,7 +925,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var D = S.D, f = S.f, mode = listMode(), list = D.E.filter(function (e) { return match(e, f, S.cat); });
     if (!list.length) {
       var anyTax = S.cat === 'tax' && (f === 'open' || f === 'new') && D.E.some(function (e) { return e.cat === 'tax'; });
-      return '<div class="tbl t-' + mode + '" id="list"><ul class="list"><li class="empty">' + (anyTax ? '처리 대상 세금계산서가 없습니다. 수신 세금계산서는 <button type="button" class="link" data-f="done">처리 완료</button> · <button type="button" class="link" data-f="cal">전체 · 일자별</button>에서 조회할 수 있습니다.'
+      return '<div class="tbl t-' + mode + '" id="list"><ul class="list"><li class="empty">' + (anyTax ? '처리 대상 세금계산서가 없습니다. 장부에 반영된 계산서는 자동으로 처리 완료됩니다(분류 필요 · 분류 추정 건만 이 목록에 남음). 수신 세금계산서는 <button type="button" class="link" data-f="done">처리 완료</button> · <button type="button" class="link" data-f="cal">전체 · 일자별</button>에서 조회할 수 있습니다.'
         : D.E.length ? '조건에 해당하는 건이 없습니다.' : '수신 내역이 없습니다. 수집 폴더에 파일을 넣거나 ‘공문 파일 등록’을 누르십시오.') + '</li></ul></div>';
     }
     return '<div id="list" class="tbl t-' + mode + '">' + thrHtml(mode) + dayList(list, f === 'due' || f === 'late' || f === 'soon') + '</div>';
@@ -1526,7 +1526,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       '<div class="tmw" id="taxMonths"><table class="tm"><thead><tr><th>월</th><th>건수</th><th>공급가액</th><th>세액</th><th>합계</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="hint">' + (dir === 'chk' ? '확인 필요 = 자사 사업자번호로 열리지 않는 국세청 메일(판독 불가) 및 공급자 · 공급받는자 어디에도 자사 사업자번호가 없는 계산서입니다. 합계에서 제외합니다.'
         : '<b>매입과 매출은 합산하지 않습니다.</b> 합계 = 금액(공급가액 + 세액) 확인 계산서의 합계, 공급가액 · 세액 = 서버가 판독한 국세청 계산서의 합계입니다(금액만 기재된 알림 메일 제외). ' +
-          '2026년 국세청 계산서는 매출 · 매입 장부에 자동 반영되며, 장부 칸에 반영 상태가 표시됩니다.') + '</p></section>';
+          '2026년 국세청 계산서는 매출 · 매입 장부에 자동 반영되며(처리 완료를 누르지 않아도 됨), 장부 칸에 반영 상태가 표시됩니다. 장부에 반영된 계산서는 상태도 자동으로 처리 완료가 되고, 분류 필요 · 분류 추정 건만 미처리로 남습니다.') + '</p></section>';
     return h + taxMonthHtml();
   }
   function taxMonthHtml() {
