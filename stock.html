@@ -529,6 +529,10 @@ body.labmode .wrap{max-width:1480px}
 .polines{list-style:none;margin:0;padding:0}
 .poln{padding:9px 0;border-bottom:1px solid var(--line)}
 .poln:last-child{border-bottom:0}
+.poln.gone{opacity:.55}
+.poln.gone .pl1 b{text-decoration:line-through}
+.poln.gone .pohow{color:var(--ink2);font-weight:700}
+.potab .pz{margin-right:4px;color:var(--ink2)}
 .poln.short{background:linear-gradient(90deg,var(--bad-soft),transparent 70%)}
 .poln.need .pl1{color:var(--bad)}
 .pl1{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15.5px}
@@ -1069,6 +1073,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     po_done: '이미 등록된 발주서입니다. 수정하려면 달력에서 해당 일자를 선택해 수정하십시오.',
     po_busy: '현재 판독 중입니다. 잠시 후 다시 시도해 주십시오.',
     po_moved: '그 사이에 기록이 변경되었습니다(확정·삭제 등). 발주서를 다시 판독했으니 한 번 더 확인해 주십시오.',
+    po_overlap: '이미 등록된 행과 겹칩니다. 발주서를 다시 판독했으니 겹친 행을 확인한 후 다시 등록해 주십시오.',
     po_not_done: '등록된 발주서가 아니어서 취소할 내역이 없습니다.',
     mixed_prod: '같은 날 같은 현장에서 같은 색은 한 제품으로만 출고됩니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색상 차이가 있습니다). 제품을 통일해 주십시오.'
   };
@@ -5150,11 +5155,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }, 450);
     render();
   }
-  function poReady(p) { return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }) && !poMixList(p).known.length; }
+  function poReady(p) { var ls = p ? poLeft(p) : []; return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && ls.length > 0 && ls.every(function (l) { return l.prod && l.color && l.kg > 0; }) && !poMixList(p).known.length; }
+  /** v61 일부 등록(rest): 서버가 알려 준 '이미 들어간 줄'(구분|색|kg, 하나씩) → 계획 줄 번호 */
+  function poGoneIdx(p) {
+    var left = (p.gone || []).slice(), out = {};
+    p.lines.forEach(function (l, i) { var j = left.indexOf((l.zone || '') + '|' + l.color + '|' + l.kg); if (j >= 0) { left.splice(j, 1); out[i] = true; } });
+    return out;
+  }
+  function poLeft(p) { if (p.mode !== 'rest') return p.lines; var g = poGoneIdx(p); return p.lines.filter(function (l, i) { return !g[i]; }); }
   function poPlanOut(p) {
-    return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', addr: String(p.addr || '').trim(), mode: p.mode === 'replace' ? 'replace' : 'add',
-      remove: p.mode === 'replace' ? (p.remove || []) : [],
-      lines: p.lines.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '', pack: l.pack || '' }; }) };
+    var ls = poLeft(p);
+    return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', addr: String(p.addr || '').trim(),
+      mode: p.mode === 'replace' ? 'replace' : p.mode === 'rest' ? 'rest' : 'add', remove: p.mode === 'replace' ? (p.remove || []) : [],
+      skipped: p.lines.length - ls.length, note: p.note || '',
+      ack: p.mode === 'add' && S.poRev && S.poRev.R && S.poRev.R.overlap ? 1 : 0,   // 겹친 것을 보고 '별도 주문'을 고름 — 없으면 서버가 겹침을 다시 확인 (v61)
+      lines: ls.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '', pack: l.pack || '' }; }) };
   }
   function poRevView() {
     var V = S.poRev;
@@ -5193,7 +5208,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         (ov.diff ? ' (수량 다른 것 <b class="bad">' + ov.diff + '개</b>)' : ' (수량까지 모두 같음)') + '.</p>';
       h += '<table class="potab"><thead><tr><th>품목</th><th>기존</th><th>발주서</th></tr></thead><tbody>' + ov.pairs.map(function (q) {
         var df = q.kg !== q.old;
-        return '<tr' + (df ? ' class="df"' : '') + '><td><span class="sw" style="background:' + labTint(q.oldProd, q.color) + '"></span>' + esc(q.oldProd + ' ' + q.color) + '</td><td>' + fmt(q.old) + ' <small>' + esc(poMd(q.oldDate)) + '</small></td><td>' + fmt(q.kg) + (df ? ' <b class="bad">' + (q.kg > q.old ? '+' : '') + fmt(q.kg - q.old) + '</b>' : '') + '</td></tr>';
+        return '<tr' + (df ? ' class="df"' : '') + '><td>' + (q.zone ? '<small class="pz">' + esc(poZoneName(q.zone)) + '</small>' : '') + '<span class="sw" style="background:' + labTint(q.oldProd, q.color) + '"></span>' + esc(q.oldProd + ' ' + q.color) + '</td><td>' + fmt(q.old) + ' <small>' + esc(poMd(q.oldDate)) + '</small></td><td>' + fmt(q.kg) + (df ? ' <b class="bad">' + (q.kg > q.old ? '+' : '') + fmt(q.kg - q.old) + '</b>' : '') + '</td></tr>';
       }).join('') + '</tbody></table>';
       if (ov.others) h += '<p class="hint">같은 무렵 이 거래처의 다른 예정 ' + ov.others + '건은 유지합니다.</p>';
       var opt = function (v, title, sub, dis) {
@@ -5201,7 +5216,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
           '<span><b>' + title + '</b><small>' + sub + '</small></span></label>';
       };
       var nPlan = ov.rows.filter(function (r) { return r.type === '출고예정'; }).length;
-      h += '<div class="poopts">' + opt('replace', '동일 주문 — 기존 ' + nPlan + '건을 삭제하고 이 발주서대로 등록', '구분(구분 적재)·현장명이 반영되어 물표가 구분별로 출력됩니다. 수량이 다른 품목은 발주서 수량으로 변경됩니다.', ov.shipped || !nPlan) +
+      var nGone = Object.keys(poGoneIdx(p)).length, nLeft = p.lines.length - nGone;   // v61: 구분 줄이 이미 들어간 경우
+      h += '<div class="poopts">' + (ov.byLine ? opt('rest', '일부 등록 — 이미 들어간 ' + nGone + '건은 빼고 나머지 ' + nLeft + '건만 등록',
+        '같은 구분 · 같은 색 · 같은 수량으로 이미 들어간 행을 뺍니다. 나머지 행은 발주서의 구분이 붙어 물표가 구분별로 출력됩니다.', !nLeft) : '') + opt('replace', '동일 주문 — 기존 ' + nPlan + '건을 삭제하고 이 발주서대로 등록', '구분(구분 적재)·현장명이 반영되어 물표가 구분별로 출력됩니다. 수량이 다른 품목은 발주서 수량으로 변경됩니다.', ov.shipped || !nPlan) +
         opt('add', '별도 주문 — 기존 건은 유지하고 추가 등록', '같은 품목이 중복 등록됩니다.', false) +
         opt('skip', '등록하지 않음 — 이미 등록됨', '이 발주서는 ‘중복’으로만 표시합니다.', false) + '</div>';
       if (ov.shipped) h += '<p class="bad">이미 출고 확정된 행이 있어 대체할 수 없습니다.</p>';
@@ -5209,29 +5226,33 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     // 3. 품목
     if (p.mode !== 'skip') {
-      var kg = p.lines.reduce(function (s, l) { return s + (l.kg || 0); }, 0), pal = poPallets(p.lines);
-      var units = p.lines.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
-      h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + p.lines.length + '건' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + grpKgH(p.lines, function (l) { return Number(l.kg) || 0; }) + ' · 물표 ' + pal + '장' + poTbTxt(p.lines) + '</small></h2>';
+      var gone = p.mode === 'rest' ? poGoneIdx(p) : {}, left = poLeft(p), si = {}, sc = 0;
+      p.lines.forEach(function (l, i) { if (!gone[i]) si[i] = sc++; });
+      var kg = left.reduce(function (s, l) { return s + (l.kg || 0); }, 0), pal = poPallets(left);
+      var units = left.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
+      h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + left.length + '건' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + grpKgH(left, function (l) { return Number(l.kg) || 0; }) + ' · 물표 ' + pal + '장' + poTbTxt(left) +
+        (left.length < p.lines.length ? ' · 이미 들어간 ' + (p.lines.length - left.length) + '건 제외' : '') + '</small></h2>';
       if (!p.lines.length) h += '<p class="bad">판독된 품목이 없습니다. ‘직접 입력’으로 등록해 주십시오.</p>';
       if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추로 일반 EPDM · NM-CHIP · 락칩을 변경합니다(같은 색 행은 함께 변경). 해당일 = 출고일에 사용 가능한 양 · kg.</p>';
       var pmx = poMixList(p);
       if (pmx.known.length) h += '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(pmx.known.join(', ')) + ' — 같은 색은 한 제품으로만 출고됩니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색상 차이가 있음). 제품 단추로 하나를 선택하십시오.</p>';
       if (pmx.unknown.length) h += '<p class="mixw warn">같은 날 이 거래처에 같은 색이 다른 제품으로 있습니다: ' + esc(pmx.unknown.join(', ')) + ' — 현장명이 없어 동일 현장인지 확인할 수 없습니다. 같은 현장이면 혼합 출고되므로 통일하고, 다른 현장이면 위 현장명 칸에 기재해 주십시오.</p>';
       poZones(p.lines).forEach(function (g) {
-        if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + g.lines.length + '건 · ' + grpKgH(g.lines.map(function (x) { return x.l; }), function (l) { return Number(l.kg) || 0; }) + '</small></h3>';
-        h += '<ul class="polines">' + g.lines.map(function (x) { return poLineHtml(x.l, x.i, V); }).join('') + '</ul>';
+        var gl = g.lines.filter(function (x) { return !gone[x.i]; }), gn = g.lines.length - gl.length;   // v61 일부 등록: 이 구분에서 넣을 줄만 셈
+        if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + gl.length + '건 · ' + grpKgH(gl.map(function (x) { return x.l; }), function (l) { return Number(l.kg) || 0; }) + (gn ? ' · 이미 들어간 ' + gn + '건 제외' : '') + '</small></h3>';
+        h += '<ul class="polines">' + g.lines.map(function (x) { return gone[x.i] ? poGoneHtml(x.l) : poLineHtml(x.l, x.i, V, si[x.i]); }).join('') + '</ul>';
       });
       h += '</section>';
     }
     // 4. 계산 · 넣기
     var ready = p.mode === 'skip' || poReady(p);
     h += '<section class="card poact">';
-    if (p.mode !== 'skip') h += V.simBusy ? '<p class="muted"><span class="spinner sm" aria-hidden="true"></span> 다시 계산하는 중…</p>' : poCalcHtml(V.sim, p.lines);
+    if (p.mode !== 'skip') h += V.simBusy ? '<p class="muted"><span class="spinner sm" aria-hidden="true"></span> 다시 계산하는 중…</p>' : poCalcHtml(V.sim, poLeft(p));
     var nRep = p.mode === 'replace' ? (p.remove || []).length : 0;
-    var label = p.mode === 'skip' ? '등록하지 않기로 결정' : nRep ? '기존 ' + nRep + '건 대체 후 등록' : '등록';
+    var label = p.mode === 'skip' ? '등록하지 않기로 결정' : nRep ? '기존 ' + nRep + '건 대체 후 등록' : p.mode === 'rest' ? '나머지 ' + poLeft(p).length + '건 등록' : '등록';
     h += '<button type="button" class="primary wide mt12" data-act="poapply"' + (ready && !V.busy ? '' : ' disabled') + '>' + (V.busy ? '등록 중…' : label) + '</button>';
     if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고일을 선택하십시오.' : !String(p.cust || '').trim() ? '거래처를 입력하십시오.' :
-      !p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }) ? '제품을 선택하지 않은 행이 있습니다.' : '같은 색이 다른 제품으로 혼합되어 등록할 수 없습니다. 제품 단추로 하나를 선택하십시오.') + '</p>';
+      !poLeft(p).length ? '등록할 행이 없습니다.' : !poLeft(p).every(function (l) { return l.prod && l.color && l.kg > 0; }) ? '제품을 선택하지 않은 행이 있습니다.' : '같은 색이 다른 제품으로 혼합되어 등록할 수 없습니다. 제품 단추로 하나를 선택하십시오.') + '</p>';
     if (p.mode !== 'skip') {
       var rw = poReadyWait(p);
       h += '<button type="button" class="ghost wide mt8 poqbtn" data-act="poqsave"' + (rw && !V.busy ? '' : ' disabled') + '>' + (V.wait ? '대기 목록에 유지 (수정 내용 저장)' : '날짜 미정 — 대기 목록에 보관') + '</button>';
@@ -5343,8 +5364,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return h + '</div>';
   }
-  function poLineHtml(l, i, V) {
-    var x = V.sim && V.sim.lines ? V.sim.lines[i] : null;
+  /** v61 일부 등록에서 뺄 줄 (이미 들어간 줄) */
+  function poGoneHtml(l) {
+    return '<li class="poln gone"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span><b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '') + '</b> <b>' + esc(l.color) + '</b>' +
+      '<small class="pohow">이미 들어감 — 빼고 등록</small></div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b></div></li>';
+  }
+  function poLineHtml(l, i, V, sIdx) {
+    var x = V.sim && V.sim.lines ? V.sim.lines[sIdx == null ? i : sIdx] : null;
     var short = x && x.short > 0;
     var h = '<li class="poln' + (short ? ' short' : '') + (!l.prod ? ' need' : '') + '"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span>';
     var regen = l.regen && l.regen.length ? l.regen : null;
@@ -5388,7 +5414,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       toastOk('등록했습니다 · ' + poMd(p.date) + ' ' + p.cust + ' ' + ((r.item && r.item.n) || p.lines.length) + '건');   // 같은 제품·색은 한 줄로 합쳐 넣으므로 넣은 줄 수
     }, function (e) {
       V.busy = false; render();
-      if (/po_moved|po_done/.test(String((e && e.message) || ''))) { toast(errText(e)); poReadNow(V.id); return; }
+      if (/po_moved|po_done|po_overlap/.test(String((e && e.message) || ''))) { toast(errText(e)); poReadNow(V.id); return; }
       failed(e);
     });
   }
