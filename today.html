@@ -45,7 +45,7 @@ b,td{font-variant-numeric:tabular-nums}
 .home:focus-visible,.ref:focus-visible,.btn:focus-visible,.link:focus-visible,select:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 .wrap{max-width:760px;margin:0 auto;padding:12px 12px 80px}
 .card{background:var(--card);border:1px solid var(--line);border-top:5px solid var(--c,var(--vc));border-radius:16px;padding:14px;margin:0 0 12px}
-.card.out{--c:var(--out);--s:var(--out-soft)} .card.in{--c:var(--in);--s:var(--in-soft)} .card.doc{--c:var(--doc);--s:var(--doc-soft)} .card.set{--c:var(--vc);--s:var(--vsoft)}
+.card.out{--c:var(--out);--s:var(--out-soft)} .card.stw{--c:#1B3A6B;--s:#E8EEF8} .card.in{--c:var(--in);--s:var(--in-soft)} .card.doc{--c:var(--doc);--s:var(--doc-soft)} .card.set{--c:var(--vc);--s:var(--vsoft)}
 .card h2{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;margin:0 0 8px;font-size:19px;font-weight:800;color:var(--c,var(--ink))}
 .card h2 small{font-size:14px;font-weight:700;color:var(--ink2)}
 .card h3{margin:14px 0 6px;font-size:15px;font-weight:800;color:var(--ink2)}
@@ -72,6 +72,7 @@ b,td{font-variant-numeric:tabular-nums}
 .btn{min-height:46px;padding:0 16px;border:0;border-radius:12px;background:var(--vc);color:#fff;font-weight:800;font-size:15.5px;cursor:pointer}
 .btn.ghost{background:#fff;color:var(--vc);border:2px solid var(--line)}
 .btn.sm{min-height:38px;padding:0 12px;font-size:14px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none;white-space:nowrap;flex-shrink:0}
 .btn.danger{background:#fff;color:var(--bad);border:2px solid #F2C4BF}
 .btn:disabled{opacity:.55;cursor:default}
 .tools{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 0}
@@ -236,7 +237,7 @@ details.card.set[open]>summary{margin-bottom:8px}
     if (none) h += '<section class="card"><p class="allnone">오늘 예정된 출고 · 입고 및 처리 대기 공문이 없습니다.</p></section>';
     if (!none) h += tilesHtml(b);
     if (b.late) h += '<p class="late"><span>미처리 출고예정 ' + b.late + '건(' + b.lateCust + '곳) — 출고 처리가 완료되지 않았습니다.</span><a class="link" style="min-height:0;color:var(--warn)" href="stock.html?view=out">출고 화면 →</a></p>';
-    h += outHtml(b) + inHtml(b) + docHtml(b);
+    h += outHtml(b) + stwHtml(b) + inHtml(b) + docHtml(b);
     if (S.mode === 'admin') h += setHtml();
     root.innerHTML = h;
   }
@@ -269,6 +270,17 @@ details.card.set[open]>summary{margin-bottom:8px}
         '<ul class="subs">' + g.lines.map(function (l) { return '<li><span>' + esc(l[0] + ' ' + l[1]) + '</span><span>' + kg(l[2]) + '</span></li>'; }).join('') + '</ul></div></li>';
     });
     return h + '</ul><a class="link" href="stock.html?view=out">출고 화면 열기 →</a></section>';
+  }
+  /** 거래명세서 발행 대기 (v60, 2026-11-23 "두번째 거래명세서를 발주하도록 유도"): 발주서로 잡힌 출고예정 중 명세서가 없는 묶음 → 바로 발행 화면 */
+  function stwHtml(b) {
+    var L = b.stw || [];
+    if (!L.length) return '';
+    var h = '<section class="card stw" id="sStw"><h2>거래명세서 발행 대기 <small>' + L.length + '건 · 출고일순</small></h2><ul class="rows">';
+    L.forEach(function (g) {
+      h += '<li class="row"><div class="rl"><b>' + esc(g.cust) + '</b><small>' + (g.site ? esc(g.site) + ' · ' : '') + esc(md(g.date)) + ' 출고</small><p class="gk">' + esc(g.kg) + '</p></div>' +
+        '<a class="btn sm" href="statement.html?ids=' + encodeURIComponent((g.ids || []).join(',')) + '">거래명세서 발행</a></li>';
+    });
+    return h + '</ul></section>';
   }
   function inHtml(b) {
     if (!b.made.length && !b.pj.length) return none('in', '입고', '오늘 생산예정 · 자재 입고 예정이 없습니다.');

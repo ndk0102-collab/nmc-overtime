@@ -194,6 +194,11 @@ select.inp{padding-right:30px}
 .sbody .fld{margin:0 0 12px}
 .sfoot{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
 .sfoot .btn{flex:1 1 130px}
+/* 거래처 송부 메일 (v60) */
+.mrow{margin:8px 0 0;font-size:14px;color:var(--ink2)}
+.mrow p{margin:0}
+.mpv{margin:2px 0 8px;border:1px solid var(--line);border-radius:8px}
+.mailoff{position:fixed;left:-10000px;top:0;width:210mm;pointer-events:none}
 
 .login{max-width:440px;margin:20px auto}
 .login form{display:flex;gap:8px;margin-top:12px}
@@ -236,6 +241,7 @@ select.inp{padding-right:30px}
 .si{display:flex;align-items:stretch;margin-top:2mm;height:5.2mm;border:.25mm solid #9FB0C9}
 .si span{width:14.5mm;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:#EDF2FA;color:#1B3A6B;font-size:6.5pt;font-weight:700}
 .si b{flex:1;min-width:0;display:flex;align-items:center;padding:0 2mm;font-size:7.8pt;font-weight:700;white-space:nowrap;overflow:hidden}
+.si b small{min-width:0;margin-left:1.6mm;font-size:.88em;font-weight:500;color:#3D4656;overflow:hidden;text-overflow:ellipsis}   /* 현장 주소 (v60) */
 table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed;border:.25mm solid #9FB0C9}
 .it thead th{height:5mm;padding:0;background:#1B3A6B;color:#fff;font-size:6.7pt;font-weight:800;text-align:center;white-space:nowrap}
 .it td{height:var(--rh,5mm);padding:0 1.5mm;border-top:.2mm solid #E3E8F0;border-left:.2mm solid #E3E8F0;font-size:7.8pt;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -316,6 +322,7 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 
 /* 한 부씩 크게 (품목 8줄부터, 2026-11-21): A4 한 장에 한 부 · 칸 20줄 · 글자와 줄 높이를 키움 */
 .pg.f .cp,.pg.f .cp.b{top:0;height:297mm;padding:13mm 14mm 10mm}
+.pg.f.ml,.pg.f.ml .cp{height:296mm}   /* 거래처 송부 PDF: 쪽 나눔이 A4에 정확히 맞게 1mm 줄임 */
 .pg.f .hd{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);height:26mm;padding-bottom:2.4mm;border-bottom-width:.8mm}
 .pg.f .hd .lgo{height:22mm}
 .pg.f .tt b{font-size:22pt}
@@ -526,7 +533,9 @@ body.pvon{overflow:hidden}
     bad_item: '제품 · 색상을 확인해 주십시오.', dup_item: '같은 출고 기록이 두 번 들어갔습니다.', bad_qty: '수량을 확인해 주십시오 (kg, 정수).',
     bad_price: '단가를 확인해 주십시오 (원 단위 숫자).', bad_amount: '금액을 확인해 주십시오.', bad_date: '거래일자를 확인해 주십시오.',
     bad_biz: '등록번호는 숫자 10자리입니다.', bad_email: '이메일 주소를 확인해 주십시오.', dup_cust: '같은 거래처가 이미 있습니다.', need_name: '상호를 입력해 주십시오.',
-    bad_input: '입력값을 확인해 주십시오.'
+    bad_input: '입력값을 확인해 주십시오.',
+    mail_bad: '첨부 PDF를 만들지 못했습니다. 다시 시도해 주십시오.', mail_size: '첨부 PDF 용량이 너무 큽니다.', pdf_lib: 'PDF 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주십시오.',
+    need_subj: '메일 제목을 입력해 주십시오.'
   };
   function errText(e) {
     var c = String((e && e.message) || e || '');
@@ -624,7 +633,7 @@ body.pvon{overflow:hidden}
 
   /* ───────── 작성 양식 ───────── */
   function blankForm() {
-    return { no: '', date: S.I ? S.I.today : '', cust: '', site: '', memo: '', vat: 'ex', amt: true, lines: [], linked: [], from: 'new', err: '', touched: false };
+    return { no: '', date: S.I ? S.I.today : '', cust: '', site: '', addr: '', memo: '', vat: 'ex', amt: true, lines: [], linked: [], from: 'new', err: '', touched: false };
   }
   function sLine(o) {
     o = o || {};
@@ -644,7 +653,7 @@ body.pvon{overflow:hidden}
     call('apiStmtDraft', [ids]).then(function (d) {
       S.busy = false;
       var F = blankForm();
-      F.from = 'box'; F.date = d.date; F.cust = d.cust; F.site = d.site; F.linked = d.linked || []; F.boxType = d.type;
+      F.from = 'box'; F.date = d.date; F.cust = d.cust; F.site = d.site; F.addr = d.addr || ''; F.linked = d.linked || []; F.boxType = d.type;   // v60: 발주서의 현장 주소
       F.lines = d.lines.map(function (l) { return sLine({ rid: l.rid, prod: l.prod, color: l.color, name: l.name, spec: l.spec, qty: l.qty, price: l.price, psrc: l.psrc, memo: l.memo }); });
       F.lines.forEach(function (l, i) { var src = d.lines[i]; if (src.psrc === 'last') { var a = priceOf(F.cust, l.prod, l.color); l.pat = a && a.at ? a.at : ''; } });
       S.F = F;
@@ -655,7 +664,7 @@ body.pvon{overflow:hidden}
   }
   function editFrom(st, useCur) {
     var F = blankForm();
-    F.no = st.no; F.date = st.date; F.cust = st.cust; F.site = st.site; F.memo = st.memo; F.vat = st.vat; F.amt = st.amt !== false; F.from = 'edit';
+    F.no = st.no; F.date = st.date; F.cust = st.cust; F.site = st.site; F.addr = st.addr || ''; F.memo = st.memo; F.vat = st.vat; F.amt = st.amt !== false; F.from = 'edit';
     F.lines = st.lines.map(function (l) {
       if (l.k === 'x') return xLine(l);
       var o = { rid: l.rid, made: l.made, prod: l.prod, color: l.color, name: l.name, spec: l.spec, qty: l.qty, price: l.price, memo: l.memo, diff: l.diff, cur: l.cur };
@@ -763,7 +772,7 @@ body.pvon{overflow:hidden}
         var v = s.state === '취소';
         h += '<button type="button" class="ent' + (v ? ' void' : '') + '" data-act="open" data-v="' + esc(s.no) + '"><span class="no">' + esc(noShort(s.no)) + '</span>' +
           '<span class="et"><b>' + esc(s.cust) + (s.site ? '<em>' + esc(s.site) + '</em>' : '') + '</b><small>' + esc(s.sum) + '</small></span>' +
-          '<span class="ea"><b>' + won(s.total) + '</b><small>' + (v ? '<span class="st void">취소</span>' : s.printed ? '인쇄 ' + s.printed + '회' : '<span class="st gold">인쇄 전</span>') + '</small></span></button>';
+          '<span class="ea"><b>' + won(s.total) + '</b><small>' + (v ? '<span class="st void">취소</span>' : (s.printed ? '인쇄 ' + s.printed + '회' : '<span class="st gold">인쇄 전</span>') + (I.mail && I.mail[s.no] ? ' ' + mailTag(I.mail[s.no]) : '')) + '</small></span></button>';
       });
     });
     return h;
@@ -787,10 +796,13 @@ body.pvon{overflow:hidden}
         return '<li>' + esc(l.name || pname(l.prod, l.color)) + ': ' + esc(parts.join(' · ') || '바뀜') + '</li>';
       }).join('') + '</ul>' + (v ? '' : '<div class="tools"><button type="button" class="btn sm" data-act="fixcur">출고 기록대로 명세서 수정</button></div>') + '</div>';
     }
+    var ml = v ? null : mailOf(st);
     h += '<div class="tools"><button type="button" class="btn" data-act="print"' + (v ? ' disabled' : '') + '>인쇄 · PDF 저장</button>' +
+      (v ? '' : '<button type="button" class="btn ghost" data-act="mail">' + (ml ? '메일 재발송' : '메일 발송') + '</button>') +
       (v ? '' : '<button type="button" class="btn ghost" data-act="edit">수정</button>') +
       (v ? '' : '<button type="button" class="btn ghost" data-act="cancel"' + (S.busy ? ' disabled' : '') + '>' + (S.arm === 'cancel' ? '한 번 더 누르면 취소' : '발행 취소') + '</button>') +
       '<button type="button" class="btn ghost" data-act="back">목록</button></div>';
+    if (!v) h += '<div class="mrow">' + (ml ? '<p>' + mailTag(ml) + ' ' + esc(mailLine(ml)) + '</p>' : '<p class="hint" style="margin:0">거래처 송부 메일: 발송 전</p>') + '</div>';
     if (S.arm === 'cancel') h += '<p class="fwarn">취소하면 이 명세서가 출고 기록에 넣은 단가 · 수량 · 확정이 명세서 전으로 돌아가고, 명세서에서 새로 만든 출고 · 장부 기록은 삭제됩니다. 번호는 \'취소\'로 남습니다.</p>';
     if (!v && (!S.I.co.saved)) h += '<p class="infobox">공급자 칸은 \'회사 정보\' 기본값입니다. 업태 · 종목 · 입금 계좌 등을 넣으려면 회사 정보에서 저장해 주십시오.</p>';
     h += '<p class="hint">' + esc(layoutNote(st.lines.length)) + ' 인쇄 창에서 \'PDF로 저장\'을 고르면 메일 · 팩스용 PDF가 됩니다.</p></section>';
@@ -846,6 +858,12 @@ body.pvon{overflow:hidden}
       '<tr><th>등록번호</th><td>' + esc(x.biz || '') + (tel ? '<small>' + esc(tel) + '</small>' : '') + '</td></tr>' +
       '<tr><th>주 소</th><td class="ad">' + esc(x.addr || '') + '</td></tr></table></div>';
   }
+  /** 납품장소 칸: 현장명 · 현장 주소 (v60, 2026-11-23 "현장 주소 정보도 다 발주서에있는 거 가지고와서") — 주소가 길면 끝을 줄임 */
+  function siteHtml(st) {
+    var s = String(st.site || '').trim(), a = String(st.addr || '').trim();
+    if (a && s && s.indexOf(a) >= 0) a = '';   // 현장명에 주소가 이미 들어 있으면 한 번만
+    return esc(s) + (a ? '<small>' + (s ? '· ' : '') + esc(a) + '</small>' : '');
+  }
   /** 회사 도장 그림 (서버가 관리자에게만 보냄 · PNG data URL만 받음). 취소한 명세서에는 찍지 않음 */
   function sealSrc(st) {
     var s = S.I && S.I.seal;
@@ -863,7 +881,7 @@ body.pvon{overflow:hidden}
     else h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
       ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]], sealSrc(st)) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
-    h += '<div class="si"><span>납품장소</span><b>' + esc(st.site || '') + '</b></div>';
+    h += '<div class="si"><span>납품장소</span><b>' + siteHtml(st) + '</b></div>';
     var cols = L.full ? (amt ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['8mm', '', '30mm', '12mm', '22mm', '34mm'])
       : (amt ? ['6mm', '', '14mm', '10mm', '16mm', '13mm', '21mm', '18mm', '14mm'] : ['6mm', '', '20mm', '11mm', '20mm', '26mm']);   // 2026-11-23 품명 칸 확보 (67 → 76mm · 금액 없음 92 → 105mm)
     h += '<table class="it"><colgroup>' + cols.map(function (w) { return '<col' + (w ? ' style="width:' + w + '"' : '') + '>'; }).join('') + '</colgroup>' +
@@ -907,7 +925,8 @@ body.pvon{overflow:hidden}
     if (F.linked && F.linked.length) h += '<p class="infobox">이 상자의 일부 출고는 이미 거래명세서 ' + F.linked.map(function (no) { return '<button type="button" class="link" data-act="open" data-v="' + esc(no) + '">No. ' + esc(no) + '</button>'; }).join(', ') + '에 들어 있어 뺐습니다.</p>';
     h += '<div class="fgrid"><label class="fld"><span>거래일자</span><input class="inp" type="date" data-f="date" value="' + esc(F.date) + '" max="' + maxD + '"></label>' +
       '<label class="fld w2"><span>거래처</span><input class="inp" type="text" data-f="cust" list="custList" autocomplete="off" maxlength="60" value="' + esc(F.cust) + '" placeholder="거래처 상호"></label>' +
-      '<label class="fld wf" style="grid-column:1/-1"><span>납품장소 · 현장 <small>선택</small></span><input class="inp" type="text" data-f="site" autocomplete="off" maxlength="60" value="' + esc(F.site) + '"></label></div>' +
+      '<label class="fld wf" style="grid-column:1/-1"><span>납품장소 · 현장 <small>선택</small></span><input class="inp" type="text" data-f="site" autocomplete="off" maxlength="60" value="' + esc(F.site) + '"></label>' +
+      '<label class="fld wf" style="grid-column:1/-1"><span>현장 주소 <small>선택 · 발주서에 있으면 자동</small></span><input class="inp" type="text" data-f="addr" autocomplete="off" maxlength="120" value="' + esc(F.addr || '') + '" placeholder="납품장소 옆에 함께 찍힙니다"></label></div>' +
       '<datalist id="custList">' + names.map(function (n) { return '<option value="' + esc(n) + '"></option>'; }).join('') + '</datalist>';
     h += '<div class="cinfo" id="cinfo">' + cinfoHtml(F.cust, cu) + '</div>';
     if (F.date) h += '<p class="hint" id="dnote">' + dateNote(F.date) + '</p>';
@@ -1028,7 +1047,7 @@ body.pvon{overflow:hidden}
   }
   function payload() {
     var F = S.F;
-    return { no: F.no, date: F.date, cust: String(F.cust).trim(), site: String(F.site).trim(), memo: String(F.memo).trim(), vat: F.vat, amt: F.amt,
+    return { no: F.no, date: F.date, cust: String(F.cust).trim(), site: String(F.site).trim(), addr: String(F.addr || '').trim(), memo: String(F.memo).trim(), vat: F.vat, amt: F.amt,
       lines: F.lines.map(function (l) {
         if (l.k === 's') return { k: 's', rid: l.rid, prod: l.prod, color: l.color, name: String(l.name).trim(), spec: String(l.spec).trim(), qty: num(l.qty), price: num(l.price), memo: String(l.memo).trim() };
         var o = { k: 'x', lid: l.lid, name: String(l.name).trim(), spec: String(l.spec).trim(), unit: String(l.unit).trim(), cat: l.cat, memo: String(l.memo).trim() };
@@ -1063,6 +1082,8 @@ body.pvon{overflow:hidden}
       var msg = (was ? '수정했습니다' : '발행했습니다') + ' · No. ' + d.stmt.no + (d.confirmed ? ' · 출고 확정 ' + d.confirmed + '줄' : '') + (d.kept ? ' · 출고 화면에서 고친 ' + d.kept + '줄은 그대로' : '');
       toast(d.mixWarn ? msg + ' (같은 색 다른 제품: ' + d.mixWarn + ')' : msg);
       if (printAfter) setTimeout(printCur, 150);   // 발행하고 인쇄: 저장한 명세서로 바로 인쇄 창
+      // v60: 새로 발행하면 거래처 송부 메일 확인 창 (보내기를 눌러야 보냄)
+      if (!was && d.stmt.state !== '취소') setTimeout(function () { if (S.cur && S.cur.no === d.stmt.no && !S.sheet) openMail(S.cur, true); }, printAfter ? 700 : 80);
     }, function (e) {
       S.busy = false; S.pv = false; renderPv();
       if (isAuth(e)) return;
@@ -1090,7 +1111,7 @@ body.pvon{overflow:hidden}
       sup += o.supply; tax += o.tax;
       return o;
     });
-    return { draft: true, no: F.no || '', date: F.date, cust: String(F.cust || '').trim(), site: String(F.site || '').trim(), memo: String(F.memo || '').trim(),
+    return { draft: true, no: F.no || '', date: F.date, cust: String(F.cust || '').trim(), site: String(F.site || '').trim(), addr: String(F.addr || '').trim(), memo: String(F.memo || '').trim(),
       vat: F.vat, amt: F.amt, lines: lines, supply: sup, tax: tax, total: sup + tax };
   }
   function openPreview() {
@@ -1160,6 +1181,131 @@ body.pvon{overflow:hidden}
     if (S.I.names.indexOf(st.cust) < 0) S.I.names.unshift(st.cust);
   }
 
+  /* ───────── 거래처 송부 메일 (v60, 2026-11-23 지시) ─────────
+     "거래처에게 보낼 거래명세서를 1부만 따로 해야된다. 그래서 확정하기를 누르면 저장되어있는 거래처 메일로 자동으로 거래명세서가 발송된다.
+      보낼때는 물론 우리의 컨펌을 받는다. 여기서 보내는 용도에는 금액이 포함되어야 한다."
+     새로 발행하면 확인 창이 바로 뜹니다(받는 주소 = 거래처 정보의 이메일 · 고치면 거래처 정보에도 저장). [보내기]를 눌러야 서버 대기열에 들어가고,
+     실제 발송은 사무실 컴퓨터의 메일 프로그램(1.8판)이 회사 메일로 합니다. 첨부: 공급받는자 보관용 1부 · 금액 포함(인쇄 설정과 상관없이) · A4 한 부(20줄마다 한 장). */
+  var MAIL_RE = /^[^\s@,;<>"']{1,64}@[A-Za-z0-9.\-]{1,190}\.[A-Za-z]{2,24}$/, PDF_LIB = 'lib/html2pdf.bundle.min.js', PDF_LOADING = null;
+  var MAIL_ST = { '대기': '발송 대기', '보내는 중': '발송 중', '보냄': '발송 완료', '실패': '발송 실패' };
+  function mailOf(st) { return (st && st.mail) || (st && S.I && S.I.mail && S.I.mail[st.no]) || null; }
+  function mailTag(m) {
+    var c = m.st === '보냄' ? 'ok' : m.st === '실패' ? 'void' : 'gold';
+    return '<span class="st ' + c + '">메일 ' + esc(MAIL_ST[m.st] || m.st || '') + '</span>';
+  }
+  function shortAt(at) { var m = /^\d{4}-(\d{2})-(\d{2}) (\d{2}:\d{2})/.exec(String(at || '')); return m ? Number(m[1]) + '/' + Number(m[2]) + ' ' + m[3] : ''; }
+  function mailLine(m) {
+    return [m.to, m.st === '보냄' ? '발송 ' + shortAt(m.sentAt) : '요청 ' + shortAt(m.at), m.st === '실패' && m.msg ? m.msg : ''].filter(Boolean).join(' · ');
+  }
+  function mailSubj(st, co) {
+    var p = P3(st.date);
+    return ('[' + (co.name || '거래명세서') + '] 거래명세서 송부 · ' + p[1] + '월 ' + p[2] + '일' + (st.site ? ' ' + st.site : '') + ' (No. ' + st.no + ')').slice(0, 120);
+  }
+  function mailBody(st, co) {
+    var p = P3(st.date), tel = [co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · '), L = [];
+    L.push('안녕하십니까. ' + (co.name || '') + '입니다.', '', p[1] + '월 ' + p[2] + '일 출고분 거래명세서를 첨부하여 송부드립니다.', '', '· 명세서 번호: ' + st.no);
+    if (st.site || st.addr) L.push('· 납품장소: ' + [st.site, st.addr].filter(Boolean).join(' · '));
+    L.push('· 합계금액: ₩' + fmt(st.total) + (st.vat === 'none' ? '' : ' (VAT 포함)'), '', '내용 확인 부탁드립니다.', '감사합니다.', '', co.name || '');
+    if (tel) L.push(tel);
+    return L.join('\n').slice(0, 2000);
+  }
+  /** 송부용 문서: 공급받는자 보관용 한 부 · 금액 포함 · 한 부씩 크게. only = 앞에서 몇 장만(미리보기) */
+  function mailDocHtml(st, only) {
+    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = st.lines || [], k = Math.max(1, Math.ceil(lines.length / FULL_ROWS));
+    var L = { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k }, x = Object.assign({}, st, { amt: true, draft: false }), out = '';
+    for (var p = 0; p < (only ? Math.min(only, k) : k); p++) out += '<section class="pg f ml">' + copyHtml(x, co, cu, lines.slice(p * L.per, (p + 1) * L.per), p, k, L, 't') + '</section>';
+    return out;
+  }
+  function pcNote(pc) {
+    if (!pc) return '';
+    if (!pc.on) return '<p class="fwarn">사무실 컴퓨터 메일 프로그램이 연결되어 있지 않습니다. 요청한 메일은 발송 대기로 남고, 메일 프로그램(1.8판)을 연결하면 발송됩니다.</p>';
+    if (!pc.seen) return '<p class="fwarn">사무실 컴퓨터 메일 프로그램이 아직 실행되지 않았습니다. 프로그램이 실행되면 발송됩니다.</p>';
+    if (!pc.send) return '<p class="fwarn">사무실 컴퓨터 메일 프로그램이 이전 판입니다. 1.8판으로 업데이트하면 대기 중인 메일이 발송됩니다.</p>';
+    if (pc.stale) return '<p class="fwarn">사무실 컴퓨터 메일 프로그램이 ' + (pc.age >= 120 ? Math.floor(pc.age / 60) + '시간' : pc.age + '분') + ' 동안 응답하지 않았습니다. 컴퓨터가 켜지면 발송됩니다.</p>';
+    return '';
+  }
+  function pcReady() { var pc = S.I && S.I.mailPc; return !!(pc && pc.on && pc.seen && pc.send && !pc.stale); }
+  function openMail(st, auto) {
+    if (!st || st.state === '취소' || !S.I) return;
+    var cu = custOf(st.cust) || {}, co = S.I.co || {};
+    S.sheet = { kind: 'mail', st: st, auto: !!auto, err: '', step: '', f: { to: cu.email || '', subj: mailSubj(st, co), body: mailBody(st, co) } };
+    renderSheet();
+  }
+  function mailSheetHtml(X) {
+    var st = X.st, m = mailOf(st), busy = !!X.step;
+    var h = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="shead"><h2 id="shT">거래처 메일 발송</h2>' +
+      '<button type="button" class="btn ghost sm" data-act="shclose"' + (busy ? ' disabled' : '') + '>닫기</button></div><div class="sbody">';
+    if (X.auto) h += '<p class="infobox" style="margin:0 0 12px">발행을 완료했습니다. 거래처에 보낼 거래명세서(금액 포함 1부)를 확인한 뒤 [보내기]를 눌러 주십시오.</p>';
+    if (X.err) h += '<p class="err" role="alert">' + esc(X.err) + '</p>';
+    if (m) h += '<p class="hint" style="margin:0 0 10px">' + mailTag(m) + ' ' + esc(mailLine(m)) + '</p>';
+    h += pcNote(S.I.mailPc);
+    h += '<label class="fld" style="margin-top:10px"><span>받는 주소</span><input class="inp" type="email" data-s="to" inputmode="email" autocomplete="off" maxlength="120" value="' + esc(X.f.to) + '" placeholder="거래처 이메일"></label>';
+    if (!(custOf(st.cust) || {}).email) h += '<p class="hint" style="margin:-6px 0 12px">거래처 정보에 이메일이 없습니다. 입력한 주소는 거래처 정보에도 저장됩니다.</p>';
+    h += '<label class="fld"><span>제목</span><input class="inp" type="text" data-s="subj" maxlength="120" value="' + esc(X.f.subj) + '"></label>' +
+      '<label class="fld"><span>본문</span><textarea class="inp" data-s="body" maxlength="2000" rows="9">' + esc(X.f.body) + '</textarea></label>' +
+      '<p class="hint" style="margin:0 0 6px">첨부: 거래명세서 No. ' + esc(st.no) + ' PDF · 공급받는자 보관용 1부 · 금액 포함' + ((st.lines || []).length > FULL_ROWS ? ' · ' + Math.ceil(st.lines.length / FULL_ROWS) + '장' : '') + '</p>' +
+      '<div class="pvbox mpv" id="pvbox3"><div class="pvk" id="pvk3">' + mailDocHtml(st, 1) + '</div></div>';
+    return h + '</div><div class="sfoot"><button type="button" class="btn ghost" data-act="shclose"' + (busy ? ' disabled' : '') + '>' + (X.auto ? '나중에 보내기' : '취소') + '</button>' +
+      '<button type="button" class="btn" data-act="mailsend"' + (busy ? ' disabled' : '') + '>' + (X.step === 'pdf' ? 'PDF 만드는 중…' : X.step === 'up' ? '발송 요청 중…' : '보내기') + '</button></div></div>';
+  }
+  function loadPdfLib() {
+    if (window.html2pdf) return Promise.resolve();
+    if (!PDF_LOADING) PDF_LOADING = new Promise(function (res, rej) {
+      var sc = document.createElement('script');
+      sc.src = PDF_LIB;
+      sc.onload = function () { if (window.html2pdf) res(); else { PDF_LOADING = null; rej(new Error('pdf_lib')); } };
+      sc.onerror = function () { PDF_LOADING = null; if (sc.parentNode) sc.parentNode.removeChild(sc); rej(new Error('pdf_lib')); };
+      document.head.appendChild(sc);
+    });
+    return PDF_LOADING;
+  }
+  /** 송부용 PDF(base64): 화면 밖에 그린 뒤 그림으로 찍어 A4 쪽마다 한 장 */
+  function mailPdf(st) {
+    return loadPdfLib().then(function () {
+      var off = document.createElement('div'), k = document.createElement('div');
+      off.className = 'mailoff'; k.className = 'mailk'; k.innerHTML = mailDocHtml(st, 0); off.appendChild(k); document.body.appendChild(off);
+      var done = function () { if (off.parentNode) off.parentNode.removeChild(off); };
+      return new Promise(function (res) { imgsReady(k, res); })
+        .then(function () { return document.fonts && document.fonts.ready ? document.fonts.ready : null; })
+        .then(function () {
+          return window.html2pdf().set({ margin: 0, image: { type: 'jpeg', quality: 0.92 },
+            html2canvas: { scale: 2, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
+            pagebreak: { mode: ['css'], before: '.mailk > .pg + .pg' } }).from(k).outputPdf('datauristring');
+        })
+        .then(function (uri) { done(); var t = String(uri || ''), i = t.indexOf('base64,'); if (i < 0) throw new Error('mail_bad'); return t.slice(i + 7); },
+          function (e) { done(); throw (e && e.message && ERR[e.message] ? e : new Error('mail_bad')); });
+    });
+  }
+  function custEmail(name, to) {
+    var k = ckey(name), c = (S.I.custs || []).filter(function (x) { return ckey(x[0]) === k; })[0];
+    if (c) c[7] = to; else (S.I.custs = S.I.custs || []).push([name, '', '', '', '', '', '', to, '', '명세서']);
+  }
+  function mailSend() {
+    var X = S.sheet;
+    if (!X || X.kind !== 'mail' || X.step) return;
+    var to = String(X.f.to || '').trim(), subj = String(X.f.subj || '').trim(), body = String(X.f.body || '');
+    if (!MAIL_RE.test(to) || to.length > 120) { X.err = ERR.bad_email; renderSheet(); return; }
+    if (!subj) { X.err = ERR.need_subj; renderSheet(); return; }
+    var st = X.st, co = S.I.co || {};
+    X.err = ''; X.step = 'pdf'; renderSheet();
+    mailPdf(st).then(function (b64) {
+      if (S.sheet !== X) throw new Error('gone');
+      X.step = 'up'; renderSheet();
+      return call('apiStmtMail', [{ no: st.no, to: to, subj: subj, body: body, name: '거래명세서 ' + (co.name ? co.name + ' ' : '') + st.no, data: b64 }]);
+    }).then(function (d) {
+      S.I.mail = d.map || S.I.mail || {};
+      if (S.cur && S.cur.no === st.no) S.cur.mail = d.mail;
+      custEmail(st.cust, to);
+      X.step = ''; closeSheet(); render();
+      toast(pcReady() ? '메일 발송을 요청했습니다. 사무실 컴퓨터 메일 프로그램이 곧 발송합니다.' : '메일 발송을 요청했습니다. 메일 프로그램이 연결되면 발송됩니다.');
+    }, function (e) {
+      X.step = '';
+      if (isAuth(e) || String(e && e.message) === 'gone' || S.sheet !== X) return;
+      X.err = errText(e); renderSheet();
+    });
+  }
+
   /* 거래처 */
   function custHtml() {
     var I = S.I, q = ckey(S.cq), L = (I.custs || []).filter(function (c) { return !q || ckey(c[0]).indexOf(q) >= 0 || String(c[1]).replace(/\D/g, '').indexOf(S.cq.replace(/\D/g, '') || '~') >= 0; });
@@ -1185,6 +1331,7 @@ body.pvon{overflow:hidden}
   function renderSheet() {
     var X = S.sheet;
     if (!X) { sheetEl.hidden = true; sheetEl.innerHTML = ''; return; }
+    if (X.kind === 'mail') { sheetEl.innerHTML = mailSheetHtml(X); sheetEl.hidden = false; fitBox($('pvbox3'), $('pvk3')); if (window.NMCNav) NMCNav.sync(); return; }
     var h = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shT"><div class="shead"><h2 id="shT">' + (X.old ? '거래처 정보' : '거래처 추가') + '</h2>' +
       '<button type="button" class="btn ghost sm" data-act="shclose">닫기</button></div><div class="sbody">';
     if (X.err) h += '<p class="err" role="alert">' + esc(X.err) + '</p>';
@@ -1246,7 +1393,7 @@ body.pvon{overflow:hidden}
   function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { toastEl.hidden = true; }, 4200); }
   document.addEventListener('click', function (ev) {
     var el = ev.target.closest('[data-act]');
-    if (!el) { if (ev.target === sheetEl) closeSheet(); return; }
+    if (!el) { if (ev.target === sheetEl && !(S.sheet && S.sheet.step)) closeSheet(); return; }
     var act = el.getAttribute('data-act'), v = el.getAttribute('data-v'), i = Number(el.getAttribute('data-i'));
     if (el.disabled) return;
     switch (act) {
@@ -1289,6 +1436,8 @@ body.pvon{overflow:hidden}
       case 'custedit': openCust(v); return;
       case 'shclose': closeSheet(); return;
       case 'custsave': custSave(); return;
+      case 'mail': if (S.cur) openMail(S.cur, false); return;
+      case 'mailsend': mailSend(); return;
       case 'custdel': custDel(); return;
       case 'cosave': coSave(); return;
     }
@@ -1301,7 +1450,7 @@ body.pvon{overflow:hidden}
     if (f === 'cq') { S.cq = el.value; var pos = el.selectionStart; render(); var q = root.querySelector('[data-f="cq"]'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } return; }
     if (!S.F) return;
     if (f === 'cust') { S.F.cust = el.value; var ci = $('cinfo'); if (ci) ci.innerHTML = cinfoHtml(S.F.cust, custOf(S.F.cust)); return; }
-    if (f === 'site' || f === 'memo') { S.F[f] = el.value; return; }
+    if (f === 'site' || f === 'memo' || f === 'addr') { S.F[f] = el.value; return; }
     var lk = el.getAttribute('data-l');
     if (!lk) return;
     var i = Number(el.getAttribute('data-i')), l = S.F.lines[i];
@@ -1343,7 +1492,7 @@ body.pvon{overflow:hidden}
       function (e) { S.loginErr = errText(e); render(); });
   });
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
+    if (ev.key === 'Escape' && S.sheet) { if (!S.sheet.step) closeSheet(); return; }
     if (ev.key === 'Escape' && S.pv) { closePv(); return; }
     if (ev.key === 'Enter' && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'radio' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }
   });

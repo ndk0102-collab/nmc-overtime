@@ -4874,7 +4874,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function poRow(x) {
     var st = PO_STATE[x.state] || 'off', busy = S.poOpening === x.id;
-    var h = '<li class="poitem st-' + st + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(poStTxt(x.state) || '?') + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
+    var h = '<li class="poitem st-' + st + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(x.shipped ? '출고 완료' : (poStTxt(x.state) || '?')) + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
       '<small class="pometa">' + esc(poWhen(x.at)) + ' 업로드' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>';
     var readBtn = function (label, cls) { return '<button type="button" class="' + (cls || 'ghost') + ' sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '판독 중…' : label) + '</button>'; };
     if (x.state === '기다림' || (x.state === '읽는 중' && x.stale)) {
@@ -5152,7 +5152,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function poReady(p) { return !!p && isYmd(p.date) && !!String(p.cust || '').trim() && p.lines.length > 0 && p.lines.every(function (l) { return l.prod && l.color && l.kg > 0; }) && !poMixList(p).known.length; }
   function poPlanOut(p) {
-    return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', mode: p.mode === 'replace' ? 'replace' : 'add',
+    return { date: p.date, cust: String(p.cust || '').trim(), site: String(p.site || '').trim(), poNo: p.poNo || '', addr: String(p.addr || '').trim(), mode: p.mode === 'replace' ? 'replace' : 'add',
       remove: p.mode === 'replace' ? (p.remove || []) : [],
       lines: p.lines.map(function (l) { return { zone: l.zone || '', prod: l.prod, color: l.color, kg: l.kg, price: l.price == null ? '' : l.price, note: l.note || '', pack: l.pack || '' }; }) };
   }
@@ -5182,6 +5182,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<label class="label mt16" for="prv-cust">' + step(2) + '거래처</label><input id="prv-cust" class="text" type="text" data-in="prvcust" list="cust-list" maxlength="60" autocomplete="off" value="' + esc(p.cust || '') + '" placeholder="거래처 이름">';
     if (p.cust && S.customers.indexOf(String(p.cust).trim()) < 0) h += '<p class="hint">신규 거래처입니다. 기존 거래처라면 목록에서 선택하십시오(이름이 같아야 합계가 일치합니다).</p>';
     h += '<label class="label mt12" for="prv-site">현장명</label><input id="prv-site" class="text" type="text" data-in="prvsite" maxlength="60" autocomplete="off" value="' + esc(p.site || '') + '" placeholder="물표의 현장명 칸에 찍힙니다">';
+    // 현장 주소 (v60, 2026-11-23): 발주서에서 읽은 주소 — 거래명세서 납품장소에 자동으로 들어감
+    h += '<label class="label mt12" for="prv-addr">현장 주소</label><input id="prv-addr" class="text" type="text" data-in="prvaddr" maxlength="120" autocomplete="off" value="' + esc(p.addr || '') + '" placeholder="거래명세서 납품장소에 함께 찍힙니다">';
     if (p.poNo) h += '<p class="hint">발주번호 ' + esc(p.poNo) + '</p>';
     h += '</section>';
     // 2. 이미 들어 있는 예정
@@ -6760,7 +6762,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       apply(r);
       S.sheet = null;
       render();
-      toastOk('확정했습니다 · ' + ls.length + '건 · 현재고에 반영');
+      var dn = r && r.done ? r.done : {};   // v60: 확정 때 정리한 것 (단가는 금액 보는 화면에서만 알림)
+      toastOk('확정했습니다 · ' + ls.length + '건 · 현재고에 반영' + (S.money && dn.priced ? ' · 기준 단가 적용 ' + dn.priced + '줄' : '') + (dn.po ? ' · 발주서 ' + dn.po + '건 출고 완료' : ''));
     }, function (e) {
       S.busy = false;
       renderSheet();
@@ -7592,6 +7595,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (k === 'poedit') { S.poEditNote = el.value; return; }
     if (k === 'prvcust') { if (S.poRev) S.poRev.plan.cust = el.value; return; }
     if (k === 'prvsite') { if (S.poRev) S.poRev.plan.site = el.value; return; }
+    if (k === 'prvaddr') { if (S.poRev) S.poRev.plan.addr = el.value; return; }
     if (k === 'price') {
       var p = el.getAttribute('data-p');
       S.price[p] = el.value;
