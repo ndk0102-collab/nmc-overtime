@@ -210,7 +210,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   <p class="banner info" id="srcBanner" hidden></p>
   <form class="banner info paylock" id="payBanner" hidden autocomplete="off">
     <span id="payBannerTxt"></span>
-    <span class="payrow" id="payRow"><label for="payPw" class="sr">직원 급여 비밀번호</label><input type="password" id="payPw" placeholder="직원 급여 비밀번호" maxlength="100" autocomplete="current-password"><button class="btn" type="submit" id="payGo">급여대장 반영</button></span>
+    <span class="payrow" id="payRow"><label for="payPw" class="sr">비밀번호</label><input type="password" id="payPw" placeholder="비밀번호" maxlength="100" autocomplete="current-password"><button class="btn" type="submit" id="payGo">급여대장 반영</button></span>
     <span class="status" id="payMsg" role="status"></span>
   </form>
 
@@ -544,9 +544,9 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     b.hidden = !PAY_LOCK;
     if (!PAY_LOCK) return;
     var unset = PAY_LOCK === 'pay_unset';
-    $('payBannerTxt').textContent = unset ? '직원 급여 비밀번호가 아직 설정되지 않아 인건비는 설정값을 적용했습니다. 관리자 → 재무 → 직원 급여에서 처음 설정하십시오.'
-      : PAY ? '인건비는 저장된 급여대장 값입니다. 최신 급여대장을 반영하려면 직원 급여 비밀번호를 입력하십시오.'
-      : '인건비는 설정값을 적용했습니다. 급여대장을 반영하려면 직원 급여 비밀번호를 입력하십시오.';
+    $('payBannerTxt').textContent = unset ? '인건비는 설정값을 적용했습니다.'
+      : PAY ? '인건비는 저장된 급여대장 값입니다. 최신 급여대장을 반영하려면 비밀번호를 입력하십시오.'
+      : '인건비는 설정값을 적용했습니다. 급여대장을 반영하려면 비밀번호를 입력하십시오.';
     $('payRow').hidden = unset;
   }
   function addRow(list, color, label, value, bold, note) {
@@ -582,7 +582,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       if (k === 'labor' && r.lab.pay) {
         addRow(list, 'var(--fix)', '인건비', r.lab.total, false, '급여대장 ' + r.lab.pay.n + '명 지급합계 ' + won(r.lab.pay.gross) + (r.lab.pay.partial ? ' (당월 누계)' : '') +
           ' + 급여대장 외 ' + won(r.lab.other) + (r.lab.est ? ' (추정: 설정 인건비 − 급여대장)' : ''));
-      } else addRow(list, 'var(--fix)', FIXED_LABELS[k] + (k === 'labor' ? (PAY_LOCK ? ' (설정값 — 직원 급여 비밀번호 확인 전)' : ' (설정값)') : ''), r.fx[k]);
+      } else addRow(list, 'var(--fix)', FIXED_LABELS[k] + (k === 'labor' ? ' (설정값)' : ''), r.fx[k]);
     });
     addRow(list, 'var(--bank)', '이자비용', num(S.interest));
     addRow(list, 'var(--bank)', '약정 원금 상환', num(S.principal));
@@ -1166,7 +1166,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       rec = makeRec();
       return pnl('saveMonth', { ym: ym, rec: rec });
     }).then(function (r) {
-      rec.savedAt = r.savedAt; records[ym] = rec; renderHist(); status(fmtYM(ym) + ' 실적이 저장되었습니다.' + (PAY_LOCK && !rec.pay ? ' 인건비는 설정값으로 저장했습니다(직원 급여 비밀번호 확인 전).' : ''));
+      rec.savedAt = r.savedAt; records[ym] = rec; renderHist(); status(fmtYM(ym) + ' 실적이 저장되었습니다.' + (PAY_LOCK && !rec.pay ? ' 인건비는 설정값으로 저장했습니다.' : ''));
     }, function (e) { status('저장에 실패했습니다. ' + errText(e)); }).then(function () { $('save').disabled = false; calc(); });
   }
   function removeMonth(ym) {
@@ -1236,7 +1236,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     }, function (e) {
       var c = String((e && e.message) || '');
       if (c === 'auth') { logoutLocal(ERR.auth); return; }
-      $('payMsg').textContent = c === 'bad_pw' ? '직원 급여 비밀번호가 맞지 않습니다.' : c === 'pay_unset' ? '직원 급여 비밀번호가 아직 설정되지 않았습니다.' : errText(e);
+      $('payMsg').textContent = c === 'bad_pw' ? '비밀번호가 맞지 않습니다.' : c === 'pay_unset' ? '비밀번호가 아직 설정되지 않았습니다.' : errText(e);
     }).then(function () { $('payGo').disabled = false; });
   });
   $('month').addEventListener('change', function () { loadMonth(); });

@@ -102,7 +102,7 @@ button,input{font:inherit;color:inherit}
   <p class="wait" id="wait">확인 중…</p>
   <section class="login" id="login" hidden aria-labelledby="lh">
     <h2 id="lh">관리자 로그인</h2>
-    <p>관리자 비밀번호 입력 시 부서 업무 · 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 도면 화면을 이용할 수 있습니다. 직원 급여(잔업 확인 · 급여)는 직원 급여 비밀번호를 한 번 더 입력합니다.</p>
+    <p>관리자 비밀번호 입력 시 부서 업무 · 출고 · 거래명세서 · 매출 · 매입 · 손익계산서 · 도면 화면을 이용할 수 있습니다.</p>
     <form id="loginForm" autocomplete="off">
       <label for="pw" style="position:absolute;left:-9999px">비밀번호</label>
       <input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100">
@@ -150,11 +150,11 @@ button,input{font:inherit;color:inherit}
         <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
         <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 후 잉여금</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="admin.html"><span class="t"><b>직원 급여</b><small>잔업 확인 · 근태 · 급여대장 · 명세서 · 은행 이체 (직원 급여 비밀번호 별도)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
+        <a class="go" href="admin.html"><span class="t"><b>직원 급여</b><small>잔업 확인 · 근태 · 급여대장 · 명세서 · 은행 이체</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
       </section>
     </div>
     <p class="legend"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>1회 로그인으로 위 화면을 이용할 수 있습니다(직원 급여는 별도 비밀번호). 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
+      <span>1회 로그인으로 위 화면을 이용할 수 있습니다. 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
   </div>
 </main>
 <p class="toast" id="toast" role="status" hidden></p>
