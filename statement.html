@@ -274,52 +274,57 @@ table.it{width:100%;margin-top:2.4mm;border-collapse:collapse;table-layout:fixed
 .sumbar small .sb{width:16mm}
 #print{display:none}
 
-/* 한 장 두 부(반쪽) — 품목 칸을 크게 (2026-11-23 지시 "반쪽으로 하니까 품명하고 이걸 극대화시켜라. 아래 전달사항은 없어도 되고 …
-   품명 들어가는 그 칸을 좀 더 확보 … 우리 주소 상대편 주소는 좀 줄여도 된다"): 머리 · 공급자 · 공급받는자 칸을 줄이고(3줄),
-   전달사항 칸을 없애고 인수자 확인은 합계금액 줄 오른쪽으로, 남은 높이를 품목 표(줄 높이 · 글자)와 품명 칸 폭에 씀 */
-.cp.h{padding:6mm 11mm 4mm}
-.cp.h .hd{height:13.5mm;padding-bottom:1.2mm;border-bottom-width:.5mm}
-.cp.h .hd .lgo{height:12mm}
-.cp.h .tt b{font-size:15pt}
-.cp.h .tt i{font-size:5pt;margin:.4mm -.36em .7mm 0}
-.cp.h .tt .bd{font-size:6.4pt;padding:.3mm 2.2mm}
+/* A4 반장 (2026-11-24 지시 "이렇게 13줄이상 깔리도록 해라. a4 반장에 말이다. 그리고 한장으로 만들지마라 무조건 반절 자르도록 해라.
+   그리고 반장으로 잘랐을때 딱 좌우 위아래 간격 맞춰라. 줄이 넘어가면 다음장인데 페이지수를 저렇게 알려줘라"):
+   반장(210 × 148.5 mm)마다 위 · 아래 · 왼쪽 · 오른쪽 여백을 같게, 품목 14줄. 머리 · 공급자 · 공급받는자 칸은 줄이고(3줄, 전달사항 칸 없음 ·
+   인수자 확인은 합계금액 줄 오른쪽 — 2026-11-23 "반쪽으로 하니까 품명하고 이걸 극대화"), 남은 높이를 품목 표에 씀.
+   여백은 인쇄된 선 · 글자 끝 기준으로 맞춤(위 · 아래는 글자 줄 안쪽 여유만큼 padding을 조금 다르게) */
+.cp.h{padding:7.6mm 8mm 7.55mm}
+.cp.h .hd{height:12.4mm;padding-bottom:.9mm;border-bottom-width:.5mm}
+.cp.h .hd .lgo{height:10.6mm}
+.cp.h .tt b{font-size:13.6pt;line-height:1.08}
+.cp.h .tt i{font-size:4.6pt;margin:.25mm -.36em .55mm 0;line-height:1.2}
+.cp.h .tt .bd{font-size:6pt;padding:.15mm 2.2mm;line-height:1.25}
 .cp.h .mt .am{display:none}
-.cp.h .mt p{font-size:8.8pt;margin-bottom:.9mm}
-.cp.h .mt p span{font-size:6.6pt}
-.cp.h .pt{gap:4mm;margin-top:2mm}
-.pb.pc th{width:12mm;height:4.3mm;font-size:6.2pt;letter-spacing:0}
+.cp.h .mt p{font-size:7.8pt;margin-bottom:.15mm;line-height:1.2}
+.cp.h .mt p span{font-size:6.1pt}
+.mt p.pgn{color:#1B3A6B;font-weight:800;letter-spacing:.02em}
+.mt p.pgn span{color:#1B3A6B;font-weight:800;letter-spacing:.08em}
+.cp.h .pt{gap:4mm;margin-top:1.5mm}
+.pb.pc th{width:12mm;height:4.1mm;font-size:6.1pt;letter-spacing:0}
 .pb.pc th.vt{width:5.4mm;padding:0;background:#1B3A6B;color:#fff;font-size:6.6pt;font-weight:800;line-height:1.08;white-space:normal;border-top:0}
 .pb.pc th.vt span{display:block;width:1.05em;margin:0 auto;word-break:break-all;text-align:center}
-.pb.pc td{height:4.3mm;font-size:7.2pt}
-.pb.pc td.b{font-size:8.6pt}
-.pb.pc td small{margin-left:1.8mm;font-size:6.4pt;font-weight:500;color:#5B6474}
+.pb.pc td{height:4.1mm;font-size:7.2pt;text-overflow:clip}
+.pb.pc td.b{font-size:8.4pt}
+.pb.pc td small{margin-left:1.8mm;font-size:.86em;font-weight:500;color:#5B6474}
 .pb.pc td.ad{font-size:6.3pt;white-space:nowrap;line-height:1.25}
 .pb.pc td.sc{width:14.4mm;padding:0;position:relative;overflow:visible}
 .pb.pc td.sc i{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:6.8pt;color:#8A93A3}
-.pb.pc td.sc .sl{position:absolute;left:50%;top:50%;width:12.4mm;height:12.4mm;max-width:none;transform:translate(-50%,-50%);mix-blend-mode:multiply;pointer-events:none}
-.cp.h .si{margin-top:1.8mm;height:6.2mm}
-.cp.h .si span{width:17.4mm;font-size:6.8pt}
-.cp.h .si b{font-size:9.4pt}
-.cp.h table.it{margin-top:2.2mm}
-.cp.h .it thead th{height:6mm;font-size:7.6pt}
-.cp.h .it td{padding:0 1.6mm;font-size:10pt}
-.cp.h .it td.nm{font-size:11.2pt}
-.cp.h .it td.c{font-size:8.8pt}
-.cp.h .it td.r{padding:0 1.2mm;font-size:9.4pt}
-.cp.h .it td.q{font-size:10pt}
-.cp.h .it td.no{font-size:8pt}
+.pb.pc td.sc .sl{position:absolute;left:50%;top:50%;width:11.8mm;height:11.8mm;max-width:none;transform:translate(-50%,-50%);mix-blend-mode:multiply;pointer-events:none}
+.cp.h .si{margin-top:1.5mm;height:5.4mm}
+.cp.h .si span{width:17.4mm;font-size:6.6pt}
+.cp.h .si b{font-size:9pt}
+.cp.h table.it{margin-top:1.6mm}
+.cp.h .it thead th{height:5.2mm;font-size:7.2pt}
+.cp.h .it td{padding:0 1.6mm;font-size:9pt;text-overflow:clip}
+.cp.h .it td.nm{font-size:9.6pt}
+.cp.h .it td.c{font-size:8.6pt}
+.cp.h .it td.r{padding:0 1.2mm;font-size:9pt}
+.cp.h .it td.q{font-size:9.4pt}
+.cp.h .it td.no{font-size:7.4pt}
 .cp.h .it td.mm{font-size:7.4pt}
-.cp.h .it tfoot td{height:6.8mm;font-size:9pt}
-.cp.h .it tfoot td.r{font-size:8.6pt}
-.cp.h .bt{display:flex;align-items:stretch;gap:3mm;margin-top:2mm}
-.cp.h .sumbar{flex:1;min-width:0;height:9.4mm}
-.cp.h .sumbar span{width:20mm;font-size:8.2pt}
-.cp.h .sumbar em{font-size:8.4pt}
-.cp.h .sumbar b{font-size:14pt}
-.cp.h .rcv{width:46mm;flex-shrink:0;margin-left:auto;display:flex;align-items:center;height:9.4mm;border:.25mm solid #9FB0C9}
+.cp.h .it tfoot td{height:5.6mm;font-size:8.4pt}
+.cp.h .it tfoot td.r{font-size:8.4pt}
+.cp.h .it tfoot td.cont{letter-spacing:.04em}
+.cp.h .bt{display:flex;align-items:stretch;gap:3mm;margin-top:1.6mm}
+.cp.h .sumbar{flex:1;min-width:0;height:8mm}
+.cp.h .sumbar span{width:20mm;font-size:8pt}
+.cp.h .sumbar em{font-size:8.2pt;text-overflow:clip}
+.cp.h .sumbar b{font-size:13pt}
+.cp.h .rcv{width:46mm;flex-shrink:0;margin-left:auto;display:flex;align-items:center;height:8mm;border:.25mm solid #9FB0C9}
 .cp.h .rcv span{width:14mm;flex-shrink:0;height:100%;display:flex;align-items:center;justify-content:center;background:#EDF2FA;color:#1B3A6B;font-size:6.8pt;font-weight:800}
 .cp.h .rcv em{margin-left:auto;padding-right:2.6mm;font-style:normal;font-size:7.4pt;color:#8A93A3}
-.cp.h .ft{padding-top:1mm;font-size:6.4pt}
+.cp.h .ft{padding-top:.8mm;font-size:6.2pt;line-height:1.2;text-overflow:clip}
 
 /* 한 부씩 크게 (품목 8줄부터, 2026-11-21): A4 한 장에 한 부 · 칸 20줄 · 글자와 줄 높이를 키움 */
 .pg.f .cp,.pg.f .cp.b{top:0;height:297mm;padding:13mm 14mm 10mm}
@@ -495,10 +500,30 @@ body.pvon{overflow:hidden}
     if (p === (S.I && S.I.sbr) || (/\d/.test(c) && !isChip(p))) return p;
     return p + ' ' + c;
   }
+  /* 규격 1-4mm (2026-11-24 지시 "epdm 연갈 옆에 규격 1-4mm 로 epdm nmchip lok chip 전부 규격에 1-4mm 표기하도록 해라.
+     sbr 고무분말도 1-4mm 로 전부다 수정해라"): 일반 EPDM · NM-CHIP · LOK-CHIP · SBR 고무분말(크기 상관없이)의 규격은 1-4mm.
+     이미 발행한 명세서도 찍을 때 · 고칠 때 비어 있는 규격과 예전 자동 규격(SBR '5-7mm 톤백' · '2-3mm 소포장')을 1-4mm로 바꿈.
+     SBR 포장(톤백 · 소포장)은 포장마다 단가가 달라 비고 칸으로 옮겨 남김. 손으로 적어 넣은 다른 규격은 그대로. */
+  var SPEC_STD = '1-4mm', SPEC_CHIPS = ['일반 EPDM', 'NM-CHIP', 'LOK-CHIP'];
+  function sbrName() { return (S.I && S.I.sbr) || 'SBR 고무분말'; }
+  function stdSpecProd(p) { return SPEC_CHIPS.indexOf(p) >= 0 || (!!p && p === sbrName()); }
   function specDef(p, c) {
-    if (p === (S.I && S.I.sbr)) return c + ' 톤백';
+    if (stdSpecProd(p)) return SPEC_STD;
     if (!isChip(p) && /\d/.test(c)) return c;
     return '';
+  }
+  /** 명세서 줄(k 's')의 규격 · 비고를 위 기준대로 (바꿀 것이 있으면 새 객체, 없으면 그 줄 그대로) */
+  function stdLine(l) {
+    if (!l || l.k !== 's' || !stdSpecProd(l.prod)) return l;
+    var sp = String(l.spec == null ? '' : l.spec).trim(), memo = String(l.memo == null ? '' : l.memo).trim(), pack = '';
+    if (l.prod === sbrName()) {
+      var m = /^(.*?)\s*(톤백|소포장)$/.exec(sp), size = m ? m[1].trim() : sp;
+      if (m) pack = m[2];
+      if (size && size !== SPEC_STD && size !== l.color && colorsOf(l.prod).indexOf(size) < 0) return l;   // 손으로 적은 규격
+    } else if (sp) return l;
+    if (pack && memo.indexOf(pack) < 0) memo = memo ? memo + ' · ' + pack : pack;
+    if (sp === SPEC_STD && memo === String(l.memo == null ? '' : l.memo).trim()) return l;
+    return Object.assign({}, l, { spec: SPEC_STD, memo: memo });
   }
   /** 거래처 · 제품 · 색의 단가 제안: 지난 단가 → 기준 단가 */
   function priceOf(cust, p, c) {
@@ -513,7 +538,7 @@ body.pvon{overflow:hidden}
     if (l.k !== 's') return '';
     var q = Number(l.qty);
     if (!(q > 0) || q % BAG) return '';
-    return isChip(l.prod) || /소포장/.test(l.spec || '') ? q / BAG : '';
+    return isChip(l.prod) || /소포장/.test((l.spec || '') + ' ' + (l.memo || '')) ? q / BAG : '';   // SBR 소포장: 2026-11-24부터 비고 칸에
   }
   function custOf(name) {
     var k = ckey(name);
@@ -655,7 +680,11 @@ body.pvon{overflow:hidden}
       S.busy = false;
       var F = blankForm();
       F.from = 'box'; F.date = d.date; F.cust = d.cust; F.site = d.site; F.addr = d.addr || ''; F.linked = d.linked || []; F.boxType = d.type;   // v60: 발주서의 현장 주소
-      F.lines = d.lines.map(function (l) { return sLine({ rid: l.rid, prod: l.prod, color: l.color, name: l.name, spec: l.spec, qty: l.qty, price: l.price, psrc: l.psrc, memo: l.memo }); });
+      F.lines = d.lines.map(function (l0) {   // 규격 1-4mm · SBR 포장은 비고 (2026-11-24, 서버 초안의 예전 자동 규격도 바꿈)
+        var l = stdLine(Object.assign({ k: 's' }, l0, SPEC_CHIPS.indexOf(l0.prod) >= 0 ? { spec: SPEC_STD } : {})), o = sLine({ rid: l.rid, prod: l.prod, color: l.color, name: l.name, spec: l.spec, qty: l.qty, price: l.price, psrc: l.psrc, memo: l.memo });
+        o.specAuto = o.spec === specDef(o.prod, o.color);
+        return o;
+      });
       F.lines.forEach(function (l, i) { var src = d.lines[i]; if (src.psrc === 'last') { var a = priceOf(F.cust, l.prod, l.color); l.pat = a && a.at ? a.at : ''; } });
       S.F = F;
       if (!F.lines.length && F.linked.length === 1) { toast('이 출고는 이미 거래명세서 No. ' + F.linked[0] + '로 발행했습니다.'); openStmt(F.linked[0]); return; }
@@ -670,7 +699,9 @@ body.pvon{overflow:hidden}
       if (l.k === 'x') return xLine(l);
       var o = { rid: l.rid, made: l.made, prod: l.prod, color: l.color, name: l.name, spec: l.spec, qty: l.qty, price: l.price, memo: l.memo, diff: l.diff, cur: l.cur };
       if (useCur && l.diff && l.cur) { o.prod = l.cur.prod; o.color = l.cur.color; o.qty = l.cur.qty; if (l.cur.price != null) o.price = l.cur.price; o.diff = false; }
-      return sLine(o);
+      var s = stdLine(Object.assign({ k: 's' }, o)), x = sLine(s);   // 예전에 비워 둔 규격 · 예전 SBR 자동 규격 → 1-4mm (2026-11-24)
+      x.specAuto = x.spec === specDef(x.prod, x.color);
+      return x;
     }).filter(function (l) { return !(useCur && l.k === 's' && l.diff && !l.cur); });
     if (useCur && st.lines.some(function (l) { return l.k === 's' && l.cur && l.diff && l.cur.date !== st.date; })) {
       var d0 = st.lines.filter(function (l) { return l.k === 's' && l.cur; })[0].cur.date; F.date = d0;
@@ -806,7 +837,7 @@ body.pvon{overflow:hidden}
     if (!v) h += '<div class="mrow">' + (ml ? '<p>' + mailTag(ml) + ' ' + esc(mailLine(ml)) + '</p>' : '<p class="hint" style="margin:0">거래처 송부 메일: 발송 전</p>') + '</div>';
     if (S.arm === 'cancel') h += '<p class="fwarn">취소하면 이 명세서가 출고 기록에 넣은 단가 · 수량 · 확정이 명세서 전으로 돌아가고, 명세서에서 새로 만든 출고 · 장부 기록은 삭제됩니다. 번호는 \'취소\'로 남습니다.</p>';
     if (!v && (!S.I.co.saved)) h += '<p class="infobox">공급자 칸은 \'회사 정보\' 기본값입니다. 업태 · 종목 · 입금 계좌 등을 넣으려면 회사 정보에서 저장해 주십시오.</p>';
-    h += '<p class="hint">' + esc(layoutNote(st.lines.length)) + ' 인쇄 창에서 \'PDF로 저장\'을 고르면 메일 · 팩스용 PDF가 됩니다.</p></section>';
+    h += '<p class="hint">' + esc(layoutNote(st.lines.length)) + ' 인쇄 창의 배율은 \'기본값\'(100%)으로 두어야 반으로 잘랐을 때 여백이 맞습니다. \'PDF로 저장\'을 고르면 메일 · 팩스용 PDF가 됩니다.</p></section>';
     h += '<section class="card"><div class="pvbox" id="pvbox"><div class="pvk" id="pvk">' + docHtml(st) + '</div></div></section>';
     return h;
   }
@@ -821,49 +852,81 @@ body.pvon{overflow:hidden}
   function fitPreview() { fitBox($('pvbox'), $('pvk')); fitBox($('pvbox2'), $('pvk2')); }
 
   /* ───────── 인쇄 문서 ─────────
-     품목 7줄까지: A4 한 장에 위 '공급받는자 보관용' · 아래 '공급자 보관용' (칸 7줄).
-     8줄부터 (2026-11-21 "제품량이 다양하면 칸이 많아져야, 지금은 좀 작다"): 한 부씩 크게 — 공급받는자 보관용 · 공급자 보관용이
-     각각 A4 한 장 (칸 20줄 · 글자와 줄 높이를 키움). 20줄이 넘으면 그 부가 다음 장으로 이어집니다 (최대 40줄 = 부마다 2장). */
-  var HALF_MAX = 7, FULL_ROWS = 20;
+     A4 반장 (2026-11-24 지시 "이렇게 13줄이상 깔리도록 해라. a4 반장에 말이다. 그리고 한장으로 만들지마라 무조건 반절 자르도록 해라.
+     그리고 반장으로 잘랐을때 딱 좌우 위아래 간격 맞춰라. 줄이 넘어가면 다음장인데 페이지수를 저렇게 알려줘라"):
+     줄 수와 상관없이 언제나 A4 한 장을 반으로 잘라 위 '공급받는자 보관용' · 아래 '공급자 보관용' (A4 한 장에 한 부씩 크게 찍던 것은 없앰).
+     반장마다 품목 14줄. 14줄이 넘으면 다음 장(같은 배치)으로 이어지고, 반장마다 머리 오른쪽에 'PAGE. 1/2'처럼 쪽수.
+     (거래처 송부 메일 PDF만 A4 한 부 · 20줄마다 한 장 — 종이로 잘라 쓰지 않으므로 그대로) */
+  var HALF_ROWS = 14, HALF_RH = 5.23, FULL_ROWS = 20;
   function layoutOf(n) {
-    if (n <= HALF_MAX) return { full: false, per: HALF_MAX, rh: 9.8, k: 1, sheets: 1 };   // 2026-11-23: 5.4 → 9.8mm (품목 칸 키움)
-    var k = Math.ceil(n / FULL_ROWS);
-    return { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k * 2 };
+    var k = Math.max(1, Math.ceil(n / HALF_ROWS));
+    return { full: false, per: HALF_ROWS, rh: HALF_RH, k: k, sheets: k };
   }
   function layoutNote(n) {
     var L = layoutOf(n);
-    if (!L.full) return 'A4 1장: 위는 공급받는자(인수자) 보관용, 아래는 공급자 보관용입니다.';
-    return '품목이 ' + n + '줄이라 한 부씩 크게 찍습니다: A4 ' + L.sheets + '장 (공급받는자 보관용 ' + L.k + '장 · 공급자 보관용 ' + L.k + '장).';
+    return 'A4 반장 양식: A4를 반으로 잘라 위는 공급받는자(인수자) 보관용, 아래는 공급자 보관용입니다. 반장마다 품목 ' + HALF_ROWS + '줄' +
+      (L.k > 1 ? ' — 품목이 ' + n + '줄이라 A4 ' + L.k + '장(PAGE. 1/' + L.k + ' ~ ' + L.k + '/' + L.k + ')입니다.' : '.');
   }
   function docHtml(st) {
-    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = st.lines || [], L = layoutOf(lines.length), dr = st.draft ? ' draft' : '', out = '';
-    if (!L.full) return '<section class="pg' + dr + '">' + copyHtml(st, co, cu, lines, 0, 1, L, 't') + '<div class="cut"><span>✂ 절 취 선</span></div>' + copyHtml(st, co, cu, lines, 0, 1, L, 'b') + '</section>';
-    ['t', 'b'].forEach(function (pos) {
-      for (var p = 0; p < L.k; p++) out += '<section class="pg f' + dr + '">' + copyHtml(st, co, cu, lines.slice(p * L.per, (p + 1) * L.per), p, L.k, L, pos) + '</section>';
-    });
+    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = (st.lines || []).map(stdLine), L = layoutOf(lines.length), dr = st.draft ? ' draft' : '', out = '';
+    var s2 = Object.assign({}, st, { lines: lines });
+    for (var p = 0; p < L.k; p++) {
+      var pl = lines.slice(p * L.per, (p + 1) * L.per);
+      out += '<section class="pg' + dr + '">' + copyHtml(s2, co, cu, pl, p, L.k, L, 't') + '<div class="cut"><span>✂ 절 취 선</span></div>' + copyHtml(s2, co, cu, pl, p, L.k, L, 'b') + '</section>';
+    }
     return out;
   }
+  /* 글자가 칸에서 잘리지 않게 (2026-11-24 지시 "거래명세서 규격에 짤리지않도록"): 글 폭을 추정해(Noto Sans KR 실측 — 한글 0.92em,
+     숫자 0.56~0.61em, 맑은 고딕 대비 여유를 더함) 칸보다 길면 그 칸만 글자를 줄이고, 최소 크기로도 넘치면 두 줄로. 끝을 '…'로 자르지 않음 */
+  function txtEm(s) {
+    var w = 0, i, c, ch;
+    s = String(s == null ? '' : s);
+    for (i = 0; i < s.length; i++) {
+      c = s.charCodeAt(i); ch = s.charAt(i);
+      if ((c >= 0xAC00 && c <= 0xD7A3) || (c >= 0x1100 && c <= 0x11FF) || (c >= 0x3130 && c <= 0x318F) || (c >= 0x2E80 && c <= 0x9FFF) || (c >= 0xF900 && c <= 0xFAFF) || (c >= 0xFF01 && c <= 0xFF60)) w += 0.96;
+      else if (c === 32) w += 0.25;
+      else if (c >= 48 && c <= 57) w += 0.63;
+      else if ('MWmw@%&×'.indexOf(ch) >= 0) w += 1.02;
+      else if ('iljfrt.,:;|!\'"()[]-/'.indexOf(ch) >= 0) w += 0.42;
+      else w += 0.72;
+    }
+    return w;
+  }
+  /** 칸 안쪽 폭 mm · 기본 글자 pt · 최소 pt → 넘치면 style 글 (안 넘치면 '') */
+  function fitCss(s, mm, pt, min) { return s === '' || s == null ? '' : fitEm(txtEm(s), 0, mm, pt, min); }
   function partyHtml(title, rows, seal) {
     return '<div class="pb"><h4>' + title + '</h4><table>' + rows.map(function (r) {
       return '<tr><th>' + r[0] + '</th><td class="' + (r[2] || '') + '">' + esc(r[1] || '') +
         (r[2] === 'seal' ? (seal ? '<i class="on">(인)<img class="sl" src="' + seal + '" alt=""></i>' : '<i>(인)</i>') : '') + '</td></tr>';
     }).join('') + '</table></div>';
   }
-  /** 반쪽용 공급자 · 공급받는자 3줄: 상호(대표) · 등록번호(전화) · 주소 — 세로 제목 칸 (2026-11-23 "주소는 좀 줄여도 된다") */
-  function partyCompact(title, x, seal, sealRow) {
+  /** 반쪽용 공급자 · 공급받는자 3줄: 상호(대표) · 등록번호(전화) · 주소 — 세로 제목 칸 (2026-11-23 "주소는 좀 줄여도 된다").
+   *  w = 글 칸 안쪽 폭(mm). 길면 그 줄만 글자를 줄임 (2026-11-24 잘림 없앰) */
+  function partyCompact(title, x, seal, sealRow, w) {
     var tel = [x.tel ? 'TEL ' + x.tel : '', x.fax ? 'FAX ' + x.fax : ''].filter(Boolean).join(' · ');
+    var nmS = fitEm(txtEm(x.name || '') + (x.ceo ? txtEm('대표 ' + x.ceo) * 0.86 : 0), x.ceo ? 1.8 : 0, w, 8.4, 6.4);
+    var bzS = fitEm(txtEm(x.biz || '') + (tel ? txtEm(tel) * 0.86 : 0), tel ? 1.8 : 0, w, 7.2, 5.6);
     return '<div class="pb pc"><table>' +
-      '<tr><th class="vt" rowspan="3"><span>' + title + '</span></th><th>상 호</th><td class="b">' + esc(x.name || '') +
+      '<tr><th class="vt" rowspan="3"><span>' + title + '</span></th><th>상 호</th><td class="b"' + nmS + '>' + esc(x.name || '') +
         (x.ceo ? '<small>대표 ' + esc(x.ceo) + '</small>' : '') + '</td>' +
         (sealRow ? '<td class="sc" rowspan="3"><i>(인)' + (seal ? '<img class="sl" src="' + seal + '" alt="">' : '') + '</i></td>' : '') + '</tr>' +
-      '<tr><th>등록번호</th><td>' + esc(x.biz || '') + (tel ? '<small>' + esc(tel) + '</small>' : '') + '</td></tr>' +
-      '<tr><th>주 소</th><td class="ad">' + esc(x.addr || '') + '</td></tr></table></div>';
+      '<tr><th>등록번호</th><td' + bzS + '>' + esc(x.biz || '') + (tel ? '<small>' + esc(tel) + '</small>' : '') + '</td></tr>' +
+      '<tr><th>주 소</th><td class="ad"' + fitCss(x.addr || '', w, 6.3, 5) + '>' + esc(x.addr || '') + '</td></tr></table></div>';
   }
-  /** 납품장소 칸: 현장명 · 현장 주소 (v60, 2026-11-23 "현장 주소 정보도 다 발주서에있는 거 가지고와서") — 주소가 길면 끝을 줄임 */
-  function siteHtml(st) {
+  /** 납품장소 칸: 현장명 · 현장 주소 (v60, 2026-11-23 "현장 주소 정보도 다 발주서에있는 거 가지고와서") */
+  function siteParts(st) {
     var s = String(st.site || '').trim(), a = String(st.addr || '').trim();
     if (a && s && s.indexOf(a) >= 0) a = '';   // 현장명에 주소가 이미 들어 있으면 한 번만
-    return esc(s) + (a ? '<small>' + (s ? '· ' : '') + esc(a) + '</small>' : '');
+    return [s, a ? (s ? '· ' : '') + a : ''];
+  }
+  function siteHtml(st) { var p = siteParts(st); return esc(p[0]) + (p[1] ? '<small>' + esc(p[1]) + '</small>' : ''); }
+  /** 글 폭(em 합) · 고정 여백(mm) 기준 맞춤 — fitCss와 같은 규칙 */
+  function fitEm(em, gapMm, mm, pt, min) {
+    var need = em * pt * 0.3528 * 1.04, room = mm - gapMm;
+    if (!(em > 0) || !(room > 0) || need <= room) return '';
+    var f = pt * room / need;
+    if (f >= min) return ' style="font-size:' + f.toFixed(2) + 'pt"';
+    return ' style="font-size:' + Math.max(4.8, Math.min(min, pt * 1.9 * room / need)).toFixed(2) + 'pt;white-space:normal;line-height:1.02;word-break:break-all"';
   }
   /** 회사 도장 그림 (서버가 관리자에게만 보냄 · PNG data URL만 받음). 취소한 명세서에는 찍지 않음 */
   function sealSrc(st) {
@@ -871,47 +934,61 @@ body.pvon{overflow:hidden}
     if (st && st.state === '취소') return '';
     return typeof s === 'string' && s.length < 400000 && /^data:image\/png;base64,[A-Za-z0-9+\/]+={0,2}$/.test(s) ? s : '';
   }
+  /* 품목 표 칸 폭(mm): 품명(0)은 나머지 전부. 반장 안쪽 폭 194mm(여백 8mm씩) · 송부 PDF 182mm.
+     2026-11-24: 규격 14 → 16mm, 비고 14 → 18mm (규격 · 비고가 잘리지 않게), 품명 76mm */
+  var COLS_H = [6, 0, 16, 10, 16, 13, 21, 18, 18], COLS_F = [8, 0, 20, 12, 18, 15, 25, 22, 16];
   function copyHtml(st, co, cu, pl, pi, pn, L, pos) {
     var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, half = !L.full, i, l;
+    var CW = half ? 194 : 182, cols = (half ? COLS_H : COLS_F).slice(), padT = half ? 1.6 : 2, padN = half ? 1.2 : 2;
+    cols[1] = CW - cols.reduce(function (a, b) { return a + b; }, 0);
+    var FZ = half ? { nm: 9.6, c: 8.6, r: 9, q: 9.4, mm: 7.4, tf: 8.4 } : { nm: 9, c: 9, r: 9, q: 9, mm: 8, tf: 8.6 };
+    var fit = function (s, ci, pt, pad) { return fitCss(String(s == null ? '' : s), cols[ci] - pad * 2 - 0.3, pt, Math.max(5.6, pt * 0.7)); };
     var h = '<div class="cp ' + pos + (half ? ' h' : '') + (amt ? '' : ' noamt') + '" style="--rh:' + L.rh + 'mm">';
     h += '<div class="hd"><img class="lgo" src="icons/nmc-logo-print.png" alt="">' +
       '<div class="tt"><b>거래명세표</b><i>TRANSACTION STATEMENT</i><span class="bd ' + pos + '">' + (pos === 't' ? '공급받는자 보관용' : '공급자 보관용') + '</span></div>' +
-      '<div class="mt"><p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
+      '<div class="mt">' + (half ? '<p class="pgn"><span>PAGE.</span>' + (pi + 1) + '/' + pn + '</p>' : '') +
+      '<p><span>No.</span>' + (st.no ? esc(st.no) : '<em>발행하면 매김</em>') + (!half && pn > 1 ? ' <em>(' + (pi + 1) + '/' + pn + ')</em>' : '') + '</p><p><span>거래일자</span>' + dateKo(st.date) + '</p>' +
       '<p class="am"><span>합계금액' + (st.vat === 'none' ? '' : ' (VAT 포함)') + '</span><b>₩' + (amt ? fmt(st.total) : '') + '</b></p></div></div>';
-    if (half) h += '<div class="pt">' + partyCompact('공급자', co, sealSrc(st), true) + partyCompact('공급받는자', { name: st.cust, ceo: cu.ceo, biz: cu.biz, addr: cu.addr, tel: cu.tel }, '', false) + '</div>';
+    if (half) h += '<div class="pt">' + partyCompact('공급자', co, sealSrc(st), true, 58.8) + partyCompact('공급받는자', { name: st.cust, ceo: cu.ceo, biz: cu.biz, addr: cu.addr, tel: cu.tel }, '', false, 73.2) + '</div>';
     else h += '<div class="pt">' + partyHtml('공급자', [['등록번호', co.biz], ['상 호', co.name, 'b'], ['대 표 자', co.ceo, 'seal'], ['주 소', co.addr, (co.addr || '').length > 30 ? 'ad' : ''],
       ['전화번호', [co.tel, co.fax ? 'FAX ' + co.fax : ''].filter(Boolean).join(' · ')]], sealSrc(st)) +
       partyHtml('공급받는자', [['등록번호', cu.biz], ['상 호', st.cust, 'b'], ['대 표 자', cu.ceo], ['주 소', cu.addr, (cu.addr || '').length > 30 ? 'ad' : ''], ['전화번호', cu.tel]]) + '</div>';
-    h += '<div class="si"><span>납품장소</span><b>' + siteHtml(st) + '</b></div>';
-    // 2026-11-23 품명 칸 확보 (67 → 76mm). 2026-11-24 지시 "단가 금액없이 체크해도 거래명세서 양식은 단가 하고 그대로 … 금액하고 공란으로":
+    var sp = siteParts(st);
+    h += '<div class="si"><span>납품장소</span><b' + (half ? fitEm(txtEm(sp[0]) + txtEm(sp[1]) * 0.88, sp[1] ? 1.6 : 0, CW - 17.4 - 4.6, 9, 6) : '') + '>' + siteHtml(st) + '</b></div>';
+    // 2026-11-23 품명 칸 확보. 2026-11-24 지시 "단가 금액없이 체크해도 거래명세서 양식은 단가 하고 그대로 … 금액하고 공란으로":
     //  단가 · 금액 빈칸 인쇄도 칸은 그대로(같은 폭) 두고 값만 비움
-    var cols = L.full ? ['8mm', '', '20mm', '12mm', '18mm', '15mm', '25mm', '22mm', '16mm'] : ['6mm', '', '14mm', '10mm', '16mm', '13mm', '21mm', '18mm', '14mm'];
-    h += '<table class="it"><colgroup>' + cols.map(function (w) { return '<col' + (w ? ' style="width:' + w + '"' : '') + '>'; }).join('') + '</colgroup>' +
+    h += '<table class="it"><colgroup>' + cols.map(function (w, k) { return '<col' + (k !== 1 ? ' style="width:' + w + 'mm"' : '') + '>'; }).join('') + '</colgroup>' +
       '<thead><tr><th>No.</th><th>품명</th><th>규격</th><th>포대</th><th>수량(kg)</th><th>단가</th><th>공급가액</th><th>세액</th><th>비고</th></tr></thead><tbody>';
     for (i = 0; i < per; i++) {
       l = pl[i];
       if (!l) { h += '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>'; continue; }
       var q = l.k === 's' ? fmtQ(l.qty) : (l.qty != null && l.qty !== '' ? fmtQ(l.qty) + (l.unit ? ' ' + l.unit : '') : (l.unit || ''));
-      h += '<tr><td class="no">' + (base + i + 1) + '</td><td class="nm">' + esc(l.name || pname(l.prod, l.color)) + '</td><td class="c">' + esc(l.spec || '') + '</td>' +
-        '<td class="c">' + esc(bagsOf(l)) + '</td><td class="r q">' + esc(q) + '</td>' +
-        (amt ? '<td class="r">' + (l.price == null || l.price === '' ? '' : fmt(l.price)) + '</td><td class="r b">' + (l.supply || l.price != null ? fmt(l.supply) : '') + '</td><td class="r">' + (l.supply || l.price != null ? fmt(l.tax) : '') + '</td>' : '<td class="r"></td><td class="r b"></td><td class="r"></td>') +
-        '<td class="mm">' + esc(l.memo || '') + '</td></tr>';
+      var nm = l.name || pname(l.prod, l.color), bg = bagsOf(l), pr = amt && !(l.price == null || l.price === '') ? fmt(l.price) : '';
+      var su = amt && (l.supply || l.price != null) ? fmt(l.supply) : '', tx = amt && (l.supply || l.price != null) ? fmt(l.tax) : '';
+      h += '<tr><td class="no">' + (base + i + 1) + '</td><td class="nm"' + fit(nm, 1, FZ.nm, padT) + '>' + esc(nm) + '</td><td class="c"' + fit(l.spec, 2, FZ.c, padT) + '>' + esc(l.spec || '') + '</td>' +
+        '<td class="c"' + fit(bg, 3, FZ.c, padT) + '>' + esc(bg) + '</td><td class="r q"' + fit(q, 4, FZ.q, padN) + '>' + esc(q) + '</td>' +
+        '<td class="r"' + fit(pr, 5, FZ.r, padN) + '>' + pr + '</td><td class="r b"' + fit(su, 6, FZ.r, padN) + '>' + su + '</td><td class="r"' + fit(tx, 7, FZ.r, padN) + '>' + tx + '</td>' +
+        '<td class="mm"' + fit(l.memo, 8, FZ.mm, padT) + '>' + esc(l.memo || '') + '</td></tr>';
     }
     h += '</tbody><tfoot><tr>';
     if (last) {
       var bags = 0, hasBag = false, gs = {}, kg = 0;
       (st.lines || []).forEach(function (x) { var b = bagsOf(x); if (b !== '') { bags += b; hasBag = true; } if (x.k === 's') { gs[grpOf(x.prod)] = 1; kg += Number(x.qty) || 0; } });
       var oneG = Object.keys(gs).length === 1;   // 칼라칩 · SBR 고무분말 · 분철 kg은 서로 더하지 않음
-      h += '<td colspan="3" class="lab">합계</td><td class="c">' + (hasBag ? fmt(bags) : '') + '</td><td class="r">' + (oneG ? fmtQ(kg) : '') + '</td>' +
-        '<td></td><td class="r">' + (amt ? fmt(st.supply) : '') + '</td><td class="r">' + (amt ? fmt(st.tax) : '') + '</td><td></td>';
-    } else h += '<td colspan="9" class="cont">다음 장에 계속 (' + (pi + 1) + '/' + pn + ')</td>';
+      var tb = hasBag ? fmt(bags) : '', tk = oneG ? fmtQ(kg) : '', ts = amt ? fmt(st.supply) : '', tt = amt ? fmt(st.tax) : '';
+      h += '<td colspan="3" class="lab">합계</td><td class="c"' + fit(tb, 3, FZ.tf, padT) + '>' + tb + '</td><td class="r"' + fit(tk, 4, FZ.tf, padN) + '>' + tk + '</td>' +
+        '<td></td><td class="r"' + fit(ts, 6, FZ.tf, padN) + '>' + ts + '</td><td class="r"' + fit(tt, 7, FZ.tf, padN) + '>' + tt + '</td><td></td>';
+    } else h += '<td colspan="9" class="cont">다음 장에 계속 → PAGE. ' + (pi + 2) + '/' + pn + '</td>';
     h += '</tr></tfoot></table>';
     var memo = [st.memo, co.bank ? '입금 계좌: ' + co.bank : '', co.note || ''].filter(Boolean).join('\n');
-    if (half) h += '<div class="bt">' + '<div class="sumbar"><span>합계금액</span><em>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><b>₩' + (amt ? fmt(st.total) : '') + '</b></div>' +
-      '<div class="rcv"><span>인수자</span><em>(인)</em></div></div>';
-    else h += '<div class="bt">' + (last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><small>공급가액 ' + (amt ? fmt(st.supply) : '<i class="sb"></i>') + ' + 세액 ' + (amt ? fmt(st.tax) : '<i class="sb"></i>') + '</small><b>₩' + (amt ? fmt(st.total) : '') + '</b></div>' : '') +
+    if (half) {
+      var won = '₩' + (amt ? fmt(st.total) : ''), han = '일금 ' + (amt ? numKo(st.total) : '') + '원정';
+      h += '<div class="bt">' + '<div class="sumbar"><span>합계금액</span><em' + (amt ? fitCss(han, CW - 3 - 46 - 20 - 5.6 - (txtEm(won) * 13 * 0.3528 + 6.2), 8.2, 6) : '') + '>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><b>' + won + '</b></div>' +
+        '<div class="rcv"><span>인수자</span><em>(인)</em></div></div>';
+    } else h += '<div class="bt">' + (last ? '<div class="sumbar"><span>합계금액</span><em>일금 ' + (amt ? numKo(st.total) : '<i class="sb"></i>') + '원정</em><small>공급가액 ' + (amt ? fmt(st.supply) : '<i class="sb"></i>') + ' + 세액 ' + (amt ? fmt(st.tax) : '<i class="sb"></i>') + '</small><b>₩' + (amt ? fmt(st.total) : '') + '</b></div>' : '') +
       '<div class="lo"><div class="memo"><span class="lb">전달사항</span><p>' + esc(memo) + '</p></div><div class="sign"><span class="lb">인수자 확인</span><p><i></i><em>(인)</em></p></div></div></div>';
-    h += '<div class="ft">' + [co.name, co.addr, co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : '', co.web, half && co.bank ? '입금 계좌 ' + co.bank : ''].filter(Boolean).map(esc).join('<i>·</i>') + '</div>';
+    var ft = [co.name, co.addr, co.tel ? 'TEL ' + co.tel : '', co.fax ? 'FAX ' + co.fax : '', co.web, half && co.bank ? '입금 계좌 ' + co.bank : ''].filter(Boolean);
+    h += '<div class="ft"' + (half ? fitEm(ft.reduce(function (a, x) { return a + txtEm(x); }, 0), Math.max(0, ft.length - 1) * 4.4, CW, 6.2, 5) : '') + '>' + ft.map(esc).join('<i>·</i>') + '</div>';
     return h + '</div>';
   }
 
@@ -1033,7 +1110,7 @@ body.pvon{overflow:hidden}
   /** 줄 하나의 입력 칸 값만 다시 씀 (화면 전체를 다시 그리지 않음) */
   function refreshLine(i) {
     var l = S.F.lines[i];
-    ['price', 'name', 'spec'].forEach(function (k) { var e = root.querySelector('[data-l="' + k + '"][data-i="' + i + '"]'); if (e && e.value !== l[k]) e.value = l[k]; });
+    ['price', 'name', 'spec', 'memo'].forEach(function (k) { var e = root.querySelector('[data-l="' + k + '"][data-i="' + i + '"]'); if (e && e.value !== l[k]) e.value = l[k]; });
     updLive(i);
   }
   function pickItem(l, cust) {
@@ -1042,6 +1119,9 @@ body.pvon{overflow:hidden}
     var mm = l.prod && l.color ? memoOf(cust, l.prod, l.color) : null;
     if (mm && l.nameAuto && mm[0]) { l.name = mm[0]; }
     if (!l.spec || l.specAuto) { l.spec = specDef(l.prod, l.color) || (mm ? mm[1] : ''); l.specAuto = true; }
+    // SBR 포장은 비고 칸 (규격은 1-4mm, 2026-11-24): 비고가 비어 있으면 기본 '톤백' — 손으로 고친 비고는 그대로
+    if (l.prod && l.prod === sbrName()) { if (!String(l.memo || '').trim() || l.memoAuto) { l.memo = '톤백'; l.memoAuto = true; } }
+    else if (l.memoAuto) { l.memo = ''; l.memoAuto = false; }
     if (l.prod && l.color && String(l.price).trim() === '') {
       var a = priceOf(cust, l.prod, l.color);
       if (a) { l.price = String(a.v); l.psrc = a.src; l.pat = a.at || ''; }
@@ -1129,7 +1209,7 @@ body.pvon{overflow:hidden}
     var F = S.F, T = formTotals(F), n = F.lines.length, L = layoutOf(n), out = [];
     if (T.noPrice) out.push(['w', '단가 없는 줄 ' + T.noPrice + '개: 빈칸으로 찍힙니다 (\'고치기\'에서 넣을 수 있음)']);
     out.push(['w', F.date > S.I.today ? '거래일자가 앞날이라 발행해도 출고예정으로 둠' : '발행하면 이 거래일자로 출고 확정 (재고에서 빠짐)']);
-    out.push(['', L.full ? 'A4 ' + L.sheets + '장: 품목 ' + n + '줄이라 한 부씩 크게 (공급받는자 보관용 · 공급자 보관용)' : 'A4 1장: 위 공급받는자 보관용 · 아래 공급자 보관용']);
+    out.push(['', 'A4 ' + L.k + '장 · 반으로 잘라 위 공급받는자 보관용 · 아래 공급자 보관용' + (L.k > 1 ? ' (품목 ' + n + '줄 → 반장마다 ' + HALF_ROWS + '줄, PAGE. 1/' + L.k + ' ~ ' + L.k + '/' + L.k + ')' : ' (반장마다 품목 ' + HALF_ROWS + '줄)')]);
     if (F.linked && F.linked.length) out.push(['', '이 상자의 일부 출고는 이미 No. ' + F.linked.join(', ') + '에 들어 있어 뺐습니다']);
     if (!custOf(F.cust)) out.push(['', '거래처 정보 없음: 공급받는자 칸에 상호만 찍힘']);
     if (!(S.I.co && S.I.co.saved)) out.push(['', '공급자 칸은 회사 정보 기본값 (업태 · 종목 · 입금 계좌는 \'회사 정보\' 탭)']);
@@ -1213,8 +1293,8 @@ body.pvon{overflow:hidden}
   }
   /** 송부용 문서: 공급받는자 보관용 한 부 · 금액 포함 · 한 부씩 크게. only = 앞에서 몇 장만(미리보기) */
   function mailDocHtml(st, only) {
-    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = st.lines || [], k = Math.max(1, Math.ceil(lines.length / FULL_ROWS));
-    var L = { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k }, x = Object.assign({}, st, { amt: true, draft: false }), out = '';
+    var co = S.I.co || {}, cu = custOf(st.cust) || {}, lines = (st.lines || []).map(stdLine), k = Math.max(1, Math.ceil(lines.length / FULL_ROWS));
+    var L = { full: true, per: FULL_ROWS, rh: 6.8, k: k, sheets: k }, x = Object.assign({}, st, { amt: true, draft: false, lines: lines }), out = '';
     for (var p = 0; p < (only ? Math.min(only, k) : k); p++) out += '<section class="pg f ml">' + copyHtml(x, co, cu, lines.slice(p * L.per, (p + 1) * L.per), p, k, L, 't') + '</section>';
     return out;
   }
@@ -1460,6 +1540,7 @@ body.pvon{overflow:hidden}
     l[lk] = el.value;
     if (lk === 'name') l.nameAuto = false;
     if (lk === 'spec') l.specAuto = false;
+    if (lk === 'memo') l.memoAuto = false;
     if (lk === 'price' && l.k === 's') { var a = priceOf(S.F.cust, l.prod, l.color); l.psrc = a && num(el.value) === a.v ? a.src : ''; }
     if (lk === 'qty' || lk === 'price' || lk === 'supply') updLive(i);
   });
@@ -1503,7 +1584,7 @@ body.pvon{overflow:hidden}
 
   start();
   if (DEMO) window.__stmt = { get S() { return S; }, numKo: numKo, ckey: ckey, docHtml: docHtml, pname: pname, formTotals: formTotals,
-    layoutOf: layoutOf,
+    layoutOf: layoutOf, stdLine: stdLine, fitCss: fitCss, txtEm: txtEm, mailDocHtml: function (st) { return mailDocHtml(st); },
     nav: function (qs) { q0 = new URLSearchParams(qs); S.F = null; S.cur = null; S.arm = ''; S.pv = false; renderPv(); S.tab = /^(list|edit|cust|co)$/.test(q0.get('view') || '') ? q0.get('view') : 'list'; start(); } };   // 시험: 같은 화면에서 주소만 바꿔 다시 열기
 })();
 </script>
