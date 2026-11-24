@@ -435,7 +435,7 @@ body.labmode .wrap{max-width:1480px}
 .poinbox .poitem.st-done{border-left-color:var(--ok)}
 .poinbox .poitem.st-off,.poinbox .poitem.st-dup{border-left-color:#B8BEC7;opacity:.8}
 .poinbox .poitem.hi{outline:3px solid #F4B400;outline-offset:-3px;background:#FFFBE6;opacity:1}   /* 공문함에서 연 발주서 (2026-11-21) */
-.rgq{margin:10px 0 2px;font-size:14.5px;font-weight:700;color:#8A5300}   /* 검정 = EPDM 재생일 수 있음 (2026-11-21 22:21) */
+.rgq{margin:10px 0 2px;font-size:14.5px;font-weight:700;color:#8A5300}   /* 검정 = EPDM BK일 수 있음 (2026-11-21 22:21) */
 .ppick.rg{grid-template-columns:repeat(auto-fit,minmax(118px,1fr))}
 .pohead{display:flex;align-items:flex-start;gap:8px}
 .pochip{flex:none;display:inline-flex;align-items:center;min-height:26px;padding:0 10px;border-radius:999px;font-size:13px;font-weight:800;white-space:nowrap}
@@ -1238,7 +1238,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function prodsOfLine(l, prods) { return (prods || S.prods).filter(function (p) { return lineOf(p) === l; }); }
   /* ───────── 칼라칩 · SBR 고무분말 · 분철은 따로 셉니다 (2026-11-19 지시) ─────────
      "이번달 출고량을 칼라칩과 sbr의 총합계량을 겹치게 하지 마라. 칼라칩과 sbr은 철저히 둘로 나누어서 계산해야 된다."
-     묶음 = '재고품목' 분류가 칼라칩인 제품(일반 EPDM·NM-CHIP·LOK-CHIP·KS·EPDM 재생)은 '칼라칩' 하나,
+     묶음 = '재고품목' 분류가 칼라칩인 제품(일반 EPDM·NM-CHIP·LOK-CHIP·KS·EPDM BK)은 '칼라칩' 하나,
      그 밖의 분류(폐타이어)는 제품마다 따로(SBR 고무분말 · 분철). 서로 다른 묶음의 kg은 한 숫자로 더하지 않습니다. */
   var CHIP_LINE = '칼라칩';
   /* 분류를 하나도 안 쓴 시트(예전 시트)는 예전처럼 한 묶음('') — 지금 시트는 모든 품목에 분류가 있습니다 */
@@ -2795,7 +2795,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var LAB_CODE = { '로즈': 'NM-01', '분홍': 'NM-02', '주황': 'NM-03', '노랑': 'NM-04', '겨자': 'NM-05', '연두': 'NM-06', '녹색': 'NM-07', '진녹': 'NM-08',
     '카키': 'NM-09', '청녹': 'NM-10', '청록': 'NM-10', '하늘': 'NM-11', '하늘색': 'NM-11', '청색': 'NM-12', '진청': 'NM-13', '연보라': 'NM-14', '보라': 'NM-15',
     '아이보리': 'NM-16', '황토': 'NM-17', '연갈': 'NM-18', '연갈색': 'NM-18', '적갈': 'NM-19', '적갈색': 'NM-19', '적색': 'NM-19', '진갈': 'NM-20', '진갈색': 'NM-20', '회색': 'NM-21', '검정': 'NM-22' };
-  var LAB_SIZE = { 'SBR 고무분말|5-7mm': ['NMSBR-01', '검정5-7'], 'SBR 고무분말|2-3mm': ['NMSBR-02', '검정2-3'], 'SBR 고무분말|1-2mm': ['NMSBR-03', '검정1-2'], 'EPDM 재생|2-3mm': ['NMEPDM', '재생2-3'] };
+  var LAB_SIZE = { 'SBR 고무분말|5-7mm': ['NMSBR-01', '검정5-7'], 'SBR 고무분말|2-3mm': ['NMSBR-02', '검정2-3'], 'SBR 고무분말|1-2mm': ['NMSBR-03', '검정1-2'], 'EPDM BK|2-3mm': ['NMEPDM', 'BK2-3'] };   // EPDM BK: 2026-11-24 이름 바꿈
   var LAB_ROWS = 10;
   function labItem(prod, color) {
     var s = LAB_SIZE[prod + '|' + color];
@@ -2805,7 +2805,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     return { code: LAB_CODE[String(color).replace(/\s+/g, '')] || '', color: color, sub: prod };
   }
   /* 품번 칸 색 = 그 칩의 색 (2026-11-16 지시 "노랑이면 품번에도 노랑색, 녹색이면 녹색").
-     색은 앱 화면의 색 견본(SWATCH)과 같은 색입니다. SBR 고무분말·EPDM 재생·분철처럼 색 칩이 아닌 것은
+     색은 앱 화면의 색 견본(SWATCH)과 같은 색입니다. SBR 고무분말·EPDM BK·분철처럼 색 칩이 아닌 것은
      양식 견본 줄(NMSBR-02 검정2-3)처럼 검정. 글씨는 칸 색이 밝으면 검정, 어두우면 흰색(더 잘 보이는 쪽). */
   var LAB_ALIAS = { '하늘': '하늘색', '연갈': '연갈색', '진갈': '진갈색', '청녹': '청록' };
   var LAB_EXTRA = { '적갈': '#8B3A2B', '적갈색': '#8B3A2B' };
@@ -3759,7 +3759,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function labProdNear(s) {
     s = String(s || '').toUpperCase();
-    if (/재생/.test(s)) return 'EPDM 재생';
+    if (/재생|EPDM\s*-?\s*BK/.test(s)) return PROD_BK;   // 예전 이름 '재생'으로 말해도 EPDM BK
     if (/LOK|락|록/.test(s)) return 'LOK-CHIP';
     if (/NM|엔엠/.test(s)) return 'NM-CHIP';
     if (/일반|EPDM|이피디엠/.test(s)) return '일반 EPDM';
@@ -5350,13 +5350,14 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     });
     return h + '</div>';
   }
-  /* 검정 = EPDM 재생일 수 있음 (2026-11-21 22:21 지시 "일반 epdm 검정 이면 epdm 재생일수 잇으니 그것도 적용해라. 선택할수잇도록 만들고")
-     서버가 제품이 안 적혔거나 '일반 EPDM'으로 적힌 검정 줄에 regen(재생 규격들)을 붙여 줌 → 칩 제품(검정) · EPDM 재생(규격) 중 하나 */
+  /* 검정 = EPDM BK일 수 있음 (2026-11-21 22:21 지시, 2026-11-24 이름 EPDM BK)
+     서버가 제품이 안 적혔거나 '일반 EPDM'으로 적힌 검정 줄에 regen(EPDM BK 규격들)을 붙여 줌 → 칩 제품(검정) · EPDM BK(규격) 중 하나 */
+  var PROD_BK = 'EPDM BK';
   function regenPick(l, i, V, skip) {
     var date = isYmd(V.plan.date) ? V.plan.date : '';
     var opts = PROD3.filter(function (p) { return !!S.byKey[p + '|검정']; }).map(function (p) { return [p, '검정', (PROD3_NAME[p] || p) + ' 검정']; })
-      .concat(l.regen.filter(function (z) { return !!S.byKey['EPDM 재생|' + z]; }).map(function (z) { return ['EPDM 재생', z, 'EPDM 재생 ' + z + (z === l.size ? ' (발주서 규격)' : '')]; }));
-    var h = '<p class="rgq">검정은 <b>EPDM 재생</b>일 수 있습니다. 발주서대로 골라 주십시오.</p><div class="ppick rg" role="radiogroup" aria-label="검정 — 칩 제품 또는 EPDM 재생">';
+      .concat(l.regen.filter(function (z) { return !!S.byKey[PROD_BK + '|' + z]; }).map(function (z) { return [PROD_BK, z, PROD_BK + ' ' + z + (z === l.size ? ' (발주서 규격)' : '')]; }));
+    var h = '<p class="rgq">검정은 <b>' + PROD_BK + '</b>일 수 있습니다. 발주서대로 골라 주십시오.</p><div class="ppick rg" role="radiogroup" aria-label="검정 — 칩 제품 또는 ' + PROD_BK + '">';
     opts.forEach(function (o) {
       var on = l.prod === o[0] && l.color === o[1], st = stockAt(o[0], o[1], date, skip), short = date && st.day != null && st.day < l.kg;
       h += '<button type="button" class="pp' + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-act="poregen" data-i="' + i + '" data-v="' + esc(o[0] + '|' + o[1]) + '"><b>' + esc(o[2]) + '</b>' +
@@ -5375,7 +5376,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var h = '<li class="poln' + (short ? ' short' : '') + (!l.prod ? ' need' : '') + '"><div class="pl1"><span class="sw" style="background:' + labTint(l.prod || '일반 EPDM', l.color) + '"></span>';
     var regen = l.regen && l.regen.length ? l.regen : null;
     var cands = regen ? [] : prodCands(l.prod, l.color);
-    if (regen) h += '<b>' + esc(l.prod === 'EPDM 재생' ? 'EPDM 재생' : (PROD3_NAME[l.prod] || l.prod || '제품 선택')) + '</b> <b>' + esc(l.color) + '</b><small class="pohow">' + (l.how === 'pick' ? '고른 제품' : '검정 — EPDM 재생인지 확인') + '</small>';
+    if (regen) h += '<b>' + esc(l.prod === PROD_BK ? PROD_BK : (PROD3_NAME[l.prod] || l.prod || '제품 선택')) + '</b> <b>' + esc(l.color) + '</b><small class="pohow">' + (l.how === 'pick' ? '고른 제품' : '검정 — ' + PROD_BK + '인지 확인') + '</small>';
     else if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
     else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 선택') + '</b> <b>' + esc(l.color) + '</b>' +
       '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
@@ -7437,7 +7438,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         if (ppl && v) S.poRev.plan.lines.forEach(function (x) { if (x.color === ppl.color && x.prod !== v && prodCands(x.prod, x.color).indexOf(v) >= 0) { x.prod = v; x.how = 'pick'; nchg++; } });
         if (nchg) poResim();
       } return;
-      case 'poregen': if (S.poRev) {   // 검정: 칩 제품이면 같은 색(검정) 칩 줄을 함께, EPDM 재생이면 그 줄만
+      case 'poregen': if (S.poRev) {   // 검정: 칩 제품이면 같은 색(검정) 칩 줄을 함께, EPDM BK이면 그 줄만
         var rgl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))], rv = String(v || '').split('|');
         if (rgl && rv.length === 2 && (rv[0] !== rgl.prod || rv[1] !== rgl.color)) {
           if (PROD3.indexOf(rv[0]) >= 0) S.poRev.plan.lines.forEach(function (x) { if (x === rgl || (x.color === '검정' && PROD3.indexOf(x.prod) >= 0)) { x.prod = rv[0]; x.color = '검정'; x.how = 'pick'; } });

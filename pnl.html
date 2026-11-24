@@ -330,7 +330,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
   var TOKEN_KEY = 'nmc_pay_token';
   var PTOKEN_KEY = 'nmc_payroll_token';   // 직원 급여 비밀번호 열쇠 (v59) — 급여대장 연결에만
   var ITEMS = [
-    { k: 'nm', g: 'EPDM 칩', name: 'EPDM 칩 (일반·NM·KS·재생)' },
+    { k: 'nm', g: 'EPDM 칩', name: 'EPDM 칩 (일반·NM·KS·BK)' },
     { k: 'lok', g: 'EPDM 칩', name: '락칩 (LOK-CHIP)' },
     { k: 's57', g: '폐타이어', name: 'SBR 고무분말 5-7mm' },
     { k: 's23', g: '폐타이어', name: 'SBR 고무분말 2-3mm' },
@@ -734,7 +734,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       .map(function (r) { return r.map(function (c) { return c.replace(/^"|"$/g, '').trim(); }); }).filter(function (r) { return r.some(function (c) { return c !== ''; }); });
   }
   var isNum = function (v) { return /^-?[\d,]+(\.\d+)?\s*(원|kg)?$/i.test(String(v).trim()) && String(v).replace(/[^0-9]/g, '') !== ''; };
-  var HDR = { date: /일자|날짜|거래일|일시/, party: /거래처|업체|상호|받는분|보낸분|거래기록|업체명|고객/, item: /품목|품명|내역|적요|규격|제품|거래내용|메모|비고/, qty: /수량|중량|판매량|kg/i, price: /단가/, supply: /공급가/, vat: /부가세|세액/, total: /합계|금액|출금|매출액|총매출|지급액|청구/, epdm: /^epdm$/i, sbr: /^sbr$/i, rec: /^재생$/ };
+  var HDR = { date: /일자|날짜|거래일|일시/, party: /거래처|업체|상호|받는분|보낸분|거래기록|업체명|고객/, item: /품목|품명|내역|적요|규격|제품|거래내용|메모|비고/, qty: /수량|중량|판매량|kg/i, price: /단가/, supply: /공급가/, vat: /부가세|세액/, total: /합계|금액|출금|매출액|총매출|지급액|청구/, epdm: /^epdm$/i, sbr: /^sbr$/i, rec: /^(재생|bk|epdm\s*bk)$/i };   // rec = EPDM BK 열 (예전 결산표 열 이름 '재생')
   /** 월 매출 보고서(결산) 양식: 1.고무칩 표 → 2.분철 · 3.기타 매출 → 시공 → 총합계(건너뜀) */
   function parseReport(body, map, vatOn, items) {
     var N = num, isTotal = function (r) { return r.some(function (c) { return /^(총|합|소)\s*계$|매출\s*총\s*계|총\s*합\s*계/.test(String(c).replace(/\s+/g, ' ').trim()); }); };
@@ -742,7 +742,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
     for (; i < body.length; i++) {
       var r = body[i]; if (isTotal(r)) { i++; break; }
       var nm = (map.party !== undefined ? r[map.party] : r[0]) || ''; if (!nm) continue;
-      [['epdm', 'nm', 'EPDM'], ['rec', 'nm', '재생'], ['sbr', 's57', 'SBR']].forEach(function (x) {
+      [['epdm', 'nm', 'EPDM'], ['rec', 'nm', 'EPDM BK'], ['sbr', 's57', 'SBR']].forEach(function (x) {
         if (map[x[0]] === undefined) return; var v = N(r[map[x[0]]]);
         if (v > 0) items.push({ text: nm + ' · ' + x[2], cls: nm + ' ' + x[2], party: nm, qty: 0, price: 0, amt0: vatOn ? v / 1.1 : v, rep: 'col', hint: x[1] });
       });
