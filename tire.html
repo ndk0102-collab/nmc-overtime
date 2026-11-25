@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NMC 폐타이어 관리대장</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#44505C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+<script src="nav.js"></script>
+<script src="menu.js"></script>
+<script src="tire-forms.js"></script>
+<!--PREVIEW_SERVER-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* 폐타이어 관리대장 (2026-11-25). 회사 숫자 · 업체 · 거래처는 이 파일에 없고, 관리자 로그인 뒤 서버(구글 시트 '타이어입고' · '타이어생산' · '타이어판매' · '타이어설정' · '재고기록')에서 받아 옵니다. */
+:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#121820; --ink2:#2E3742; --muted:#5A6471; --line:#D5DBE3; --soft:#EBEEF3;
+  --accent:#1E5AA8; --accent-soft:#E6EEF9;
+  --bad:#B42318; --bad-soft:#FDE9E7; --warn:#8A5300; --warn-soft:#FCF0D6; --ok:#1B7A43; --ok-soft:#E4F3EA;
+  --vc:#44505C; --vsoft:#E9EDF1;
+  --font:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body.noscroll{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+b,.big,td,th{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+.bar{position:sticky;top:0;z-index:20;background:var(--vc);color:#fff;padding:10px 12px 0;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+.bin{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+.bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vtabs{max-width:980px;margin:8px auto 0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.vtabs button{min-height:46px;padding:2px 4px;border:0;border-radius:12px 12px 0 0;background:rgba(255,255,255,.16);color:#fff;font-weight:800;font-size:15.5px;line-height:1.2;cursor:pointer}
+@media (max-width:560px){.bar{padding-bottom:8px}.vtabs{grid-template-columns:repeat(3,minmax(0,1fr))}.vtabs button{min-height:40px;border-radius:10px;font-size:14px}}   /* 휴대폰: 서식 5가지 = 3 + 2 */
+.vtabs button[aria-selected="true"]{background:var(--bg);color:var(--vc)}
+.home:focus-visible,.vtabs button:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+
+.wrap{max-width:980px;margin:0 auto;padding:12px 12px 96px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{margin:0 0 8px;font-size:17px;font-weight:800}
+.card h2 small{margin-left:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.card h3{margin:14px 0 6px;font-size:15px;font-weight:800;color:var(--ink2)}
+.hint{margin:6px 0 0;color:var(--muted);font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--vc);color:#fff;font-weight:800;font-size:16px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:var(--bad)}
+.btn.sm{min-height:40px;padding:0 12px;font-size:14.5px}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.nav:focus-visible,.ent:focus-visible,.link:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.link{border:0;background:none;padding:6px 0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:15px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+
+.pnav{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.nav{flex-shrink:0;width:50px;height:50px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:26px;font-weight:800;line-height:1;cursor:pointer}
+.nav:disabled{opacity:.3;cursor:default}
+.plabel{flex:1;min-width:0;text-align:center}
+.plabel b{display:block;font-size:18.5px;font-weight:800;line-height:1.3}
+.plabel small{display:block;font-size:13.5px;color:var(--muted)}
+
+.head .k{margin:0;font-size:15px;font-weight:800;color:var(--vc)}
+.head .big{margin:2px 0 2px;font-size:30px;font-weight:800;letter-spacing:-.01em;line-height:1.25}
+.head .note{margin:2px 0;font-size:14.5px;color:var(--ink2)}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}
+.tile{padding:10px;border-radius:12px;background:var(--soft)}
+.tile span{display:block;font-size:13px;font-weight:800;color:var(--ink2)}
+.tile b{display:block;font-size:17px;font-weight:800;line-height:1.3;margin-top:2px}
+.tile small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+@media (max-width:420px){.tiles{grid-template-columns:1fr 1fr}}
+.warnbox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:14px;font-weight:600}
+.badbox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--bad-soft);color:var(--bad);font-size:14px;font-weight:700}
+.okbox{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font-size:14px;font-weight:700}
+
+.dayh{display:flex;justify-content:space-between;gap:8px;margin:14px 0 2px;padding:6px 10px;border-radius:10px;background:var(--vsoft);font-size:14px;font-weight:800;color:var(--ink2)}
+.dayh:first-child{margin-top:4px}
+.ent{display:flex;align-items:flex-start;gap:10px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.ent .et{flex:1;min-width:0}
+.ent .et b{display:block;font-size:15.5px;font-weight:800}
+.ent .et small{display:block;font-size:13px;color:var(--muted)}
+.ent .ea{flex-shrink:0;text-align:right}
+.ent .ea b{display:block;font-size:15.5px}
+.ent .ea small{display:block;font-size:12px;color:var(--muted)}
+.ent.off{opacity:.55}
+.tag{display:inline-block;margin:2px 4px 0 0;padding:0 6px;border-radius:6px;background:var(--soft);font-size:11.5px;font-weight:800;color:var(--ink2);vertical-align:1px}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.info{background:var(--accent-soft);color:#174A8C}.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{padding:14px 4px;color:var(--muted);font-weight:600}
+
+/* 서식 (엑셀과 같은 모양: 제목 · 머리글 · 줄 · 합계 줄) */
+.form .ft{margin:2px 0 2px;text-align:center;font-size:18px;font-weight:800;letter-spacing:-.01em}
+.form .ft.sm{font-size:16px}
+.form .fs{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;font-size:13.5px;font-weight:700;color:var(--ink2)}
+.form .fs .b{font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:42px;padding:0 14px;border:2px solid var(--line);border-radius:999px;background:#fff;font-size:15px;font-weight:700;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--vc);background:var(--vc);color:#fff}
+.chip.sm{min-height:36px;padding:0 11px;font-size:14px;border-width:1px}
+.tw{overflow-x:auto;margin:8px -4px 0;-webkit-overflow-scrolling:touch}
+table.fm{border-collapse:collapse;font-size:13px;min-width:100%;background:#fff}
+table.fm th,table.fm td{height:28px;padding:3px 6px;border:1px solid #8C96A3;text-align:right;white-space:nowrap}
+table.fm th{background:#F3F5F8;font-size:12.5px;font-weight:800;color:#1F2933;text-align:center;line-height:1.3}
+table.fm td.l{text-align:left}table.fm td.c{text-align:center}table.fm td.r{text-align:right}table.fm td.b,table.fm th.b{font-weight:800}
+table.fm tr.sum td{font-weight:700}
+table.fm tr.cum td{font-weight:800;background:var(--vsoft)}
+table.fm tr.ylw td,table.fm td.yel,table.fm tr.cum td.yel{background:#FFF59D}
+table.fm td.blu,table.fm tr.cum td.blu{background:#4472C4;color:#000}
+table.fm td.red{color:#C00000}
+table.fm td.warnc{color:var(--warn);font-weight:800;font-size:12px;text-align:center}
+table.fm tr.gtop td{border-top:2px solid #44505C}
+table.fm .sm{font-size:11.5px;color:var(--muted);font-weight:700}
+table.fm td.neg{color:var(--bad)}
+table.fm td.mut,table.fm th.mut{color:var(--muted)}
+table.fm tr.rb,table.fm td.rb,table.fm th.v{cursor:pointer}
+table.fm tr.rb:hover td,table.fm td.rb:hover{background:var(--vsoft)}
+table.fm td.pc[data-act]{cursor:pointer;color:#174A8C;text-decoration:underline dotted;text-underline-offset:3px}
+table.fm th.v{color:#174A8C;text-decoration:underline dotted;text-underline-offset:3px}
+[role="button"]:focus-visible{outline:3px solid #F4B400;outline-offset:-2px}
+.lab3{margin:6px 0 8px;font-size:15px;font-weight:800;color:var(--ink2)}
+.impb .file{margin-bottom:8px}
+.chkm{color:var(--ok);font-weight:800}.chkx{color:var(--bad);font-weight:800}
+
+/* 점검 */
+.issue{display:flex;gap:10px;align-items:flex-start;padding:10px 2px;border-top:1px solid var(--line)}
+.issue:first-child{border-top:0}
+.issue .t{flex:1;min-width:0;font-size:14.5px}
+.issue .lv{flex-shrink:0}
+
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;min-height:58px;padding:0 22px;border:0;border-radius:999px;background:var(--vc);color:#fff;font-size:17.5px;font-weight:800;box-shadow:0 6px 18px rgba(15,23,42,.3);cursor:pointer}
+.fab:focus-visible{outline:3px solid #F4B400;outline-offset:3px}
+
+#sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.45)}
+.sheet{display:flex;flex-direction:column;width:100%;max-width:600px;max-height:94vh;max-height:94dvh;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(15,23,42,.25)}
+@media (min-width:640px){#sheet{align-items:center;padding:16px}.sheet{border-radius:20px;max-height:92vh}}
+.shead{display:flex;align-items:center;gap:10px;padding:12px 14px 12px 16px;border-bottom:1px solid var(--line)}
+.shead h2{flex:1;margin:0;font-size:19px;font-weight:800;color:var(--vc)}
+.sbody{flex:1;overflow:auto;padding:12px 16px 4px;-webkit-overflow-scrolling:touch}
+.sfoot{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sfoot .btn{flex:1 1 140px}
+.fld{margin:0 0 14px}
+.fld > .lab{display:block;margin:0 0 6px;font-size:14.5px;font-weight:800;color:var(--ink2)}
+.fld > .lab small{margin-left:4px;font-weight:600;color:var(--muted)}
+.inp{width:100%;min-height:50px;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:17.5px}
+.inp:focus{outline:none;border-color:var(--vc)}
+.inp:disabled{background:var(--soft);color:var(--ink2)}
+.inp.amt{font-weight:800;text-align:right}
+textarea.inp{min-height:150px;padding:10px 12px;font-size:14px;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two .fld{min-width:0}
+.inrow{display:flex;align-items:center;gap:8px}
+.inrow .inp{flex:1;min-width:0}
+.unit{flex-shrink:0;font-weight:800;color:var(--muted)}
+.calc{margin:8px 0 0;padding:8px 10px;border-radius:10px;background:var(--soft);font-size:14.5px;line-height:1.6}
+.ro{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14.5px;line-height:1.7}
+.ro b{font-weight:800}
+.smsg{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:14.5px;font-weight:700}
+.smsg.err{background:var(--bad-soft);color:var(--bad)}
+.smsg.info{background:var(--accent-soft);color:#174A8C}
+details.more{margin:0 0 12px;border-top:1px dashed var(--line);padding-top:6px}
+details.more > summary{display:flex;align-items:center;min-height:44px;font-weight:800;color:var(--accent);cursor:pointer}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700}
+.chk input{width:22px;height:22px}
+.file{display:block;width:100%;padding:14px;border:2px dashed var(--line);border-radius:12px;background:var(--soft);font-size:15px}
+
+.login{max-width:440px;margin:20px auto}
+.login form{display:flex;gap:8px;margin-top:12px}
+.login input{flex:1;min-width:0;min-height:52px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:17px}
+.err{margin:8px 0 0;color:var(--bad);font-weight:700}
+.wait{padding:30px 10px;text-align:center;color:var(--muted);font-weight:700}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3)}
+@media (max-width:420px){.vtabs button{font-size:15px}.bar h1{font-size:18px}}
+@media print{.bar,.fab,.noprint,#sheet,.toast{display:none!important}body{background:#fff}.wrap{max-width:none;padding:0}.card{border:1px solid #999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
+    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴" title="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg><span>메뉴</span></a>
+    <h1 id="title">폐타이어 입고</h1>
+  </div>
+  <nav class="vtabs" id="vtabs" role="tablist" aria-label="화면 선택"></nav>
+</header>
+<main class="wrap" id="root"></main>
+<button type="button" class="fab" id="fab" hidden></button>
+<div id="sheet" hidden></div>
+<p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+
+<script>
+(function () {
+  'use strict';
+  var DEMO = window.__SERVER__ || null;   // 시험용 화면에서만
+  var API = DEMO ? '' : String(window.NMC_API || '');
+  var TOKEN_KEY = 'nmc_pay_token';      // 다른 관리자 화면과 같은 열쇠
+  var T = window.NMCTire;
+  var $ = function (id) { return document.getElementById(id); };
+  var root = $('root'), sheetEl = $('sheet'), toastEl = $('toast'), fab = $('fab');
+
+  var VIEWS = [['f1', '서식-1 보고서'], ['f2', '서식-2 보고서'], ['weigh', '계량증명서 관리'], ['tax', '세금계산서 관리'], ['sum', '총괄표']];   // 2026-11-25 22:00 지시: 서식 5가지 그대로
+  var TITLE = { f1: '서식-1 보고서', f2: '서식-2 보고서', weigh: '계량증명서 관리', tax: '세금계산서 관리', sum: '총괄표' };
+  var FAB = { f1: '+ 입고 등록', f2: '+ 생산 입력', weigh: '+ 매입 계량 등록', tax: '+ 판매 추가' };
+  var WD = ['일', '월', '화', '수', '목', '금', '토'];
+  var XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  var vm = /[?&]view=(f1|f2|weigh|tax|sum)(?:&|$)/.exec(location.search);
+  var S = { view: vm ? vm[1] : 'f1', y: '', m: 0, today: '', data: {}, M: {}, loading: {}, err: '', authed: false, loginErr: '', sheet: null, dl: '', imp: null };
+  var token = '';
+  try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
+  S.authed = !!token;
+
+  /* ───────── 글자 · 숫자 · 날짜 ───────── */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function kg(n) { return n == null || n === '' ? '' : (n < 0 ? '−' : '') + Math.abs(Math.round(Number(n))).toLocaleString('ko-KR'); }
+  function won(n) { return n == null ? '' : (n < 0 ? '−' : '') + Math.abs(Math.round(n)).toLocaleString('ko-KR') + '원'; }
+  function pr(n) { return n == null ? '' : Number(n).toLocaleString('ko-KR', { maximumFractionDigits: 2 }); }
+  function num(v) {
+    var s = String(v == null ? '' : v).replace(/[,\s원]/g, '');
+    if (s === '') return null;
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+    return Number(s);
+  }
+  function fmtIn(v, dec) {   // dec: 소수 자리 (true = 2) — 수율 · 철심 비율은 소수 넷째 자리까지
+    var nd = dec === true ? 2 : (Number(dec) || 0);
+    var s = String(v == null ? '' : v).replace(/[^0-9.]/g, '');
+    if (!nd) s = s.replace(/\./g, '');
+    var i = s.indexOf('.');
+    if (i >= 0) s = s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, '').slice(0, nd);
+    var a = i >= 0 ? s.slice(0, i) : s, b = i >= 0 ? s.slice(i) : '';
+    a = a.replace(/^0+(?=\d)/, '');
+    return (a ? Number(a).toLocaleString('ko-KR') : (b ? '0' : '')) + b;
+  }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function ymd(y, m, d) { return y + '-' + pad(m) + '-' + pad(d); }
+  function dim(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+  function P3(s) { return [Number(s.slice(0, 4)), Number(s.slice(5, 7)), Number(s.slice(8, 10))]; }
+  function wd(s) { var p = P3(s); return WD[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()]; }
+  function md(s) { var p = P3(s); return p[1] + '월 ' + p[2] + '일'; }
+  function dShort(s) { return md(s) + ' (' + wd(s) + ')'; }
+  function mOf(s) { return Number(String(s).slice(5, 7)); }
+  function dnum(s) { var p = P3(s); return Date.UTC(p[0], p[1] - 1, p[2]) / 864e5; }
+  function todayY() { return S.today ? S.today.slice(0, 4) : String(new Date().getFullYear()); }
+
+  /* ───────── 서버 ───────── */
+  var ERR = {
+    auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
+    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
+    bad_date: '날짜를 확인해 주십시오.', future_date: '미래 날짜는 등록할 수 없습니다.', bad_co: '업체명을 입력해 주십시오.', bad_cust: '거래처를 입력해 주십시오.',
+    bad_qty: 'kg은 1 이상 200,000 이하의 정수로 입력해 주십시오.', bad_weigh: '총중량과 공차중량을 둘 다 입력하거나 둘 다 비워 주십시오 (총중량 > 공차중량).',
+    bad_net: '실중량이 총중량 − 공차중량과 다릅니다.', bad_time: '계량 시각은 시:분으로 입력해 주십시오.', bad_price: '단가를 확인해 주십시오.',
+    bad_amount: '금액을 확인해 주십시오 (원 단위 정수). 세액만 입력할 수는 없습니다.', bad_item: '품목을 선택해 주십시오.', bad_year: '연도를 확인해 주십시오.',
+    bad_ratio: '수율 · 철심 비율 · 섬유 값을 확인해 주십시오.', not_found: '해당 기록이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.',
+    bad_input: '입력값을 확인해 주십시오.', bad_rows: '옮길 줄이 없습니다.', bad_kind: '자료 종류가 올바르지 않습니다.',
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', lib: '엑셀 도구를 받지 못했습니다. 인터넷 연결을 확인해 주십시오.'
+  };
+  function errText(e) {
+    var c = String((e && e.message) || e || ''), m = /^bad_row:(\d+):(.+)$/.exec(c);
+    if (m) return m[1] + '번째 줄: ' + (ERR[m[2]] || m[2]);
+    return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.');
+  }
+  function post(body) {
+    if (token && body.action !== 'login') body.token = token;
+    if (DEMO) {
+      return new Promise(function (res, rej) {
+        setTimeout(function () { try { var j = JSON.parse(DEMO.post(JSON.stringify(body))); if (j.ok) res(j.data); else rej(new Error(j.error)); } catch (e) { rej(e); } }, 20);
+      });
+    }
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 90000);
+    return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('net'); return r.json(); }, function (e) { throw new Error(e && e.name === 'AbortError' ? 'timeout' : 'net'); })
+      .then(function (j) { clearTimeout(timer); if (!j || !j.ok) throw new Error((j && j.error) || 'server'); return j.data; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function setToken(t) { token = t || ''; try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  function devId() {
+    var k = 'nmc_dev', v = '';
+    try { v = localStorage.getItem(k) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(v)) {
+      var a = new Uint8Array(16); crypto.getRandomValues(a);
+      v = Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
+  function call(fn, args) {
+    return post({ action: 'stock.call', fn: fn, args: args || [] }).catch(function (e) {
+      if (String(e && e.message) === 'auth') { setToken(''); S.authed = false; S.data = {}; S.M = {}; S.loginErr = ERR.auth; closeSheetNow(); render(); }
+      throw e;
+    });
+  }
+
+  /* ───────── 자료 ───────── */
+  function put(d) {
+    S.data[d.y] = d; S.M[d.y] = T.model(d); S.today = d.today;
+    if (!S.y) S.y = d.y;
+    if (!S.m) S.m = d.y === d.today.slice(0, 4) ? mOf(d.today) : 12;
+  }
+  function need(y) {
+    if (S.data[y] || S.loading[y]) return;
+    S.loading[y] = true;
+    call('apiTire', [y]).then(function (d) { S.loading[y] = false; S.err = ''; put(d); render(); },
+      function (e) { S.loading[y] = false; if (String(e && e.message) !== 'auth') S.err = errText(e); render(); });
+  }
+  var reloading = false;
+  function reload(quiet, then) {
+    if (reloading || !S.y) return;
+    reloading = true;
+    var y = S.y;
+    call('apiTire', [y]).then(function (d) { reloading = false; S.err = ''; put(d); if (!S.sheet || !quiet) render(); if (then) then(); },
+      function (e) { reloading = false; if (!quiet && String(e && e.message) !== 'auth') toast(errText(e)); });
+  }
+  function cur() { return S.M[S.y] || null; }
+  function curD() { return S.data[S.y] || null; }
+  function monthT(M) { return M && M.months[S.m - 1] || null; }
+
+  /* ───────── 그리기 ─────────
+     2026-11-25 22:00 지시: "서식1 보고서 서식 2보고서 계량증명서관리 세금계산서관리 총괄표 전부다 똑같이 해서 만들어야지 다르게 만들지마라"
+     → 칸 = 서식 5가지. 칸마다 그 서식을 엑셀과 같은 모양(제목 · 머리글 · 줄 · 합계 줄)으로 보이고, 줄을 누르면 그 자리에서 넣기 · 고치기. */
+  function render() {
+    document.body.classList.toggle('noscroll', !!S.sheet);
+    $('title').textContent = TITLE[S.view];
+    document.title = 'NMC ' + TITLE[S.view];
+    var vt = '';
+    VIEWS.forEach(function (v) { vt += '<button type="button" role="tab" aria-selected="' + (S.view === v[0]) + '" data-act="view" data-v="' + v[0] + '">' + v[1] + '</button>'; });
+    $('vtabs').innerHTML = vt;
+    var h = '', canAdd = false;
+    if (!S.authed) h = loginHtml();
+    else if (!S.y) h = S.err ? errHtml() : '<p class="wait">조회 중…</p>';
+    else {
+      var M = cur();
+      if (!M) { if (!S.err) need(S.y); h = S.err ? errHtml() : '<p class="wait">' + esc(S.y) + '년 자료 조회 중…</p>'; }
+      else {
+        h = S.view === 'f1' ? f1Html(M) : S.view === 'f2' ? f2Html(M) : S.view === 'weigh' ? weighHtml(M) : S.view === 'tax' ? taxHtml(M) : sumHtml(M);
+        canAdd = !!FAB[S.view] && !!monthT(M);
+      }
+    }
+    root.innerHTML = h;
+    if (window.NMCNav) NMCNav.sync();
+    fab.hidden = !canAdd;
+    fab.textContent = FAB[S.view] || '';
+    if (!S.authed) { var pw = $('pw'); if (pw && !S.sheet) pw.focus(); }
+  }
+  function errHtml() { return '<section class="card"><p class="err" role="alert">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 조회</button></div></section>'; }
+  function loginHtml() {
+    return '<section class="card login"><h2>관리자 로그인</h2><p class="hint">폐타이어 관리대장은 관리자 전용입니다. 관리자 비밀번호를 입력해 주십시오. 다른 관리자 화면에서 이미 로그인한 경우 바로 열립니다.</p>' +
+      '<form id="loginForm" autocomplete="off"><label class="hint" for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
+      '<p class="err" id="loginErr" role="alert">' + esc(S.loginErr) + '</p></section>';
+  }
+  function canNext() { var ty = todayY(); return Number(S.y) < Number(ty) || (S.y === ty && S.m < mOf(S.today)); }
+  function monthBar(note) {
+    return '<div class="pnav noprint"><button type="button" class="nav" data-act="mprev" aria-label="이전 달"' + (Number(S.y) <= 2020 && S.m === 1 ? ' disabled' : '') + '>‹</button>' +
+      '<div class="plabel"><b>' + esc(S.y) + '년 ' + S.m + '월</b>' + (note ? '<small>' + note + '</small>' : '') + '</div>' +
+      '<button type="button" class="nav" data-act="mnext" aria-label="다음 달"' + (canNext() ? '' : ' disabled') + '>›</button></div>';
+  }
+  function yearBar(note) {
+    var ty = Number(todayY());
+    return '<div class="pnav noprint"><button type="button" class="nav" data-act="yprev" aria-label="이전 해"' + (Number(S.y) <= 2020 ? ' disabled' : '') + '>‹</button>' +
+      '<div class="plabel"><b>' + esc(S.y) + '년</b>' + (note ? '<small>' + note + '</small>' : '') + '</div>' +
+      '<button type="button" class="nav" data-act="ynext" aria-label="다음 해"' + (Number(S.y) >= ty ? ' disabled' : '') + '>›</button></div>';
+  }
+  function noMonth(M) { return '<section class="card"><p class="hint">' + esc(M.y) + '년 ' + S.m + '월은 아직 도래하지 않았습니다.</p></section>'; }
+  function tags(list) { return list.map(function (t) { return '<span class="tag ' + (t[1] || '') + '">' + esc(t[0]) + '</span>'; }).join(''); }
+  function md2(s) { return mOf(s) + '/' + Number(String(s).slice(8, 10)); }
+  /** 칸: 숫자(쉼표) · 음수 빨강 */
+  function td(v, cls, extra) { return '<td class="' + (cls || '') + (Number(v) < 0 ? ' neg' : '') + '"' + (extra || '') + '>' + (v == null || v === '' ? '' : kg(v)) + '</td>'; }
+  function tdt(v, cls, extra) { return '<td class="' + (cls || 'c') + '"' + (extra || '') + '>' + esc(v == null ? '' : v) + '</td>'; }
+  /** 누르면 넣기 · 고치기 (키보드도) */
+  function act(a, k, v) { return ' data-act="' + a + '" data-' + k + '="' + esc(v) + '" tabindex="0" role="button"'; }
+  /** 이 서식 · 이 달에 볼 '확인할 내용' (점검) */
+  function issuesHtml(M, kinds, all) {
+    var list = M.checks.filter(function (c) { return c.lv !== 'info' && (all || c.m === S.m || c.m === 0 || (c.ms && c.ms.indexOf(S.m) >= 0)) && (!kinds || !c.ref || kinds.indexOf(c.ref.v) >= 0); });
+    if (!list.length) return '';
+    var LV = { bad: ['문제', 'bad'], warn: ['확인', 'warn'] };
+    return '<section class="card issues noprint"><h2>확인할 내용 <small>' + list.length + '건</small></h2>' + list.slice(0, all ? 99 : 4).map(function (c) {
+      return '<div class="issue"><span class="lv">' + tags([LV[c.lv]]) + '</span><span class="t">' + esc(c.t) + '</span>' + (c.ref ? '<button type="button" class="link" data-act="goref" data-i="' + M.checks.indexOf(c) + '">보기</button>' : '') + '</div>';
+    }).join('') + (!all && list.length > 4 ? '<p class="hint">외 ' + (list.length - 4) + '건 — 총괄표 칸에 전부 있습니다.</p>' : '') + '</section>';
+  }
+  /** 서식 아래 단추: 이 서식 엑셀 · 5가지 한 번에 · 엑셀 올리기 */
+  function dlTools(k, extra) {
+    var M = cur(), dis = S.dl || !M.lastM ? ' disabled' : '', F = T.FORMS.filter(function (f) { return f.k === k; })[0];
+    return '<div class="tools noprint">' + (extra || '') +
+      '<button type="button" class="btn ghost sm" data-act="dl-one" data-form="' + k + '"' + dis + '>' + (S.dl === k ? '만드는 중…' : esc(F.name) + ' 엑셀') + '</button>' +
+      '<button type="button" class="btn ghost sm" data-act="dl-all"' + dis + '>' + (S.dl === 'all' ? '만드는 중…' : '5가지 한 번에 (zip)') + '</button>' +
+      '<button type="button" class="btn ghost sm" data-act="imp-open">엑셀 올리기 (지난 자료)</button></div>';
+  }
+
+  /* ── 서식-1 보고서 (재활용의무대상 제품,포장재의 회수,재활용 관리 대장) ── */
+  function f1Html(M) {
+    var Tm = monthT(M), h = monthBar('회수 · 재활용 관리 대장');
+    if (!Tm) return h + noMonth(M);
+    h += issuesHtml(M, ['in', 'prod', 'set']);
+    h += '<section class="card form"><p class="ft">재활용의무대상 제품,포장재의 회수,재활용 관리 대장</p><p class="fs"><span>제품,포장재명: 폐타이어</span><span>(단위:kg)</span></p><div class="tw"><table class="fm">' +
+      '<thead><tr><th rowspan="3">연월일</th><th colspan="2">1)회수내역</th><th colspan="5">처리내역</th><th>4)보관량</th></tr>' +
+      '<tr><th rowspan="2">업체명</th><th rowspan="2">회수량</th><th colspan="2">2)재활용</th><th colspan="3">3)그 밖의 사항</th><th>전월보관량</th></tr>' +
+      '<tr><th>방법및기준</th><th>재활용량</th><th>업체명</th><th>처리방법</th><th>처리량</th>' + (Tm.m === 1 ? '<th class="v"' + act('set-open', 'k', 'tire') + '>' + kg(Tm.tire0) + '</th>' : '<th></th>') + '</tr></thead><tbody>';
+    var rows = [], by = {};
+    Tm.ins.forEach(function (x) { var o = { date: x.date, co: x.co, net: x.net, rec: null, id: x.id }; rows.push(o); if (!by[x.date]) by[x.date] = o; });
+    Tm.days.forEach(function (x) { if (by[x.date]) by[x.date].rec = x.tot; else { var o = { date: x.date, co: '', net: null, rec: x.tot, id: '' }; rows.push(o); by[x.date] = o; } });
+    rows.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    rows.forEach(function (o) {
+      h += '<tr class="rb"' + (o.id ? act('in-edit', 'id', o.id) : act('prod-edit', 'date', o.date)) + '><td class="r">' + md2(o.date) + '</td>' + tdt(o.co) + td(o.net) + '<td class="c">*</td>' +
+        td(o.rec, 'pc', o.rec != null ? act('prod-edit', 'date', o.date) : '') + '<td></td><td></td><td></td><td></td></tr>';
+    });
+    h += '<tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+    h += '<tr class="sum"><td class="c b">' + Tm.m + '월합계</td><td></td>' + td(Tm.inKg) + '<td></td>' + td(Tm.rec, 'yel') + '<td></td><td></td><td></td><td></td></tr>';
+    h += '<tr class="sum"><td class="c b" colspan="2">수율적용(월계*' + M.R.yield + ')</td>' + td(Tm.yld) + td(0) + '<td></td><td></td><td></td><td></td><td></td></tr>';
+    h += '<tr class="cum"><td class="c b">누 계</td><td></td>' + td(Tm.cum.yld) + td(0) + td(Tm.cum.rec) + '<td></td><td></td><td></td>' + td(Tm.tire) + '</tr></tbody></table></div>' +
+      dlTools('f1', '<button type="button" class="btn ghost sm" data-act="prod-add">재활용량(생산) 입력</button><button type="button" class="btn ghost sm" data-act="paste">엑셀에서 붙여넣기</button>') +
+      '<p class="hint noprint">입고 1대 = 1줄 (회수량 = 계량증명서 매입 실중량). 줄을 누르면 고칩니다. 재활용량은 그날 서식-2 생산량 합(고무분말 + 철심 + 섬유)이며, 재활용량 칸을 누르면 생산을 고칩니다. 보관량 = 전월 + 수율 적용 − 재활용량.</p></section>';
+    return h;
+  }
+
+  /* ── 서식-2 보고서 (재활용제품 생산.판매 및 부산물 처리 관리대장) ── */
+  var K2 = { '고무분말': '고무분말', '철심': '철 심', '섬유': '섬 유' }, K2S = { '고무분말': '고무분말', '철심': '철    심', '섬유': '섬    유' };
+  function f2Html(M) {
+    var Tm = monthT(M), h = monthBar('생산 · 판매 및 부산물 처리 관리대장');
+    if (!Tm) return h + noMonth(M);
+    h += issuesHtml(M, ['prod', 'sale', 'set']);
+    var K = T.KINDS, dset = {}, sBy = {};
+    Tm.days.forEach(function (x) { dset[x.date] = 1; });
+    Tm.sales.forEach(function (l) { dset[l.sdate] = 1; (sBy[l.sdate + '|' + l.kind] = sBy[l.sdate + '|' + l.kind] || []).push(l); });
+    h += '<section class="card form"><p class="ft sm">재활용제품 생산.판매 및 부산물 처리 관리대장</p><p class="fs"><span></span><span>(단위:kg, 원)</span></p><div class="tw"><table class="fm">' +
+      '<thead><tr><th rowspan="3">연월일</th><th colspan="2">1)생산내역</th><th colspan="4">2)재활용제품 판매 맟 부산물 처리내역</th><th rowspan="3">4)보관량</th></tr>' +
+      '<tr><th>재활용제품</th><th rowspan="2">생산량</th><th rowspan="2">업체명</th><th>판매량</th><th rowspan="2">단가</th><th>판매금액</th></tr>' +
+      '<tr><th>및 부산물</th><th>(처리량)</th><th>(처리비용)</th></tr></thead><tbody>';
+    if (Tm.m === 1) K.forEach(function (k, j) { h += '<tr class="rb' + (j === 0 ? ' gtop' : '') + '"' + act('set-open', 'k', k) + '><td class="c b">' + (j === 0 ? '년초재고' : '') + '</td><td class="c b">' + k + '</td>' + td(Tm.stk0[k], 'b') + '<td></td><td></td><td></td><td></td><td></td></tr>'; });
+    Object.keys(dset).sort().forEach(function (date) {
+      var day = M.dayBy[date] && M.dayBy[date].tot > 0 ? M.dayBy[date] : null, first = true;
+      K.forEach(function (k, j) {
+        var sl = sBy[date + '|' + k] || [], n = Math.max(1, sl.length);
+        for (var q = 0; q < n; q++) {
+          var l = sl[q] || null, pv = q === 0 && day ? (k === '고무분말' ? day.rubber : k === '철심' ? day.steel : (day.fiber || null)) : null, lastRow = j === 2 && q === n - 1;
+          h += '<tr class="' + (first ? 'gtop' : '') + (l ? ' rb' : '') + '"' + (l ? act('sale-edit', 'key', l.key) : '') + '><td class="r">' + (first ? md2(date) : '') + '</td><td class="c">' + (q === 0 ? K2[k] : '') + '</td>' +
+            td(pv, 'pc', q === 0 ? act('prod-edit', 'date', date) : '') + '<td class="l' + (l && (l.ex || l.own) ? ' mut' : '') + '">' + esc(l ? l.cust : '') + '</td>' + td(l ? l.qty : null) +
+            '<td>' + (l && l.price != null && !l.own ? pr(l.price) : '') + '</td>' + (l && !l.own && l.supply == null ? '<td class="warnc">단가 없음</td>' : td(l && !l.own ? l.supply : null)) +
+            (lastRow && day ? td(day.tot, 'pc', act('prod-edit', 'date', date)) : '<td></td>') + '</tr>';
+          first = false;
+        }
+      });
+    });
+    var add = function (o) { return o['고무분말'] + o['철심'] + o['섬유']; };
+    h += '<tr class="gtop"><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="c sm">보관량</td></tr>' +
+      '<tr><td></td><td></td><td class="sm">생산량</td><td class="c sm">생산량누계</td><td class="sm">공급량</td><td class="sm">공급량누계</td><td></td>' + td(Tm.rec, 'yel') + '</tr>';
+    K.forEach(function (k) {
+      h += '<tr class="sum"><td></td><td class="c">' + K2S[k] + '</td>' + td(Tm.prod[k]) + td(Tm.cum.prod[k]) + (k === '섬유' && !Tm.sale[k] ? '<td></td>' : td(Tm.sale[k])) + td(Tm.cum.sale[k]) +
+        (k === '고무분말' ? '<td></td>' : td(Tm.amt['철심'])) + td(Tm.stk[k]) + '</tr>';
+    });
+    h += '<tr class="cum"><td></td><td class="c">합계</td>' + td(add(Tm.prod)) + td(add(Tm.cum.prod)) + td(Tm.sale['고무분말'] + Tm.sale['철심'], 'blu') + td(add(Tm.cum.sale)) + td(Tm.cumSteelAmt) + td(add(Tm.stk)) + '</tr></tbody></table></div>';
+    var off = Tm.sales.filter(function (l) { return l.own; }).concat(M.lines.filter(function (l) { return l.ex && String(l.sdate).slice(0, 4) === M.y && mOf(l.sdate) === S.m; }));
+    if (off.length) h += '<p class="hint">자사 사용(처리량 · 금액 없음) · 서식에서 뺀 판매: ' + off.map(function (l) { return '<button type="button" class="link"' + act('sale-edit', 'key', l.key) + '>' + esc(md(l.sdate) + ' ' + l.cust + ' ' + kg(l.qty) + 'kg' + (l.ex ? ' (뺌)' : '')) + '</button>'; }).join(' · ') + '</p>';
+    h += dlTools('f2', '<button type="button" class="btn ghost sm" data-act="sale-add">+ 판매 추가</button>') +
+      '<p class="hint noprint">생산량: 생산 화면(재고)의 SBR 고무분말 생산이 날짜별로 자동으로 들어오고(철심 = 고무분말 × ' + M.R.steelR + '), 생산량 칸을 누르면 서식 값을 고칩니다. 판매: 재고 화면의 SBR 고무분말 · 분철 출고가 계산서 발행일로 들어오며, 줄을 누르면 계산서일 · 금액 · 계량을 넣습니다. 출고 기록에 없는 판매는 \'+ 판매 추가\'.</p></section>';
+    return h;
+  }
+
+  /* ── 계량증명서 관리 (매입 · 매출) ── */
+  function weighHtml(M) {
+    var Tm = monthT(M), h = monthBar('계량증명서(매입,매출)');
+    if (!Tm) return h + noMonth(M);
+    h += issuesHtml(M, ['in']);
+    var row = function (kind, co, it, date, w, q, a) {
+      var hw = w && w.gross != null && w.tare != null;
+      return '<tr class="rb"' + a + '><td class="c">' + kind + '</td>' + tdt(M.co.short) + tdt(co) + tdt(it) + '<td class="c">' + md2(date) + '</td>' + tdt(w ? w.car : '', 'r') + tdt(w ? w.no : '', 'r') +
+        tdt(w ? w.t1 : '', 'r') + tdt(w ? w.t2 : '', 'r') + td(hw ? w.gross : null) + td(hw ? w.tare : null) + td(hw ? w.gross - w.tare : q) + '</tr>';
+    };
+    h += '<section class="card form"><p class="ft">' + esc(M.y) + '년 계량증명서(매입,매출)</p><p class="fs"><span class="b">재활용사업자: ' + esc(M.co.name) + '</span><span class="b">(단위:kg)</span></p><div class="tw"><table class="fm">' +
+      '<thead><tr><th rowspan="2">구 분</th><th>발행처</th><th>거래처</th><th rowspan="2">품 명</th><th rowspan="2">발행일</th><th rowspan="2">차량번호</th><th rowspan="2">일련번호</th><th>1차 계량시간</th><th>2차 계량시간</th><th rowspan="2">총중량</th><th rowspan="2">공차중량</th><th rowspan="2">실중량</th></tr>' +
+      '<tr><th class="sm">(계량한곳)</th><th class="sm">(매입매출처)</th><th></th><th></th></tr></thead><tbody>';
+    Tm.ins.forEach(function (x) { h += row('매입', x.co, x.item, x.date, x, x.net, act('in-edit', 'id', x.id)); });
+    h += '<tr class="sum ylw"><td class="c b">' + Tm.m + '월결산</td><td colspan="10"></td>' + td(Tm.inKg, 'b') + '</tr>';
+    var g = 0, t = 0;
+    Tm.wOut.forEach(function (l) { h += row('매출', l.cust, l.item, l.date, l.w, l.qty, act('sale-edit', 'key', l.key)); if (l.w && l.w.gross != null && l.w.tare != null) { g += l.w.gross; t += l.w.tare; } });
+    h += '<tr class="sum ylw"><td class="c b">' + Tm.m + '월매출</td><td></td><td class="c">' + Tm.m + '월분</td><td colspan="6"></td>' + td(g || null) + td(t || null) + td(Tm.wOutNet, 'b') + '</tr></tbody></table></div>' +
+      dlTools('weigh', '<button type="button" class="btn ghost sm" data-act="paste">엑셀에서 붙여넣기</button>') +
+      '<p class="hint noprint">매입 = 폐타이어 입고 1대 (서식-1 회수량과 같은 숫자). 매출 = 재고 화면의 SBR 고무분말 · 분철 출고(출고일 기준) — 줄을 누르면 차량번호 · 계량 시각 · 총중량 · 공차중량을 넣습니다. 계량하지 않은 출고는 실중량 칸에 판매 수량이 들어갑니다.</p></section>';
+    return h;
+  }
+
+  /* ── 세금계산서 관리 (매출) ── */
+  function taxHtml(M) {
+    var Tm = monthT(M), h = monthBar('세금계산서(매출)');
+    if (!Tm) return h + noMonth(M);
+    h += issuesHtml(M, ['sale']);
+    h += '<section class="card form"><p class="ft">' + esc(M.y) + '년 세금계산서(매출)</p><p class="fs"><span class="b">' + esc(M.co.name) + '</span><span></span></p><div class="tw"><table class="fm">' +
+      '<thead><tr><th rowspan="2">구분</th><th>업체명</th><th>업체명</th><th rowspan="2">발행일</th><th rowspan="2">품목</th><th rowspan="2">규격</th><th rowspan="2">수량</th><th rowspan="2">단가</th><th rowspan="2">공급가액</th><th rowspan="2">세액</th><th rowspan="2" class="mut">월 수량</th></tr>' +
+      '<tr><th class="sm">(공급자)</th><th class="sm">(공급받는자)</th></tr></thead><tbody>';
+    if (!Tm.tax.length) h += '<tr><td class="c mut" colspan="11">이 달 세금계산서(매출) 기록이 없습니다.</td></tr>';
+    Tm.tax.forEach(function (l, j) {
+      h += '<tr class="rb"' + act('sale-edit', 'key', l.key) + '><td class="c' + (j === 0 ? ' yel' : '') + '">' + (j === 0 ? Tm.m + '월매출' : '매출') + '</td>' + tdt(M.co.short) + tdt(l.cust) + '<td class="c">' + md2(l.sdate) + '</td>' + tdt(l.item) + tdt(l.spec) +
+        td(l.qty, 'red yel') + '<td>' + (l.price != null ? pr(l.price) : '') + '</td>' + (l.supply == null ? '<td class="warnc">단가 없음</td><td></td>' : td(l.supply) + td(l.tax)) +
+        (j === Tm.tax.length - 1 ? td(Tm.taxKg, 'mut') : '<td></td>') + '</tr>';
+    });
+    h += '</tbody></table></div>';
+    var off = Tm.sales.filter(function (l) { return l.own; }).concat(M.lines.filter(function (l) { return l.ex && String(l.sdate).slice(0, 4) === M.y && mOf(l.sdate) === S.m; }));
+    if (off.length) h += '<p class="hint">세금계산서에 넣지 않은 출고 (자사 사용 · 서식에서 뺀 것): ' + off.map(function (l) { return '<button type="button" class="link"' + act('sale-edit', 'key', l.key) + '>' + esc(md(l.sdate) + ' ' + l.cust + ' ' + kg(l.qty) + 'kg') + '</button>'; }).join(' · ') + '</p>';
+    h += dlTools('tax') + '<p class="hint noprint">재고 화면의 SBR 고무분말 · 분철 출고가 저절로 들어옵니다 (공급가액 = 수량 × 단가, 세액 = 10% 원 미만 버림). 계산서 발행일 · 금액이 출고와 다르면 줄을 눌러 고칩니다. 출고 기록에 없는 판매는 \'+ 판매 추가\'.</p></section>';
+    return h;
+  }
+
+  /* ── 총괄표 ── */
+  function sumHtml(M) {
+    var h = yearBar('폐타이어 재활용 관리대장 총괄표');
+    h += issuesHtml(M, null, true);
+    var K = T.KINDS.concat(['합계']), add = function (o) { return o['고무분말'] + o['철심'] + o['섬유']; }, arr = function (o) { return [o['고무분말'], o['철심'], o['섬유'], add(o)]; };
+    h += '<section class="card form"><p class="ft sm">' + esc((M.co.short ? '㈜' + M.co.short + ' ' : '') + M.y + '년 폐타이어 재활용 관리대장 총괄표') + '</p><p class="fs"><span></span><span>(단위 : kg)</span></p><div class="tw"><table class="fm">' +
+      '<thead><tr><th rowspan="2">년월</th><th rowspan="2">폐타이어<br>반입량</th><th rowspan="2"></th><th colspan="3">재활용제품 생산·판매</th><th rowspan="2">폐타이어<br>재고량</th></tr><tr><th>생산량</th><th>판매량</th><th>재고량</th></tr></thead><tbody>';
+    var blk = function (label, a, b, g, d, e, f) {
+      K.forEach(function (k, j) {
+        h += '<tr class="' + (j === 0 ? 'gtop' : '') + (j === 3 ? ' sum' : '') + '">' + (j === 0 ? '<td class="c rb" rowspan="4"' + a + '>' + label + '</td><td rowspan="4">' + kg(b) + '</td>' : '') + '<td class="c">' + k + '</td>' +
+          td(d ? d[j] : null) + td(e ? e[j] : null) + td(f[j]) + (j === 0 ? '<td rowspan="4" class="c' + (g < 0 ? ' neg' : '') + '">' + kg(g) + '</td>' : '') + '</tr>';
+      });
+    };
+    var s0 = M.st0;
+    blk('전년재고', act('set-open', 'k', 'tire'), null, s0.tire, null, null, [s0['고무분말'], s0['철심'], s0['섬유'], s0['고무분말'] + s0['철심'] + s0['섬유']]);
+    M.months.forEach(function (t) { blk(t.m === 1 ? M.y.slice(2) + '.1월' : t.m + '월', act('go-month', 'm', t.m), t.yld, t.tire, arr(t.prod), arr(t.sale), arr(t.stk)); });
+    var E = M.end;
+    for (var fm = M.months.length + 1; fm <= 12 && E; fm++) blk(fm + '월', '', null, E.tire, null, null, arr(E.stk));
+    if (E) blk('누계', '', E.cum.yld, E.tire, arr(E.cum.prod), arr(E.cum.sale), arr(E.stk));
+    h += '</tbody></table></div><div class="tools noprint"><button type="button" class="btn ghost sm" data-act="set-open" data-k="tire">전년재고 · 계산 기준</button></div>' +
+      '<p class="hint noprint">반입량 = 서식-1 수율 적용, 생산량 · 판매량 · 재고량 = 서식-2 달 정리, 폐타이어 재고량 = 서식-1 보관량과 같은 숫자입니다. 년월을 누르면 그 달 서식-1로 갑니다.</p></section>';
+    h += '<section class="card noprint"><h2>엑셀 내려받기 <small>' + esc(M.y) + '년 ' + (M.lastM ? '1월~' + M.lastM + '월' : '자료 없음') + '</small></h2>' +
+      '<div class="tools" style="margin-top:4px"><button type="button" class="btn" data-act="dl-all"' + (S.dl || !M.lastM ? ' disabled' : '') + '>' + (S.dl === 'all' ? '만드는 중…' : '5가지 한 번에 받기 (zip)') + '</button></div>' +
+      '<div class="tools">' + T.FORMS.map(function (f) { return '<button type="button" class="btn ghost sm" data-act="dl-one" data-form="' + f.k + '"' + (S.dl || !M.lastM ? ' disabled' : '') + '>' + (S.dl === f.k ? '만드는 중…' : esc(f.name)) + '</button>'; }).join('') +
+      '<button type="button" class="btn ghost sm" data-act="imp-open">엑셀 올리기 (지난 자료)</button></div>' +
+      '<p class="hint">서식 5가지는 같은 원장에서 만들어 숫자가 서로 같습니다. 엑셀은 이 기기에서 만들며, 처음 한 번 엑셀 도구(약 1MB)를 받습니다.</p></section>';
+    h += '<section class="card noprint"><h2>서식끼리 대조 <small>달마다</small></h2><div class="tw"><table class="fm">' +
+      '<thead><tr><th>월</th><th>회수량<br><small>서식-1 = 계량 매입</small></th><th>수율 적용<br><small>= 총괄 반입량</small></th><th>재활용량<br><small>서식-1 = 서식-2</small></th><th>폐타이어<br>보관량</th>' +
+      '<th>판매<br><small>서식-2</small></th><th>세금계산서<br><small>수량</small></th><th>자사 사용</th><th>계량 매출<br><small>실중량</small></th></tr></thead><tbody>';
+    M.months.forEach(function (t) {
+      var own = 0; t.sales.forEach(function (l) { if (l.own) own += l.qty; });
+      var sale = add(t.sale), same = sale === t.taxKg + own;
+      h += '<tr><td class="c">' + t.m + '월</td>' + td(t.inKg) + td(t.yld) + td(t.rec) + td(t.tire) + td(sale) + '<td' + (same ? '' : ' class="neg"') + '>' + kg(t.taxKg) + (same ? ' <span class="chkm">✓</span>' : ' <span class="chkx">≠</span>') + '</td>' +
+        td(own) + '<td>' + kg(t.wOutNet) + (t.wOutNet !== t.taxKg ? ' <small class="mut">(' + (t.wOutNet - t.taxKg > 0 ? '+' : '−') + kg(Math.abs(t.wOutNet - t.taxKg)) + ')</small>' : '') + '</td></tr>';
+    });
+    h += '</tbody></table></div><p class="hint">계량 매출 실중량은 저울(10kg 단위) 숫자라 세금계산서 수량과 몇 kg 다를 수 있습니다 (괄호 = 차이).</p></section>';
+    return h;
+  }
+  /* 전년재고 · 계산 기준 (창) */
+  function setSheetHtml() {
+    var d = curD(), s = d.set || {}, df = d.def || {}, f = S.sheet.f;
+    var fi = function (k, lab, unit, ph, dec) {
+      return '<div class="fld"><label class="lab" for="s_' + k + '">' + lab + '</label><div class="inrow"><input class="inp amt" id="s_' + k + '" data-f="' + k + '" inputmode="' + (dec ? 'decimal' : 'numeric') + '" value="' + esc(f[k]) + '" placeholder="' + esc(ph == null ? '' : ph) + '"><span class="unit">' + unit + '</span></div></div>';
+    };
+    return '<p class="hint" style="margin:0 0 10px">' + esc(S.y) + '년 ' + (s.at ? '(저장 ' + esc(String(s.at).slice(0, 16)) + ')' : '(아직 저장 안 함)') + '</p>' +
+      '<h3 class="lab3">전년 재고 (' + (Number(S.y) - 1) + '년 말 — 지난해 총괄표 누계)</h3><div class="two">' + fi('tire', '폐타이어 재고량', 'kg', '서식-1 전월보관량') + fi('rubber', '고무분말 재고량', 'kg', '서식-2 년초재고') +
+      fi('steel', '철심 재고량', 'kg') + fi('fiber', '섬유 재고량', 'kg') + '</div>' +
+      '<h3 class="lab3">계산 기준</h3><div class="two">' + fi('yield', '수율 (서식-1 수율적용)', '배', df.yield, true) + fi('steelR', '철심 비율 (고무분말 ×)', '배', df.steelR, true) + '</div>' +
+      fi('fiberKg', '섬유 (생산일마다)', 'kg', '0 = 기록 안 함') +
+      '<div class="fld"><label class="lab" for="s_memo">메모</label><input class="inp" id="s_memo" data-f="memo" maxlength="200" value="' + esc(f.memo) + '"></div>' +
+      '<p class="hint">수율 · 철심 비율 · 섬유를 바꾸면 그 해 서식 전체에 다시 적용됩니다.</p>';
+  }
+
+  /* ───────── 엑셀 도구 (처음 한 번 받음) ───────── */
+  var LIBP = {};
+  function lib(k) {
+    var src = k === 'x' ? 'lib/exceljs.min.js' : 'lib/jszip.min.js', g = k === 'x' ? 'ExcelJS' : 'JSZip';
+    if (window[g]) return Promise.resolve(window[g]);
+    if (!LIBP[k]) LIBP[k] = new Promise(function (res, rej) {
+      var sc = document.createElement('script'); sc.src = src; sc.async = true;
+      sc.onload = function () { if (window[g]) res(window[g]); else { LIBP[k] = null; rej(new Error('lib')); } };
+      sc.onerror = function () { LIBP[k] = null; rej(new Error('lib')); };
+      document.head.appendChild(sc);
+    });
+    return LIBP[k];
+  }
+  function save(name, blob) {
+    var a = document.createElement('a'), u = URL.createObjectURL(blob);
+    a.href = u; a.download = name; a.rel = 'noopener'; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(u); a.remove(); }, 4000);
+  }
+  function dlOne(k) {
+    var M = cur(); if (!M || S.dl) return;
+    S.dl = k; render();
+    lib('x').then(function (X) { return T.build(X, M, k); }).then(function (o) {
+      save(o.name, new Blob([o.buf], { type: XLSX })); S.dl = ''; render(); toast(o.name + ' 내려받기 완료');
+    }, function (e) { S.dl = ''; render(); toast(errText(e)); });
+  }
+  function dlAll() {
+    var M = cur(); if (!M || S.dl) return;
+    S.dl = 'all'; render();
+    Promise.all([lib('x'), lib('z')]).then(function (L) {
+      return T.buildAll(L[0], M).then(function (files) {
+        var z = new L[1]();
+        files.forEach(function (f) { z.file(f.name, f.buf); });
+        return z.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+      });
+    }).then(function (blob) {
+      var name = M.y + '년 폐타이어 관리대장 (' + (M.lastM === 12 ? '1~12월' : '1~' + M.lastM + '월') + ').zip';
+      save(name, blob); S.dl = ''; render(); toast('5가지 서식을 내려받았습니다');
+    }, function (e) { S.dl = ''; render(); toast(errText(e)); });
+  }
+
+  /* ───────── 지난 자료 옮기기 (엑셀 올리기) ─────────
+     2026-11-25 답: "실제 데이터는 내일 넣어주도록할테니 현재는 기본틀만 다 만들어놔라" — 쓰던 엑셀(계량증명서 · 서식-2 · 서식-1)을 올리면 읽어서 원장으로 옮김.
+     · 계량증명서: 매입 → 입고 1대씩 (계량 포함), 매출 → 재고 화면 출고에 계량 연결 (같은 거래처 · 3일 안 · 10kg 안)
+     · 서식-2: 날짜별 고무분말 · 철심 · 섬유 생산 (달 정리 칸은 읽지 않음)
+     · 서식-1: 계량증명서가 없을 때 입고(업체 · 회수량)
+     날짜는 월 · 일만 읽고 연도는 고른 해로 (예전 파일에 연도가 잘못 들어간 칸이 있음). 같은 기간을 다시 옮기면 전에 옮긴 줄을 바꿈. */
+  function cv(c) {
+    var v = c && c.value;
+    if (v && typeof v === 'object' && !(v instanceof Date)) {
+      if (v.richText) return v.richText.map(function (t) { return t.text; }).join('');
+      if ('result' in v) return v.result;
+      if (v.text != null) return v.text;
+      if (v.error) return null;
+    }
+    return v == null ? null : v;
+  }
+  function vtxt(v) { return v == null ? '' : v instanceof Date ? '' : String(v).trim(); }
+  function vnum(v) {
+    if (typeof v === 'number') return v;
+    var s = vtxt(v).replace(/[,\s]/g, '');
+    return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : null;
+  }
+  /** 날짜 칸 → [월, 일] (연도는 쓰지 않음) */
+  function vmd(v) {
+    if (v instanceof Date) return [v.getUTCMonth() + 1, v.getUTCDate()];
+    if (typeof v === 'number' && v > 20000 && v < 80000) { var d = new Date(Math.round((v - 25569) * 864e5)); return [d.getUTCMonth() + 1, d.getUTCDate()]; }
+    var s = vtxt(v), m = /^(?:\d{2,4}[-./])?(\d{1,2})[-./](\d{1,2})\.?$/.exec(s) || /^(\d{1,2})월\s*(\d{1,2})일$/.exec(s);
+    return m ? [Number(m[1]), Number(m[2])] : null;
+  }
+  function vhm(v) {
+    if (v instanceof Date) return pad(v.getUTCHours()) + ':' + pad(v.getUTCMinutes());
+    if (typeof v === 'number' && v >= 0 && v < 1) { var t = Math.round(v * 1440); return pad(Math.floor(t / 60) % 24) + ':' + pad(t % 60); }
+    var m = /^(\d{1,2}):(\d{2})/.exec(vtxt(v));
+    return m && Number(m[1]) < 24 ? pad(Number(m[1])) + ':' + m[2] : '';
+  }
+  function okDay(y, p) { return p && p[0] >= 1 && p[0] <= 12 && p[1] >= 1 && p[1] <= dim(y, p[0]); }
+  function sheetRows(ws) {
+    var out = [];
+    ws.eachRow({ includeEmpty: false }, function (row, rn) {
+      var a = [];
+      for (var c = 1; c <= Math.min(16, Math.max(row.cellCount, 12)); c++) a[c] = cv(row.getCell(c));
+      out.push({ r: rn, c: a });
+    });
+    return out;
+  }
+  function titleYear(rows) {
+    for (var i = 0; i < Math.min(rows.length, 4); i++) for (var c = 1; c <= 12; c++) { var m = /(20\d\d)년/.exec(vtxt(rows[i].c[c])); if (m) return m[1]; }
+    return '';
+  }
+  function parseBook(wb, y, name) {
+    var res = [];
+    wb.eachSheet(function (ws) {
+      var rows = sheetRows(ws), all = rows.map(function (x) { return x.c.map(vtxt).join('|'); }).join('\n'), o = null;
+      if (/실중량/.test(all) && /공차중량/.test(all) && /구\s*분/.test(all)) o = parseWeigh(rows, y);
+      else if (/공급가액/.test(all) && /세액/.test(all) && /품목/.test(all) && /발행일/.test(all)) o = parseTax(rows, y);
+      else if (/1\)생산내역/.test(all) || /생산\.판매 및 부산물/.test(all)) o = parseF2(rows, y);
+      else if (/1\)회수내역/.test(all) || /회수,재활용 관리 대장/.test(all)) o = parseF1(rows, y);
+      if (o) { o.name = name + (wb.worksheets.length > 1 ? ' · ' + ws.name : ''); o.ty = titleYear(rows); res.push(o); }
+    });
+    if (!res.length) res.push({ kind: 'none', name: name });
+    return res;
+  }
+  function parseWeigh(rows, y) {
+    var col = {}, hr = -1, ins = [], outs = [], bad = [];
+    rows.some(function (x, i) {
+      var cols = {};
+      x.c.forEach(function (v, c) {
+        var t = vtxt(v).replace(/\s/g, '');
+        if (t === '구분') cols.kind = c; else if (t === '거래처') cols.co = c; else if (t === '품명') cols.item = c; else if (t === '발행일') cols.date = c;
+        else if (t === '차량번호') cols.car = c; else if (t === '일련번호') cols.no = c; else if (/^1차/.test(t)) cols.t1 = c; else if (/^2차/.test(t)) cols.t2 = c;
+        else if (t === '총중량') cols.gross = c; else if (t === '공차중량') cols.tare = c; else if (t === '실중량') cols.net = c;
+      });
+      if (cols.kind && cols.net && cols.date) { col = cols; hr = i; return true; }
+      return false;
+    });
+    if (hr < 0) return { kind: 'none' };
+    rows.slice(hr + 1).forEach(function (x) {
+      var k = vtxt(x.c[col.kind]).replace(/\s/g, '');
+      if (k !== '매입' && k !== '매출') return;
+      var p = vmd(x.c[col.date]), g = vnum(x.c[col.gross]), t = vnum(x.c[col.tare]), n = vnum(x.c[col.net]);
+      var o = { row: x.r, date: okDay(y, p) ? ymd(y, p[0], p[1]) : '', co: vtxt(x.c[col.co]), item: vtxt(x.c[col.item]) || (k === '매입' ? '폐타이어' : ''),
+        car: vtxt(x.c[col.car]), no: vtxt(x.c[col.no]).replace(/\.0+$/, ''), t1: vhm(x.c[col.t1]), t2: vhm(x.c[col.t2]), gross: g, tare: t, net: g != null && t != null ? g - t : n };
+      if (o.gross == null || o.tare == null || o.gross <= o.tare) { o.gross = null; o.tare = null; }
+      var why = !o.date ? '날짜' : !o.co ? '거래처' : !(o.net > 0) || o.net !== Math.round(o.net) || o.net > 200000 ? '실중량' : o.date > S.today ? '미래 날짜' : '';
+      if (why) { bad.push(x.r + '행(' + why + ')'); return; }
+      (k === '매입' ? ins : outs).push(o);
+    });
+    return { kind: 'weigh', ins: ins, outs: outs, bad: bad };
+  }
+  function parseF2(rows, y) {
+    var prod = {}, cur = null, open = false, bad = [];
+    rows.forEach(function (x) {
+      var a = x.c[1], b = vtxt(x.c[2]).replace(/\s/g, ''), c = vnum(x.c[3]), p = vmd(a);
+      if (x.c.some(function (v) { return /^(생산량|생산량누계|공급량|보관량|합계)$/.test(vtxt(v).replace(/\s/g, '')); })) { open = false; return; }
+      if (p && a != null && !(typeof a === 'string' && /재고|합계|월/.test(a))) {
+        if (!okDay(y, p)) { bad.push(x.r + '행(날짜)'); cur = null; open = false; return; }
+        cur = ymd(y, p[0], p[1]); open = true;
+      } else if (vtxt(a)) { open = false; }   // 년초재고 · 제목 · 머리글 → 날짜 묶음 아님
+      if (!open || !cur) return;
+      var k = b === '고무분말' ? 'rubber' : b === '철심' ? 'steel' : b === '섬유' ? 'fiber' : '';
+      if (!k) return;
+      var o = prod[cur] || (prod[cur] = { date: cur, rubber: null, steel: null, fiber: null, row: x.r });
+      if (o[k] == null && c != null) o[k] = Math.round(c);
+      if (k === 'fiber') open = false;   // 섬유 줄 = 그날 묶음 끝 (뒤에 오는 달 정리 칸은 읽지 않음)
+    });
+    var list = Object.keys(prod).sort().map(function (k) { return prod[k]; }).filter(function (o) { return o.rubber > 0; });
+    list.forEach(function (o) { if (o.date > S.today) bad.push(o.row + '행(미래 날짜)'); });
+    return { kind: 'f2', prod: list.filter(function (o) { return o.date <= S.today; }), bad: bad };
+  }
+  function parseF1(rows, y) {
+    var ins = [], last = '', bad = [];
+    rows.forEach(function (x) {
+      var a = x.c[1], p = vmd(a), co = vtxt(x.c[2]), n = vnum(x.c[3]);
+      var isDate = !!p && (a instanceof Date || typeof a === 'number' || /^\d/.test(vtxt(a)));
+      if (isDate) { if (okDay(y, p)) last = ymd(y, p[0], p[1]); else { last = ''; bad.push(x.r + '행(날짜)'); } }
+      else if (vtxt(a)) last = '';   // 합계 · 수율 · 누계 · 머리글
+      if (!last || !co || n == null || /업체명|합계/.test(co)) return;
+      if (!(n > 0) || n !== Math.round(n) || n > 200000) { bad.push(x.r + '행(회수량)'); return; }
+      if (last > S.today) { bad.push(x.r + '행(미래 날짜)'); return; }
+      ins.push({ row: x.r, date: last, co: co, item: '폐타이어', net: n, gross: null, tare: null, car: '', no: '', t1: '', t2: '' });
+    });
+    return { kind: 'f1', ins: ins, bad: bad };
+  }
+  /** 세금계산서(매출): 구분이 '…매출'인 줄. 공급받는자 = 두 번째 '업체명' 칸 */
+  function parseTax(rows, y) {
+    var col = {}, hr = -1, lines = [], bad = [];
+    rows.some(function (x, i) {
+      var cols = {}, co = 0;
+      x.c.forEach(function (v, c) {
+        var t = vtxt(v).replace(/\s/g, '');
+        if (t === '구분') cols.kind = c; else if (t === '업체명') { co++; if (co === 1) cols.sup = c; else cols.cust = c; } else if (t === '발행일') cols.date = c;
+        else if (t === '품목') cols.item = c; else if (t === '규격') cols.spec = c; else if (t === '수량') cols.qty = c; else if (t === '단가') cols.price = c;
+        else if (t === '공급가액') cols.supply = c; else if (t === '세액') cols.tax = c;
+      });
+      if (cols.kind && cols.date && cols.qty && cols.supply) { if (!cols.cust) cols.cust = cols.sup; col = cols; hr = i; return true; }
+      return false;
+    });
+    if (hr < 0) return { kind: 'none' };
+    rows.slice(hr + 1).forEach(function (x) {
+      if (!/매출/.test(vtxt(x.c[col.kind]))) return;
+      var p = vmd(x.c[col.date]), q = vnum(x.c[col.qty]), sp = vnum(x.c[col.supply]), tx = vnum(x.c[col.tax]), raw = vtxt(x.c[col.item]);
+      var item = /코드/.test(raw) ? '타이어코드' : /비드/.test(raw) ? '타이어비드' : /미분/.test(raw) ? '미분' : '고무분말';
+      var o = { row: x.r, date: okDay(y, p) ? ymd(y, p[0], p[1]) : '', cust: vtxt(x.c[col.cust]), item: item, raw: raw, spec: col.spec ? vtxt(x.c[col.spec]) : '', qty: q,
+        price: col.price ? vnum(x.c[col.price]) : null, supply: sp != null ? Math.round(sp) : null, tax: tx != null ? Math.floor(tx + 1e-6) : null };
+      var why = !o.date ? '날짜' : !o.cust ? '거래처' : !(q > 0) || q !== Math.round(q) || q > 200000 ? '수량' : o.date > S.today ? '미래 날짜' : '';
+      if (why) { bad.push(x.r + '행(' + why + ')'); return; }
+      if (o.price != null && (o.price < 0 || o.price > 100000)) o.price = null;
+      lines.push(o);
+    });
+    return { kind: 'tax', lines: lines, bad: bad };
+  }
+  /** 세금계산서 → 출고 (같은 제품 · 거래처 · 출고 3일 전 ~ 10일 뒤 · 10kg 안). 수량이 같은 것 → 가까운 날짜 */
+  function matchTax(lines, d) {
+    var used = {}, list = (d.out || []).slice();
+    lines.forEach(function (t) {
+      var grp = /코드|비드/.test(t.item) ? '분철' : 'SBR 고무분말', best = null, bs = 1e9;
+      list.forEach(function (o) {
+        if (used[o.id] || o.prod !== grp || !sameCo(o.cust, t.cust)) return;
+        var dd = dnum(t.date) - dnum(o.date), dq = Math.abs(Number(o.qty) - t.qty);
+        if (dd < -3 || dd > 10 || dq > 10) return;
+        var sc = dq * 1000 + Math.abs(dd);
+        if (sc < bs) { bs = sc; best = o; }
+      });
+      t.link = best ? best.id : ''; t.out = best;
+      if (best) used[best.id] = 1;
+    });
+  }
+  /** 연결한 계산서 → 출고 보완 (출고와 다른 것만: 발행일 · 단가 · 공급가액 · 세액) */
+  function taxSup(t) {
+    var o = t.out, r = { link: t.link };
+    if (t.date !== o.date) r.invDate = t.date;
+    var op = o.price == null || o.price === '' ? null : Number(o.price), pr = t.price != null ? t.price : op;
+    if (t.price != null && t.price !== op) r.price = t.price;
+    if (t.supply != null && (pr == null || Math.round(Number(o.qty) * pr) !== t.supply)) { r.supply = t.supply; if (t.tax != null && t.tax !== Math.floor(t.supply / 10)) r.tax = t.tax; }
+    return r;
+  }
+  /** 계량 매출 → 출고 (같은 제품 · 거래처 · 3일 안 · 10kg 안). 가장 가까운 날짜 → 가까운 kg */
+  function sameCo(a, b) { a = T.normCo(a); b = T.normCo(b); return !!a && !!b && (a === b || a.indexOf(b) === 0 || b.indexOf(a) === 0 || (a.length >= 2 && a.slice(0, 2) === b.slice(0, 2))); }
+  function matchOuts(outs, d) {
+    var used = {}, list = (d.out || []).slice();
+    outs.forEach(function (t) {
+      var grp = /코드|비드|철/.test(t.item) ? '분철' : 'SBR 고무분말', best = null, bs = 1e9;
+      list.forEach(function (o) {
+        if (used[o.id] || o.prod !== grp || !sameCo(o.cust, t.co)) return;
+        var dd = Math.abs(dnum(o.date) - dnum(t.date)), dq = Math.abs(Number(o.qty) - t.net);
+        if (dd > 3 || dq > 10) return;
+        var sc = dd * 100 + dq;
+        if (sc < bs) { bs = sc; best = o; }
+      });
+      t.link = best ? best.id : '';
+      if (best) used[best.id] = 1;
+    });
+  }
+  function reimp() { if (S.sheet && S.sheet.kind === 'imp') renderSheet(); else render(); }
+  function importHtml(M) {
+    var I = S.imp;
+    var h = '<div class="impb">' +
+      '<p class="hint" style="margin:0 0 10px">계량증명서(매입 → 입고, 매출 → 출고 계량) · 서식-2(날짜별 생산) · 세금계산서(매출)(출고에 계산서일 · 금액, 출고 기록에 없는 판매 → 추가 판매) · 서식-1(계량증명서가 없을 때 입고)을 올리면 읽어서 ' + esc(S.y) + '년 원장으로 옮깁니다. 날짜는 월 · 일만 읽고 연도는 ' + esc(S.y) + '년으로 넣습니다. 같은 기간을 다시 옮기면 전에 옮긴 줄을 바꿉니다 (직접 넣은 줄은 그대로).</p>' +
+      '<label class="lab" for="impFile" style="display:block;font-weight:800;margin:0 0 6px">엑셀 파일 (.xlsx, 여러 개 가능)</label><input class="file" id="impFile" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple data-act="imp-file">';
+    if (!I) return h + '</div>';
+    if (I.busy) return h + '<p class="wait">' + esc(I.busy) + '</p></div>';
+    if (I.err) h += '<p class="badbox">' + esc(I.err) + '</p>';
+    var ins = [], outs = [], prod = [], f1 = [], taxes = [], bad = [];
+    (I.files || []).forEach(function (f) {
+      h += '<h3>' + esc(f.name) + '</h3>';
+      if (f.kind === 'none') { h += '<p class="hint">알아볼 수 있는 서식이 아닙니다 (계량증명서 · 서식-2 · 서식-1만).</p>'; return; }
+      if (f.ty && f.ty !== S.y) h += '<p class="warnbox">파일 제목의 연도는 ' + esc(f.ty) + '년인데, 지금 ' + esc(S.y) + '년으로 옮기게 되어 있습니다. ' + esc(f.ty) + '년으로 옮기려면 이 창을 닫고 총괄표 칸에서 해를 ' + esc(f.ty) + '년으로 바꾼 뒤 다시 올려 주십시오.</p>';
+      if (f.kind === 'weigh') { ins = ins.concat(f.ins); outs = outs.concat(f.outs); h += '<p class="hint">계량증명서: 매입 ' + f.ins.length + '대 · 매출 ' + f.outs.length + '건</p>'; }
+      if (f.kind === 'f2') { prod = prod.concat(f.prod); h += '<p class="hint">서식-2: 생산 ' + f.prod.length + '일</p>'; }
+      if (f.kind === 'f1') { f1 = f1.concat(f.ins); h += '<p class="hint">서식-1: 입고 ' + f.ins.length + '대</p>'; }
+      if (f.kind === 'tax') { taxes = taxes.concat(f.lines); h += '<p class="hint">세금계산서(매출): ' + f.lines.length + '건</p>'; }
+      if (f.bad && f.bad.length) { bad = bad.concat(f.bad.map(function (b) { return f.name + ' ' + b; })); }
+    });
+    var sum = function (a, k) { return a.reduce(function (s, x) { return s + (Number(x[k]) || 0); }, 0); };
+    var span = function (a) { var ds = a.map(function (x) { return x.date; }).sort(); return ds.length ? md(ds[0]) + '~' + md(ds[ds.length - 1]) : ''; };
+    var src = ins.length ? ins : f1;
+    I.plan = { ins: src, prod: prod, links: [], taxLinks: [], taxAdd: [] };
+    if (src.length) {
+      h += '<div class="ro"><b>입고 ' + src.length + '대 · ' + kg(sum(src, 'net')) + ' kg</b> (' + span(src) + (ins.length ? ', 계량증명서 매입' : ', 서식-1 — 계량 정보 없음') + ')' +
+        (ins.length && f1.length ? '<br>서식-1 회수량 합 ' + kg(sum(f1, 'net')) + ' kg ' + (sum(f1, 'net') === sum(ins, 'net') ? '= 계량증명서 매입 ✓' : '≠ 계량증명서 매입 ' + kg(sum(ins, 'net')) + ' kg (계량증명서로 옮김)') : '') +
+        '<br>달마다: ' + byMonth(src, 'net') + '</div><div class="tools"><button type="button" class="btn sm" data-act="imp-in"' + (I.doing ? ' disabled' : '') + '>입고 ' + src.length + '대 옮기기</button></div>';
+    }
+    if (prod.length) {
+      h += '<div class="ro" style="margin-top:12px"><b>생산 ' + prod.length + '일 · 고무분말 ' + kg(sum(prod, 'rubber')) + ' kg</b> (' + span(prod) + ')<br>철심 ' + kg(sum(prod, 'steel')) + ' kg · 섬유 ' + kg(sum(prod, 'fiber')) + ' kg' +
+        '<br>달마다 고무분말: ' + byMonth(prod, 'rubber') + '</div><div class="tools"><button type="button" class="btn sm" data-act="imp-prod"' + (I.doing ? ' disabled' : '') + '>생산 ' + prod.length + '일 옮기기</button></div>';
+    }
+    if (outs.length) {
+      matchOuts(outs, curD());
+      var ok = outs.filter(function (t) { return t.link; }), no = outs.filter(function (t) { return !t.link; });
+      I.plan.links = ok;
+      h += '<div class="ro" style="margin-top:12px"><b>계량증명서 매출 ' + outs.length + '건</b> → 재고 화면 출고와 연결 ' + ok.length + '건' + (no.length ? ' · 못 찾음 ' + no.length + '건' : '') +
+        (no.length ? '<br><small>못 찾은 건 (같은 거래처 · 3일 안 · 10kg 안 출고 없음): ' + no.slice(0, 12).map(function (t) { return esc(md(t.date) + ' ' + t.co + ' ' + kg(t.net) + 'kg'); }).join(', ') + (no.length > 12 ? ' 외 ' + (no.length - 12) + '건' : '') + '</small>' : '') +
+        '</div>' + (ok.length ? '<div class="tools"><button type="button" class="btn sm" data-act="imp-link"' + (I.doing ? ' disabled' : '') + '>계량 ' + ok.length + '건 출고에 연결</button></div>' : '');
+    }
+    if (taxes.length) {
+      matchTax(taxes, curD());
+      var tl = taxes.filter(function (t) { return t.link; }), ta = taxes.filter(function (t) { return !t.link; });
+      I.plan.taxLinks = tl.map(taxSup).filter(function (r) { return Object.keys(r).length > 1; });
+      I.plan.taxAdd = ta;
+      var same = tl.length - I.plan.taxLinks.length, byItem = {};
+      ta.forEach(function (t) { byItem[t.item] = (byItem[t.item] || 0) + t.qty; });
+      h += '<div class="ro" style="margin-top:12px"><b>세금계산서(매출) ' + taxes.length + '건 · ' + kg(sum(taxes, 'qty')) + ' kg · 공급가액 ' + won(sum(taxes, 'supply')) + '</b> (' + span(taxes) + ')' +
+        '<br>재고 화면 출고와 연결 ' + tl.length + '건' + (tl.length ? ' (계산서일 · 금액이 출고와 같음 ' + same + '건 · 보완할 것 ' + I.plan.taxLinks.length + '건)' : '') +
+        '<br>출고 기록에 없는 판매 ' + ta.length + '건' + (ta.length ? ' → 추가 판매로 (' + Object.keys(byItem).map(function (k) { return k + ' ' + kg(byItem[k]) + ' kg'; }).join(' · ') + ')' : '') + '</div>' +
+        '<div class="tools">' + (I.plan.taxLinks.length ? '<button type="button" class="btn sm" data-act="imp-taxlink"' + (I.doing ? ' disabled' : '') + '>계산서 ' + I.plan.taxLinks.length + '건 출고에 연결</button>' : '') +
+        (ta.length ? '<button type="button" class="btn sm" data-act="imp-taxadd"' + (I.doing ? ' disabled' : '') + '>추가 판매 ' + ta.length + '건 넣기</button>' : '') + '</div>' +
+        '<p class="hint">연결: 같은 제품 · 같은 거래처 · 출고 3일 전~10일 뒤 · 수량 10kg 안. 추가 판매는 같은 파일을 다시 올리면 전에 넣은 줄을 바꿉니다.</p>';
+    }
+    if (bad.length) h += '<p class="warnbox">읽지 못한 줄 ' + bad.length + '개: ' + esc(bad.slice(0, 10).join(', ')) + (bad.length > 10 ? ' 외' : '') + '</p>';
+    if (I.msg) h += '<p class="okbox">' + esc(I.msg) + '</p>';
+    return h + '</div>';
+  }
+  function byMonth(a, k) {
+    var o = {};
+    a.forEach(function (x) { var m = mOf(x.date); o[m] = (o[m] || 0) + (Number(x[k]) || 0); });
+    return Object.keys(o).sort(function (p, q) { return p - q; }).map(function (m) { return m + '월 ' + kg(o[m]); }).join(' · ');
+  }
+  function impFiles(files) {
+    if (!files || !files.length) return;
+    var y = S.y;
+    S.imp = { busy: '엑셀 읽는 중…', files: [] }; reimp();
+    lib('x').then(function (X) {
+      return Array.prototype.reduce.call(files, function (p, f) {
+        return p.then(function (acc) {
+          return f.arrayBuffer().then(function (buf) { var wb = new X.Workbook(); return wb.xlsx.load(buf); })
+            .then(function (wb) { return acc.concat(parseBook(wb, y, f.name)); }, function () { return acc.concat([{ kind: 'none', name: f.name }]); });
+        });
+      }, Promise.resolve([]));
+    }).then(function (list) { S.imp = { files: list, y: y }; reimp(); }, function (e) { S.imp = { err: errText(e), files: [] }; reimp(); });
+  }
+  function impRun(kind) {
+    var I = S.imp, P = I && I.plan; if (!P || I.doing) return;
+    var rows, opt = {}, label;
+    if (kind === 'in') {
+      rows = P.ins.map(function (o) { var r = { date: o.date, co: o.co, item: o.item || '폐타이어', car: o.car, no: o.no, t1: o.t1, t2: o.t2 }; if (o.gross != null) { r.gross = o.gross; r.tare = o.tare; } else r.net = o.net; return r; });
+      var ds = rows.map(function (r) { return r.date; }).sort(); opt = { from: ds[0], to: ds[ds.length - 1] }; label = '입고';
+    } else if (kind === 'prod') {
+      var R = cur().R;
+      rows = P.prod.map(function (o) {
+        var st = o.steel != null && Math.abs(o.steel - Math.round(o.rubber * R.steelR)) > 1 ? o.steel : '';
+        var fb = o.fiber != null && o.fiber !== R.fiberKg ? o.fiber : '';
+        return { date: o.date, rubber: o.rubber, steel: st, fiber: fb };
+      });
+      label = '생산';
+    } else if (kind === 'taxlink') { rows = P.taxLinks; kind = 'link'; label = '계산서 연결'; }
+    else if (kind === 'taxadd') {
+      rows = P.taxAdd.map(function (t) { return { date: t.date, cust: t.cust, item: t.item, spec: t.spec, qty: t.qty, price: t.price == null ? '' : t.price, supply: t.supply == null ? '' : t.supply, tax: t.tax == null ? '' : t.tax }; });
+      var ds2 = rows.map(function (r) { return r.date; }).sort(); opt = { from: ds2[0], to: ds2[ds2.length - 1] }; kind = 'sale'; label = '추가 판매';
+    } else { rows = P.links.map(function (t) { return { link: t.link, car: t.car, no: t.no, t1: t.t1, t2: t.t2, gross: t.gross, tare: t.tare }; }); label = '계량 연결'; }
+    if (!rows.length) return;
+    I.doing = true; I.msg = ''; I.err = ''; reimp();
+    call('apiTireBulk', [kind, rows, opt]).then(function (r) {
+      I.doing = false;
+      I.msg = label + ': 새로 ' + (r.added || 0) + '줄' + (r.replaced ? ' · 바꿈 ' + r.replaced + '줄' : '') + (r.removed ? ' · 전에 옮긴 ' + r.removed + '줄 지움' : '') + ' — 원장에 반영했습니다.';
+      reload(true, function () { render(); reimp(); });   // 뒤의 서식도 바로 새 자료로
+    }, function (e) { I.doing = false; I.err = errText(e); reimp(); });
+  }
+
+  /* ───────── 넣기 창 ───────── */
+  function openSheet(kind, o) { S.sheet = Object.assign({ kind: kind, msg: '', busy: false }, o || {}); renderSheet(); render(); }   // render → 기록에 한 칸 (뒤로 = 창 닫기)
+  function closeSheet() { if (!S.sheet) return; closeSheetNow(); if (window.NMCNav) NMCNav.sync(); }   // 앱에서 닫으면 기록도 한 칸 되돌림
+  function closeSheetNow() {
+    var was = !!S.sheet;
+    S.sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = ''; document.body.classList.remove('noscroll');
+    if (was && !fab.hidden) fab.focus();
+  }
+  function fld(k, lab, v, o) {
+    o = o || {};
+    var t = o.type || 'text', id = 'f_' + k;
+    var inp = '<input class="inp' + (o.amt ? ' amt' : '') + '" id="' + id + '" data-f="' + k + '" type="' + t + '" value="' + esc(v == null ? '' : v) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') +
+      (o.max ? ' max="' + o.max + '"' : '') + (o.im ? ' inputmode="' + o.im + '"' : '') + (o.list ? ' list="' + o.list + '"' : '') + (o.dis ? ' disabled' : '') + ' maxlength="' + (o.ml || 60) + '" autocomplete="off">';
+    return '<div class="fld"><label class="lab" for="' + id + '">' + lab + (o.sub ? '<small>' + o.sub + '</small>' : '') + '</label>' + (o.unit ? '<div class="inrow">' + inp + '<span class="unit">' + o.unit + '</span></div>' : inp) + (o.after || '') + '</div>';
+  }
+  function renderSheet() {
+    var sh = S.sheet; if (!sh) return;
+    var b = '', foot = '', title = '';
+    var f = sh.f;
+    if (sh.msg) b += '<p class="smsg ' + (sh.msgOk ? 'info' : 'err') + '" role="alert">' + esc(sh.msg) + '</p>';
+    if (sh.kind === 'in') {
+      title = sh.id ? '입고 수정' : '입고 등록';
+      var names = (curD().names && curD().names.co) || [];
+      b += fld('date', '날짜', f.date, { type: 'date', max: S.today }) +
+        fld('co', '업체', f.co, { list: 'coList', ml: 40, after: '<datalist id="coList">' + names.map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist>' +
+          (names.length ? '<div class="chips" style="margin-top:6px">' + names.slice(0, 6).map(function (n) { return '<button type="button" class="chip sm" data-act="pick" data-k="co" data-v="' + esc(n) + '">' + esc(n) + '</button>'; }).join('') + '</div>' : '') }) +
+        '<div class="two">' + fld('car', '차량번호', f.car, { ml: 20 }) + fld('no', '일련번호', f.no, { ml: 10, im: 'numeric' }) + '</div>' +
+        '<div class="two">' + fld('t1', '1차 계량시간', f.t1, { type: 'time' }) + fld('t2', '2차 계량시간', f.t2, { type: 'time' }) + '</div>' +
+        '<div class="two">' + fld('gross', '총중량', f.gross, { unit: 'kg', amt: 1, im: 'numeric' }) + fld('tare', '공차중량', f.tare, { unit: 'kg', amt: 1, im: 'numeric' }) + '</div>' +
+        fld('net', '실중량 (회수량)', f.net, { unit: 'kg', amt: 1, im: 'numeric', sub: '총중량 − 공차중량 (계량표가 없으면 직접)', dis: hasW(f) }) +
+        '<p class="calc" id="inCalc">' + inCalc(f) + '</p>' +
+        '<details class="more"' + (f.item && f.item !== '폐타이어' || f.memo ? ' open' : '') + '><summary>품명 · 메모</summary>' + fld('item', '품명', f.item, { ml: 20 }) + fld('memo', '메모', f.memo, { ml: 200 }) + '</details>';
+      foot = '<button type="button" class="btn" data-act="in-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
+        (sh.id ? '<button type="button" class="btn danger" data-act="in-del"' + (sh.busy ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 삭제' : '삭제') + '</button>' : '');
+    } else if (sh.kind === 'prod') {
+      title = '생산 입력';
+      var M = cur(), st = (curD().stockProd || []).filter(function (a) { return a[0] === f.date; })[0];
+      b += fld('date', '날짜', f.date, { type: 'date', max: S.today }) +
+        '<p class="ro">생산 화면 기록 (SBR 고무분말 생산 합): <b>' + (st ? kg(st[1]) + ' kg' : '없음') + '</b>' + (sh.manual ? '<br>이 날짜는 창구에서 넣은 값을 씁니다.' : '') + '</p>' +
+        fld('rubber', '고무분말', f.rubber, { unit: 'kg', amt: 1, im: 'numeric', sub: '0 = 이날 서식 생산 없음' }) +
+        '<div class="two">' + fld('steel', '철심', f.steel, { unit: 'kg', amt: 1, im: 'numeric', ph: '자동' }) + fld('fiber', '섬유', f.fiber, { unit: 'kg', amt: 1, im: 'numeric', ph: '자동' }) + '</div>' +
+        '<p class="calc" id="prodCalc">' + prodCalc(f, M) + '</p>' + fld('memo', '메모', f.memo, { ml: 200 });
+      foot = '<button type="button" class="btn" data-act="prod-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
+        (sh.manual ? '<button type="button" class="btn ghost" data-act="prod-del"' + (sh.busy ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더: 생산 화면 값으로' : '생산 화면 값으로 되돌리기') + '</button>' : '');
+    } else if (sh.kind === 'sale') {
+      var l = sh.line;
+      title = l && l.src === 'out' ? '판매 (출고) 보완' : sh.id ? '판매 수정' : '판매 추가';
+      if (l && l.src === 'out') {
+        b += '<p class="ro">출고 <b>' + esc(dShort(l.date)) + '</b> · ' + esc(l.cust || '거래처 미기재') + '<br>' + esc((l.prod === '분철' ? '분철 ' : 'SBR 고무분말 ') + l.color) + ' → 서식 품목 <b>' + esc(l.item) + '</b><br>수량 <b>' + kg(l.qty) + ' kg</b> · 출고 단가 ' + (l.oprice != null ? pr(l.oprice) + '원/kg' : '없음') +
+          (l.own ? '<br><span class="tag warn">자사 사용</span> 서식-2 처리량에만 들어가고 세금계산서 · 계량증명서에서는 빠집니다.' : '') + '<br><small>수량 · 거래처 · 단가는 재고 화면 출고에서 고칩니다.</small></p>' +
+          fld('invDate', '계산서 발행일', f.invDate, { type: 'date', sub: '비우면 출고일' }) +
+          '<details class="more"' + (f.price || f.supply || f.tax ? ' open' : '') + '><summary>계산서 금액이 출고와 다를 때</summary><div class="two">' + fld('price', '단가', f.price, { unit: '원', amt: 1, im: 'decimal', ph: '출고 단가' }) +
+          fld('supply', '공급가액', f.supply, { unit: '원', amt: 1, im: 'numeric', ph: '수량 × 단가' }) + '</div>' + fld('tax', '세액', f.tax, { unit: '원', amt: 1, im: 'numeric', ph: '공급가액의 10%' }) + '</details>';
+      } else {
+        b += fld('date', '판매일 (계량일)', f.date, { type: 'date', max: S.today }) + fld('cust', '거래처', f.cust, { ml: 60, list: 'custList', after: '<datalist id="custList">' + ((curD().names && curD().names.cust) || []).map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist>' }) +
+          '<div class="fld"><span class="lab">품목</span><div class="chips">' + T.ITEMS.map(function (it) { return '<button type="button" class="chip" aria-pressed="' + (f.item === it) + '" data-act="pick" data-k="item" data-v="' + it + '">' + it + '</button>'; }).join('') + '</div></div>' +
+          '<div class="two">' + fld('qty', '수량', f.qty, { unit: 'kg', amt: 1, im: 'numeric' }) + fld('price', '단가', f.price, { unit: '원', amt: 1, im: 'decimal' }) + '</div>' +
+          '<div class="two">' + fld('supply', '공급가액', f.supply, { unit: '원', amt: 1, im: 'numeric', ph: '수량 × 단가' }) + fld('tax', '세액', f.tax, { unit: '원', amt: 1, im: 'numeric', ph: '10%' }) + '</div>' +
+          fld('invDate', '계산서 발행일', f.invDate, { type: 'date', sub: '비우면 판매일' }) + fld('spec', '규격', f.spec, { ml: 20 });
+      }
+      b += '<details class="more"' + (f.gross || f.car ? ' open' : '') + '><summary>계량 (계량증명서 매출)</summary><div class="two">' + fld('car', '차량번호', f.car, { ml: 20 }) + fld('no', '일련번호', f.no, { ml: 10, im: 'numeric' }) + '</div>' +
+        '<div class="two">' + fld('t1', '1차 계량시간', f.t1, { type: 'time' }) + fld('t2', '2차 계량시간', f.t2, { type: 'time' }) + '</div>' +
+        '<div class="two">' + fld('gross', '총중량', f.gross, { unit: 'kg', amt: 1, im: 'numeric' }) + fld('tare', '공차중량', f.tare, { unit: 'kg', amt: 1, im: 'numeric' }) + '</div><p class="calc" id="saleCalc">' + saleCalc(f, l) + '</p></details>';
+      if (l && l.src === 'out') b += '<label class="chk"><input type="checkbox" data-f="ex"' + (f.ex ? ' checked' : '') + '> 서식에서 빼기 (반품 · 판매 아님)</label>';
+      b += fld('memo', '메모', f.memo, { ml: 200 });
+      foot = '<button type="button" class="btn" data-act="sale-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
+        (sh.id ? '<button type="button" class="btn ' + (l && l.src === 'out' ? 'ghost' : 'danger') + '" data-act="sale-del"' + (sh.busy ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 ' + (l && l.src === 'out' ? '보완 지움' : '삭제') : l && l.src === 'out' ? '보완 지우기' : '삭제') + '</button>' : '');
+    } else if (sh.kind === 'set') {
+      title = '전년재고 · 계산 기준';
+      b += setSheetHtml();
+      foot = '<button type="button" class="btn" data-act="set-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>';
+    } else if (sh.kind === 'imp') {
+      title = '엑셀 올리기 (지난 자료)';
+      b += importHtml(cur());
+      foot = '<button type="button" class="btn ghost" data-act="close">닫기</button>';
+    } else if (sh.kind === 'paste') {
+      title = '엑셀에서 붙여넣기 (입고)';
+      b += '<p class="hint" style="margin:0 0 10px">엑셀에서 입고 줄을 복사해 붙여넣습니다. 칸 순서: <b>날짜 · 업체 · 실중량</b> 또는 계량증명서 순서(<b>구분 · 발행처 · 거래처 · 품명 · 발행일 · 차량번호 · 일련번호 · 1차 · 2차 · 총중량 · 공차중량 · 실중량</b>). 날짜는 월/일만 읽고 ' + esc(S.y) + '년으로 넣습니다.</p>' +
+        '<textarea class="inp" data-f="txt" aria-label="붙여넣을 내용" placeholder="예) 11/2&#9;○○환경&#9;12,340">' + esc(f.txt) + '</textarea><p class="calc" id="pasteCalc">' + pasteCalc(f) + '</p>';
+      foot = '<button type="button" class="btn" data-act="paste-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '입고로 넣기') + '</button>';
+    }
+    sheetEl.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="shead"><h2 id="shTitle">' + esc(title) + '</h2><button type="button" class="btn ghost sm" data-act="close">닫기</button></div>' +
+      '<div class="sbody">' + b + '</div><div class="sfoot">' + foot + '</div></div>';
+    sheetEl.hidden = false;
+    document.body.classList.add('noscroll');
+  }
+  function hasW(f) { var g = num(f.gross), t = num(f.tare); return g != null && t != null && !isNaN(g) && !isNaN(t); }
+  function inCalc(f) {
+    var g = num(f.gross), t = num(f.tare), n = num(f.net);
+    if (hasW(f)) return g > t ? '실중량 = ' + kg(g) + ' − ' + kg(t) + ' = <b>' + kg(g - t) + ' kg</b>' : '<span style="color:var(--bad)">총중량이 공차중량보다 커야 합니다.</span>';
+    if ((g == null) !== (t == null)) return '<span style="color:var(--bad)">총중량과 공차중량을 둘 다 입력해 주십시오.</span>';
+    return n != null && !isNaN(n) ? '실중량 <b>' + kg(n) + ' kg</b> (계량 정보 없이)' : '계량표의 총중량 · 공차중량을 넣으면 실중량이 자동으로 계산됩니다.';
+  }
+  function prodCalc(f, M) {
+    var r = num(f.rubber), s = num(f.steel), fb = num(f.fiber);
+    if (r == null || isNaN(r)) return '고무분말을 입력하면 철심(× ' + M.R.steelR + ') · 섬유 · 재활용량이 계산됩니다.';
+    var st = s == null ? Math.round(r * M.R.steelR) : s, ff = fb == null ? (r > 0 ? M.R.fiberKg : 0) : fb;
+    return '철심 ' + kg(st) + ' kg' + (s == null ? ' (자동)' : '') + ' · 섬유 ' + kg(ff) + ' kg' + (fb == null ? ' (자동)' : '') + ' → 재활용량 <b>' + kg(r + st + ff) + ' kg</b> (서식-1 재활용량)';
+  }
+  function saleCalc(f, l) {
+    var g = num(f.gross), t = num(f.tare), q = l ? l.qty : num(f.qty);
+    if (g == null && t == null) return '계량표가 있으면 넣어 주십시오 (계량증명서 매출).';
+    if (g == null || t == null || isNaN(g) || isNaN(t) || g <= t) return '<span style="color:var(--bad)">총중량 > 공차중량으로 둘 다 입력해 주십시오.</span>';
+    return '실중량 <b>' + kg(g - t) + ' kg</b>' + (q != null && !isNaN(q) && Math.abs(g - t - q) > 0 ? ' · 판매 수량 ' + kg(q) + ' kg와 ' + kg(Math.abs(g - t - q)) + ' kg 차이' + (Math.abs(g - t - q) > 10 ? ' (확인)' : ' (저울 단위)') : '');
+  }
+  function pasteRows(txt) {
+    var y = S.y, out = [], bad = 0;
+    String(txt || '').split(/\r?\n/).forEach(function (line) {
+      if (!line.trim()) return;
+      var c = line.split('\t').map(function (x) { return x.trim(); }), o = null;
+      if (c.length >= 12 && /매입|매출/.test(c[0])) {
+        if (c[0].indexOf('매입') < 0) return;
+        var p = vmd(c[4]), g = vnum(c[9]), t = vnum(c[10]), n = vnum(c[11]);
+        o = { date: okDay(y, p) ? ymd(y, p[0], p[1]) : '', co: c[2], item: c[3] || '폐타이어', car: c[5], no: c[6], t1: vhm(c[7]), t2: vhm(c[8]) };
+        if (g != null && t != null && g > t) { o.gross = g; o.tare = t; o.n = g - t; } else o.n = n;
+      } else if (c.length >= 3) {
+        var p2 = vmd(c[0]), n2 = vnum(c[2]);
+        o = { date: okDay(y, p2) ? ymd(y, p2[0], p2[1]) : '', co: c[1], item: '폐타이어', n: n2 };
+      }
+      if (!o || !o.date || !o.co || !(o.n > 0) || o.n !== Math.round(o.n) || o.n > 200000 || o.date > S.today) { bad++; return; }
+      out.push(o);
+    });
+    return { rows: out, bad: bad };
+  }
+  function pasteCalc(f) {
+    var p = pasteRows(f.txt);
+    if (!p.rows.length && !p.bad) return '붙여넣으면 읽은 줄 수와 합계가 여기에 나옵니다.';
+    return '읽은 줄 <b>' + p.rows.length + '대 · ' + kg(p.rows.reduce(function (s, o) { return s + o.n; }, 0)) + ' kg</b>' + (p.bad ? ' · 읽지 못한 줄 ' + p.bad + '개 (날짜 · 업체 · kg 확인)' : '');
+  }
+  function updCalc() {
+    var sh = S.sheet; if (!sh) return;
+    var e;
+    if (sh.kind === 'in') {
+      if ((e = $('inCalc'))) e.innerHTML = inCalc(sh.f);
+      var ni = sheetEl.querySelector('[data-f="net"]');
+      if (ni) { var w = hasW(sh.f); ni.disabled = w; if (w) { var g = num(sh.f.gross), t = num(sh.f.tare); if (g > t) { sh.f.net = fmtIn(g - t); ni.value = sh.f.net; } } }
+    } else if (sh.kind === 'prod') { if ((e = $('prodCalc'))) e.innerHTML = prodCalc(sh.f, cur()); }
+    else if (sh.kind === 'sale') { if ((e = $('saleCalc'))) e.innerHTML = saleCalc(sh.f, sh.line); }
+    else if (sh.kind === 'paste') { if ((e = $('pasteCalc'))) e.innerHTML = pasteCalc(sh.f); }
+  }
+  function defDate() {
+    var t = S.today, y = Number(S.y);
+    if (S.y === t.slice(0, 4) && S.m === mOf(t)) return t;
+    return ymd(y, S.m, dim(y, S.m));
+  }
+  function fmtF(v, dec) { return v == null || v === '' ? '' : fmtIn(String(v), dec); }
+  function nOrE(v) { var n = num(v); return n == null ? '' : n; }
+  function busy(on) { S.sheet.busy = on; if (on) { S.sheet.msg = ''; S.sheet.arm = false; } renderSheet(); }
+  function fail(e) { if (!S.sheet) return; S.sheet.busy = false; S.sheet.msg = errText(e); S.sheet.msgOk = false; renderSheet(); }
+  function done(t, d) {
+    if (d && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+      if (d.slice(0, 4) !== S.y) { S.data = {}; S.M = {}; S.y = d.slice(0, 4); }
+      S.m = mOf(d);
+    }
+    closeSheet();
+    toast(t);
+    reload(true, function () { render(); });
+  }
+
+  function saveIn() {
+    var sh = S.sheet, f = sh.f, p = { date: f.date, co: String(f.co || '').trim(), item: String(f.item || '').trim() || '폐타이어', car: f.car, no: f.no, t1: f.t1, t2: f.t2, memo: f.memo };
+    var g = num(f.gross), t = num(f.tare);
+    if ((g == null) !== (t == null) || (g != null && t != null && !(g > t))) { sh.msg = ERR.bad_weigh; sh.msgOk = false; renderSheet(); return; }
+    if (hasW(f)) { p.gross = nOrE(f.gross); p.tare = nOrE(f.tare); } else { p.gross = ''; p.tare = ''; p.net = nOrE(f.net); }
+    if (sh.id) p.id = sh.id;
+    busy(true);
+    call('apiTireIn', [sh.id ? 'edit' : 'add', p]).then(function () { done(sh.id ? '입고를 수정했습니다' : '입고를 등록했습니다', p.date); }, fail);
+  }
+  function saveProd() {
+    var f = S.sheet.f, p = { date: f.date, rubber: nOrE(f.rubber), steel: nOrE(f.steel), fiber: nOrE(f.fiber), memo: f.memo };
+    busy(true);
+    call('apiTireProd', ['put', p]).then(function () { done('생산을 저장했습니다', p.date); }, fail);
+  }
+  function saveSale() {
+    var sh = S.sheet, f = sh.f, l = sh.line, g0 = num(f.gross), t0 = num(f.tare);
+    if ((g0 == null) !== (t0 == null) || (g0 != null && t0 != null && !(g0 > t0))) { sh.msg = ERR.bad_weigh; sh.msgOk = false; renderSheet(); return; }
+    var p = { invDate: f.invDate || '', car: f.car, no: f.no, t1: f.t1, t2: f.t2, gross: nOrE(f.gross), tare: nOrE(f.tare), memo: f.memo };
+    if (l && l.src === 'out') { p.link = l.id; p.ex = !!f.ex; p.price = nOrE(f.price); p.supply = nOrE(f.supply); p.tax = nOrE(f.tax); }
+    else { p.date = f.date; p.cust = String(f.cust || '').trim(); p.item = f.item; p.spec = f.spec; p.qty = nOrE(f.qty); p.price = nOrE(f.price); p.supply = nOrE(f.supply); p.tax = nOrE(f.tax); }
+    var op = sh.id ? 'edit' : 'add';
+    if (sh.id) p.id = sh.id;
+    if (l && l.src === 'out') op = 'add';   // 출고 보완은 출고마다 한 줄 (있으면 서버가 바꿈)
+    busy(true);
+    call('apiTireSale', [op, p]).then(function () { done('판매를 저장했습니다', l ? l.sdate : (p.invDate || p.date)); }, fail);
+  }
+
+  /* ───────── 누르기 ───────── */
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest('[data-act]');
+    if (!el) { if (ev.target === sheetEl) closeSheet(); return; }
+    var act = el.getAttribute('data-act'), M = cur();
+    switch (act) {
+      case 'view': {
+        var v = el.getAttribute('data-v');
+        if (v !== S.view) { S.view = v; render(); window.scrollTo(0, 0); }
+        return;
+      }
+      case 'retry': S.err = ''; if (!S.y) start(); else render(); return;
+      case 'reload': toast('새로고침 중…'); reload(false, function () { toast('새로고침 완료'); }); return;
+      case 'mprev': case 'mnext': {
+        var y = Number(S.y), m = S.m + (act === 'mnext' ? 1 : -1);
+        if (m < 1) { y--; m = 12; } else if (m > 12) { y++; m = 1; }
+        if (act === 'mnext' && !canNext()) return;
+        S.y = String(y); S.m = m; render(); return;
+      }
+      case 'yprev': case 'ynext': {
+        var yy = Number(S.y) + (act === 'ynext' ? 1 : -1), ty = Number(todayY());
+        if (yy > ty || yy < 2020) return;
+        S.y = String(yy); S.m = yy === ty ? mOf(S.today) : 12; S.imp = null; render(); return;
+      }
+      case 'go-month': S.m = Number(el.getAttribute('data-m')) || S.m; S.view = 'f1'; render(); window.scrollTo(0, 0); return;
+      case 'set-open': openSet(); return;
+      case 'imp-open': if (S.imp && S.imp.y !== S.y) S.imp = null; openSheet('imp', {}); return;
+      case 'prod-add': openProd(defDate()); return;
+      case 'sale-add': openSheet('sale', { line: null, f: { date: defDate(), cust: '', item: '고무분말', spec: '', qty: '', price: '', supply: '', tax: '', invDate: '', car: '', no: '', t1: '', t2: '', gross: '', tare: '', memo: '' } }); return;
+      case 'dl-all': dlAll(); return;
+      case 'dl-one': dlOne(el.getAttribute('data-form')); return;
+      case 'goref': {
+        var c = M && M.checks[Number(el.getAttribute('data-i'))]; if (!c || !c.ref) return;
+        if (c.ref.v === 'set') { openSet(); return; }
+        if (c.m) S.m = c.m;
+        S.view = { 'in': 'f1', prod: 'f2', sale: 'tax' }[c.ref.v] || S.view; render();
+        if (c.ref.id) {
+          if (c.ref.v === 'in') { var r = M.ins.filter(function (x) { return x.id === c.ref.id; })[0]; if (r) openIn(r); }
+          else if (c.ref.v === 'prod') openProd(c.ref.id);
+          else if (c.ref.v === 'sale') { var l = M.lines.filter(function (x) { return x.key === c.ref.id; })[0]; if (l) openSale(l); }
+        }
+        return;
+      }
+      case 'set-save': {
+        var sf = S.sheet && S.sheet.f; if (!sf) return;
+        var p = { y: S.y, memo: sf.memo };
+        ['tire', 'rubber', 'steel', 'fiber', 'yield', 'steelR', 'fiberKg'].forEach(function (k) { p[k] = String(sf[k] == null ? '' : sf[k]).replace(/,/g, ''); });
+        busy(true);
+        call('apiTireSet', [p]).then(function () { done('전년재고 · 계산 기준을 저장했습니다'); }, fail);
+        return;
+      }
+      case 'imp-in': impRun('in'); return;
+      case 'imp-prod': impRun('prod'); return;
+      case 'imp-link': impRun('link'); return;
+      case 'imp-taxlink': impRun('taxlink'); return;
+      case 'imp-taxadd': impRun('taxadd'); return;
+      case 'close': closeSheet(); return;
+      case 'in-edit': { var rr = M.ins.filter(function (x) { return x.id === el.getAttribute('data-id'); })[0]; if (rr) openIn(rr); return; }
+      case 'prod-edit': openProd(el.getAttribute('data-date')); return;
+      case 'sale-edit': { var ll = M.lines.filter(function (x) { return x.key === el.getAttribute('data-key'); })[0]; if (ll) openSale(ll); return; }
+      case 'add':
+        if (S.view === 'f1' || S.view === 'weigh') openSheet('in', { f: { date: defDate(), co: '', item: '폐타이어', car: '', no: '', t1: '', t2: '', gross: '', tare: '', net: '', memo: '' } });
+        else if (S.view === 'f2') openProd(defDate());
+        else if (S.view === 'tax') openSheet('sale', { line: null, f: { date: defDate(), cust: '', item: '고무분말', spec: '', qty: '', price: '', supply: '', tax: '', invDate: '', car: '', no: '', t1: '', t2: '', gross: '', tare: '', memo: '' } });
+        return;
+      case 'paste': openSheet('paste', { f: { txt: '' } }); return;
+      case 'pick': {
+        var k = el.getAttribute('data-k'); if (!S.sheet) return;
+        S.sheet.f[k] = el.getAttribute('data-v'); renderSheet(); return;
+      }
+      case 'in-save': saveIn(); return;
+      case 'prod-save': saveProd(); return;
+      case 'sale-save': saveSale(); return;
+      case 'in-del': case 'prod-del': case 'sale-del': {
+        var sh = S.sheet; if (!sh) return;
+        if (!sh.arm) { sh.arm = true; renderSheet(); return; }
+        busy(true);
+        var q = act === 'in-del' ? call('apiTireIn', ['del', { id: sh.id }]) : act === 'prod-del' ? call('apiTireProd', ['del', { date: sh.f.date }]) : call('apiTireSale', ['del', { id: sh.id }]);
+        q.then(function () { done(act === 'prod-del' ? '생산 화면 값으로 되돌렸습니다' : '삭제했습니다'); }, fail);
+        return;
+      }
+      case 'paste-save': {
+        var pr2 = pasteRows(S.sheet.f.txt);
+        if (!pr2.rows.length) { S.sheet.msg = '읽은 줄이 없습니다. 날짜 · 업체 · kg 칸을 확인해 주십시오.'; S.sheet.msgOk = false; renderSheet(); return; }
+        busy(true);
+        var rows = pr2.rows.map(function (o) { var r = { date: o.date, co: o.co, item: o.item, car: o.car || '', no: o.no || '', t1: o.t1 || '', t2: o.t2 || '' }; if (o.gross != null) { r.gross = o.gross; r.tare = o.tare; } else r.net = o.n; return r; });
+        call('apiTireBulk', ['in', rows, {}]).then(function (r) { done('입고 ' + r.added + '대를 넣었습니다', rows[0].date); }, fail);
+        return;
+      }
+    }
+  });
+  function openSet() {
+    var ss = (curD() && curD().set) || {}, nv = function (v, dec) { return v == null || v === '' ? '' : dec ? String(v) : fmtIn(String(v)); };
+    openSheet('set', { f: { tire: nv(ss.tire), rubber: nv(ss.rubber), steel: nv(ss.steel), fiber: nv(ss.fiber), yield: nv(ss.yield, true), steelR: nv(ss.steelR, true), fiberKg: nv(ss.fiberKg), memo: ss.memo || '' } });
+  }
+  function openIn(r) {
+    openSheet('in', { id: r.id, f: { date: r.date, co: r.co, item: r.item, car: r.car, no: r.no, t1: r.t1, t2: r.t2, gross: fmtF(r.gross), tare: fmtF(r.tare), net: fmtF(r.net), memo: r.memo } });
+  }
+  function openProd(date) {
+    var d = curD(), p = (d.prod || []).filter(function (x) { return x.date === date; })[0], st = (d.stockProd || []).filter(function (a) { return a[0] === date; })[0];
+    openSheet('prod', { manual: !!p, f: { date: date, rubber: p ? fmtF(p.rubber) : st ? fmtF(st[1]) : '', steel: p ? fmtF(p.steel) : '', fiber: p ? fmtF(p.fiber) : '', memo: p ? p.memo || '' : '' } });
+  }
+  function openSale(l) {
+    var d = curD(), s = l.sid ? (d.sales || []).filter(function (x) { return x.id === l.sid; })[0] : null;
+    var w = s || {};
+    if (l.src === 'out') {
+      openSheet('sale', { id: l.sid || '', line: l, f: { invDate: s ? s.invDate || '' : '', price: s && s.price != null ? fmtF(s.price, true) : '', supply: s && s.supply != null ? fmtF(s.supply) : '', tax: s && s.tax != null ? fmtF(s.tax) : '',
+        car: w.car || '', no: w.no || '', t1: w.t1 || '', t2: w.t2 || '', gross: fmtF(w.gross), tare: fmtF(w.tare), ex: !!(s && s.ex), memo: s ? s.memo || '' : '' } });
+    } else {
+      openSheet('sale', { id: l.sid, line: null, f: { date: l.date, cust: l.cust, item: l.item, spec: l.spec, qty: fmtF(l.qty), price: fmtF(l.price, true), supply: fmtF(l.supply), tax: fmtF(l.tax), invDate: l.invDate,
+        car: w.car || '', no: w.no || '', t1: w.t1 || '', t2: w.t2 || '', gross: fmtF(w.gross), tare: fmtF(w.tare), memo: l.memo || '' } });
+    }
+  }
+  fab.setAttribute('data-act', 'add');
+  document.addEventListener('input', function (ev) {
+    var el = ev.target, k = el.getAttribute('data-f');
+    if (!k || !S.sheet) return;
+    var f = S.sheet.f;
+    if (k === 'ex') { f.ex = el.checked; return; }
+    if (/^(gross|tare|net|rubber|steel|fiber|qty|supply|tax|price|tire|fiberKg|yield|steelR)$/.test(k)) {
+      var nv = fmtIn(el.value, k === 'yield' || k === 'steelR' ? 4 : k === 'price');
+      if (nv !== el.value) { el.value = nv; try { el.setSelectionRange(nv.length, nv.length); } catch (e) {} }
+      f[k] = nv;
+      if (S.sheet.kind === 'sale' && !S.sheet.line && (k === 'qty' || k === 'price')) {   // 추가 판매: 공급가액 · 세액 자동
+        var q = num(f.qty), p = num(f.price);
+        if (q != null && p != null && !isNaN(q) && !isNaN(p)) { var sp = Math.round(q * p); f.supply = fmtIn(sp); f.tax = fmtIn(Math.floor(sp / 10)); var a = sheetEl.querySelector('[data-f="supply"]'), b2 = sheetEl.querySelector('[data-f="tax"]'); if (a) a.value = f.supply; if (b2) b2.value = f.tax; }
+      }
+      updCalc(); return;
+    }
+    f[k] = el.value;
+    if (k === 'txt') updCalc();
+  });
+  document.addEventListener('change', function (ev) {
+    var el = ev.target;
+    if (el.getAttribute('data-act') === 'imp-file') { impFiles(el.files); return; }
+    var k = el.getAttribute('data-f');
+    if (!k || !S.sheet) return;
+    if (k === 'date' && S.sheet.kind === 'prod') { var f = S.sheet.f, keep = f.memo; openProdKeep(el.value, keep); return; }
+  });
+  function openProdKeep(date) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+    var d = curD(), p = (d.prod || []).filter(function (x) { return x.date === date; })[0], st = (d.stockProd || []).filter(function (a) { return a[0] === date; })[0];
+    S.sheet.manual = !!p;
+    S.sheet.f = { date: date, rubber: p ? fmtF(p.rubber) : st ? fmtF(st[1]) : '', steel: p ? fmtF(p.steel) : '', fiber: p ? fmtF(p.fiber) : '', memo: p ? p.memo || '' : '' };
+    renderSheet();
+  }
+  document.addEventListener('submit', function (ev) {
+    if (ev.target.id !== 'loginForm') return;
+    ev.preventDefault();
+    var pw = $('pw'), v = pw ? pw.value : '';
+    if (!v) return;
+    S.loginErr = '';
+    var btn = ev.target.querySelector('button'); if (btn) { btn.disabled = true; btn.textContent = '확인 중…'; }
+    post({ action: 'login', pw: v, dev: devId() }).then(function (r) { setToken(r.token); S.authed = true; S.loginErr = ''; start(); },
+      function (e) { S.loginErr = errText(e); render(); });
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.getAttribute && ev.target.getAttribute('role') === 'button' && ev.target.tagName !== 'BUTTON') { ev.preventDefault(); ev.target.click(); return; }
+    if (ev.key === 'Enter' && !ev.isComposing && ev.keyCode !== 229 && S.sheet && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') { ev.preventDefault(); ev.target.blur(); }   // 한글 조합 중 엔터는 조합만 끝냄
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && S.authed && S.y && !S.sheet && !S.dl) reload(true); });
+  var toastT = null;
+  function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { toastEl.hidden = true; }, 3600); }
+
+  /* 뒤로 = 온 길로 한 걸음 (공통 nav.js): 기록에 남는 것 = 칸 · 달 · 열어 본 창 */
+  function navGet() { return { view: S.view, sheet: S.sheet ? S.sheet.kind + (S.sheet.id ? ':' + S.sheet.id : '') : '' }; }
+  function navSet(v) {
+    v = v || {};
+    if (S.sheet && !v.sheet) closeSheetNow();
+    if (v.view && VIEWS.some(function (x) { return x[0] === v.view; })) S.view = v.view;
+    render();
+  }
+  if (window.NMCNav) NMCNav.page({ get: navGet, set: navSet, url: function (v) { return location.pathname + '?view=' + v.view; } });
+  function start() {
+    S.err = '';
+    if (!S.authed) { render(); return; }
+    var y = S.y || String(new Date().getFullYear());
+    render();
+    S.loading[y] = true;
+    call('apiTire', [y]).then(function (d) { S.loading[y] = false; put(d); S.y = d.y; render(); },
+      function (e) { S.loading[y] = false; if (String(e && e.message) !== 'auth') S.err = errText(e); render(); });
+  }
+  start();
+  if (DEMO) window.__tire = { get S() { return S; }, model: function () { return cur(); }, pasteRows: pasteRows, parseBook: parseBook, matchOuts: matchOuts, matchTax: matchTax, taxSup: taxSup };
+})();
+</script>
+</body>
+</html>

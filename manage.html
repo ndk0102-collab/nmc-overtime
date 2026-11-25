@@ -74,6 +74,7 @@ button,input{font:inherit;color:inherit}
 .pushline button{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:var(--dc);color:#fff;font-weight:800;font-size:14.5px;cursor:pointer}
 .pushline button:disabled{opacity:.55}
 @media (min-width:880px){.wrap{max-width:1180px;padding-top:22px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}}   /* PC: 위 줄 업무 · 영업·출고 · 생산·재고 / 아래 줄 공사 · 재무 · 인사·급여 */
+@media (min-width:880px){.grid > .sect:last-child:nth-child(3n+1){grid-column:1/-1}.grid > .sect:last-child:nth-child(3n+1) .subs{grid-template-columns:repeat(4,minmax(0,1fr))}}   /* 대분류 7개(2026-11-25 폐타이어 추가): 마지막 줄에 혼자 남는 칸은 한 줄 전체 · 소분류 4칸 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}

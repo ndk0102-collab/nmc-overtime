@@ -1,7 +1,8 @@
 /* NMC 전체 메뉴 — 대분류 → 소분류 (2026-11-25 10:11 지시: "전체카테고리 -소카테고리로 해서 좀 정리를 하자. 정렬도 하고 전체적으로 체계적으로 만들어서 우리가 일하기 편하게")
    · 관리자 첫 화면(manage.html)과 관리자 화면마다 위쪽의 '메뉴' 단추가 이 목록 하나를 같이 씁니다. 메뉴를 바꿀 때는 여기 한 곳만 고칩니다.
    · 소분류는 그 화면의 그 칸으로 바로 엽니다 — 예: 거래명세서 작성 = statement.html?view=edit, 현재고 = stock.html?view=all&tab=stock
-   · 순서 = 일하는 순서. 대분류: 업무 → 영업·출고 → 생산·재고 → 공사 → 재무 → 인사·급여, 소분류도 업무 흐름대로 (받은 발주서 → 출고 → 거래명세서 → 거래처 …)
+   · 순서 = 일하는 순서. 대분류: 업무 → 영업·출고 → 생산·재고 → 폐타이어 → 공사 → 재무 → 인사·급여, 소분류도 업무 흐름대로 (받은 발주서 → 출고 → 거래명세서 → 거래처 …)
+   · 폐타이어(2026-11-25 지시): 서식-1 보고서 · 서식-2 보고서 · 계량증명서 관리 · 세금계산서 관리 · 총괄표 — 쓰던 서식 그대로 (tire.html)
    · '메뉴' 단추 = <a href="manage.html" data-nmc-menu> — 이 파일을 못 읽으면 관리자 첫 화면으로 그냥 갑니다.
    · 메뉴 창: 대분류별 소분류 · 지금 보고 있는 화면 표시 · 메뉴 찾기(초성도 됨: ㄱㄹㅁㅅㅅ → 거래명세서) · Esc · 바깥 누르면 닫힘
    회사 자료는 없습니다. */
@@ -17,6 +18,7 @@
     sales: '<path d="M2 6h12v10H2z"/><path d="M14 9h4.5L22 12.5V16h-8"/><circle cx="6.5" cy="17.5" r="1.9"/><circle cx="17.5" cy="17.5" r="1.9"/>',
     stock: '<path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/>',
     cons: '<path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/>',
+    tire: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.4"/><path d="M12 3v3.2M12 17.8V21M3 12h3.2M17.8 12H21M5.6 5.6l2.3 2.3M16.1 16.1l2.3 2.3M5.6 18.4l2.3-2.3M16.1 7.9l2.3-2.3"/>',
     fin: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     hr: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M15.6 14.1c3 .3 5.4 2.7 5.4 5.9"/>'
   };
@@ -72,6 +74,13 @@
         { k: 'st-sum', n: '재고 현황', d: '기간별 생산 · 출고 · 반입 (10일 단위)', u: 'stock.html?view=all&tab=sum', p: { view: 'all', tab: 'sum' }, kw: '현황 전체관리' },
         { k: 'st-log', n: '재고 기록', d: '생산 · 출고 · 반입 · 조정 기록', u: 'stock.html?view=all&tab=log', p: { view: 'all', tab: 'log' }, kw: '기록 이력 조정' }
       ] },
+      { k: 'tire', n: '폐타이어', d: '서식-1 · 서식-2 · 계량증명서 · 세금계산서 · 총괄표', c: '#44505C', s: '#E9EDF1', items: [
+        { k: 'tire-f1', n: '서식-1 보고서', d: '회수 · 재활용 관리 대장 (입고 · 재활용량 · 보관량)', u: 'tire.html?view=f1', p: { view: 'f1' }, kw: '서식1 회수 입고 반입 재활용량 보관량' },
+        { k: 'tire-f2', n: '서식-2 보고서', d: '재활용제품 생산 · 판매 및 부산물 처리 관리대장', u: 'tire.html?view=f2', p: { view: 'f2' }, kw: '서식2 생산 고무분말 철심 섬유 판매' },
+        { k: 'tire-weigh', n: '계량증명서 관리', d: '계량증명서(매입,매출) — 차량 · 계량 시각 · 총중량 · 공차중량', u: 'tire.html?view=weigh', p: { view: 'weigh' }, kw: '계량증명서 계량 매입 매출 차량 총중량' },
+        { k: 'tire-tax', n: '세금계산서 관리', d: '세금계산서(매출) — SBR 고무분말 · 분철 판매', u: 'tire.html?view=tax', p: { view: 'tax' }, kw: '세금계산서 매출 판매 계산서' },
+        { k: 'tire-sum', n: '총괄표', d: '폐타이어 재활용 관리대장 총괄표 · 엑셀 5가지 내려받기', u: 'tire.html?view=sum', p: { view: 'sum' }, kw: '총괄표 전년재고 엑셀 내려받기 다운로드 점검' }
+      ] },
       { k: 'cons', n: '공사', d: '프로젝트 · 도면 · 배합', c: '#0E7490', s: '#E0F2F7', items: [
         { k: 'pj', n: '프로젝트 목록', d: '시공 목록 · 대금 · 도면 확정 · 물량 산출', u: 'pj.html', p: { view: 'list' }, kw: '공사 시공 프로젝트' },
         { k: 'pj-new', n: '프로젝트 등록', d: '새 시공 프로젝트 등록', u: 'pj.html?view=new', p: { view: 'new' }, kw: '공사등록' },
@@ -105,8 +114,8 @@
   function fileOf(u) { return String(u).split('?')[0]; }
 
   /* ── 지금 보고 있는 화면 = 주소 + 화면 안 칸(nav.js가 적어 둔 기록 칸의 상태) ── */
-  var DEF = { 'statement.html': { view: 'list' }, 'pj.html': { view: 'list' }, 'ledger.html': { view: 'buy' }, 'docs.html': { cat: 'todo' }, 'admin.html': { tab: 'ot' }, 'stock.html': { view: 'prod' } };
-  var SV = { 'statement.html': { view: 'tab' }, 'pj.html': { view: 'tab' }, 'ledger.html': { view: 'view' }, 'stock.html': { tab: 'tab' }, 'docs.html': { cat: 'cat' }, 'admin.html': { tab: 'tab' }, 'work.html': { d: 'd' } };
+  var DEF = { 'statement.html': { view: 'list' }, 'pj.html': { view: 'list' }, 'ledger.html': { view: 'buy' }, 'docs.html': { cat: 'todo' }, 'admin.html': { tab: 'ot' }, 'stock.html': { view: 'prod' }, 'tire.html': { view: 'f1' } };
+  var SV = { 'statement.html': { view: 'tab' }, 'pj.html': { view: 'tab' }, 'ledger.html': { view: 'view' }, 'stock.html': { tab: 'tab' }, 'docs.html': { cat: 'cat' }, 'admin.html': { tab: 'tab' }, 'work.html': { d: 'd' }, 'tire.html': { view: 'view' } };
   function hereFile() {
     var path = location.pathname || '';
     if (/\/sketchbook\/(?:index\.html)?$/.test(path)) return 'sketchbook/';
@@ -245,7 +254,10 @@
       '@media (min-width:760px){.nmm .nmm-p{width:min(1120px,calc(100vw - 32px));height:auto;max-height:calc(100vh - 32px);margin-top:16px;border-radius:20px;overflow:hidden}' +
         '.nmm .nmm-h{padding:12px 16px}.nmm .nmm-qk{padding:12px 16px 0}.nmm .nmm-b{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 16px 18px}' +
         '.nmm .nmm-i{min-height:48px}}' +
-      '@media (min-width:1060px){.nmm .nmm-b{grid-template-columns:repeat(3,minmax(0,1fr))}}' +
+      '@media (min-width:1060px){.nmm .nmm-b{grid-template-columns:repeat(3,minmax(0,1fr))}' +   /* 대분류 7개(2026-11-25 폐타이어 추가): 3칸이면 마지막 줄에 혼자 남는 칸은 한 줄 전체 · 소분류 4칸 */
+        '.nmm .nmm-g:last-child:nth-child(3n+1){grid-column:1/-1}.nmm .nmm-g:last-child:nth-child(3n+1) ul{grid-template-columns:repeat(4,minmax(0,1fr))}}' +
+      '@media (min-width:1340px){.nmm .nmm-p{width:min(1480px,calc(100vw - 32px))}.nmm .nmm-b{grid-template-columns:repeat(4,minmax(0,1fr))}' +   /* 넓은 PC: 4칸 두 줄 — 메뉴 전체가 한 화면에 */
+        '.nmm .nmm-g:last-child:nth-child(3n+1){grid-column:auto}.nmm .nmm-g:last-child:nth-child(3n+1) ul{grid-template-columns:repeat(2,minmax(0,1fr))}}' +
       '@media print{.nmm,a.nmc-menu[data-nmc-menu],a.nmc-hub[data-nmc-home]{display:none!important}}';
     (document.head || document.documentElement).appendChild(el);
   }
