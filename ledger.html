@@ -1393,7 +1393,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
   });
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
-    if (ev.key === 'Enter' && S.sheet && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') { ev.preventDefault(); ev.target.blur(); }
+    if (ev.key === 'Enter' && !ev.isComposing && ev.keyCode !== 229 && S.sheet && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') { ev.preventDefault(); ev.target.blur(); }   // 한글 조합 중 엔터는 조합만 끝냄 (2026-11-25)
   });
   document.addEventListener('visibilitychange', function () {
     if (document.hidden || !S.authed || S.sheet) return;

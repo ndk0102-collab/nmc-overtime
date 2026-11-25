@@ -1892,6 +1892,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   });
   $('sq').addEventListener('input', function (ev) { srSet(ev.target.value); });
   $('sq').addEventListener('keydown', function (ev) {
+    if (ev.isComposing || ev.keyCode === 229) return;   // 한글 조합 중 엔터 · Esc는 조합만 끝냄 (2026-11-25)
     if (ev.key === 'Escape') { if (ev.target.value) { ev.preventDefault(); srClear(); } return; }
     if (ev.key === 'Enter') {
       ev.preventDefault();
@@ -1907,7 +1908,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || (tg && tg.isContentEditable)) return;
     ev.preventDefault(); $('sq').focus();
   });
-  root.addEventListener('input', function (ev) { if (ev.target.id === 'q') { S.q = ev.target.value; var pos = ev.target.selectionStart; render(); var q = $('q'); q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } });
+  // 세금계산서 달 필터: 칸은 그대로 두고 그 달 목록(#list)만 다시 그림 — 화면 전체를 다시 그리면 한글 조합이 끊김 (2026-11-25)
+  root.addEventListener('input', function (ev) { if (ev.target.id === 'q') { S.q = ev.target.value; var L = $('list'); if (L && S.cat === 'tax') L.outerHTML = taxMonthHtml(); else { var pos = ev.target.selectionStart; render(); var q = $('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } } } });
   root.addEventListener('change', function (ev) { if (ev.target.id === 'kindSel') { S.kind = ev.target.value; render(); } });
   function b64of(file) {
     return new Promise(function (res, rej) {

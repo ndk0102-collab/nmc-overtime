@@ -739,15 +739,18 @@ select.inp{padding-right:30px}
     h += '<section class="card"><div class="chips" role="group" aria-label="보기">' + FLT.map(function (f) {
       return '<button type="button" class="chip" aria-pressed="' + (S.flt === f[0]) + '" data-act="flt" data-v="' + f[0] + '">' + f[1] + '<small>' + cnt[f[0]] + '</small></button>';
     }).join('') + '</div><input class="find" type="search" data-f="q" value="' + esc(S.q) + '" placeholder="공사명 · 발주처 · 번호 찾기" aria-label="찾기">';
-    var q = S.q.trim().toLowerCase();
+    return h + '<div id="pjRows">' + pjRowsHtml() + '</div></section>';
+  }
+  /** 프로젝트 목록 줄 — 찾기 칸에 칠 때는 이 부분만 다시 그림(칸을 바꾸면 한글 조합이 끊김, 2026-11-25) */
+  function pjRowsHtml() {
+    var L = S.list, q = S.q.trim().toLowerCase();
     var rows = L.filter(function (p) {
       if (!inFlt(p, S.flt)) return false;
       if (!q) return true;
       return (p.no + ' ' + p.name + ' ' + p.cust + ' ' + p.type + ' ' + p.memo).toLowerCase().indexOf(q) >= 0;
     }).sort(function (a, b) { var x = sortKey(a), z = sortKey(b); return x < z ? -1 : x > z ? 1 : 0; });
-    if (!rows.length) h += '<p class="empty">' + (L.length ? '해당하는 프로젝트가 없습니다.' : '등록된 프로젝트가 없습니다. \'+ 새 프로젝트 등록\'으로 시작해 주십시오.') + '</p>';
-    h += rows.map(entHtml).join('') + '</section>';
-    return h;
+    if (!rows.length) return '<p class="empty">' + (L.length ? '해당하는 프로젝트가 없습니다.' : '등록된 프로젝트가 없습니다. \'+ 새 프로젝트 등록\'으로 시작해 주십시오.') + '</p>';
+    return rows.map(entHtml).join('');
   }
   /** 목록 한 줄의 단계 표시: 도면 · 색상 · 발주 · 출고 · 입고 · 완료 · 대금 */
   /** 도면 요약 (목록용 요약 · 전체 도면 어느 쪽이든) */
@@ -1830,7 +1833,7 @@ select.inp{padding-right:30px}
     if (el.hasAttribute('data-cf') && S.cf) { S.cf[el.getAttribute('data-cf')] = el.value; S.cf.dirty = true; updQty(); return; }
     if (el.hasAttribute('data-p')) { if (!S.pay && S.cur) S.pay = payForm(S.cur.pj); if (S.pay) S.pay[el.getAttribute('data-p')] = el.value; return; }
     var f = el.getAttribute('data-f');
-    if (f === 'q') { S.q = el.value; var pos = el.selectionStart; render(); var q = root.querySelector('[data-f="q"]'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } return; }
+    if (f === 'q') { S.q = el.value; var pr = document.getElementById('pjRows'); if (pr) pr.innerHTML = pjRowsHtml(); else render(); return; }   // 칸은 그대로(한글 조합 유지), 목록만
     if (!S.F || !f) return;
     if (f === 'supply') { S.F.supply = el.value; S.F.supplyAuto = String(el.value).trim() === ''; updAmt(); return; }
     if (f === 'price') { S.F.price = el.value; S.F.priceAuto = false; updAmt(); return; }
@@ -1875,7 +1878,7 @@ select.inp{padding-right:30px}
   document.addEventListener('keydown', function (ev) {
     if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
     if (ev.key === 'Escape' && S.doc) { S.doc = null; render(); return; }
-    if (ev.key === 'Enter' && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }
+    if (ev.key === 'Enter' && !ev.isComposing && ev.keyCode !== 229 && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }   // 한글 조합 중 엔터는 조합만 끝냄 (2026-11-25)
   });
 
   start();

@@ -1388,13 +1388,24 @@ body.pvon{overflow:hidden}
     });
   }
 
-  /* 거래처 */
+  /* 거래처
+     2026-11-25 지시 "거래처 등록하는곳에가서 창에 거래처이름쓰면 한글이제대로 안써진다 고쳐라. 그리고 등록하면 아래 등록된 거래처가 가나다 순으로 보이도록 하라 등록순이아니고":
+     찾기 칸에 글자를 칠 때 칸은 그대로 두고 아래 목록(#custRows)만 다시 그림(전에는 화면 전체를 다시 그려 한글 조합이 끊김).
+     목록은 가나다순 — (주) · ㈜ · 주식회사 · 유한회사 같은 회사 형태 글은 빼고 상호로 정렬(ckey), 같으면 전체 이름 순 */
+  function custSorted() {
+    return (S.I.custs || []).slice().sort(function (a, b) { return ckey(a[0]).localeCompare(ckey(b[0]), 'ko') || String(a[0]).localeCompare(String(b[0]), 'ko'); });
+  }
   function custHtml() {
-    var I = S.I, q = ckey(S.cq), L = (I.custs || []).filter(function (c) { return !q || ckey(c[0]).indexOf(q) >= 0 || String(c[1]).replace(/\D/g, '').indexOf(S.cq.replace(/\D/g, '') || '~') >= 0; });
-    var h = '<section class="card"><h2>거래처 <small>' + (I.custs || []).length + '곳</small></h2>' +
+    var I = S.I;
+    return '<section class="card"><h2>거래처 <small>' + (I.custs || []).length + '곳 · 가나다순</small></h2>' +
       '<p class="hint" style="margin:0 0 8px">명세서 공급받는자 칸에 찍히는 정보입니다. 홈택스 매출 세금계산서를 자동 수집 폴더에 넣으면 등록번호 · 대표자 · 주소가 빈 칸에 저절로 채워집니다.</p>' +
       '<input class="find" type="search" data-f="cq" value="' + esc(S.cq) + '" placeholder="상호 · 등록번호로 찾기" autocomplete="off">' +
-      '<div class="tools" style="margin:4px 0 8px"><button type="button" class="btn sm" data-act="custnew">+ 거래처 추가</button></div><div>';
+      '<div class="tools" style="margin:4px 0 8px"><button type="button" class="btn sm" data-act="custnew">+ 거래처 추가</button></div><div id="custRows">' + custRowsHtml() + '</div></section>';
+  }
+  function custRowsHtml() {
+    var q = ckey(S.cq), d = String(S.cq || '').replace(/\D/g, '');
+    var L = custSorted().filter(function (c) { return !q || ckey(c[0]).indexOf(q) >= 0 || (!!d && String(c[1]).replace(/\D/g, '').indexOf(d) >= 0); });
+    var h = '';
     if (!L.length) h += '<p class="empty">' + (S.cq ? '찾는 거래처가 없습니다.' : '등록된 거래처가 없습니다.') + '</p>';
     L.slice(0, 300).forEach(function (c) {
       var miss = !c[1] || !c[3];
@@ -1402,7 +1413,7 @@ body.pvon{overflow:hidden}
         esc([c[1], c[2] ? '대표 ' + c[2] : '', c[6]].filter(Boolean).join(' · ') || '정보 없음') + '</small></span>' +
         '<span class="cm">' + (c[9] === '세금계산서' ? '<span class="st ok">자동</span>' : miss ? '<span class="st gold">정보 부족</span>' : '') + '</span></button>';
     });
-    return h + '</div></section>';
+    return h;
   }
   function openCust(name, prefill) {
     var c = name ? custOf(name) : null;
@@ -1529,7 +1540,7 @@ body.pvon{overflow:hidden}
     if (el.hasAttribute('data-s') && S.sheet) { S.sheet.f[el.getAttribute('data-s')] = el.value; return; }
     if (el.hasAttribute('data-c') && S.co) { S.co[el.getAttribute('data-c')] = el.value; S.coMsg = ''; return; }
     var f = el.getAttribute('data-f');
-    if (f === 'cq') { S.cq = el.value; var pos = el.selectionStart; render(); var q = root.querySelector('[data-f="cq"]'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } return; }
+    if (f === 'cq') { S.cq = el.value; var cr = $('custRows'); if (cr) cr.innerHTML = custRowsHtml(); else render(); return; }   // 칸은 그대로(한글 조합 유지), 목록만
     if (!S.F) return;
     if (f === 'cust') { S.F.cust = el.value; var ci = $('cinfo'); if (ci) ci.innerHTML = cinfoHtml(S.F.cust, custOf(S.F.cust)); return; }
     if (f === 'site' || f === 'memo' || f === 'addr') { S.F[f] = el.value; return; }
@@ -1575,6 +1586,7 @@ body.pvon{overflow:hidden}
       function (e) { S.loginErr = errText(e); render(); });
   });
   document.addEventListener('keydown', function (ev) {
+    if (ev.isComposing || ev.keyCode === 229) return;   // 한글 조합 중(엔터 · Esc로 조합을 끝내는 키)은 건드리지 않음 (2026-11-25)
     if (ev.key === 'Escape' && S.sheet) { if (!S.sheet.step) closeSheet(); return; }
     if (ev.key === 'Escape' && S.pv) { closePv(); return; }
     if (ev.key === 'Enter' && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'radio' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }
