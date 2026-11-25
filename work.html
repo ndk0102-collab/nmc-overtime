@@ -43,7 +43,10 @@ b,td{font-variant-numeric:tabular-nums}
 .home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
 .bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-.01em}
 .bar h1 small{display:block;font-size:13px;font-weight:600;color:#D9E3F2;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ref{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--vc);font-size:14px;font-weight:800;cursor:pointer}
+.ref{display:inline-flex;align-items:center;gap:5px;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--vc);font-size:14px;font-weight:800;cursor:pointer}
+.ref[hidden]{display:none}
+.ref svg{display:none;flex:none}
+@media (max-width:420px){.ref{padding:0 11px}.ref svg{display:block}.ref span{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}   /* 휴대폰: 새로고침 = 돌아가는 화살표만 (관리자 · 메뉴 단추와 같이 그림, 머리글 한 줄 — 2026-11-25) */
 .home:focus-visible,.ref:focus-visible,.btn:focus-visible,.link:focus-visible,.tab:focus-visible,.cd:focus-visible,.segb button:focus-visible,select:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 .wrap{max-width:760px;margin:0 auto;padding:12px 12px 90px}
 @media (min-width:980px){.wrap{max-width:1180px}}
@@ -186,9 +189,9 @@ b,td{font-variant-numeric:tabular-nums}
 <body>
 <header class="bar">
   <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
-    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>메뉴</a>
+    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴" title="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg><span>메뉴</span></a>
     <h1 id="title">부서 업무<small id="sub"></small></h1>
-    <button type="button" class="ref" id="refBtn" hidden>새로고침</button>
+    <button type="button" class="ref" id="refBtn" aria-label="새로고침" title="새로고침" hidden><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg><span>새로고침</span></button>
   </div>
 </header>
 <main class="wrap" id="root"><p class="wait">확인 중…</p></main>

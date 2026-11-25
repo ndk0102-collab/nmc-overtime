@@ -185,8 +185,22 @@
 
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   /** 머리글 '메뉴' 단추 (화면이 글로 머리글을 그릴 때) */
+  /** '관리자' 단추 = 관리자 첫 화면으로 바로 (2026-11-25 20:31 지시 "모든창구에서 관리자 첫화면으로 돌아가는 버튼 하나 만들어라") */
+  function hubBtn(cls) {
+    return '<a class="nmc-hub' + (cls ? ' ' + cls : '') + '" href="' + esc(BASE + 'manage.html') + '" data-nmc-home aria-label="관리자 첫 화면" title="관리자 첫 화면">' + HOME_IC + '<span>관리자</span></a>';
+  }
+  /** 머리글 단추 묶음: 관리자(첫 화면으로) + 메뉴(전체 메뉴 창) — 화면이 글로 머리글을 그릴 때 */
   function btn(cls) {
-    return '<a class="nmc-menu' + (cls ? ' ' + cls : '') + '" href="' + esc(BASE + 'manage.html') + '" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴">' + MENU_IC + '<span>메뉴</span></a>';
+    return hubBtn(cls) + '<a class="nmc-menu' + (cls ? ' ' + cls : '') + '" href="' + esc(BASE + 'manage.html') + '" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴" title="전체 메뉴">' + MENU_IC + '<span>메뉴</span></a>';
+  }
+  /** 화면에 그대로 적힌 '메뉴' 단추 앞에 '관리자' 단추를 붙임 (같은 모양 class) — 화면마다 따로 적지 않아도 모든 관리자 화면에 */
+  function mountHub() {
+    Array.prototype.forEach.call(document.querySelectorAll('a[data-nmc-menu]'), function (m) {
+      const prev = m.previousElementSibling;
+      if (prev && prev.hasAttribute('data-nmc-home')) return;
+      const cls = String(m.className || '').split(/\s+/).filter(function (c) { return c && c !== 'nmc-menu'; }).join(' ');
+      m.insertAdjacentHTML('beforebegin', hubBtn(cls));
+    });
   }
 
   function css() {
@@ -194,7 +208,10 @@
     var el = document.createElement('style');
     el.id = 'nmc-menu-css';
     el.textContent =
-      'a.nmc-menu[data-nmc-menu]{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}a.nmc-menu[data-nmc-menu] svg{flex:none}' +
+      'a.nmc-menu[data-nmc-menu],a.nmc-hub[data-nmc-home]{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}a.nmc-menu[data-nmc-menu] svg,a.nmc-hub[data-nmc-home] svg{flex:none}' +
+      '@media (max-width:420px){a.nmc-hub[data-nmc-home]>span,a.nmc-menu[data-nmc-menu]>span{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}' +   /* 휴대폰: 관리자 = 집 그림 · 메뉴 = 줄 세 개 (머리글 한 줄 — 이름은 읽어 주기 · 손가락 올리면 보임) */
+        'header h1>small:not([id]){display:none}}' +   /* 휴대폰: 제목 옆 영문(STATEMENT · PROJECT · MIX)은 숨김 */
+
       '.nmm{position:fixed;inset:0;z-index:2147483000;display:flex;justify-content:center;align-items:flex-start;color:#0F172A;font-family:"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:16px;line-height:1.5;word-break:keep-all;text-align:left;-webkit-text-size-adjust:100%}' +
       '.nmm[hidden],.nmm [hidden]{display:none!important}.nmm *{box-sizing:border-box}' +
       '.nmm .nmm-bg{position:absolute;inset:0;background:rgba(15,23,42,.5)}' +
@@ -229,7 +246,7 @@
         '.nmm .nmm-h{padding:12px 16px}.nmm .nmm-qk{padding:12px 16px 0}.nmm .nmm-b{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:12px 16px 18px}' +
         '.nmm .nmm-i{min-height:48px}}' +
       '@media (min-width:1060px){.nmm .nmm-b{grid-template-columns:repeat(3,minmax(0,1fr))}}' +
-      '@media print{.nmm,a.nmc-menu[data-nmc-menu]{display:none!important}}';
+      '@media print{.nmm,a.nmc-menu[data-nmc-menu],a.nmc-hub[data-nmc-home]{display:none!important}}';
     (document.head || document.documentElement).appendChild(el);
   }
 
@@ -323,10 +340,11 @@
     if (isOpen()) close(); else open();
   }, true);
   window.addEventListener('pagehide', close);   // 다른 화면으로 갔다가 '뒤로'로 오면 닫힌 채로
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountHub); else mountHub();
   css();
 
   window.NMCMenu = {
-    groups: groups, href: href, icon: icon, btn: btn, here: here, filter: filter, setDepts: setDepts, deptItem: deptItem,
+    groups: groups, href: href, icon: icon, btn: btn, hubBtn: hubBtn, mountHub: mountHub, here: here, filter: filter, setDepts: setDepts, deptItem: deptItem,
     open: open, close: close, isOpen: isOpen, menuIcon: MENU_IC, findIcon: FIND_IC
   };
 })();
