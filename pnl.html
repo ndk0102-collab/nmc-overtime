@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="payroll.js?v=v11"></script>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 <!--PREVIEW_SERVER-->
 <style>
 /* 남명 월 손익판 (매입·매출) — 회사 숫자(대출·원가·매달 비용·거래처 규칙)는 서버(구글 시트)에만 있고, 관리자 로그인 뒤에 받아 옵니다. */
@@ -197,7 +198,7 @@ details.panel>summary::before{content:"▸ ";color:var(--muted)} details[open].p
       <p class="sub">판매량은 출고 실적, 인건비는 급여대장 기준입니다. 모든 금액은 부가세를 제외한 공급가액입니다.</p>
     </div>
     <nav class="nav" aria-label="화면 이동" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
-      <a href="manage.html" aria-label="관리자"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a><button type="button" id="logoutBtn">로그아웃</button>
+      <a class="nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>메뉴</a><button type="button" id="logoutBtn">로그아웃</button>
     </nav>
   </header>
   <div class="controls">

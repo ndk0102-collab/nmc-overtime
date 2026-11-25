@@ -252,6 +252,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
 .iconbtn.nmc-back { display: inline-flex; min-height: 0; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 11px 6px 7px; font-size: inherit; font-weight: 700; }
 </style>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -266,7 +267,8 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
   var app = document.getElementById('app');
   var TOKEN_KEY = 'nmc_pay_token';
   var PTOKEN_KEY = 'nmc_payroll_token';   // 직원 급여 비밀번호 열쇠 (v59) — 이 탭에서만, 관리자 열쇠와 따로
-  var S = { token: '', ptoken: '', payNeed: '', payErr: '', payAt: '', payOff: false, lastYm: '', data: null, month: null, tab: 'ot', slip: '', busy: 0, err: '', edit: null, adjEdit: null, cell: null, attErr: '', attForm: null };
+  var TAB0 = (/[?&]tab=(ot|att|ledger|slips|staff|adjust|bank|config)(?:&|$)/.exec(location.search) || [])[1] || '';   // 전체 메뉴의 소분류(급여대장 · 명세서 · 은행 이체 …)로 바로 그 칸 (2026-11-25)
+  var S = { token: '', ptoken: '', payNeed: '', payErr: '', payAt: '', payOff: false, lastYm: '', data: null, month: null, tab: TAB0 || 'ot', slip: '', busy: 0, err: '', edit: null, adjEdit: null, cell: null, attErr: '', attForm: null };
   try { S.token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) { S.token = ''; }
   try { S.ptoken = sessionStorage.getItem(PTOKEN_KEY) || ''; } catch (e) { S.ptoken = ''; }
 
@@ -556,7 +558,7 @@ details.bulk code { padding: 0 4px; border-radius: 4px; background: #EEF2F7; }
     var m = S.month;
     return '<header class="top"><div class="top-in">' +
       (window.NMCNav ? NMCNav.btn('iconbtn') : '') +   // 뒤로 = 온 길로 한 걸음 (2026-11-22 지시)
-      '<a class="iconbtn" href="manage.html" aria-label="관리자">' + HOME_IC + '관리자</a>' +
+      (window.NMCMenu ? NMCMenu.btn('iconbtn') : '<a class="iconbtn" href="manage.html" aria-label="관리자">' + HOME_IC + '관리자</a>') +   // 전체 메뉴 (2026-11-25)
       '<div class="brand">직원 급여<small>' + esc(m.config.company) + '</small></div>' +
       '<div class="mnav"><button class="iconbtn" data-act="prev" aria-label="이전 달">◀</button>' +
       '<b>' + ymTitle(m.ym) + '</b><button class="iconbtn" data-act="next" aria-label="다음 달">▶</button></div>' +

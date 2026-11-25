@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -36,6 +37,7 @@ button,input,select{font:inherit;color:inherit}
 .bar{position:sticky;top:0;z-index:20;background:var(--vc);color:#fff;padding:10px 12px;box-shadow:0 2px 8px rgba(15,23,42,.18)}
 .bin{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:10px}
 .home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+@media (max-width:520px){#back{display:none!important}}   /* 휴대폰: 프로젝트에서 연 배합은 '뒤로'가 그 프로젝트로 — 머리글을 한 줄로 (2026-11-25 메뉴 단추 추가) */
 .bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800}
 .bar h1 small{margin-left:8px;font-size:12px;font-weight:700;letter-spacing:.2em;color:#E9D7AC}
 .wrap{max-width:1180px;margin:0 auto;padding:12px 12px 60px;display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px;align-items:start}
@@ -129,7 +131,7 @@ button,input,select{font:inherit;color:inherit}
 <body>
 <header class="bar">
   <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
-    <a class="home" id="back" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span id="backT">관리자</span></a>
+    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>메뉴</a><a class="home" id="back" href="manage.html" hidden><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg><span id="backT">프로젝트</span></a>
     <h1>배합 시뮬레이션<small>MIX</small></h1>
   </div>
 </header>
@@ -679,7 +681,7 @@ button,input,select{font:inherit;color:inherit}
     var card = $('pjCard');
     if (!/^\d{4}-\d{3,}$/.test(pjNo)) { card.hidden = true; return; }
     card.hidden = false;
-    $('back').href = 'pj.html?no=' + encodeURIComponent(pjNo); $('backT').textContent = '프로젝트';
+    $('back').href = 'pj.html?no=' + encodeURIComponent(pjNo); $('backT').textContent = '프로젝트'; $('back').hidden = false;   // 프로젝트에서 연 배합: 그 프로젝트로 (메뉴 단추는 따로)
     if (window.NMCNav) NMCNav.hub('pj.html?no=' + encodeURIComponent(pjNo), '프로젝트');   // 돌아갈 기록이 없으면 그 프로젝트로
     if (!token) {
       card.innerHTML = '<h2>프로젝트 ' + esc(pjNo) + ' 색상 정하기</h2><div class="login"><p class="hint">프로젝트 도면을 불러오려면 관리자 비밀번호를 입력해 주십시오.</p>' +

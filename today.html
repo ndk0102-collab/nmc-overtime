@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 <!--PREVIEW_SERVER-->
 <script src="push.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
@@ -131,7 +132,7 @@ details.card.set[open]>summary{margin-bottom:8px}
 <body>
 <header class="bar">
   <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
-    <a class="home" href="manage.html"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>관리자</a>
+    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg>메뉴</a>
     <h1 id="title">오늘 할 일<small id="sub"></small></h1>
     <button type="button" class="ref" id="refBtn" hidden>새로고침</button>
   </div>

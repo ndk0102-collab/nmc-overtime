@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 <script src="push.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -41,39 +42,38 @@ button,input{font:inherit;color:inherit}
 .home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
 .brand{flex:1;min-width:0;margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em}
 .brand small{margin-left:8px;font-size:12px;font-weight:700;letter-spacing:.2em;color:#E9D7AC}
+@media (max-width:420px){.brand small{display:none}}   /* 휴대폰: 영문 부제가 두 줄로 쪼개지지 않게 */
 .out{min-height:40px;padding:0 14px;border:0;border-radius:999px;background:#fff;color:var(--navy);font-size:14px;font-weight:800;cursor:pointer}
 
-.wrap{max-width:560px;margin:0 auto;padding:18px 14px 36px}
+.wrap{max-width:560px;margin:0 auto;padding:16px 14px 36px}
+/* 대분류 → 소분류 (2026-11-25): 메뉴 목록은 menu.js 한 곳 — 이 화면과 화면마다 '메뉴' 단추가 같이 씀 */
+.mfind{display:flex;align-items:center;gap:8px;min-height:52px;margin:0 0 14px;padding:0 14px;border:2px solid var(--line);border-radius:16px;background:#fff;color:var(--muted)}
+.mfind:focus-within{border-color:var(--navy)}
+.mfind input{flex:1;min-width:0;height:48px;border:0;outline:0;background:transparent;font-size:16.5px;color:var(--ink);-webkit-appearance:none;appearance:none}
 .grid{display:grid;gap:14px}
-.sect{background:var(--card);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:20px;padding:16px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
-.sect.ot{--c:var(--ot);--soft:var(--ot-soft)}
-.sect.st{--c:var(--st);--soft:var(--st-soft)}
-.sect.pl{--c:var(--pl);--soft:var(--pl-soft)}
-.sect.cs{--c:var(--cs);--soft:var(--cs-soft)}
-.sect.dc{--c:var(--dc);--soft:var(--dc-soft)}
-.sect.wk{--c:var(--wk);--soft:var(--wk-soft)}
-.go small.live b.w{color:var(--wk)}
-.gos{display:grid;gap:10px}
-.gos .go{margin:0}
-.pushline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0 0;padding:10px 12px;border-radius:14px;background:var(--dc-soft);font-size:14.5px;font-weight:700;color:var(--ink2)}
+.sect{min-width:0;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:20px;padding:14px;box-shadow:0 1px 2px rgba(15,23,42,.05)}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:46px;height:46px;border-radius:14px;background:var(--soft);color:var(--c)}
+.sh h2{margin:0;font-size:22px;font-weight:800;line-height:1.2;color:var(--c)}
+.sh p{margin:3px 0 0;font-size:13px;font-weight:700;line-height:1.35;color:var(--muted)}
+.subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sub{display:flex;flex-direction:column;justify-content:center;gap:1px;min-width:0;min-height:62px;padding:8px 12px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink);text-decoration:none}
+.sub.wide{grid-column:1/-1}
+.sub b{font-size:16.5px;font-weight:800;line-height:1.3}
+.sub small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:12.5px;font-weight:600;line-height:1.4;color:var(--muted)}
+.sub small.live{display:block;-webkit-line-clamp:unset;color:var(--ink2);font-weight:700;font-size:13.5px}
+.sub small.live b{font-size:inherit;font-weight:800;color:var(--dc)}
+.sub small.live b.r{color:#B42318}
+.sub small.live b.w{color:var(--wk)}
+.sub:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+@media (hover:hover){.sub:hover{border-color:var(--c);background:var(--soft)}}
+.sub[data-best]{border-color:var(--c);border-style:dashed}   /* 찾기: 엔터로 열 메뉴 */
+@media (max-width:330px){.subs{grid-template-columns:1fr}}
+.mnone{margin:4px 0 0;padding:26px 10px;text-align:center;color:var(--muted);font-weight:700}
+.pushline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--dc-soft);font-size:14.5px;font-weight:700;color:var(--ink2)}
 .pushline button{min-height:42px;padding:0 14px;border:0;border-radius:10px;background:var(--dc);color:#fff;font-weight:800;font-size:14.5px;cursor:pointer}
 .pushline button:disabled{opacity:.55}
-.sh{display:flex;align-items:center;gap:12px;margin:0 0 14px}
-.ic{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;height:48px;border-radius:14px;background:var(--soft);color:var(--c)}
-.sh h2{margin:0;font-size:24px;font-weight:800;line-height:1.2;color:var(--c)}
-.go{display:flex;align-items:center;gap:10px;min-height:64px;padding:10px 12px 10px 16px;border-radius:16px;text-decoration:none;margin:0 0 10px;background:#fff;color:var(--ink);border:2px solid var(--line)}
-.go:last-child{margin-bottom:0}
-.go .t{display:flex;flex-direction:column;flex:1;min-width:0}
-.go b{font-size:18px;font-weight:800;line-height:1.3}
-.go small{font-size:13.5px;font-weight:600;line-height:1.4;color:var(--muted)}
-.go .chev{flex-shrink:0;color:var(--muted)}
-.go small.live{color:var(--ink2);font-weight:700}
-.go small.live b{font-size:inherit;font-weight:800;color:var(--dc)}
-.go small.live b.r{color:#B42318}
-.go:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
-@media (hover:hover){.go:hover{border-color:var(--c)}}
-@media (min-width:880px){.wrap{max-width:1080px;padding-top:24px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.sect.pl,.sect.st,.sect.cs{grid-row:3}.sect.pl{grid-column:1}.sect.st{grid-column:2}.sect.cs{grid-column:3}
-  .sect.dc,.sect.wk{grid-column:1/-1}.sect.dc .gos,.sect.wk .gos{grid-template-columns:1fr 1fr}}  /* 맨 위 한 줄: 오늘 할 일 · 공문함 (2026-11-21) */  /* PC: 왼쪽 재무 · 가운데 재고 · 오른쪽 공사 (2026-11-23 '잔업 확인 · 급여'를 재무의 '직원 급여'로 옮김) */
+@media (min-width:880px){.wrap{max-width:1180px;padding-top:22px}.grid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}}   /* PC: 위 줄 업무 · 영업·출고 · 생산·재고 / 아래 줄 공사 · 재무 · 인사·급여 */
 
 .login{max-width:440px;margin:24px auto;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--navy);border-radius:20px;padding:20px 18px}
 .login h2{margin:0 0 6px;font-size:21px;font-weight:800;color:var(--navy)}
@@ -112,49 +112,13 @@ button,input{font:inherit;color:inherit}
   </section>
 
   <div id="menu" hidden>
-    <div class="grid">
-      <section class="sect dc" aria-labelledby="h-dc">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span><h2 id="h-dc">오늘 · 공문</h2></div>
-        <div class="gos">
-          <a class="go" href="today.html"><span class="t"><b>오늘 할 일 · 아침 알림</b><small id="tdSum">오늘 출고 · 입고 · 공문 처리 대기 · 매일 아침 알림</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-          <a class="go" href="docs.html"><span class="t"><b>공문함</b><small id="dcSum">메일 · 팩스 공문 — 처리 대기 · 세금계산서 · 발주서 · 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        </div>
-        <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에 매일 아침 알림을 등록하시겠습니까?</span><button type="button" id="pushBtn">이 기기 알림 등록</button></p>
-      </section>
-      <section class="sect wk" aria-labelledby="h-wk">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></span><h2 id="h-wk">부서 업무</h2></div>
-        <div class="gos" id="wkGos">
-          <a class="go" href="work.html?d=%EA%B4%80%EB%A6%AC%EB%B6%80"><span class="t"><b>관리부</b><small>업무 지시 · 업무 목록 · 일정 달력</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-          <a class="go" href="work.html?d=%EB%8C%80%EC%99%B8%EC%82%AC%EC%97%85%EB%B6%80"><span class="t"><b>대외사업부</b><small>업무 지시 · 업무 목록 · 일정 달력</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        </div>
-      </section>
-
-      <section class="sect st" aria-labelledby="h-st">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/></svg></span><h2 id="h-st">재고</h2></div>
-        <a class="go" href="stock.html?view=out"><span class="t"><b>출고</b><small>발주서 업로드 · 출고 예정 · 물표 · 거래처 검색</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="stock.html?view=in"><span class="t"><b>반입</b><small>생산품 반입 등록 — 칼라칩 · SBR 고무분말 · 분철 (색상별 kg)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="ledger.html?view=recv"><span class="t"><b>입고</b><small>폐타이어 · 원자재 · 부자재 (금액은 매입에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="stock.html?view=all"><span class="t"><b>전체관리</b><small>현황 · 분석 · 현재고 · 예정 · 기록 · 매출·매입 합계</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-      </section>
-
-      <section class="sect cs" aria-labelledby="h-cs">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/></svg></span><h2 id="h-cs">공사</h2></div>
-        <a class="go" href="pj.html"><span class="t"><b>프로젝트</b><small>시공 목록 · 일정 · 대금 · 도면 확정 · 물량 산출 (완료 시 매출 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="sketchbook/"><span class="t"><b>도면</b><small>도면 기반 바닥 색상 설계 · 면적 산출표 · 3D 놀이터</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="mix.html"><span class="t"><b>배합 시뮬레이션</b><small>NM01 ~ NM22 색상 포대 비율 배합 · 바닥 미리보기</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-      </section>
-
-      <section class="sect pl" aria-labelledby="h-pl">
-        <div class="sh"><span class="ic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><h2 id="h-pl">재무</h2></div>
-        <a class="go" href="ledger.html?view=sales"><span class="t"><b>매출</b><small>일별 · 월별 · 분기별 · 반기별 · 연간 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="ledger.html?view=buy"><span class="t"><b>매입</b><small>지출 등록 · 월별 · 분기별 · 반기별 · 연간 합계 · 전년 대비</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="statement.html"><span class="t"><b>거래명세서</b><small>발행 · 인쇄 · 일일 기록 (단가는 출고 · 손익계산서에 자동 반영)</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="pnl.html"><span class="t"><b>손익계산서</b><small>월별 매출 · 원가 · 영업이익 · 원리금 상환 후 잉여금</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-        <a class="go" href="admin.html"><span class="t"><b>직원 급여</b><small>잔업 확인 · 근태 · 급여대장 · 명세서 · 은행 이체</small></span><svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></a>
-      </section>
-    </div>
+    <label class="mfind"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+      <input id="mq" type="search" placeholder="메뉴 찾기 (예: 명세서 · 급여 · ㄱㄹㅊ)" autocomplete="off" enterkeyhint="go" aria-label="메뉴 찾기"></label>
+    <div class="grid" id="groups"></div>
+    <p class="mnone" id="mNone" hidden>찾는 메뉴가 없습니다. 다른 말로 찾아 주십시오.</p>
+    <p class="pushline" id="pushLine" hidden><span id="pushTxt">이 기기에 매일 아침 알림을 등록하시겠습니까?</span><button type="button" id="pushBtn">이 기기 알림 등록</button></p>
     <p class="legend"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
-      <span>1회 로그인으로 위 화면을 이용할 수 있습니다. 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
+      <span>1회 로그인으로 위 화면을 이용할 수 있습니다. 화면마다 위쪽 ‘메뉴’ 단추로 이 목록을 바로 열 수 있습니다. 창을 닫거나 유효 시간이 지나면 재로그인이 필요합니다.</span></p>
   </div>
 </main>
 <p class="toast" id="toast" role="status" hidden></p>
@@ -166,7 +130,6 @@ button,input{font:inherit;color:inherit}
   var KEY = 'nmc_pay_token';   // 모든 관리자 화면이 같이 쓰는 열쇠
   var PKEY = 'nmc_payroll_token';   // 직원 급여 비밀번호 열쇠 (v59) — 관리자 로그아웃 · 만료 때 같이 지움
   var $ = function (id) { return document.getElementById(id); };
-  var CHEV = '<svg class="chev" aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
   var waitEl = $('wait'), loginEl = $('login'), menuEl = $('menu'), outBtn = $('outBtn'), toastEl = $('toast');
   var ERR = { bad_pw: '비밀번호가 일치하지 않습니다.', locked: '비밀번호 입력 오류 횟수 초과로 15분간 잠금되었습니다.', net: '인터넷 연결을 확인해 주십시오.',
     expired: '로그인 유효 시간이 만료되었습니다. 비밀번호를 다시 입력해 주십시오.' };
@@ -222,14 +185,49 @@ button,input{font:inherit;color:inherit}
     }, function () { /* 숫자는 보조 — 못 받으면 설명 그대로 */ });
     call('apiWorkSum', []).then(function (w) {   // v58: 부서 업무 — 담당 · 처리 대기 · 기한 경과 · 오늘 일정
       if (!w || !w.depts || !w.depts.length) return;
-      var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
-      $('wkGos').innerHTML = w.depts.map(function (d) {
+      var M = window.NMCMenu, box = $('groups'), wk = box && box.querySelector('[data-g="work"] .subs');
+      if (!M || !wk) return;
+      M.setDepts(w.depts.map(function (d) { return String(d.name || ''); }));   // 메뉴 창도 같은 부서 (이름만)
+      Array.prototype.forEach.call(wk.querySelectorAll('[data-dept]'), function (a) { a.parentNode.removeChild(a); });
+      wk.insertAdjacentHTML('beforeend', w.depts.map(function (d) {
         var t = (d.head ? '담당 ' + e(d.head) + ' · ' : '') + (d.open ? '처리 대기 <b class="w">' + d.open + '</b>건' : '처리 대기 없음') +
           (d.late ? ' · <b class="r">기한 경과 ' + d.late + '건</b>' : '') + (d.ev ? ' · 오늘 일정 <b class="w">' + d.ev + '</b>건' : '');
-        return '<a class="go" href="work.html?d=' + encodeURIComponent(d.name) + '"><span class="t"><b>' + e(d.name) + '</b><small class="live">' + t + '</small></span>' + CHEV + '</a>';
-      }).join('');
+        var it = M.deptItem(String(d.name || ''));
+        return '<a class="sub" data-k="' + e(it.k) + '" data-dept="' + e(it.dept) + '" href="' + e(M.href(it)) + '"><b>' + e(it.n) + '</b><small class="live">' + t + '</small></a>';
+      }).join(''));
+      findNow();
     }, function () { /* 서버가 아직 v58 전이면 설명 그대로 */ });
   }
+  /* ── 대분류 → 소분류 (2026-11-25 10:11 지시 "전체카테고리 -소카테고리로 해서 좀 정리를 하자. 정렬도 하고 전체적으로 체계적으로"): 목록은 menu.js ── */
+  function e(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function buildMenu() {
+    var M = window.NMCMenu, box = $('groups');
+    if (!M) { box.innerHTML = '<p class="wait">메뉴를 불러오지 못했습니다. 새로고침해 주십시오.</p>'; return; }
+    box.innerHTML = M.groups().map(function (g) {
+      return '<section class="sect" data-g="' + g.k + '" style="--c:' + g.c + ';--soft:' + g.s + '" aria-labelledby="h-' + g.k + '">' +
+        '<div class="sh"><span class="ic" aria-hidden="true">' + M.icon(g.k, 26) + '</span><div><h2 id="h-' + g.k + '">' + e(g.n) + '</h2><p>' + e(g.d) + '</p></div></div>' +
+        '<div class="subs">' + g.items.map(function (it) {
+          var id = it.k === 'today' ? ' id="tdSum"' : it.k === 'docs' ? ' id="dcSum"' : '';
+          return '<a class="sub' + (it.w ? ' wide' : '') + '" data-k="' + e(it.k) + '"' + (it.dept ? ' data-dept="' + e(it.dept) + '"' : '') + ' href="' + e(M.href(it)) + '"><b>' + e(it.n) + '</b><small' + id + '>' + e(it.d) + '</small></a>';
+        }).join('') + '</div></section>';
+    }).join('');
+    var wk = box.querySelector('[data-g="work"]');
+    if (wk) wk.appendChild($('pushLine'));   // 아침 알림 등록은 업무 칸 아래
+  }
+  function findNow() {
+    var M = window.NMCMenu, q = $('mq');
+    if (!M || !q) return null;
+    var r = M.filter($('groups'), q.value);
+    $('mNone').hidden = r.any;
+    return r;
+  }
+  buildMenu();
+  $('mq').addEventListener('input', findNow);   // 칸은 그대로 두고 아래 목록만 걸러 보임 (한글 조합이 깨지지 않게)
+  $('mq').addEventListener('keydown', function (ev) {
+    if (ev.isComposing || ev.keyCode === 229) return;   // 한글 조합 중 엔터 · Esc는 건드리지 않음
+    if (ev.key === 'Enter') { ev.preventDefault(); var r = findNow(); if (r && r.first && this.value.trim()) r.first.click(); }
+    else if (ev.key === 'Escape' && this.value) { ev.preventDefault(); this.value = ''; findNow(); }
+  });
   function pushCheck() {
     var P = window.NMCPush, line = $('pushLine');
     if (!P || !P.supported()) { line.hidden = true; return; }

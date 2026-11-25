@@ -18,6 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 <script src="nav.js"></script>
+<script src="menu.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 :root{
@@ -1023,6 +1024,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var ADMIN_VIEW = VIEW !== 'prod';
   var PO_AUTO = VIEW === 'out' && /[?&]po=1(?:&|$)/.test(location.search);
   var PO_GO = VIEW === 'out' ? ((/[?&]poid=([A-Za-z0-9_\-]{6,40})(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 공문함의 '출고 화면에서 처리' (2026-11-21 22:17)
+  var TAB0 = VIEW === 'all' ? ((/[?&]tab=(sum|ana|stock|plan|log)(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 전체 메뉴의 소분류(현재고 · 예정 · 기록 · 분석 …)로 바로 그 칸 (2026-11-25)
   var DAY0 = VIEW === 'out' ? ((/[?&]day=(\d{4}-\d{2}-\d{2})(?:&|$)/.exec(location.search) || [])[1] || '') : '';   // 매출 화면 '이 날 출고 목록'   // 첫 화면 '발주서 올리기'로 들어오면 맨 위 올리기 칸을 잠깐 강조
   var QUICK = VIEW === 'out' || VIEW === 'in';
   var VIEW_NAME = { prod: '생산', out: '출고', 'in': '반입', all: '전체관리' }[VIEW];
@@ -1100,7 +1102,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     plan: { lines: [], sum: {} },
     months: {}, mLoading: {}, mErr: {},
     years: {}, yLoading: {}, yErr: {}, yv: '', yMin: '', yMax: '', yProd: '',
-    tab: stored('nmc_inv_tab2') || 'sum',
+    tab: TAB0 || stored('nmc_inv_tab2') || 'sum',
     inType: stored('nmc_inv_type') || '출고', inDate: '', inPDate: '', inCust: '', inMemo: '', inPo: '', inProd: '', qty: {}, price: {},
     low: false, stProd: '',
     ym: '', mProd: '', mAll: false, custOpen: null,
@@ -1108,6 +1110,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     sheet: null
   };
   if (!TABS.some(function (t) { return t[0] === S.tab; })) S.tab = 'sum';
+  if (TAB0) store('nmc_inv_tab2', TAB0);
   if (ACT_TYPES.concat(PLAN_TYPES).indexOf(S.inType) < 0) S.inType = '출고';
 
   function store(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
@@ -1673,7 +1676,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var sub = VIEW_NAME + (S.today ? ' · ' + fmtDateLong(S.today) : '');
     if (ADMIN_VIEW && S.ready && !S.admin) sub = VIEW_NAME + ' · 관리자';
     var nav = (window.NMCNav ? NMCNav.btn('ghost sm navbtn backbtn') : '') +
-      (ADMIN_VIEW ? '<a class="ghost sm navbtn" href="manage.html" aria-label="관리자">' + ICON.home + '<span>관리자</span></a>'   // 관리자 화면 → 관리자 창구 (2026-11-20)
+      (ADMIN_VIEW ? (window.NMCMenu ? NMCMenu.btn('ghost sm navbtn') : '<a class="ghost sm navbtn" href="manage.html" aria-label="관리자">' + ICON.home + '<span>관리자</span></a>')   // 관리자 화면 → 전체 메뉴 (2026-11-25, 전에는 관리자 창구로 바로)
         : '<a class="ghost sm navbtn" href="./" aria-label="홈">' + ICON.home + '<span>홈</span></a>');
     if (S.admin) nav += '<button type="button" class="ghost sm navbtn" data-act="logout">로그아웃</button>';
     else if (ADMIN_VIEW && S.ready) nav += '<button type="button" class="ghost sm navbtn" data-act="login">관리자 로그인</button>';
