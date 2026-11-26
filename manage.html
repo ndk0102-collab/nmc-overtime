@@ -68,6 +68,15 @@ button,input{font:inherit;color:inherit}
 .sub:focus-visible,.home:focus-visible,.out:focus-visible,.btn:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (hover:hover){.sub:hover{border-color:var(--c);background:var(--soft)}}
 .sub[data-best]{border-color:var(--c);border-style:dashed}   /* 찾기: 엔터로 열 메뉴 */
+.sect.one{padding:0}   /* 한 단추 대분류 (인사·급여): 칸 전체가 단추 */
+.sect.one .go{display:flex;align-items:center;gap:12px;min-height:76px;padding:14px;border:2px solid transparent;border-radius:0 0 18px 18px;color:var(--ink);text-decoration:none}
+.sect.one .gt{flex:1;min-width:0}
+.sect.one h2{margin:0;font-size:22px;font-weight:800;line-height:1.2;color:var(--c)}
+.sect.one p{margin:3px 0 0;font-size:13px;font-weight:700;line-height:1.35;color:var(--muted)}
+.sect.one .ar{flex:none;font-size:30px;font-weight:800;line-height:1;color:var(--c)}
+@media (hover:hover){.sect.one .go:hover{background:var(--soft)}}
+.sect.one .go[data-best]{border-color:var(--c);border-style:dashed}
+.sect.one .go:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
 @media (max-width:330px){.subs{grid-template-columns:1fr}}
 .mnone{margin:4px 0 0;padding:26px 10px;text-align:center;color:var(--muted);font-weight:700}
 .pushline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0 0;padding:10px 12px;border-radius:14px;background:var(--dc-soft);font-size:14.5px;font-weight:700;color:var(--ink2)}
@@ -205,6 +214,12 @@ button,input{font:inherit;color:inherit}
     var M = window.NMCMenu, box = $('groups');
     if (!M) { box.innerHTML = '<p class="wait">메뉴를 불러오지 못했습니다. 새로고침해 주십시오.</p>'; return; }
     box.innerHTML = M.groups().map(function (g) {
+      if (g.one) {   // 한 단추 대분류 (인사·급여, 2026-11-26 지시): 칸 전체가 그 화면으로 — 세부 칸은 들어간 화면의 탭
+        var it = g.items[0];
+        return '<section class="sect one" data-g="' + g.k + '" style="--c:' + g.c + ';--soft:' + g.s + '" aria-labelledby="h-' + g.k + '">' +
+          '<a class="go" data-k="' + e(it.k) + '" href="' + e(M.href(it)) + '"><span class="ic" aria-hidden="true">' + M.icon(g.k, 26) + '</span>' +
+          '<span class="gt"><h2 id="h-' + g.k + '">' + e(g.n) + '</h2><p>' + e(g.d) + '</p></span><span class="ar" aria-hidden="true">›</span></a></section>';
+      }
       return '<section class="sect" data-g="' + g.k + '" style="--c:' + g.c + ';--soft:' + g.s + '" aria-labelledby="h-' + g.k + '">' +
         '<div class="sh"><span class="ic" aria-hidden="true">' + M.icon(g.k, 26) + '</span><div><h2 id="h-' + g.k + '">' + e(g.n) + '</h2><p>' + e(g.d) + '</p></div></div>' +
         '<div class="subs">' + g.items.map(function (it) {

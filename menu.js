@@ -3,6 +3,7 @@
    · 소분류는 그 화면의 그 칸으로 바로 엽니다 — 예: 거래명세서 작성 = statement.html?view=edit, 현재고 = stock.html?view=all&tab=stock
    · 순서 = 일하는 순서. 대분류: 업무 → 영업·출고 → 생산·재고 → 폐타이어 → 공사 → 재무 → 인사·급여, 소분류도 업무 흐름대로 (받은 발주서 → 출고 → 거래명세서 → 거래처 …)
    · 폐타이어(2026-11-25 지시): 서식-1 보고서 · 서식-2 보고서 · 계량증명서 관리 · 세금계산서 관리 · 총괄표 — 쓰던 서식 그대로 (tire.html)
+   · 인사·급여(2026-11-26 지시): 메뉴에는 '인사·급여' 한 칸만, 세부 칸(잔업 기록 · 근태·연차 · 급여대장 …)은 들어간 화면의 탭
    · '메뉴' 단추 = <a href="manage.html" data-nmc-menu> — 이 파일을 못 읽으면 관리자 첫 화면으로 그냥 갑니다.
    · 메뉴 창: 대분류별 소분류 · 지금 보고 있는 화면 표시 · 메뉴 찾기(초성도 됨: ㄱㄹㅁㅅㅅ → 거래명세서) · Esc · 바깥 누르면 닫힘
    회사 자료는 없습니다. */
@@ -99,15 +100,10 @@
         { k: 'pnl', n: '손익계산서', d: '월별 매출 · 원가 · 영업이익 · 원리금 상환 후 잉여금', u: 'pnl.html', kw: '손익 이익 원가 영업이익' },
         { k: 'ana', n: '판매 분석', d: '색상 · 거래처별 판매 · 이익 · 추이', u: 'stock.html?view=all&tab=ana', p: { view: 'all', tab: 'ana' }, kw: '분석 추이' }
       ] },
-      { k: 'hr', n: '인사·급여', d: '잔업 · 근태 → 급여', c: '#7A3A14', s: '#F6EDE6', items: [
-        { k: 'pay-ot', n: '잔업 기록', d: '직원별 잔업 확인', u: 'admin.html?tab=ot', p: { tab: 'ot' }, kw: '잔업 야근 연장근무' },
-        { k: 'pay-att', n: '근태·연차', d: '근태 기록 · 연차', u: 'admin.html?tab=att', p: { tab: 'att' }, kw: '근태 연차 휴가' },
-        { k: 'pay-adj', n: '추가·공제', d: '수당 · 공제 항목', u: 'admin.html?tab=adjust', p: { tab: 'adjust' }, kw: '수당 공제' },
-        { k: 'pay-ledger', n: '급여대장', d: '월별 급여 계산', u: 'admin.html?tab=ledger', p: { tab: 'ledger' }, kw: '급여 월급' },
-        { k: 'pay-slips', n: '급여명세서', d: '직원별 급여명세서', u: 'admin.html?tab=slips', p: { tab: 'slips' }, kw: '명세서 급여' },
-        { k: 'pay-bank', n: '은행 이체 파일', d: '급여 이체용 은행 파일', u: 'admin.html?tab=bank', p: { tab: 'bank' }, kw: '이체 은행' },
-        { k: 'pay-staff', n: '직원 설정', d: '직원 목록 · 급여 기본 정보', u: 'admin.html?tab=staff', p: { tab: 'staff' }, kw: '직원 인사' },
-        { k: 'pay-cfg', n: '계산 기준', d: '급여 계산 요율 · 기준값', u: 'admin.html?tab=config', p: { tab: 'config' }, kw: '요율 기준' }
+      /* 인사·급여 (2026-11-26 11:14 지시 "일반직원들은 들어가볼수없으므로 그냥 인사급여 해놓고 들어가면 상세한 카테고리 볼수있도록"):
+         메뉴에는 한 칸만 — 잔업 기록 · 근태·연차 · 급여대장 등 세부 칸은 들어간 화면(admin.html) 위쪽 탭으로 봅니다. one = 대분류 전체가 한 단추 */
+      { k: 'hr', n: '인사·급여', d: '잔업 · 근태 → 급여', c: '#7A3A14', s: '#F6EDE6', one: 1, items: [
+        { k: 'pay', n: '인사·급여', d: '잔업 · 근태 → 급여', u: 'admin.html', kw: '잔업 기록 야근 연장근무 근태 연차 휴가 추가 공제 수당 급여대장 급여 월급 급여명세서 명세서 은행 이체 파일 직원 설정 인사 계산 기준 요율' }
       ] }
     ];
   }
@@ -250,6 +246,10 @@
       '.nmm .nmm-i em{display:inline-block;margin-left:5px;padding:0 6px;border-radius:999px;background:var(--c);color:#fff;font-size:11px;font-style:normal;font-weight:800;line-height:1.6;vertical-align:2px}' +
       '.nmm .nmm-none{margin:0;padding:22px 10px;text-align:center;color:#5B6474;font-weight:700}' +
       '.nmm li[data-best] .nmm-i{border-color:var(--c);border-style:dashed;background:#fff}' +
+      '.nmm .nmm-g.nmm-one{padding:6px}.nmm .nmm-g.nmm-one ul{grid-template-columns:1fr!important}' +   /* 한 단추 대분류 (인사·급여) */
+      '.nmm .nmm-go{flex-direction:row;align-items:center;justify-content:flex-start;gap:9px;min-height:54px;padding:4px 8px;border-color:transparent;background:#fff}' +
+      '.nmm .nmm-go .nmm-gt{flex:1;min-width:0}.nmm .nmm-go h3{margin:0;padding:0;font-size:17px;font-weight:800;line-height:1.25;color:var(--c)}' +
+      '.nmm .nmm-go small{white-space:normal}.nmm .nmm-go .nmm-ar{flex:none;font-size:24px;font-weight:800;line-height:1;color:var(--c)}' +
       '.nmm .nmm-i:focus-visible,.nmm .nmm-qk a:focus-visible,.nmm .nmm-x:focus-visible{outline:3px solid #F4B400;outline-offset:2px}' +
       '@media (max-width:330px){.nmm .nmm-g ul{grid-template-columns:1fr}}' +
       '@media (min-width:760px){.nmm .nmm-p{width:min(1120px,calc(100vw - 32px));height:auto;max-height:calc(100vh - 32px);margin-top:16px;border-radius:20px;overflow:hidden}' +
@@ -268,6 +268,12 @@
   function $(id) { return document.getElementById(id); }
   function groupsHtml(cur) {
     return groups().map(function (g) {
+      if (g.one) {   // 한 단추 대분류 (인사·급여): 머리글 전체가 그 화면으로 가는 단추
+        var it = g.items[0], on = !!cur && cur.k === it.k;
+        return '<section class="nmm-g nmm-one" data-g="' + g.k + '" style="--c:' + g.c + ';--s:' + g.s + '" aria-labelledby="nmmG-' + g.k + '"><ul><li data-k="' + esc(it.k) + '">' +
+          '<a class="nmm-i nmm-go" href="' + esc(href(it)) + '" title="' + esc(it.n + ' — ' + it.d) + '"' + (on ? ' aria-current="page"' : '') + '><span class="nmm-ic">' + icon(g.k, 20) + '</span>' +
+          '<span class="nmm-gt"><h3 id="nmmG-' + g.k + '">' + esc(g.n) + (on ? '<em>현재 화면</em>' : '') + '</h3><small>' + esc(g.d) + '</small></span><span class="nmm-ar" aria-hidden="true">›</span></a></li></ul></section>';
+      }
       return '<section class="nmm-g" data-g="' + g.k + '" style="--c:' + g.c + ';--s:' + g.s + '" aria-labelledby="nmmG-' + g.k + '">' +
         '<div class="nmm-gh"><span class="nmm-ic">' + icon(g.k, 20) + '</span><div><h3 id="nmmG-' + g.k + '">' + esc(g.n) + '</h3><small>' + esc(g.d) + '</small></div></div><ul>' +
         g.items.map(function (it) {

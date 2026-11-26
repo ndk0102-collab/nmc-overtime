@@ -467,6 +467,64 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 .filt .segs::-webkit-scrollbar{display:none}
 .filt .segs .chip{flex:none;white-space:nowrap}
 .info .kv{margin:0}
+/* v67 (2026-11-26 지시): 세금계산서 일별 · 월별 · 연별 · 업체명 찾기(전체 기간) · 보관용 1장 인쇄 */
+.tsrch{flex:1 1 260px;display:flex;align-items:center;gap:8px;min-width:0;min-height:48px;margin:0;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);cursor:text}
+.tsrch:focus-within{border-color:var(--ok)}
+.filt .tsrch input[type=search]{flex:1;min-width:0;min-height:0;height:44px;margin:0;padding:0;border:0;border-radius:0;outline:0;background:transparent;font-size:16px;color:var(--ink)}
+.tpms{display:flex;gap:4px;width:max-content;max-width:100%;margin:0 0 2px;padding:4px;border-radius:12px;background:var(--soft)}
+.tpm{min-height:40px;min-width:64px;padding:0 14px;border:0;border-radius:9px;background:transparent;color:var(--ink2);font-weight:800;font-size:15px;cursor:pointer}
+.tpm[aria-pressed="true"]{background:var(--ok);color:#fff}
+.tday{min-height:38px;margin-left:auto;padding:0 8px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:14.5px}
+.tqys{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px;border-bottom:1px solid var(--line);background:#FAF8F6}
+.tqy{min-height:36px;padding:0 13px;border:2px solid var(--line);border-radius:999px;background:#fff;color:var(--ink2);font-weight:800;font-size:14px;cursor:pointer}
+.tqy[aria-pressed="true"]{border-color:var(--ok);background:var(--ok-soft);color:#14532D}
+.tbl .dh.tmh .link{margin-left:0;padding:0;font-size:14.5px}
+.tpm:focus-visible,.tqy:focus-visible,.tday:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.keeprow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--soft)}
+.keeprow small{flex:1 1 200px;font-size:13px;font-weight:600;color:var(--muted)}
+@media (max-width:520px){.tpms{width:100%}.tpm{flex:1 1 0;min-width:0}.tday{margin-left:0}}
+#tprint{display:none}
+/* 보관용 1장 (국세청 전자세금계산서 모양) — 매출 = 공급자 보관용(빨강) · 매입 = 공급받는자 보관용(파랑) */
+.tiv{--k:#B3261E;--kt:#FCEFEE;position:relative;width:210mm;height:296mm;padding:13mm 11mm 10mm;background:#fff;color:#1E2430;font-family:var(--font);font-size:8.6pt;line-height:1.3;word-break:keep-all;overflow:hidden}
+.tiv.b{--k:#1F4E9E;--kt:#EEF3FB}.tiv.x{--k:#4B5563;--kt:#F3F4F6}
+.tiv table{width:100%;border-collapse:collapse;table-layout:fixed}
+.tiv th,.tiv td{height:7mm;padding:.6mm 1.4mm;border:.3mm solid var(--k);vertical-align:middle;overflow:hidden}
+.tiv th{background:var(--kt);color:var(--k);font-size:7.8pt;font-weight:800;text-align:center;line-height:1.15}
+.tiv th small{display:block;font-size:6.4pt;font-weight:700}
+.tiv .tvh td{height:15mm}
+.tiv .tvh .tt{border-right:0}
+.tiv .tvh .tt b{display:block;font-size:19pt;font-weight:900;letter-spacing:.06em;color:var(--k)}
+.tiv .tvh .tt span{display:inline-block;margin-top:.6mm;padding:.2mm 2.4mm;border:.3mm solid var(--k);border-radius:1mm;font-size:8.6pt;font-weight:800;color:var(--k)}
+.tiv .tvh .no{font-size:10pt;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.tiv .tvp{margin-top:-.3mm}
+.tiv .tvp th.vt{padding:0;font-size:9pt;letter-spacing:.3em;writing-mode:vertical-rl;text-orientation:upright}
+.tiv .tvp td{font-size:8.4pt}
+.tiv .tvp td.b{font-weight:800;font-size:9pt}
+.tiv .tvp td.bz{font-size:10pt;font-weight:800;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.tiv .tvp td.ad,.tiv .tvp td.em{font-size:7.6pt;line-height:1.15;word-break:break-all}
+.tiv .tva{margin-top:-.3mm}
+.tiv .tva td{text-align:center;font-size:9.4pt;font-weight:700;font-variant-numeric:tabular-nums}
+.tiv .tva td.r{text-align:right}
+.tiv .tva td.nt{text-align:left;font-size:8.2pt;font-weight:600}
+.tiv .tvl{margin-top:2.4mm}
+.tiv .tvl td{height:var(--rh,7mm);padding:0 1.2mm;font-size:var(--fz,8.4pt);white-space:nowrap;text-overflow:ellipsis}
+.tiv .tvl td.c{text-align:center}.tiv .tvl td.r{text-align:right;font-variant-numeric:tabular-nums}
+.tiv .tvl td.nm{white-space:normal;word-break:break-all;line-height:1.12;font-weight:700}
+.tiv .tvl td.mm{font-size:calc(var(--fz,8.4pt) - .8pt);color:#4B5563}
+.tiv .tvt{margin-top:2.4mm}
+.tiv .tvt td{height:10mm;text-align:center;font-size:11pt;font-weight:800;font-variant-numeric:tabular-nums}
+.tiv .tvt td.say{font-size:9.4pt;color:var(--k)}
+.tiv .tvn{margin:3mm 0 0;font-size:7pt;line-height:1.45;color:#6B7280}
+.tiv .tist{position:absolute;top:5mm;right:11mm;margin:0;font-size:7pt;font-weight:700;color:#8A93A3}
+@media print{
+  @page tinv{size:A4 portrait;margin:0}
+  body.tprinting{background:#fff!important}
+  body.tprinting > *:not(#tprint){display:none!important}
+  body.tprinting #tprint{display:block!important}
+  body.tprinting .tiv{page:tinv;break-after:page;page-break-after:always}
+  body.tprinting .tiv:last-child{break-after:auto;page-break-after:auto}
+  body.tprinting *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -483,6 +541,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 <input type="file" id="fileIn" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tif,.tiff,.webp,.heic,.hwp,.hwpx,.docx,.doc,.rtf,.odt,.eml,.txt,image/*" hidden>
 <p class="toast" id="toast" role="status" hidden></p>
 <p class="savebar" id="savebar" role="status" hidden></p>
+<div id="tprint" aria-hidden="true"></div>
 <script>
 (function () {
   'use strict';
@@ -494,7 +553,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   var root = $('root'), sheet = $('sheet'), shade = $('shade'), toastEl = $('toast'), fileIn = $('fileIn'), saveEl = $('savebar');
   var CAT0 = (/[?&]cat=(todo|all|po|tax)(?:&|$)/.exec(location.search) || [])[1] || '';   // 전체 메뉴의 소분류(받은 발주서 · 세금계산서 · 수신 공문 전체)로 바로 그 칸 (2026-11-25)
   var S = { authed: !!getToken(), D: null, err: '', loginErr: '', f: CAT0 === 'all' ? 'every' : 'open', cat: CAT0 || 'todo', dOpen: {}, pickAll: false, calYm: '', calDay: '', kind: '', q: '', open: '', text: {}, textBusy: {}, busy: '', up: '', mailKey: '', mailAsk: '',
-    taxDir: 'buy', taxYear: '', taxYm: '', taxMon: {}, taxBusy: {}, keep: {},   // keep: 방금 처리 완료한 것(보기 · 분류를 바꿀 때까지 자리에, v62)
+    taxDir: 'buy', taxYear: '', taxYm: '', taxMon: {}, taxBusy: {}, keep: {},
+    taxPm: 'm', taxDay: '', taxQy: '', taxYr: {}, taxYrBusy: {}, taxQc: {}, taxQBusy: {}, taxLed: null, tinv: {}, tkBusy: '',   // v67: 일별 · 월별 · 연별 · 업체명 찾기 · 보관용 인쇄 (2026-11-26)   // keep: 방금 처리 완료한 것(보기 · 분류를 바꿀 때까지 자리에, v62)
     sq: '', srC: {}, srE: {}, srBusy: {}, srBy: {}, srLast: null, srGen: 0 };   // 돋보기 찾기 (v55): 친 글자 · 서버 답(찾는 말마다) · 오류 · 받은 건(번호마다)   // 세금계산서: 매입 · 매출 · 확인 필요, 해 · 달 (2026-11-22)
   /* 분류 (2026-11-21 22:14 지시 "공문함에 발주서와 세금계산서 그다음 각종 공문들 정리할 수 있도록 나눠 주고")
      발주서 = 발주서함(출고 화면에서 처리하는 받은 발주서) + 종류가 발주서인 것 + 제목 · 첨부가 발주서인 메일 · 팩스
@@ -697,6 +757,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var x = S.D.R.filter(function (r) { return r.id === id; })[0];
     if (x) return x;
     for (var k in S.taxMon) { var m = S.taxMon[k]; if (m && m.rows) { x = m.rows.filter(function (r) { return r.id === id; })[0]; if (x) return x; } }
+    for (var y in S.taxYr) { var Y = S.taxYr[y]; if (Y && Y.rows) { x = Y.rows.filter(function (r) { return r.id === id; })[0]; if (x) return x; } }   // v67: 연별 · 찾기 목록
+    for (var q in S.taxQc) { var Q = S.taxQc[q]; if (Q && Q.rows) { x = Q.rows.filter(function (r) { return r.id === id; })[0]; if (x) return x; } }
     return S.srBy[id] || null;
   }
   function yy(k) { return S.D && k && k.slice(0, 4) !== S.D.today.slice(0, 4) ? k.slice(0, 4) + '년 ' : ''; }
@@ -991,7 +1053,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var D = S.D, h = '';
     var kinds = '<option value="">종류 전체</option>' + D.kinds.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('');
     var taxNew = S.cat === 'tax' && Array.isArray(D.taxm);   // 서버 v51부터: 세금계산서는 매입 · 매출 · 해 · 달마다
-    if (taxNew) return '<div class="filt"><input type="search" id="q" placeholder="해당 월 내 거래처 · 품목 · 승인번호 필터" value="' + esc(S.q) + '" aria-label="해당 월 내 필터"></div>' + taxView();
+    if (taxNew) return '<div class="filt"><label class="tsrch"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>' +
+      '<input type="search" id="q" placeholder="업체명 · 사업자번호 · 승인번호 검색 (전체 기간)" value="' + esc(S.q) + '" maxlength="40" autocomplete="off" aria-label="업체명 · 사업자번호 · 승인번호 검색 (전체 기간)"></label></div>' + taxView();
     var F = S.cat === 'po' ? [['open', '확인 필요'], ['done', '처리 완료'], ['every', '전체']] : [['every', '전체'], ['open', '미처리'], ['new', '신규'], ['due', '기한 지정'], ['done', '처리 완료']];
     h += '<div class="filt" role="group" aria-label="보기"><div class="segs">' + F.map(function (c) {
       return '<button type="button" class="chip" data-f="' + c[0] + '" aria-pressed="' + (S.f === c[0]) + '">' + c[1] + '</button>';
@@ -1411,7 +1474,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function taxYmOf(x) { var d = /^\d{4}-\d{2}/.test(String(x.date || '')) ? String(x.date) : String(x.at || ''); return d.slice(0, 7); }
   function taxSplit(x) { var m = /공급가액 (-?[\d,]+) · 세액 (-?[\d,]+)/.exec(String(x.sum || '')); return m ? [Number(m[1].replace(/,/g, '')), Number(m[2].replace(/,/g, ''))] : null; }
   function taxWhat(x) { var t = String(x.title || '').replace(/^\[[^\]]*\]\s*/, ''), i = t.indexOf(' — '); return i >= 0 ? [t.slice(0, i), t.slice(i + 3)] : [t, '']; }
-  function ledMap() { var m = S.taxMon[S.taxYm]; return (m && m.led) || (S.D && S.D.led) || null; }
+  function ledMap() { var m = S.taxMon[S.taxYm]; return S.taxLed || (m && m.led) || (S.D && S.D.led) || null; }   // v67: 가장 최근에 받은 장부 상태 표
   function ledOf(x) { var k = String(x.no || '').replace(/\D/g, ''), L = ledMap(); return k.length === 24 && L ? L[k] || null : null; }
   function ledHtml(x) {
     var e = ledOf(x);
@@ -1492,44 +1555,217 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     call('apiDocTaxMonth', [ym]).then(function (d) {
       delete S.taxBusy[ym];
       S.taxMon[ym] = { rows: (d.rows || []).map(obj).map(function (x) { x.cat = 'tax'; x.atts = []; return x; }), led: d.led || null };
-      if (S.cat === 'tax') render();
+      if (d.led) S.taxLed = d.led;
+      if (S.cat === 'tax') taxRe();   // 세금계산서 칸만 (찾기 칸에 치는 중이어도 끊기지 않게)
       var y = S.open ? find(S.open) : null;
       if (y && !sheet.hidden) sheetHtml(y);
     }, function (e) {
       delete S.taxBusy[ym];
       if (String(e && e.message) === 'auth') return;
       S.taxMon[ym] = { rows: S.D.R.filter(function (x) { return x.cat === 'tax' && taxYmOf(x) === ym; }), led: null, err: String(e && e.message) === 'bad_action' ? '' : errText(e), part: true };
-      if (S.cat === 'tax') render();
+      if (S.cat === 'tax') taxRe();
     });
+  }
+  /* ── 세금계산서: 일별 · 월별 · 연별 · 업체명 찾기 (2026-11-26 11:09 지시 "세금계산서관리도 똑같이 그렇게 해") ── */
+  var TPM = [['d', '일별'], ['m', '월별'], ['y', '연별']];
+  function tFresh(at) { return !!at && Date.now() - at < 60000; }   // 받은 목록은 1분 동안 그대로, 그 뒤 다시 열면 보이는 채로 새로
+  function tcoNorm(v) { return String(v == null ? '' : v).replace(/\s+/g, '').replace(/\(주\)|㈜|주식회사|\(유\)|유한회사/g, '').toLowerCase(); }
+  /** 업체명 찾는 말 (서버 coTerms_와 같은 기준) — 한글을 치는 중인 끝 자모는 빼고, (주)만 치면 '' */
+  function tqKey() {
+    var t = String(S.q || '').replace(/[ㄱ-ㅎㅏ-ㅣ]+$/, '').trim().replace(/\s+/g, ' ');
+    return t.split(' ').some(function (w) { return tcoNorm(w); }) ? t.slice(0, 40) : '';
+  }
+  /** 화면에 받아 둔 것 미리 거르기 (서버와 같은 칸: 거래처 · 사업자번호 · 승인번호 · 담당, 알림 메일은 제목) */
+  function tqHit(x, k) {
+    var dg = function (v) { return String(v == null ? '' : v).replace(/\D/g, ''); }, bz = (String(x.sum || '').match(/\d{3}-\d{2}-\d{5}/g) || []).join(' ');
+    var hay = tcoNorm([x.from, x.to, x.who, x.no, dg(x.no), bz, dg(bz), /서버가 엶\)/.test(String(x.how || '')) ? '' : x.title].join(' '));
+    return k.split(' ').map(tcoNorm).filter(String).every(function (t) { return hay.indexOf(t) >= 0; });
+  }
+  function taxDayOf(x) { var d = String(x.date || ''); return /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10) : String(x.at || '').slice(0, 10); }
+  function taxNewer(a, b) { var da = taxDayOf(a), db = taxDayOf(b); return da < db ? 1 : da > db ? -1 : a.at < b.at ? 1 : a.at > b.at ? -1 : 0; }
+  function taxObj(x) { x.cat = 'tax'; x.atts = []; return x; }
+  /** 세금계산서 칸만 다시 그림 — 찾기 칸(#q)은 그대로 (한글 조합이 끊기지 않게) */
+  function taxRe() {
+    if (S.cat !== 'tax' || !S.D || srKey(S.sq)) { if (S.cat === 'tax') render(); return; }
+    var a = $('taxSum'), L = $('list');
+    if (!a || !L) { render(); return; }
+    a.outerHTML = taxCardHtml(); $('list').outerHTML = taxListHtml();
+  }
+  function needTaxYear(y) {
+    var Y = S.taxYr[y];
+    if (S.taxYrBusy[y] || (Y && tFresh(Y.at))) return;
+    S.taxYrBusy[y] = 1;
+    call('apiDocTaxList', [{ from: y + '-01-01', to: y + '-12-31' }]).then(function (d) {
+      delete S.taxYrBusy[y]; if (d.led) S.taxLed = d.led;
+      S.taxYr[y] = { rows: (d.rows || []).map(obj).map(taxObj), n: d.n, at: Date.now() }; taxRe();
+    }, function (e) {
+      delete S.taxYrBusy[y];
+      var c = String(e && e.message);
+      if (c === 'auth') return;
+      S.taxYr[y] = c === 'bad_action' ? { old: true, at: Date.now() } : { rows: [], err: errText(e), at: Date.now() };   // 예전 서버: 달 목록을 모아서
+      taxRe();
+    });
+  }
+  var tqTimer = 0;
+  function tqStop() { clearTimeout(tqTimer); tqTimer = 0; }
+  function needTaxQ(k) {
+    var Q = S.taxQc[k];
+    if (!k || S.taxQBusy[k] || (Q && tFresh(Q.at))) return;
+    S.taxQBusy[k] = 1;
+    call('apiDocTaxList', [{ q: k }]).then(function (d) {
+      delete S.taxQBusy[k]; if (d.led) S.taxLed = d.led;
+      S.taxQc[k] = { rows: (d.rows || []).map(obj).map(taxObj), n: d.n, at: Date.now() }; taxRe();
+    }, function (e) {
+      delete S.taxQBusy[k];
+      var c = String(e && e.message);
+      if (c === 'auth') return;
+      S.taxQc[k] = { rows: [], err: c === 'bad_action' ? 'old' : errText(e), at: Date.now() }; taxRe();
+    });
+  }
+  /** 찾기 칸에 칠 때마다: 세금계산서 칸만 다시 그리고, 멈추고 0.35초 뒤 서버에서 찾음 (엔터 = 바로) */
+  function taxQInput(v) {
+    S.q = String(v || '').slice(0, 40); S.taxQy = '';
+    tqStop();
+    var k = tqKey();
+    if (k && !(S.taxQc[k] && tFresh(S.taxQc[k].at))) tqTimer = setTimeout(function () { tqTimer = 0; if (tqKey() === k) needTaxQ(k); }, 350);
+    taxRe();
+  }
+  /** 예전 서버(v67 전): 그해 달 목록을 모아 연별 목록 — 다 받기 전에는 null */
+  function taxYearFromMonths(y) {
+    var now = S.D.today.slice(0, 7), out = [], wait = false;
+    for (var mo = 1; mo <= 12; mo++) {
+      var ym = y + '-' + ('0' + mo).slice(-2), m = S.taxMon[ym];
+      if (ym > now) break;
+      if (!m || m.stale) needTaxMonth(ym);
+      if (!m) { wait = true; continue; }
+      out = out.concat(m.rows);
+    }
+    return wait ? null : out.sort(taxNewer);
+  }
+  /** 화면에 받아 둔 세금계산서 (달 · 해 · 찾기) 한 번씩 */
+  function taxLoaded() {
+    var seen = {}, out = [];
+    var add = function (x) { if (!seen[x.id]) { seen[x.id] = 1; out.push(x); } };
+    Object.keys(S.taxMon).forEach(function (m) { var M = S.taxMon[m]; if (M && M.rows) M.rows.forEach(add); });
+    Object.keys(S.taxYr).forEach(function (y) { var Y = S.taxYr[y]; if (Y && Y.rows) Y.rows.forEach(add); });
+    return out;
+  }
+  function taxSums(xs) {
+    var r = { n: xs.length, known: 0, sum: 0, split: 0, sup: 0, tx: 0 };
+    xs.forEach(function (x) { if (x.amt !== '') { r.known++; r.sum += x.amt; } var sp = taxSplit(x); if (sp) { r.split++; r.sup += sp[0]; r.tx += sp[1]; } });
+    return r;
+  }
+  var TAX_THR = '<div class="thr" aria-hidden="true"><span>작성일</span><span>거래처 · 품목 · 수량</span><span class="r">공급가액</span><span class="r">세액</span><span class="r">합계</span><span>장부</span><span class="r">상태</span></div>';
+  function subtHtml(t) {
+    return '<div class="subt"><span>소계</span><span>' + t.n + '건' + (t.n - t.known ? ' · 금액 미확인 ' + (t.n - t.known) + '건' : '') + '</span><span class="r xs">' + (t.split ? won(t.sup) : '—') + '</span><span class="r xs">' + (t.split ? won(t.tx) : '—') + '</span><span class="r">' + won(t.sum) + '</span><span></span><span></span></div>';
+  }
+  /** 달마다 묶은 목록 (연별 · 찾기) — 달 머리를 누르면 그 달 월별 보기 */
+  function taxGroupsHtml(xs) {
+    var G = {}, order = [], h = TAX_THR;
+    xs.forEach(function (x) { var m = taxYmOf(x); if (!G[m]) { G[m] = []; order.push(m); } G[m].push(x); });
+    order.forEach(function (m) {
+      var g = G[m], t = taxSums(g);
+      h += '<h3 class="dh tmh"><button type="button" class="link" data-tgom="' + m + '">' + Number(m.slice(0, 4)) + '년 ' + Number(m.slice(5, 7)) + '월</button><small>' + g.length + '건</small>' +
+        (t.known ? '<span class="sum">합계 ' + won(t.sum) + '원</span>' : '') + '</h3><ul class="list">' + g.map(taxRow).join('') + '</ul>';
+    });
+    return h + subtHtml(taxSums(xs));
+  }
+  function taxDirsHtml(cnt, dir) {
+    return '<div class="dirs" role="group" aria-label="매입 · 매출">' + ['buy', 'sale', 'chk'].filter(function (k) { return k !== 'chk' || cnt.chk || dir === 'chk'; }).map(function (k) {
+      return '<button type="button" data-dir="' + k + '" aria-pressed="' + (dir === k) + '">' + DIR[k] + ' <small>' + (cnt[k] || 0) + '</small></button>';
+    }).join('') + '</div>';
   }
   function taxView() {
     var D = S.D, T = D.taxm, now = D.today.slice(0, 7);
     if (!S.taxYm) { S.taxYear = taxLastYm(now.slice(0, 4)).slice(0, 4); var all = T.filter(function (o) { return o[1] === S.taxDir && o[0] <= now; }); S.taxYm = all.length ? all[all.length - 1][0] : now; S.taxYear = S.taxYm.slice(0, 4); }
+    if (!S.taxDay) S.taxDay = D.today;
+    return taxCardHtml() + taxListHtml();
+  }
+  function taxCardHtml() {
+    var D = S.D, T = D.taxm, now = D.today.slice(0, 7), k = tqKey();
     var y = S.taxYear, dir = S.taxDir, cnt = { buy: 0, sale: 0, chk: 0 }, M = {}, tot = [0, 0, 0, 0, 0, 0], rows = '';
     T.forEach(function (o) { if (o[0].slice(0, 4) !== y) return; cnt[o[1]] = (cnt[o[1]] || 0) + o[2]; if (o[1] === dir) M[o[0]] = o; });
+    if (k) {   // 찾는 중: 매입 · 매출 칸의 숫자 = 찾은 건수 (전체 기간)
+      var Q0 = S.taxQc[k], base = Q0 && !Q0.err ? Q0.rows : taxLoaded().filter(function (x) { return tqHit(x, k); });
+      cnt = { buy: 0, sale: 0, chk: 0 };
+      base.forEach(function (x) { cnt[taxDirOf(x)] = (cnt[taxDirOf(x)] || 0) + 1; });
+    }
+    var h = '<section class="card taxsum" id="taxSum"><div class="tsh"><h2>세금계산서</h2>' + taxDirsHtml(cnt, dir) + '</div>' +
+      '<div class="tpms" role="group" aria-label="보기 단위">' + TPM.map(function (p) { return '<button type="button" class="tpm" data-tpm="' + p[0] + '" aria-pressed="' + (!k && S.taxPm === p[0]) + '">' + p[1] + '</button>'; }).join('') + '</div>';
+    if (k) return h + '<p class="hint">업체명 검색 중 — 기간과 관계없이 전체 기간에서 찾습니다(아래 목록). 검색어를 지우면 고른 보기로 돌아갑니다.</p></section>';
+    if (S.taxPm === 'd') {
+      var d = S.taxDay, m = S.taxMon[d.slice(0, 7)], xs = m ? m.rows.filter(function (x) { return taxDirOf(x) === dir && taxDayOf(x) === d; }) : [], t = taxSums(xs);
+      var lo = (T[0] && T[0][0] ? T[0][0] + '-01' : D.today), hi = addDaysK(D.today, 31);
+      return h + '<div class="tk"><div class="big' + (dir === 'sale' ? ' sale' : '') + '"><small>' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 ' + DIR[dir] + ' 합계' + (m ? ' (금액 확인 ' + t.known + '건)' : '') + '</small><b>' + (m ? won(t.sum) + '원' : '—') + '</b></div>' +
+        '<div><small>' + DIR[dir] + '</small><b>' + (m ? t.n + '건' : '—') + '</b></div><div' + (m && t.n - t.known ? ' class="unk"' : '') + '><small>금액 미확인</small><b>' + (m ? (t.n - t.known) + '건' : '—') + '</b></div></div>' +
+        '<div class="yrbar"><button type="button" class="btn ghost sm" data-tpd="-1"' + (d <= lo ? ' disabled' : '') + ' aria-label="이전 날">◀</button><b>' + Number(d.slice(0, 4)) + '년 ' + Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + wdOf(d) + ')</b>' +
+        '<button type="button" class="btn ghost sm" data-tpd="1"' + (d >= hi ? ' disabled' : '') + ' aria-label="다음 날">▶</button><input type="date" id="tday" class="tday" value="' + esc(d) + '" aria-label="날짜 선택"></div>' +
+        '<p class="hint">작성일 기준 · 매입과 매출은 합산하지 않습니다.</p></section>';
+    }
     for (var mo = 1; mo <= 12; mo++) {
       var ym = y + '-' + ('0' + mo).slice(-2), o = M[ym];
       if (o) { tot[0] += o[2]; tot[1] += o[3]; tot[2] += o[4]; tot[3] += o[5]; tot[4] += o[6]; tot[5] += o[7]; }
-      rows += '<tr' + (ym === S.taxYm ? ' class="sel"' : '') + '><td><button type="button" class="link" data-tym="' + ym + '">' + mo + '월</button></td>' +
+      rows += '<tr' + (S.taxPm === 'm' && ym === S.taxYm ? ' class="sel"' : '') + '><td><button type="button" class="link" data-tym="' + ym + '">' + mo + '월</button></td>' +
         (o ? '<td>' + o[2] + '건</td><td>' + (o[7] ? won(o[4]) : '—') + '</td><td>' + (o[7] ? won(o[5]) : '—') + '</td><td>' + (o[3] ? won(o[6]) : '금액 미확인') + '</td>'
           : '<td class="mute">' + (ym > now ? '' : '0건') + '</td><td class="mute"></td><td class="mute"></td><td class="mute"></td>') + '</tr>';
     }
     rows += '<tr class="tot"><td>' + y + '년 계</td><td>' + tot[0] + '건</td><td>' + (tot[5] ? won(tot[2]) : '—') + '</td><td>' + (tot[5] ? won(tot[3]) : '—') + '</td><td>' + won(tot[4]) + '</td></tr>';
     var ys = taxYears(), yi = ys.indexOf(y), unk = tot[0] - tot[1];
-    var h = '<section class="card taxsum" id="taxSum"><div class="tsh"><h2>세금계산서</h2><div class="dirs" role="group" aria-label="매입 · 매출">' +
-      ['buy', 'sale', 'chk'].filter(function (k) { return k !== 'chk' || cnt.chk || dir === 'chk'; }).map(function (k) {
-        return '<button type="button" data-dir="' + k + '" aria-pressed="' + (dir === k) + '">' + DIR[k] + ' <small>' + (cnt[k] || 0) + '</small></button>';
-      }).join('') + '</div></div>' +
-      '<div class="tk"><div class="big' + (dir === 'sale' ? ' sale' : '') + '" id="' + (dir === 'sale' ? 'taxSale' : 'taxBuy') + '"><small>' + y + '년 ' + DIR[dir] + ' 합계 (금액 확인 ' + tot[1] + '건)</small><b>' + won(tot[4]) + '원</b></div>' +
+    h += '<div class="tk"><div class="big' + (dir === 'sale' ? ' sale' : '') + '" id="' + (dir === 'sale' ? 'taxSale' : 'taxBuy') + '"><small>' + y + '년 ' + DIR[dir] + ' 합계 (금액 확인 ' + tot[1] + '건)</small><b>' + won(tot[4]) + '원</b></div>' +
       '<div><small>' + y + '년 ' + DIR[dir] + '</small><b>' + tot[0] + '건</b></div>' +
       '<div' + (unk ? ' class="unk"' : '') + '><small>금액 미확인</small><b>' + unk + '건</b></div></div>' +
       '<div class="yrbar"><button type="button" class="btn ghost sm" data-ty="-1"' + (yi <= 0 ? ' disabled' : '') + ' aria-label="이전 연도">◀</button><b>' + y + '년</b>' +
-      '<button type="button" class="btn ghost sm" data-ty="1"' + (yi >= ys.length - 1 ? ' disabled' : '') + ' aria-label="다음 연도">▶</button><span class="hint" style="margin:0">작성일 기준 · 월 선택 시 하단에 해당 월 목록</span></div>' +
+      '<button type="button" class="btn ghost sm" data-ty="1"' + (yi >= ys.length - 1 ? ' disabled' : '') + ' aria-label="다음 연도">▶</button><span class="hint" style="margin:0">작성일 기준 · ' + (S.taxPm === 'y' ? '아래는 그해 전체 목록, 월을 누르면 그 달 보기' : '월 선택 시 하단에 해당 월 목록') + '</span></div>' +
       '<div class="tmw" id="taxMonths"><table class="tm"><thead><tr><th>월</th><th>건수</th><th>공급가액</th><th>세액</th><th>합계</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
       '<p class="hint">' + (dir === 'chk' ? '확인 필요 = 자사 사업자번호로 열리지 않는 국세청 메일(판독 불가) 및 공급자 · 공급받는자 어디에도 자사 사업자번호가 없는 계산서입니다. 합계에서 제외합니다.'
         : '<b>매입과 매출은 합산하지 않습니다.</b> 합계 = 금액(공급가액 + 세액) 확인 계산서의 합계, 공급가액 · 세액 = 서버가 판독한 국세청 계산서의 합계입니다(금액만 기재된 알림 메일 제외). ' +
           '2026년 국세청 계산서는 매출 · 매입 장부에 자동 반영되며(처리 완료를 누르지 않아도 됨), 장부 칸에 반영 상태가 표시됩니다. 장부에 반영된 계산서는 상태도 자동으로 처리 완료가 되고, 분류 필요 · 분류 추정 건만 미처리로 남습니다.') + '</p></section>';
-    return h + taxMonthHtml();
+    return h;
+  }
+  function addDaysK(d, n) { var x = new Date(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10) + n)); return x.toISOString().slice(0, 10); }
+  function taxListHtml() {
+    var k = tqKey();
+    if (k) return taxSearchHtml(k);
+    if (S.taxPm === 'd') return taxDayHtml();
+    if (S.taxPm === 'y') return taxYearHtml();
+    return taxMonthHtml();
+  }
+  function taxDayHtml() {
+    var d = S.taxDay, ym = d.slice(0, 7), dir = S.taxDir, m = S.taxMon[ym];
+    if (!m || m.stale) needTaxMonth(ym);
+    var title = Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일 (' + wdOf(d) + ') ' + DIR[dir];
+    if (!m) return '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '</h3><p class="wait">불러오는 중…</p></div>';
+    var xs = m.rows.filter(function (x) { return taxDirOf(x) === dir && taxDayOf(x) === d; }).sort(taxNewer), t = taxSums(xs);
+    var h = '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '<small>' + xs.length + '건</small>' + (t.known ? '<span class="sum">합계 ' + won(t.sum) + '원</span>' : '') + '</h3>';
+    if (!xs.length) return h + '<ul class="list"><li class="empty">' + esc(Number(d.slice(5, 7)) + '월 ' + Number(d.slice(8, 10)) + '일') + ' 작성 ' + DIR[dir] + ' 세금계산서가 없습니다.</li></ul>' + (m.part ? '<p class="tnote">서버가 월별 조회를 지원하지 않아 이 화면에 불러온 목록만 표시합니다.</p>' : '') + '</div>';
+    return h + TAX_THR + '<ul class="list">' + xs.map(taxRow).join('') + '</ul>' + subtHtml(t) + '</div>';
+  }
+  function taxYearHtml() {
+    var y = S.taxYear, dir = S.taxDir, Y = S.taxYr[y];
+    if (!Y || !tFresh(Y.at)) needTaxYear(y);
+    var all = Y && Y.rows ? Y.rows : Y && Y.old ? taxYearFromMonths(y) : null, title = y + '년 ' + DIR[dir] + ' 전체';
+    if (Y && Y.err) return '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '</h3><p class="tnote">' + esc(Y.err) + '</p></div>';
+    if (!all) return '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '</h3><p class="wait">불러오는 중…</p></div>';
+    var xs = all.filter(function (x) { return taxDirOf(x) === dir; }), t = taxSums(xs);
+    var h = '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '<small>' + xs.length + '건</small>' + (t.known ? '<span class="sum">합계 ' + won(t.sum) + '원</span>' : '') + '</h3>';
+    if (!xs.length) return h + '<ul class="list"><li class="empty">' + y + '년 작성 ' + DIR[dir] + ' 세금계산서가 없습니다.</li></ul></div>';
+    return h + taxGroupsHtml(xs) + (Y && Y.n > (Y.rows || []).length ? '<p class="tnote">최근 ' + Y.rows.length + '건까지 표시했습니다 (전체 ' + Y.n + '건).</p>' : '') + '</div>';
+  }
+  function taxSearchHtml(k) {
+    var dir = S.taxDir, Q = S.taxQc[k];
+    if (!tqTimer && !(Q && tFresh(Q.at))) needTaxQ(k);   // 치는 중이면 0.35초 기다렸다가
+    var ready = Q && !Q.err, base = ready ? Q.rows : taxLoaded().filter(function (x) { return tqHit(x, k); }).sort(taxNewer);
+    var xs = base.filter(function (x) { return taxDirOf(x) === dir; }), ys = {};
+    xs.forEach(function (x) { ys[taxDayOf(x).slice(0, 4)] = 1; });
+    var yl = Object.keys(ys).sort().reverse(), qy = S.taxQy && ys[S.taxQy] ? S.taxQy : '';
+    if (qy) xs = xs.filter(function (x) { return taxDayOf(x).slice(0, 4) === qy; });
+    var t = taxSums(xs), note = !Q ? '찾는 중… (먼저 이 화면에 불러온 목록에서 맞는 것)' : Q.err === 'old' ? '서버 업데이트 후 전체 기간 검색이 됩니다 — 지금은 이 화면에 불러온 목록에서만 찾았습니다.' : Q.err ? Q.err : '';
+    var h = '<div id="list" class="tbl t-tax"><h3 class="dh">‘' + esc(k) + '’ 검색 결과<small>' + DIR[dir] + ' · ' + (qy ? qy + '년' : '전체 기간') + ' ' + xs.length + '건</small>' + (t.known ? '<span class="sum">합계 ' + won(t.sum) + '원</span>' : '') + '</h3>';
+    if (yl.length > 1) h += '<div class="tqys" role="group" aria-label="연도">' + [''].concat(yl).map(function (yv) { return '<button type="button" class="tqy" data-tqy="' + yv + '" aria-pressed="' + (qy === yv) + '">' + (yv ? yv + '년' : '전체') + '</button>'; }).join('') + '</div>';
+    if (note) h += '<p class="tnote">' + esc(note) + '</p>';
+    if (!xs.length) return h + '<ul class="list"><li class="empty">' + (Q ? '‘' + esc(k) + '’가 들어간 거래처의 ' + DIR[dir] + ' 세금계산서가 없습니다.' : '찾는 중…') + '</li></ul></div>';
+    return h + taxGroupsHtml(xs) + (ready && Q.n > Q.rows.length ? '<p class="tnote">최근 ' + Q.rows.length + '건까지 표시했습니다 (전체 ' + Q.n + '건). 업체명을 더 길게 입력하면 좁혀집니다.</p>' : '') +
+      '<p class="tnote">거래처 이름 · 사업자번호 · 승인번호로 찾습니다(띄어쓰기 · (주) 무시). 품목은 맨 위 돋보기로 찾습니다. 누르면 계산서가 열리고 ‘보관용 1장 인쇄’로 A4 한 장을 인쇄합니다.</p></div>';
   }
   function taxMonthHtml() {
     var ym = S.taxYm, mo = +ym.slice(5, 7), dir = S.taxDir, m = S.taxMon[ym];
@@ -1537,8 +1773,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var nav = '<span class="mnav"><button type="button" class="btn ghost sm" data-tm="-1" aria-label="이전 달">◀</button><button type="button" class="btn ghost sm" data-tm="1" aria-label="다음 달">▶</button></span>';
     var title = ym.slice(0, 4) + '년 ' + mo + '월 ' + DIR[dir];
     if (!m) return '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + nav + '</h3><p class="wait">불러오는 중…</p></div>';
-    var q = S.q ? S.q.replace(/\s+/g, '').toLowerCase() : '';
-    var xs = m.rows.filter(function (x) { return taxDirOf(x) === dir && (!q || hayOf(x).indexOf(q) >= 0); });
+    var q = '';   // v67: 업체명 찾기는 전체 기간 검색 보기(taxSearchHtml)
+    var xs = m.rows.filter(function (x) { return taxDirOf(x) === dir; });
     var n = xs.length, known = 0, sum = 0, split = 0, sup = 0, tx = 0;
     xs.forEach(function (x) { if (x.amt !== '') { known++; sum += x.amt; } var sp = taxSplit(x); if (sp) { split++; sup += sp[0]; tx += sp[1]; } });
     var h = '<div id="list" class="tbl t-tax"><h3 class="dh">' + esc(title) + '<small>' + n + '건' + (q ? ' (검색 결과)' : '') + '</small>' + (known ? '<span class="sum">합계 ' + won(sum) + '원</span>' : '') + nav + '</h3>';
@@ -1551,6 +1787,73 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (m.part) notes.push(m.err ? '월 목록 조회 실패(' + m.err + ') — 이 화면에 불러온 목록만 표시합니다.' : '서버가 월별 조회를 지원하지 않아 이 화면에 불러온 목록만 표시합니다.');
     return h + (notes.length ? '<p class="tnote">' + esc(notes.join(' ')) + '</p>' : '') + '</div>';
   }
+  /* ── 보관용 1장 인쇄 (2026-11-26 지시 "검색되서 나온거를 누르면 언제든지 … 한장짜리 우리가 보관하는용으로 항상 인쇄"): 서버가 연 국세청
+     전자세금계산서의 판독 내용(apiDocTaxInv)을 국세청 양식 모양으로 A4 한 장 — 매출 = 공급자 보관용, 매입 = 공급받는자 보관용 ── */
+  function isNts(x) { return /서버가 엶\)/.test(String(x.how || '')); }
+  function keepRowHtml(x) {
+    var nts = isNts(x), c = S.tinv[x.id], d = taxDirOf(x), busy = S.tkBusy === x.id;
+    var own = x.files.some(function (f) { return !f[3] && f[2] !== 'eml'; });   // 메일 원본(eml)은 인쇄할 계산서가 아님
+    var note = !nts || (c && !c.inv) ? (own ? '국세청 원문을 판독한 계산서가 아니어서 양식 인쇄가 되지 않습니다. 아래 ‘원본 열기’로 원본 파일을 인쇄하십시오.'
+      : '금액만 기재된 알림이라 계산서 양식 인쇄가 되지 않습니다. 같은 계산서의 국세청 메일(암호화 첨부)이 수신되면 인쇄할 수 있습니다.')
+      : 'A4 한 장 · ' + (d === 'sale' ? '공급자 보관용' : d === 'buy' ? '공급받는자 보관용' : '보관용 사본') + ' · 국세청 전자세금계산서 판독 내용';
+    return '<div class="keeprow" id="keepRow"><button type="button" class="btn sm" data-act="taxkeep"' + (!nts || (c && !c.inv) || busy ? ' disabled' : '') + '>' + (busy ? '불러오는 중…' : '보관용 1장 인쇄') + '</button><small>' + esc(note) + '</small></div>';
+  }
+  function tinvTitle(label) { var l = String(label || ''); return (/^수정/.test(l) ? '수정 ' : '') + (/면세/.test(l) ? '전자계산서' : '전자세금계산서'); }
+  function taxKeepHtml(inv, x) {
+    var k = inv.dir === '매출' ? 's' : inv.dir === '매입' ? 'b' : 'x', free = /면세/.test(inv.label), L = inv.lines || [];
+    var copy = k === 's' ? '공급자 보관용' : k === 'b' ? '공급받는자 보관용' : '보관용 사본';
+    var n = Math.max(4, L.length), rh = n > 24 ? Math.max(2.8, Math.floor(171 / n * 100) / 100) : 7, fz = rh >= 5 ? 8.4 : Math.max(5.2, Math.round(rh / 0.3528 * 0.62 * 10) / 10);
+    var mn = function (v) { return v == null || v === '' ? '' : (Number(v) < 0 ? '-' : '') + won(Math.abs(Number(v))); };
+    var P = function (t, p) { p = p || {}; return [t, p]; }, A = P('공급자', inv.seller), B = P('공급받는자', inv.buyer);
+    var pc = function (i, side) { var p = side[1]; return [
+      '<th class="vt" rowspan="5">' + side[0] + '</th><th>등록번호</th><td colspan="3" class="bz">' + esc(p.biz) + '</td>',
+      '<th>상호<small>(법인명)</small></th><td class="b">' + esc(p.name) + '</td><th>성명</th><td>' + esc(p.ceo) + '</td>',
+      '<th>사업장<small>주소</small></th><td colspan="3" class="ad">' + esc(p.addr) + '</td>',
+      '<th>업태</th><td>' + esc(p.type) + '</td><th>종목</th><td>' + esc(p.item) + '</td>',
+      '<th>이메일</th><td colspan="3" class="em">' + esc(p.email) + '</td>'][i]; };
+    var h = '<section class="tiv ' + k + '"><p class="tist">보관용 출력 ' + esc(S.D.today) + '</p>' +
+      '<table class="tvh"><colgroup><col><col style="width:22mm"><col style="width:62mm"></colgroup><tr><td class="tt"><b>' + tinvTitle(inv.label) + '</b><span>' + copy + '</span></td><th>승인번호</th><td class="no">' + esc(inv.no) + '</td></tr></table>' +
+      '<table class="tvp"><colgroup><col style="width:6mm"><col style="width:14mm"><col><col style="width:9mm"><col style="width:18mm"><col style="width:6mm"><col style="width:14mm"><col><col style="width:9mm"><col style="width:18mm"></colgroup><tbody>';
+    for (var i = 0; i < 5; i++) h += '<tr>' + pc(i, A) + pc(i, B) + '</tr>';
+    h += '</tbody></table><table class="tva"><colgroup><col style="width:30mm"><col>' + (free ? '' : '<col>') + '<col style="width:30mm"></colgroup>' +
+      '<tr><th>작성일자</th><th>공급가액</th>' + (free ? '' : '<th>세액</th>') + '<th>수정사유</th></tr>' +
+      '<tr><td>' + esc(inv.date) + '</td><td class="r">' + mn(inv.supply) + '</td>' + (free ? '' : '<td class="r">' + mn(inv.tax) + '</td>') + '<td>' + esc(inv.amend) + '</td></tr>' +
+      '<tr><th>비고</th><td colspan="' + (free ? 2 : 3) + '" class="nt">' + esc(inv.note) + '</td></tr></table>';
+    h += '<table class="tvl" style="--rh:' + rh + 'mm;--fz:' + fz + 'pt"><colgroup><col style="width:7mm"><col style="width:7mm"><col><col style="width:18mm"><col style="width:17mm"><col style="width:17mm"><col style="width:25mm">' + (free ? '' : '<col style="width:21mm">') + '<col style="width:18mm"></colgroup>' +
+      '<thead><tr><th>월</th><th>일</th><th>품목</th><th>규격</th><th>수량</th><th>단가</th><th>공급가액</th>' + (free ? '' : '<th>세액</th>') + '<th>비고</th></tr></thead><tbody>';
+    for (var r = 0; r < n; r++) {
+      var l = L[r];
+      h += l ? '<tr><td class="c">' + (l[0] ? Number(l[0].slice(0, 2)) : '') + '</td><td class="c">' + (l[0] ? Number(l[0].slice(3, 5)) : '') + '</td><td class="nm">' + esc(l[1]) + '</td><td class="c">' + esc(l[2]) + '</td>' +
+        '<td class="r">' + esc(qtx(l[3])) + '</td><td class="r">' + esc(qtx(l[4])) + '</td><td class="r">' + mn(l[5]) + '</td>' + (free ? '' : '<td class="r">' + mn(l[6]) + '</td>') + '<td class="mm">' + esc(l[7]) + '</td></tr>'
+        : '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td>' + (free ? '' : '<td></td>') + '<td></td></tr>';
+    }
+    h += '</tbody></table><table class="tvt"><colgroup><col style="width:30mm"><col><col style="width:62mm"></colgroup><tr><th>합계금액</th><td>' + mn(inv.total) + '</td><td class="say">이 금액을 ' + (inv.purpose || '영수') + ' 함</td></tr></table>' +
+      '<p class="tvn">국세청 전자세금계산서(메일로 받은 원본)를 관리 프로그램이 판독한 내용으로 출력한 보관용 사본입니다. 원본은 홈택스에서 승인번호로 조회할 수 있습니다.' +
+      (L.length && x && x.td && x.td.Ln > L.length ? ' 품목 ' + x.td.Ln + '줄 중 ' + L.length + '줄 표시.' : '') + '</p></section>';
+    return h;
+  }
+  function keepBtn(x) { var r = $('keepRow'); if (r && S.open === x.id) r.outerHTML = keepRowHtml(x); }
+  function taxKeep(x) {
+    if (!x || S.tkBusy) return;
+    var c = S.tinv[x.id];
+    if (c) { taxKeepGo(c, x); return; }
+    S.tkBusy = x.id; keepBtn(x);
+    call('apiDocTaxInv', [x.id]).then(function (d) {
+      S.tkBusy = ''; S.tinv[x.id] = d; keepBtn(x); taxKeepGo(d, x);
+    }, function (e) {
+      S.tkBusy = ''; keepBtn(x);
+      var c2 = String(e && e.message);
+      if (c2 === 'auth') return;
+      toast(c2 === 'bad_action' ? '서버 업데이트 후 보관용 인쇄를 사용할 수 있습니다.' : errText(e));
+    });
+  }
+  function taxKeepGo(d, x) {
+    if (!d || !d.inv) { toast('국세청 계산서 원문이 없는 건이라 계산서 양식으로 인쇄할 수 없습니다.'); return; }
+    $('tprint').innerHTML = taxKeepHtml(d.inv, x);
+    document.body.classList.add('tprinting');
+    window.print();
+  }
+  window.addEventListener('afterprint', function () { if (document.body.classList.contains('tprinting')) { document.body.classList.remove('tprinting'); $('tprint').innerHTML = ''; } });
   function helpHtml() {
     return '<section class="card"><details class="more"><summary>등록 방법 · 분류 기준</summary>' +
       '<ol class="steps"><li>메일 · 팩스로 수신한 공문을 PDF(또는 사진 · 한글 · 워드 · 메일 저장 파일)로 저장해 구글 드라이브 ‘NMC 자동 수집’ 폴더에 등록합니다. 휴대폰에서는 ‘공문 등록 (사진 · 파일)’ 버튼으로 사진을 바로 등록할 수 있습니다.</li>' +
@@ -1693,6 +1996,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
         (x.cat === 'gong' && !isMust(x) ? '<button type="button" class="btn ghost sm" data-act="mustadd"' + (busy ? ' disabled' : '') + '>처리 대기로 지정</button>' : '') +
         '<button type="button" class="btn okb" data-st="처리 완료"' + (busy ? ' disabled' : '') + '>✓ 처리 완료</button></span></div>';
     if (x.cat === 'tax') {   // 장부(자동 수집) 상태 (서버 v51)
+      h += keepRowHtml(x);   // v67: 보관용 1장 인쇄
       var le = ledOf(x);
       if (le || /^\[(매입|매출)\]/.test(x.title)) h += '<p class="lednote">장부: ' + (le ? '<b>' + esc((LEDST[le[0]] || ['', le[0]])[1]) + '</b>' + (le[1] ? ' · ' + esc(le[1]) : '') + (le[2] ? ' (분류 추정)' : '') + (le[3] ? '<br><small class="muted">' + esc(le[3]) + '</small>' : '')
         : String(x.date) >= '2026-01-01' ? '반영 대기 — 10분 이내 매출 · 매입 장부 반영' : '2026년 이전 계산서는 장부 반영 대상이 아닙니다') +
@@ -1771,6 +2075,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (st === '처리 완료') { if (x.state !== st) doneDoc(x.id); return; }   // 처리 완료 → 창을 닫고 '되돌리기' 띠
     if (st) { if (st !== x.state) { setState(x.id, st); delete S.keep[x.id]; sheetHtml(x); render(); toast(st === '확인' ? '미처리로 변경했습니다.' : '‘' + st + '’(으)로 변경했습니다.'); } return; }   // v62: 기다리지 않음
     var a = b.getAttribute('data-act');
+    if (a === 'taxkeep') { taxKeep(x); return; }
     if (a === 'save') {
       var p = changed(x, form());
       if (!Object.keys(p).length) { toast('변경된 항목이 없습니다.'); return; }
@@ -1826,11 +2131,24 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       render(); return;
     }
     var dr = ev.target.closest('[data-dir]');
-    if (dr) { S.taxDir = dr.getAttribute('data-dir'); render(); return; }
+    if (dr) { S.taxDir = dr.getAttribute('data-dir'); S.taxQy = ''; render(); return; }
+    var tpm = ev.target.closest('[data-tpm]');
+    if (tpm) {   // 일별 · 월별 · 연별 (찾는 중이면 찾기를 끝내고 그 보기로)
+      S.taxPm = tpm.getAttribute('data-tpm'); S.q = ''; S.taxQy = ''; tqStop();
+      if (S.taxPm === 'd' && !S.taxDay) S.taxDay = S.D.today;
+      if (S.taxPm === 'y') { var yy0 = S.taxYm ? S.taxYm.slice(0, 4) : S.D.today.slice(0, 4); S.taxYear = S.taxYear || yy0; }
+      render(); return;
+    }
+    var tpd = ev.target.closest('[data-tpd]');
+    if (tpd) { S.taxDay = addDaysK(S.taxDay || S.D.today, Number(tpd.getAttribute('data-tpd'))); taxRe(); return; }
+    var tqy = ev.target.closest('[data-tqy]');
+    if (tqy) { S.taxQy = tqy.getAttribute('data-tqy'); taxRe(); return; }
+    var tgm = ev.target.closest('[data-tgom]');
+    if (tgm) { S.taxPm = 'm'; S.taxYm = tgm.getAttribute('data-tgom'); S.taxYear = S.taxYm.slice(0, 4); S.q = ''; S.taxQy = ''; tqStop(); render(); window.scrollTo(0, 0); return; }   // 달 머리 → 그 달 월별 보기
     var ty = ev.target.closest('[data-ty]');
     if (ty) { var ys = taxYears(), yi = ys.indexOf(S.taxYear) + Number(ty.getAttribute('data-ty')); if (yi >= 0 && yi < ys.length) { S.taxYear = ys[yi]; S.taxYm = taxLastYm(S.taxYear); } render(); return; }
     var tyM = ev.target.closest('[data-tym]');
-    if (tyM) { S.taxYm = tyM.getAttribute('data-tym'); S.taxYear = S.taxYm.slice(0, 4); render(); var ls = $('list'); if (ls && ls.scrollIntoView) { try { ls.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { ls.scrollIntoView(); } } return; }
+    if (tyM) { S.taxYm = tyM.getAttribute('data-tym'); S.taxYear = S.taxYm.slice(0, 4); if (S.taxPm !== 'm') S.taxPm = 'm'; render(); var ls = $('list'); if (ls && ls.scrollIntoView) { try { ls.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { ls.scrollIntoView(); } } return; }
     var tmv = ev.target.closest('[data-tm]');
     if (tmv) { var yv0 = +S.taxYm.slice(0, 4), mv0 = +S.taxYm.slice(5, 7) - 1 + Number(tmv.getAttribute('data-tm')); yv0 += Math.floor(mv0 / 12); mv0 = ((mv0 % 12) + 12) % 12; S.taxYm = yv0 + '-' + ('0' + (mv0 + 1)).slice(-2); S.taxYear = S.taxYm.slice(0, 4); render(); return; }
     var cl = ev.target.closest('[data-cal]');
@@ -1911,8 +2229,17 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     ev.preventDefault(); $('sq').focus();
   });
   // 세금계산서 달 필터: 칸은 그대로 두고 그 달 목록(#list)만 다시 그림 — 화면 전체를 다시 그리면 한글 조합이 끊김 (2026-11-25)
-  root.addEventListener('input', function (ev) { if (ev.target.id === 'q') { S.q = ev.target.value; var L = $('list'); if (L && S.cat === 'tax') L.outerHTML = taxMonthHtml(); else { var pos = ev.target.selectionStart; render(); var q = $('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } } } });
-  root.addEventListener('change', function (ev) { if (ev.target.id === 'kindSel') { S.kind = ev.target.value; render(); } });
+  root.addEventListener('input', function (ev) { if (ev.target.id === 'q' && S.cat === 'tax' && S.D && Array.isArray(S.D.taxm)) { taxQInput(ev.target.value); return; }   // v67: 업체명 찾기 (전체 기간)
+    if (ev.target.id === 'q') { S.q = ev.target.value; var L = $('list'); if (L && S.cat === 'tax') L.outerHTML = taxMonthHtml(); else { var pos = ev.target.selectionStart; render(); var q = $('q'); if (q) { q.focus(); try { q.setSelectionRange(pos, pos); } catch (e) {} } } } });
+  root.addEventListener('change', function (ev) {
+    if (ev.target.id === 'kindSel') { S.kind = ev.target.value; render(); }
+    if (ev.target.id === 'tday' && /^\d{4}-\d{2}-\d{2}$/.test(ev.target.value)) { S.taxDay = ev.target.value; taxRe(); }   // 일별: 날짜 고르기
+  });
+  root.addEventListener('keydown', function (ev) {   // 업체명 찾기: 엔터 = 바로, Esc = 지움
+    if (ev.target.id !== 'q' || S.cat !== 'tax' || ev.isComposing || ev.keyCode === 229) return;
+    if (ev.key === 'Enter') { ev.preventDefault(); tqStop(); var k = tqKey(); if (k) needTaxQ(k); return; }
+    if (ev.key === 'Escape' && S.q) { ev.preventDefault(); ev.stopPropagation(); ev.target.value = ''; taxQInput(''); }
+  });
   function b64of(file) {
     return new Promise(function (res, rej) {
       var r = new FileReader();
