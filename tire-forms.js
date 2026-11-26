@@ -58,6 +58,13 @@
         gross: r.gross == null ? null : Number(r.gross), tare: r.tare == null ? null : Number(r.tare), net: Number(r.net) || 0, memo: r.memo || '', src: r.src || '', at: r.at || '' };
     }).sort(cmpIn);
     ins.forEach(function (r) { if (r.net > LIMIT.inLoad) chk('warn', mOf(r.date), r.date + ' ' + r.co + ' 입고 ' + r.net.toLocaleString('ko-KR') + 'kg — 1대로 보기에 큰 숫자입니다. 계량표를 확인해 주십시오.', { v: 'in', id: r.id }); });
+    var dupIn = {};   // 같은 날 · 같은 차량 · 같은 실중량 입고 (계근대 계량과 직접 등록이 겹친 경우 등)
+    ins.forEach(function (r) { if (r.car) { var k = r.date + '|' + r.car.replace(/\s/g, '') + '|' + r.net; (dupIn[k] = dupIn[k] || []).push(r); } });
+    Object.keys(dupIn).forEach(function (k) {
+      var a = dupIn[k]; if (a.length < 2) return;
+      var gate = a.some(function (r) { return r.src === '계근대'; }), man = a.filter(function (r) { return r.src !== '계근대'; })[0] || a[1];
+      chk('warn', mOf(a[0].date), a[0].date + ' ' + a[0].car + ' 실중량 ' + a[0].net.toLocaleString('ko-KR') + 'kg 입고가 ' + a.length + '줄 있습니다' + (gate ? ' (계근대 계량과 직접 등록이 겹친 것으로 보입니다)' : '') + '. 한 줄만 남겨 주십시오.', { v: 'in', id: man.id });
+    });
 
     // 2) 생산 (창구에서 넣은 날 = 그 값, 넣지 않은 날 = 생산 화면 SBR 고무분말 생산 합)
     var man = {}, auto = {}, dset = {};
@@ -84,11 +91,13 @@
     days.forEach(function (x) { dayBy[x.date] = x; });
 
     // 3) 판매 (재고기록 출고 SBR 고무분말 · 분철 + 보완 · 추가 판매)
-    var supBy = {}, outIds = {};
+    var supBy = {}, outIds = {}, planIds = {};
     (d.out || []).forEach(function (o) { outIds[o.id] = 1; });
+    (d.plan || []).forEach(function (id) { planIds[id] = 1; });   // 확정 전 출고 (계근대 계량이 먼저 연결됨 → 출고 확정되면 서식에 들어감)
     (d.sales || []).forEach(function (s) {
       if (!s.link) return;
       if (outIds[s.link]) supBy[s.link] = s;
+      else if (planIds[s.link]) return;
       else chk('warn', mOf(s.date), s.date + ' 판매 보완 기록의 출고(' + s.link + ')가 없습니다 (출고가 지워졌거나 날짜가 다른 해로 바뀜).', { v: 'sale', id: 's:' + s.id });
     });
     var lines = [];
@@ -118,6 +127,10 @@
       if (!inY(l.sdate)) chk('warn', mOf(l.date), l.date + ' ' + l.cust + ' ' + l.item + ' — 계산서 발행일(' + l.invDate + ')이 다른 해라서 올해 서식에 들어가지 않습니다.', { v: 'sale', id: l.key });
       else if (!l.own && l.supply == null) chk('warn', m, l.sdate + ' ' + l.cust + ' ' + l.item + ' ' + l.qty.toLocaleString('ko-KR') + 'kg — 단가가 없어 공급가액 · 세액을 계산하지 못했습니다.', { v: 'sale', id: l.key });
       if (l.w && l.w.net != null && Math.abs(l.w.net - l.qty) > LIMIT.weighGap) chk('info', mOf(l.date), l.date + ' ' + l.cust + ' 계량 실중량 ' + l.w.net.toLocaleString('ko-KR') + 'kg ≠ 판매 수량 ' + l.qty.toLocaleString('ko-KR') + 'kg (차이 ' + Math.abs(l.w.net - l.qty).toLocaleString('ko-KR') + 'kg).', { v: 'sale', id: l.key });
+    });
+    (d.wgFree || []).forEach(function (r) {   // 계근대 매출 계량인데 출고와 연결되지 않음 → 계량증명서(매출)에 없음
+      if (!inY(r.date)) return;
+      chk('warn', mOf(r.date), r.date + ' ' + (r.co ? r.co + ' ' : '') + r.item + ' 계근대 매출 계량 ' + (Number(r.net) || 0).toLocaleString('ko-KR') + 'kg — 출고와 연결되지 않아 계량증명서(매출)에 들어가지 않았습니다. 계근대 계량 화면에서 출고를 연결해 주십시오.', { v: 'wgate', id: r.id, d: r.date });
     });
     var saleL = lines.filter(function (l) { return !l.ex && inY(l.sdate); });                  // 서식-2 · 총괄표 (자사 사용 = 처리량)
     var taxL = saleL.filter(function (l) { return !l.own; });                                    // 세금계산서(매출)

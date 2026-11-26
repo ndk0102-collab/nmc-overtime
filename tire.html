@@ -259,7 +259,8 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     bad_amount: '금액을 확인해 주십시오 (원 단위 정수). 세액만 입력할 수는 없습니다.', bad_item: '품목을 선택해 주십시오.', bad_year: '연도를 확인해 주십시오.',
     bad_ratio: '수율 · 철심 비율 · 섬유 값을 확인해 주십시오.', not_found: '해당 기록이 없습니다. 다른 곳에서 삭제되었을 수 있습니다.',
     bad_input: '입력값을 확인해 주십시오.', bad_rows: '옮길 줄이 없습니다.', bad_kind: '자료 종류가 올바르지 않습니다.',
-    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', lib: '엑셀 도구를 받지 못했습니다. 인터넷 연결을 확인해 주십시오.'
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', lib: '엑셀 도구를 받지 못했습니다. 인터넷 연결을 확인해 주십시오.',
+    weigh_locked: '계근대에서 계량한 기록입니다. 고치거나 취소하려면 계근대 계량 화면을 써 주십시오.'
   };
   function errText(e) {
     var c = String((e && e.message) || e || ''), m = /^bad_row:(\d+):(.+)$/.exec(c);
@@ -916,7 +917,13 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var b = '', foot = '', title = '';
     var f = sh.f;
     if (sh.msg) b += '<p class="smsg ' + (sh.msgOk ? 'info' : 'err') + '" role="alert">' + esc(sh.msg) + '</p>';
-    if (sh.kind === 'in') {
+    if (sh.kind === 'in' && sh.gate) {   // 계근대 계량 (무게는 계량 화면에서만)
+      title = '입고 (계근대 계량)';
+      b += '<p class="ro">' + esc(dShort(f.date)) + ' · <b>' + esc(f.co) + '</b> · ' + esc(f.item || '폐타이어') + '<br>차량번호 ' + esc(f.car || '-') + ' · 계량 번호 ' + esc(f.no) +
+        '<br>1차 ' + esc(f.t1 || '-') + ' · 2차 ' + esc(f.t2 || '-') + '<br>총중량 ' + esc(f.gross) + ' kg · 공차중량 ' + esc(f.tare) + ' kg · <b>실중량 ' + esc(f.net) + ' kg</b>' + (f.memo ? '<br>메모 ' + esc(f.memo) : '') + '</p>' +
+        '<p class="smsg info">계근대에서 계량한 기록입니다. 업체 · 차량번호 · 메모를 고치거나 취소하려면 계근대 계량 화면을 써 주십시오. 무게는 고칠 수 없습니다.</p>';
+      foot = '<a class="btn" href="weigh.html?day=' + esc(f.date) + '">계근대 계량 화면</a><button type="button" class="btn ghost" data-act="close">닫기</button>';
+    } else if (sh.kind === 'in') {
       title = sh.id ? '입고 수정' : '입고 등록';
       var names = (curD().names && curD().names.co) || [];
       b += fld('date', '날짜', f.date, { type: 'date', max: S.today }) +
@@ -956,13 +963,16 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
           '<div class="two">' + fld('supply', '공급가액', f.supply, { unit: '원', amt: 1, im: 'numeric', ph: '수량 × 단가' }) + fld('tax', '세액', f.tax, { unit: '원', amt: 1, im: 'numeric', ph: '10%' }) + '</div>' +
           fld('invDate', '계산서 발행일', f.invDate, { type: 'date', sub: '비우면 판매일' }) + fld('spec', '규격', f.spec, { ml: 20 });
       }
-      b += '<details class="more"' + (f.gross || f.car ? ' open' : '') + '><summary>계량 (계량증명서 매출)</summary><div class="two">' + fld('car', '차량번호', f.car, { ml: 20 }) + fld('no', '일련번호', f.no, { ml: 10, im: 'numeric' }) + '</div>' +
-        '<div class="two">' + fld('t1', '1차 계량시간', f.t1, { type: 'time' }) + fld('t2', '2차 계량시간', f.t2, { type: 'time' }) + '</div>' +
-        '<div class="two">' + fld('gross', '총중량', f.gross, { unit: 'kg', amt: 1, im: 'numeric' }) + fld('tare', '공차중량', f.tare, { unit: 'kg', amt: 1, im: 'numeric' }) + '</div><p class="calc" id="saleCalc">' + saleCalc(f, l) + '</p></details>';
+      var G = !!sh.gate;   // 계근대 계량 칸 (계량 화면에서만 고침)
+      b += '<details class="more"' + (f.gross || f.car ? ' open' : '') + '><summary>계량 (계량증명서 매출)' + (G ? ' · 계근대' : '') + '</summary>' +
+        (G ? '<p class="smsg info">계근대에서 계량한 값입니다. 고치거나 출고 연결을 바꾸려면 계근대 계량 화면을 써 주십시오.</p>' : '') +
+        '<div class="two">' + fld('car', '차량번호', f.car, { ml: 20, dis: G }) + fld('no', '일련번호', f.no, { ml: 10, im: 'numeric', dis: G }) + '</div>' +
+        '<div class="two">' + fld('t1', '1차 계량시간', f.t1, { type: 'time', dis: G }) + fld('t2', '2차 계량시간', f.t2, { type: 'time', dis: G }) + '</div>' +
+        '<div class="two">' + fld('gross', '총중량', f.gross, { unit: 'kg', amt: 1, im: 'numeric', dis: G }) + fld('tare', '공차중량', f.tare, { unit: 'kg', amt: 1, im: 'numeric', dis: G }) + '</div><p class="calc" id="saleCalc">' + saleCalc(f, l) + '</p></details>';
       if (l && l.src === 'out') b += '<label class="chk"><input type="checkbox" data-f="ex"' + (f.ex ? ' checked' : '') + '> 서식에서 빼기 (반품 · 판매 아님)</label>';
       b += fld('memo', '메모', f.memo, { ml: 200 });
       foot = '<button type="button" class="btn" data-act="sale-save"' + (sh.busy ? ' disabled' : '') + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
-        (sh.id ? '<button type="button" class="btn ' + (l && l.src === 'out' ? 'ghost' : 'danger') + '" data-act="sale-del"' + (sh.busy ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 ' + (l && l.src === 'out' ? '보완 지움' : '삭제') : l && l.src === 'out' ? '보완 지우기' : '삭제') + '</button>' : '');
+        (sh.id && !sh.gate ? '<button type="button" class="btn ' + (l && l.src === 'out' ? 'ghost' : 'danger') + '" data-act="sale-del"' + (sh.busy ? ' disabled' : '') + '>' + (sh.arm ? '한 번 더 누르면 ' + (l && l.src === 'out' ? '보완 지움' : '삭제') : l && l.src === 'out' ? '보완 지우기' : '삭제') + '</button>' : '');
     } else if (sh.kind === 'set') {
       title = '전년재고 · 계산 기준';
       b += setSheetHtml();
@@ -1116,6 +1126,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
       case 'goref': {
         var c = M && M.checks[Number(el.getAttribute('data-i'))]; if (!c || !c.ref) return;
         if (c.ref.v === 'set') { openSet(); return; }
+        if (c.ref.v === 'wgate') { location.href = 'weigh.html' + (c.ref.d ? '?day=' + c.ref.d : ''); return; }   // 계근대 계량 화면
         if (c.m) S.m = c.m;
         S.view = { 'in': 'f1', prod: 'f2', sale: 'tax' }[c.ref.v] || S.view; render();
         if (c.ref.id) {
@@ -1178,7 +1189,7 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     openSheet('set', { f: { tire: nv(ss.tire), rubber: nv(ss.rubber), steel: nv(ss.steel), fiber: nv(ss.fiber), yield: nv(ss.yield, true), steelR: nv(ss.steelR, true), fiberKg: nv(ss.fiberKg), memo: ss.memo || '' } });
   }
   function openIn(r) {
-    openSheet('in', { id: r.id, f: { date: r.date, co: r.co, item: r.item, car: r.car, no: r.no, t1: r.t1, t2: r.t2, gross: fmtF(r.gross), tare: fmtF(r.tare), net: fmtF(r.net), memo: r.memo } });
+    openSheet('in', { id: r.id, gate: r.src === '계근대', f: { date: r.date, co: r.co, item: r.item, car: r.car, no: r.no, t1: r.t1, t2: r.t2, gross: fmtF(r.gross), tare: fmtF(r.tare), net: fmtF(r.net), memo: r.memo } });
   }
   function openProd(date) {
     var d = curD(), p = (d.prod || []).filter(function (x) { return x.date === date; })[0], st = (d.stockProd || []).filter(function (a) { return a[0] === date; })[0];
@@ -1188,10 +1199,10 @@ details.more > summary{display:flex;align-items:center;min-height:44px;font-weig
     var d = curD(), s = l.sid ? (d.sales || []).filter(function (x) { return x.id === l.sid; })[0] : null;
     var w = s || {};
     if (l.src === 'out') {
-      openSheet('sale', { id: l.sid || '', line: l, f: { invDate: s ? s.invDate || '' : '', price: s && s.price != null ? fmtF(s.price, true) : '', supply: s && s.supply != null ? fmtF(s.supply) : '', tax: s && s.tax != null ? fmtF(s.tax) : '',
+      openSheet('sale', { id: l.sid || '', line: l, gate: !!(s && s.src === '계근대'), f: { invDate: s ? s.invDate || '' : '', price: s && s.price != null ? fmtF(s.price, true) : '', supply: s && s.supply != null ? fmtF(s.supply) : '', tax: s && s.tax != null ? fmtF(s.tax) : '',
         car: w.car || '', no: w.no || '', t1: w.t1 || '', t2: w.t2 || '', gross: fmtF(w.gross), tare: fmtF(w.tare), ex: !!(s && s.ex), memo: s ? s.memo || '' : '' } });
     } else {
-      openSheet('sale', { id: l.sid, line: null, f: { date: l.date, cust: l.cust, item: l.item, spec: l.spec, qty: fmtF(l.qty), price: fmtF(l.price, true), supply: fmtF(l.supply), tax: fmtF(l.tax), invDate: l.invDate,
+      openSheet('sale', { id: l.sid, line: null, gate: !!(s && s.src === '계근대'), f: { date: l.date, cust: l.cust, item: l.item, spec: l.spec, qty: fmtF(l.qty), price: fmtF(l.price, true), supply: fmtF(l.supply), tax: fmtF(l.tax), invDate: l.invDate,
         car: w.car || '', no: w.no || '', t1: w.t1 || '', t2: w.t2 || '', gross: fmtF(w.gross), tare: fmtF(w.tare), memo: l.memo || '' } });
     }
   }

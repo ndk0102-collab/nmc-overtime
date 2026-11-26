@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NMC 계근대 계량</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#44505C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+window.NMC_API = "https://script.google.com/macros/s/AKfycbzg5mbJ9hkPn6Ld7hzNICzRYcsTDM_vVFdWZXV2qAy6QSYJFQVOvREsvE5NjIyy_05M/exec";
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+<script src="nav.js"></script>
+<script src="menu.js"></script>
+<!--PREVIEW_SERVER-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* 계근대 계량 (2026-11-26). 계근대 옆 PC의 크롬 · 엣지가 지시계 무게를 직접 읽습니다(Web Serial — 이 화면에서 처음 한 번 단자를 고르면 다음부터 자동).
+   업체 · 차량 · 무게 기록은 이 파일에 없고, 관리자 로그인 뒤 서버(구글 시트 '계량기록')에서 받아 옵니다. */
+:root{
+  --bg:#EEF1F5; --card:#FFFFFF; --ink:#121820; --ink2:#2E3742; --muted:#5A6471; --line:#D5DBE3; --soft:#EBEEF3;
+  --accent:#1E5AA8; --accent-soft:#E6EEF9;
+  --bad:#B42318; --bad-soft:#FDE9E7; --warn:#8A5300; --warn-soft:#FCF0D6; --ok:#1B7A43; --ok-soft:#E4F3EA;
+  --vc:#44505C; --vsoft:#E9EDF1;
+  --font:'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo','Noto Sans CJK KR',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;word-break:keep-all;overflow-wrap:anywhere;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body.noscroll{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+b,td,th,.wnum{font-variant-numeric:tabular-nums}
+[hidden]{display:none!important}
+
+.bar{position:sticky;top:0;z-index:20;background:var(--vc);color:#fff;padding:10px 12px;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+.bin{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.home{display:inline-flex;align-items:center;gap:4px;min-height:40px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-weight:700;font-size:14px;white-space:nowrap}
+.bar h1{margin:0;flex:1;min-width:0;font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.home:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+
+.wrap{max-width:1100px;margin:0 auto;padding:12px 12px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin:0 0 12px}
+.card h2{margin:0 0 8px;font-size:17px;font-weight:800}
+.card h2 small{margin-left:6px;font-size:13px;font-weight:600;color:var(--muted)}
+.hint{margin:6px 0 0;color:var(--muted);font-size:14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:48px;padding:0 18px;border:0;border-radius:12px;background:var(--vc);color:#fff;font-weight:800;font-size:16px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:var(--bad)}
+.btn.sm{min-height:40px;padding:0 12px;font-size:14.5px}
+.btn.big{min-height:64px;padding:0 26px;font-size:20px;border-radius:14px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.nav:focus-visible,.link:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.link{border:0;background:none;padding:6px 0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;font-size:15px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.tag{display:inline-block;margin:2px 4px 0 0;padding:0 6px;border-radius:6px;background:var(--soft);font-size:11.5px;font-weight:800;color:var(--ink2);vertical-align:1px;white-space:nowrap}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}.tag.ok{background:var(--ok-soft);color:var(--ok)}.tag.info{background:var(--accent-soft);color:#174A8C}.tag.bad{background:var(--bad-soft);color:var(--bad)}
+.empty{padding:12px 4px;color:var(--muted);font-weight:600}
+.err{margin:8px 0 0;color:var(--bad);font-weight:700}
+.wait{padding:30px 10px;text-align:center;color:var(--muted);font-weight:700}
+
+/* 계근대 (지시계 무게) */
+.scale .srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wst{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:999px;background:var(--soft);color:var(--ink2);font-size:14px;font-weight:800}
+.wst.stable{background:var(--ok-soft);color:var(--ok)}
+.wst.move,.wst.nodata{background:var(--warn-soft);color:var(--warn)}
+.wst.err,.wst.ol{background:var(--bad-soft);color:var(--bad)}
+.wport{font-size:13px;color:var(--muted);font-weight:700}
+.wnum{margin:6px 0 2px;padding:10px 16px;border:3px solid var(--line);border-radius:16px;background:#0F172A;color:#E2E8F0;text-align:right;font-size:64px;font-weight:800;line-height:1.15;letter-spacing:.01em}
+.wnum::after{content:' kg';font-size:26px;color:#94A3B8}
+.wnum.stable{border-color:#22C55E;color:#fff}
+.wnum.move{border-color:#F59E0B}
+@media (max-width:480px){.wnum{font-size:48px}}
+.act1{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+
+/* 대기 차량 */
+.pend{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line)}
+.pend:first-of-type{border-top:0}
+.pend .pt{flex:1;min-width:0;font-size:15px}
+.pend .pt b{font-size:17px}
+.pend .pt small{display:block;font-size:13.5px;color:var(--muted)}
+.pend .pa{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:560px){.pend{flex-direction:column;align-items:stretch}.pend .pa{justify-content:flex-start}}
+
+/* 그날 계량 */
+.pnav{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.nav{flex-shrink:0;width:50px;height:50px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:26px;font-weight:800;line-height:1;cursor:pointer}
+.nav:disabled{opacity:.3;cursor:default}
+.plabel{flex:1;min-width:0;text-align:center}
+.plabel b{display:block;font-size:18px;font-weight:800;line-height:1.3}
+.plabel small{display:block;font-size:13.5px;color:var(--muted)}
+.tw{overflow-x:auto;margin:4px -4px 0;-webkit-overflow-scrolling:touch}
+table.dl{border-collapse:collapse;font-size:14px;min-width:100%}
+table.dl th,table.dl td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+table.dl th{background:#F3F5F8;font-size:13px;font-weight:800;color:#1F2933}
+table.dl td.l{text-align:left}table.dl td.r{text-align:right}table.dl td.b{font-weight:800}
+table.dl tr.rb{cursor:pointer}
+table.dl tr.rb:hover td{background:var(--vsoft)}
+table.dl tr.off td{color:var(--muted);text-decoration:line-through}
+table.dl tr.off td:last-child{text-decoration:none}
+[role="button"]:focus-visible{outline:3px solid #F4B400;outline-offset:-2px}
+
+/* 창 */
+#sheet{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.45)}
+.sheet{display:flex;flex-direction:column;width:100%;max-width:640px;max-height:94vh;max-height:94dvh;background:#fff;border-radius:20px 20px 0 0;box-shadow:0 -8px 30px rgba(15,23,42,.25)}
+@media (min-width:680px){#sheet{align-items:center;padding:16px}.sheet{border-radius:20px;max-height:92vh}}
+.shead{display:flex;align-items:center;gap:10px;padding:12px 14px 12px 16px;border-bottom:1px solid var(--line)}
+.shead h2{flex:1;margin:0;font-size:19px;font-weight:800;color:var(--vc)}
+.sbody{flex:1;overflow:auto;padding:12px 16px 4px;-webkit-overflow-scrolling:touch}
+.sfoot{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}
+.sfoot .btn{flex:1 1 140px}
+.fld{margin:0 0 14px}
+.fld > .lab{display:block;margin:0 0 6px;font-size:14.5px;font-weight:800;color:var(--ink2)}
+.fld > .lab small{margin-left:4px;font-weight:600;color:var(--muted)}
+.inp{width:100%;min-height:50px;padding:0 12px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:17.5px}
+.inp:focus{outline:none;border-color:var(--vc)}
+.inp.amt{font-weight:800;text-align:right}
+select.inp{font-size:16px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.two .fld{min-width:0}
+.inrow{display:flex;align-items:center;gap:8px}
+.inrow .inp{flex:1;min-width:0}
+.unit{flex-shrink:0;font-weight:800;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{min-height:44px;padding:0 16px;border:2px solid var(--line);border-radius:999px;background:#fff;font-size:15.5px;font-weight:700;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--vc);background:var(--vc);color:#fff}
+.chip.sm{min-height:36px;padding:0 11px;font-size:14px;border-width:1px}
+.capw{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 6px;padding:12px 14px;border-radius:12px;background:#0F172A;color:#fff}
+.capw span{font-size:14px;font-weight:800;color:#94A3B8}
+.capw b{font-size:34px;font-weight:800;line-height:1.1}
+.capw small{font-size:13px;color:#CBD5E1}
+.live{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:14px;color:var(--ink2)}
+.calc{margin:0 0 14px;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:15px;line-height:1.7}
+.calc b{font-weight:800}
+.ro{margin:0 0 14px;padding:10px 12px;border-radius:12px;background:var(--soft);font-size:14.5px;line-height:1.7}
+.smsg{margin:0 0 12px;padding:10px 12px;border-radius:10px;font-size:14.5px;font-weight:700}
+.smsg.err{background:var(--bad-soft);color:var(--bad)}
+.smsg.info{background:var(--accent-soft);color:#174A8C}
+.smsg.warn{background:var(--warn-soft);color:var(--warn)}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700}
+.chk input{width:22px;height:22px}
+.rawl{margin:0 0 12px;padding:10px;border-radius:10px;background:#0F172A;color:#E2E8F0;font-family:Consolas,'D2Coding',monospace;font-size:13px;line-height:1.55;max-height:46vh;overflow:auto;white-space:pre-wrap;word-break:break-all}
+
+.login{max-width:440px;margin:20px auto}
+.login form{display:flex;gap:8px;margin-top:12px}
+.login input{flex:1;min-width:0;min-height:52px;padding:0 12px;border:2px solid var(--line);border-radius:12px;font-size:17px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:60;max-width:92vw;padding:12px 18px;border-radius:12px;background:#0F172A;color:#fff;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(15,23,42,.3)}
+
+/* 계량증명서 (임시 양식 — 지금 쓰시는 계량증명서를 받으면 같은 모양으로 맞춤) */
+.cert{width:100%;max-width:178mm;margin:0 auto;color:#000;font-family:'Malgun Gothic','Noto Sans KR',sans-serif}
+.cert .ch{margin:0;text-align:center;font-size:26px;font-weight:800;letter-spacing:.5em;padding-left:.5em}
+.cert .cre{text-align:center;font-size:12px;font-weight:700}
+.cert .cno{margin:6px 0 4px;display:flex;justify-content:space-between;font-size:13px}
+.cert table{width:100%;border-collapse:collapse;font-size:14px}
+.cert th,.cert td{border:1px solid #000;padding:7px 8px;height:34px}
+.cert th{width:21%;background:#F2F2F2;font-weight:700;text-align:center;letter-spacing:.2em}
+.cert td.r{text-align:right;font-weight:700}
+.cert tr.net td,.cert tr.net th{font-size:16px;font-weight:800}
+.cert .cmsg{margin:14px 0 4px;text-align:center;font-size:14px}
+.cert .cdate{margin:4px 0 10px;text-align:center;font-size:14px}
+.cert .cco{margin:0;text-align:right;font-size:15px;font-weight:800}
+.cert .cco small{display:block;font-size:12px;font-weight:400}
+.cert .cnote{margin:8px 0 0;font-size:11.5px}
+.prev{padding:12px;border:1px dashed var(--line);border-radius:12px;background:#fff}
+#print{display:none}
+@media print{
+  @page{size:A4;margin:14mm}
+  body{background:#fff}
+  body.printing > *:not(#print){display:none!important}
+  body.printing #print{display:block!important}
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="bin" data-nmc-slot data-nmc-hub="manage.html" data-nmc-hub-name="관리자">
+    <a class="home nmc-menu" href="manage.html" data-nmc-menu aria-haspopup="dialog" aria-label="전체 메뉴" title="전체 메뉴"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg><span>메뉴</span></a>
+    <h1 id="title">계근대 계량</h1>
+  </div>
+</header>
+<main class="wrap" id="root"></main>
+<div id="sheet" hidden></div>
+<p class="toast" id="toast" role="status" aria-live="polite" hidden></p>
+<div id="print" aria-hidden="true"></div>
+
+<script>
+(function () {
+  'use strict';
+  var DEMO = window.__SERVER__ || null;   // 시험용 화면에서만
+  var API = DEMO ? '' : String(window.NMC_API || '');
+  var TOKEN_KEY = 'nmc_pay_token';      // 다른 관리자 화면과 같은 열쇠
+  var $ = function (id) { return document.getElementById(id); };
+  var root = $('root'), sheetEl = $('sheet'), toastEl = $('toast'), printEl = $('print');
+  var dm = /[?&]day=(\d{4}-\d{2}-\d{2})(?:&|$)/.exec(location.search);
+  var S = { authed: false, loginErr: '', d: null, day: dm ? dm[1] : '', err: '', sheet: null, loading: false };
+  var token = '';
+  try { token = sessionStorage.getItem(TOKEN_KEY) || ''; } catch (e) {}
+  S.authed = !!token;
+  var LINKABLE = ['SBR 고무분말', '분철'];
+  var KIND_ITEM = { '매입': '폐타이어', '매출': 'SBR 고무분말', '기타': '' };
+
+  /* ───────── 글자 · 숫자 · 날짜 ───────── */
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function kg(n) { return n == null || n === '' || isNaN(Number(n)) ? '' : (n < 0 ? '−' : '') + Math.abs(Math.round(Number(n))).toLocaleString('ko-KR'); }
+  function num(v) {
+    var s = String(v == null ? '' : v).replace(/[,\s]/g, '');
+    if (s === '') return null;
+    if (!/^-?\d+(\.\d+)?$/.test(s)) return NaN;
+    return Number(s);
+  }
+  function fmtInt(v) { var s = String(v == null ? '' : v).replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, ''); return s ? Number(s).toLocaleString('ko-KR') : ''; }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function P3(s) { return [Number(s.slice(0, 4)), Number(s.slice(5, 7)), Number(s.slice(8, 10))]; }
+  function addDays(s, n) { var p = P3(s), d = new Date(Date.UTC(p[0], p[1] - 1, p[2] + n)); return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); }
+  var WD = ['일', '월', '화', '수', '목', '금', '토'];
+  function wd(s) { var p = P3(s); return WD[new Date(Date.UTC(p[0], p[1] - 1, p[2])).getUTCDay()]; }
+  function dLong(s) { var p = P3(s); return p[0] + '년 ' + p[1] + '월 ' + p[2] + '일 (' + wd(s) + ')'; }
+  function md(s) { var p = P3(s); return p[1] + '/' + p[2]; }
+  function hm(s) { return String(s || '').slice(11, 16); }
+  function clock() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function tag(t, c) { return '<span class="tag' + (c ? ' ' + c : '') + '">' + esc(t) + '</span>'; }
+  function kindCls(k) { return k === '매입' ? 'info' : k === '매출' ? 'ok' : ''; }
+
+  /* ───────── 서버 ───────── */
+  var ERR = {
+    auth: '로그인 유효 시간이 지났습니다. 비밀번호를 다시 입력해 주십시오.', bad_pw: '비밀번호가 맞지 않습니다.', locked: '비밀번호를 여러 번 틀려서 15분 동안 잠겼습니다.',
+    net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.', bad_date: '날짜를 확인해 주십시오.',
+    bad_kind: '구분(매입 · 매출 · 기타)을 골라 주십시오.', bad_car: '차량번호를 입력해 주십시오.', bad_co: '업체(거래처)를 입력해 주십시오.', bad_item: '품명을 입력해 주십시오.',
+    bad_weight: '무게를 확인해 주십시오 (1kg 이상 120,000kg 이하의 정수).', bad_link: '연결할 출고를 확인해 주십시오 (매출 · SBR 고무분말 · 분철 출고만).',
+    dup_link: '이 출고에는 이미 다른 계량이 연결되어 있습니다.', not_waiting: '이미 2차 계량을 마친 차량입니다.', same_weight: '2차 무게가 1차와 같습니다. 차량을 확인해 주십시오.',
+    cancelled: '취소된 계량입니다.', not_done: '2차 계량을 마친 뒤 발행할 수 있습니다.', not_found: '해당 계량이 없습니다. 다른 곳에서 취소되었을 수 있습니다.',
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.'
+  };
+  function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.'); }
+  function post(body) {
+    if (token && body.action !== 'login') body.token = token;
+    if (DEMO) {
+      return new Promise(function (res, rej) {
+        setTimeout(function () { try { var j = JSON.parse(DEMO.post(JSON.stringify(body))); if (j.ok) res(j.data); else rej(new Error(j.error)); } catch (e) { rej(e); } }, 20);
+      });
+    }
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 90000);
+    return fetch(API, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', cache: 'no-store', credentials: 'omit', signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error('net'); return r.json(); }, function (e) { throw new Error(e && e.name === 'AbortError' ? 'timeout' : 'net'); })
+      .then(function (j) { clearTimeout(timer); if (!j || !j.ok) throw new Error((j && j.error) || 'server'); return j.data; }, function (e) { clearTimeout(timer); throw e; });
+  }
+  function setToken(t) { token = t || ''; try { if (t) sessionStorage.setItem(TOKEN_KEY, t); else sessionStorage.removeItem(TOKEN_KEY); } catch (e) {} }
+  function devId() {
+    var k = 'nmc_dev', v = '';
+    try { v = localStorage.getItem(k) || ''; } catch (e) {}
+    if (!/^[0-9a-f]{32}$/.test(v)) {
+      var a = new Uint8Array(16); crypto.getRandomValues(a);
+      v = Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+      try { localStorage.setItem(k, v); } catch (e) {}
+    }
+    return v;
+  }
+  function call(fn, args) {
+    return post({ action: 'stock.call', fn: fn, args: args || [] }).catch(function (e) {
+      if (String(e && e.message) === 'auth') { setToken(''); S.authed = false; S.d = null; S.loginErr = ERR.auth; closeSheetNow(); render(); }
+      throw e;
+    });
+  }
+  function load(quiet) {
+    if (S.loading || !S.authed) return;
+    S.loading = true;
+    call('apiWeigh', [S.day || '']).then(function (d) {
+      S.loading = false; S.err = ''; S.d = d;
+      if (!S.day) S.day = d.today;
+      render();
+      if (S.sheet && S.sheet.kind === 'w1') renderSheet();
+    }, function (e) { S.loading = false; if (String(e && e.message) !== 'auth' && !quiet) { S.err = errText(e); render(); } });
+  }
+  function recOf(id) { if (!S.d) return null; return S.d.pend.concat(S.d.done).filter(function (r) { return r.id === id; })[0] || null; }
+
+  /* ───────── 지시계 (Web Serial) ─────────
+     지시계가 RS-232C로 계속 보내는 글자 줄(예: "ST,GS,+0012340kg")에서 무게와 안정 표시를 읽습니다.
+     줄 끝 = CR · LF · ETX(0x03), STX(0x02)는 줄 시작. 안정 = 지시계의 ST 표시(있으면), 없으면 최근 같은 값이 이어질 때. */
+  var SUP = !!(navigator.serial && navigator.serial.requestPort);
+  var CFG_KEY = 'nmc_scale_cfg';
+  var DEF_CFG = { baud: 9600, data: 8, parity: 'none', stop: 1, unit: 'auto', req: '', autoPrint: true, vid: null, pid: null };
+  var C = (function () { var c = {}; try { c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}') || {}; } catch (e) { c = {}; } return Object.assign({}, DEF_CFG, c); })();
+  function saveCfg() { try { localStorage.setItem(CFG_KEY, JSON.stringify(C)); } catch (e) {} }
+  var SC = { st: SUP ? 'off' : 'nosup', port: null, reader: null, buf: '', frames: [], bytes: [], nBytes: 0, hist: [], w: null, stF: null, at: 0, ol: false, err: '', reqT: null, closing: false };
+  var ST_TXT = { nosup: '지시계 연결 미지원 브라우저', off: '지시계 연결 안 됨', conn: '연결 중…', err: '연결 오류', nodata: '수신 없음', ol: '과부하', move: '흔들림', stable: '안정' };
+
+  function parseFrame(s) {
+    var u = s.toUpperCase();
+    if (/(^|[^A-Z])(OL|OVER)([^A-Z]|$)/.test(u)) return { ol: true };
+    var st = null;
+    if (/(^|[^A-Z])(US|MT|MO)([^A-Z]|$)|UNSTABLE|MOTION/.test(u)) st = false;
+    else if (/(^|[^A-Z])ST([^A-Z]|$)|STABLE/.test(u)) st = true;
+    var t = s.replace(/(\d),(\d{3})(?!\d)/g, '$1$2');
+    var re = /([+-])?\s*(\d+(?:\.\d+)?)/g, m, best = null;
+    while ((m = re.exec(t))) { var n = m[2].replace('.', '').length; if (!best || n > best.n) best = { n: n, neg: m[1] === '-', v: Number(m[2]) }; }
+    if (!best || isNaN(best.v)) return null;
+    var unit = C.unit;
+    if (unit === 'auto') unit = /KG/.test(u) ? 'kg' : /(^|[^A-Z])(T|TON)([^A-Z]|$)/.test(u) ? 't' : 'kg';
+    var w = Math.round((unit === 't' ? best.v * 1000 : best.v) * (best.neg ? -1 : 1));
+    return { w: w, st: st };
+  }
+  function feed(bytes) {
+    for (var i = 0; i < bytes.length; i++) {
+      var b = bytes[i];
+      SC.bytes.push(b); SC.nBytes++;
+      if (b === 13 || b === 10 || b === 3) { if (SC.buf) frame(SC.buf); SC.buf = ''; }
+      else if (b === 2) SC.buf = '';
+      else if (b >= 32 && b < 127) { SC.buf += String.fromCharCode(b); if (SC.buf.length > 120) { frame(SC.buf); SC.buf = ''; } }
+    }
+    if (SC.bytes.length > 96) SC.bytes = SC.bytes.slice(-96);
+  }
+  function frame(s) {
+    var t = Date.now(), p = parseFrame(s);
+    SC.frames.push({ t: t, s: s, p: p });
+    if (SC.frames.length > 40) SC.frames.shift();
+    if (!p) return;
+    SC.at = t;
+    if (p.ol) { SC.ol = true; SC.w = null; paintScale(); return; }
+    SC.ol = false; SC.w = p.w; SC.stF = p.st;
+    SC.hist.push({ t: t, w: p.w });
+    while (SC.hist.length && t - SC.hist[0].t > 5000) SC.hist.shift();
+    paintScale();
+  }
+  function scState() {
+    var now = Date.now();
+    if (SC.st !== 'on') return SC.st;
+    if (!SC.at || now - SC.at > 3000) return 'nodata';
+    if (SC.ol) return 'ol';
+    if (SC.w == null) return 'nodata';
+    if (SC.stF === false) return 'move';
+    var h = SC.hist.filter(function (x) { return now - x.t <= 2500; });
+    if (!h.length || h[h.length - 1].w !== SC.w) return 'move';
+    if (SC.stF === true) return 'stable';
+    return h.length >= 3 && h.every(function (x) { return x.w === SC.w; }) && h[h.length - 1].t - h[0].t >= 700 ? 'stable' : 'move';
+  }
+  function okWeight() { return scState() === 'stable' && SC.w > 0; }
+  function reqBytes() {
+    var s = String(C.req || '');
+    if (!s) return null;
+    s = s.replace(/\\r/g, '\r').replace(/\\n/g, '\n').replace(/\\x([0-9a-fA-F]{2})/g, function (_, h) { return String.fromCharCode(parseInt(h, 16)); });
+    var a = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i) & 255;
+    return a;
+  }
+  function sendReq() {
+    var p = SC.port, a = reqBytes();
+    if (!p || !a || !p.writable) return;
+    var w;
+    try { w = p.writable.getWriter(); } catch (e) { return; }
+    w.write(a).catch(function () {}).then(function () { try { w.releaseLock(); } catch (e) {} });
+  }
+  function scOpen(port) {
+    return scClose(true).then(function () {
+      SC.st = 'conn'; SC.err = ''; paintScale();
+      return port.open({ baudRate: Number(C.baud) || 9600, dataBits: Number(C.data) || 8, parity: C.parity || 'none', stopBits: Number(C.stop) || 1, bufferSize: 4096 }).then(function () {
+        SC.port = port; SC.st = 'on'; SC.at = 0; SC.hist = []; SC.w = null; SC.buf = ''; SC.frames = []; SC.bytes = []; SC.nBytes = 0;
+        readLoop(port);
+        if (reqBytes()) SC.reqT = setInterval(sendReq, 500);
+        paintScale(true);
+        return true;
+      }, function (e) {
+        var msg = String((e && e.message) || e || '');
+        SC.st = 'err'; SC.err = e && e.name === 'NetworkError' || /Failed to open/i.test(msg) ? 'busy' : msg;
+        paintScale(true);
+        return false;
+      });
+    });
+  }
+  function readLoop(port) {
+    (function next() {
+      if (SC.port !== port || !port.readable || SC.closing) { if (SC.port === port && !SC.closing) { SC.port = null; SC.st = 'off'; paintScale(true); } return; }
+      var reader;
+      try { reader = port.readable.getReader(); } catch (e) { return; }
+      SC.reader = reader;
+      (function pump() {
+        reader.read().then(function (r) {
+          if (r.done) { try { reader.releaseLock(); } catch (e) {} setTimeout(next, 50); return; }
+          if (r.value) feed(r.value);
+          pump();
+        }, function () { try { reader.releaseLock(); } catch (e) {} setTimeout(next, 200); });   // 패리티 · 프레임 오류: 다시 읽기
+      })();
+    })();
+  }
+  function scClose(quiet) {
+    clearInterval(SC.reqT); SC.reqT = null;
+    var p = SC.port;
+    if (!p) { if (!quiet) { SC.st = SUP ? 'off' : 'nosup'; paintScale(true); } return Promise.resolve(); }
+    SC.closing = true; SC.port = null;
+    var rd = SC.reader;
+    return Promise.resolve().then(function () { return rd ? rd.cancel().catch(function () {}) : null; })
+      .then(function () { try { if (rd) rd.releaseLock(); } catch (e) {} return p.close().catch(function () {}); })
+      .then(function () { SC.closing = false; SC.reader = null; SC.st = SUP ? 'off' : 'nosup'; SC.w = null; SC.at = 0; if (!quiet) paintScale(true); });
+  }
+  function scAuto() {
+    if (!SUP || SC.port) return;
+    navigator.serial.getPorts().then(function (ps) {
+      if (!ps.length || SC.port) return;
+      var p = ps.filter(function (x) { var i = x.getInfo ? x.getInfo() : {}; return C.vid != null && i.usbVendorId === C.vid && i.usbProductId === C.pid; })[0] || ps[0];
+      scOpen(p);
+    }, function () {});
+  }
+  function scPick() {
+    if (!SUP) return;
+    navigator.serial.requestPort().then(function (p) {
+      var i = p.getInfo ? p.getInfo() : {};
+      C.vid = i.usbVendorId == null ? null : i.usbVendorId; C.pid = i.usbProductId == null ? null : i.usbProductId; saveCfg();
+      return scOpen(p).then(function (ok) { if (ok) toast('지시계를 연결했습니다'); });
+    }, function () { /* 고르지 않음 */ });
+  }
+  if (SUP && navigator.serial.addEventListener) navigator.serial.addEventListener('disconnect', function (ev) { if (ev.target === SC.port) { scClose(); toast('지시계 연결이 끊겼습니다'); } });
+  setInterval(function () { if (SC.st === 'on') paintScale(); }, 700);   // 수신 끊김 · 안정 판단은 시간에 따라 바뀜
+
+  /* ───────── 그리기 ───────── */
+  function render() {
+    document.body.classList.toggle('noscroll', !!S.sheet);
+    var h;
+    if (!S.authed) h = loginHtml();
+    else if (!S.d) h = S.err ? errHtml() : '<p class="wait">조회 중…</p>';
+    else h = scaleHtml() + pendHtml() + doneHtml();
+    root.innerHTML = h;
+    paintScale(true);
+    if (window.NMCNav) NMCNav.sync();
+    if (!S.authed) { var pw = $('pw'); if (pw && !S.sheet) pw.focus(); }
+  }
+  function errHtml() { return '<section class="card"><p class="err" role="alert">' + esc(S.err) + '</p><div class="tools"><button type="button" class="btn" data-act="retry">다시 조회</button></div></section>'; }
+  function loginHtml() {
+    return '<section class="card login"><h2>관리자 로그인</h2><p class="hint">계근대 계량은 관리자 전용입니다. 관리자 비밀번호를 입력해 주십시오. 다른 관리자 화면에서 이미 로그인한 경우 바로 열립니다.</p>' +
+      '<form id="loginForm" autocomplete="off"><label class="hint" for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
+      '<p class="err" id="loginErr" role="alert">' + esc(S.loginErr) + '</p></section>';
+  }
+  function scaleHtml() {
+    return '<section class="card scale" aria-label="계근대"><div class="srow"><span class="wst" id="wst"></span><span class="wport" id="wport"></span></div>' +
+      '<div class="wnum" id="wnum">—</div><div class="tools" id="wtools"></div>' +
+      '<div class="act1"><button type="button" class="btn big" id="b1" data-act="w1">1차 계량</button><button type="button" class="link" data-act="w1m">직접 입력으로 1차 계량</button></div>' +
+      '<p class="hint" id="whint"></p></section>';
+  }
+  function toolsHtml() {
+    if (!SUP) return '';
+    var on = SC.st === 'on' || SC.st === 'conn';
+    return (on ? '<button type="button" class="btn ghost sm" data-act="sc-off">연결 끊기</button>' : '<button type="button" class="btn sm" data-act="sc-pick">계근대 연결</button>') +
+      '<button type="button" class="btn ghost sm" data-act="cfg">통신 설정</button><button type="button" class="btn ghost sm" data-act="raw">받은 글자</button>';
+  }
+  function hintTxt(st) {
+    if (st === 'nosup') return '지시계 연결은 PC의 크롬 또는 엣지에서 됩니다. 지금은 무게를 직접 입력할 수 있습니다.';
+    if (st === 'off') return "'계근대 연결'을 누르고 지시계가 연결된 단자(COM)를 고르십시오. 처음 한 번만 고르면 다음부터 자동으로 연결됩니다.";
+    if (st === 'err') return SC.err === 'busy' ? '단자를 열지 못했습니다. 기존 계근 프로그램이 켜져 있으면 닫고 다시 연결해 주십시오.' : '연결하지 못했습니다 (' + SC.err + '). 통신 설정을 확인해 주십시오.';
+    if (st === 'nodata') return "지시계에서 받은 값이 없습니다. 통신 설정(속도)과 지시계 출력 설정을 확인해 주십시오. '받은 글자'에서 들어오는 내용을 볼 수 있습니다.";
+    if (st === 'ol') return '과부하 — 지시계를 확인해 주십시오.';
+    if (st === 'move') return '무게가 멈추면 계량할 수 있습니다.';
+    return '';
+  }
+  var paintQ = false;
+  function paintScale(now) {
+    if (now) { doPaint(); return; }
+    if (paintQ) return;
+    paintQ = true;
+    (window.requestAnimationFrame || setTimeout)(function () { paintQ = false; doPaint(); });
+  }
+  function doPaint() {
+    var st = scState(), el, on = SC.st === 'on', ok = okWeight();
+    if ((el = $('wnum'))) { el.textContent = on && SC.w != null && !SC.ol ? kg(SC.w) : '—'; el.className = 'wnum ' + st; }
+    if ((el = $('wst'))) { el.textContent = ST_TXT[st]; el.className = 'wst ' + st; }
+    if ((el = $('wport'))) el.textContent = on ? C.baud + 'bps · ' + C.data + (C.parity === 'none' ? 'N' : C.parity === 'even' ? 'E' : 'O') + C.stop : '';
+    if ((el = $('wtools'))) { var k = SC.st + '|' + SUP; if (el.getAttribute('data-k') !== k) { el.setAttribute('data-k', k); el.innerHTML = toolsHtml(); } }
+    if ((el = $('whint'))) el.textContent = hintTxt(st);
+    if ((el = $('b1'))) { el.disabled = on && !ok; el.textContent = on ? (ok ? '1차 계량 · ' + kg(SC.w) + ' kg' : '1차 계량') : '1차 계량 (직접 입력)'; }
+    Array.prototype.forEach.call(document.querySelectorAll('#root [data-act="w2"]'), function (b) { b.disabled = on && !ok; });
+    if ((el = $('liveW'))) el.textContent = on ? (SC.w != null && !SC.ol ? kg(SC.w) + ' kg · ' : '') + ST_TXT[st] : ST_TXT[st];
+    if ((el = $('recap'))) el.disabled = !ok;
+  }
+  function pendHtml() {
+    var P = S.d.pend.slice().sort(function (a, b) { return a.at1 < b.at1 ? -1 : 1; });
+    var h = '<section class="card"><h2>대기 차량 <small>1차 계량만 마친 차 · ' + P.length + '대</small></h2>';
+    if (!P.length) h += '<p class="empty">대기 중인 차량이 없습니다.</p>';
+    P.forEach(function (r) {
+      h += '<div class="pend"><div class="pt"><b>' + esc(r.car) + '</b> ' + tag(r.kind, kindCls(r.kind)) + (r.link ? tag('출고 연결', 'ok') : '') + '<br>' + esc(r.co || '업체 없음') + ' · ' + esc(r.item) +
+        '<small>' + esc(r.id) + ' · 1차 ' + esc(hm(r.at1)) + (r.date !== S.d.today ? ' (' + esc(md(r.date)) + ')' : '') + ' · <b>' + kg(r.w1) + ' kg</b>' + (r.m1 === '직접' ? ' · 직접 입력' : '') + '</small></div>' +
+        '<div class="pa"><button type="button" class="btn" data-act="w2" data-id="' + esc(r.id) + '">2차 계량</button>' +
+        '<button type="button" class="btn ghost sm" data-act="w2m" data-id="' + esc(r.id) + '">직접 입력</button>' +
+        '<button type="button" class="btn ghost sm" data-act="edit" data-id="' + esc(r.id) + '">고치기</button></div></div>';
+    });
+    return h + '</section>';
+  }
+  function doneHtml() {
+    var day = S.d.day, today = S.d.today;
+    var D = S.d.done.slice().sort(function (a, b) { return a.id < b.id ? -1 : 1; });
+    var sum = { n: 0, '매입': 0, '매출': 0 };
+    D.forEach(function (r) { if (r.st === '완료') { sum.n++; if (sum[r.kind] != null) sum[r.kind] += Number(r.net) || 0; } });
+    var h = '<section class="card"><div class="pnav"><button type="button" class="nav" data-act="dprev" aria-label="이전 날">‹</button>' +
+      '<div class="plabel"><b>' + esc(dLong(day)) + '</b><small>완료 ' + sum.n + '대 · 매입 ' + kg(sum['매입']) + ' kg · 매출 ' + kg(sum['매출']) + ' kg</small></div>' +
+      '<button type="button" class="nav" data-act="dnext" aria-label="다음 날"' + (day >= today ? ' disabled' : '') + '>›</button></div>';
+    if (!D.length) h += '<p class="empty">' + (day === today ? '오늘 2차 계량까지 마친 차량이 없습니다.' : '이 날 계량 기록이 없습니다.') + '</p>';
+    else {
+      h += '<div class="tw"><table class="dl"><thead><tr><th>번호</th><th>차량번호</th><th>구분</th><th>업체</th><th>품명</th><th>1차</th><th>2차</th><th>총중량</th><th>공차중량</th><th>실중량</th><th>표시</th></tr></thead><tbody>';
+      D.forEach(function (r) {
+        var off = r.st === '취소';
+        h += '<tr class="rb' + (off ? ' off' : '') + '" data-act="rec" data-id="' + esc(r.id) + '" tabindex="0" role="button">' +
+          '<td>' + esc(r.id) + '</td><td class="l">' + esc(r.car) + '</td><td>' + esc(r.kind) + '</td><td class="l">' + esc(r.co) + '</td><td class="l">' + esc(r.item) + '</td>' +
+          '<td>' + esc(hm(r.at1)) + '</td><td>' + esc(hm(r.at2)) + '</td><td class="r">' + kg(r.gross) + '</td><td class="r">' + kg(r.tare) + '</td><td class="r b">' + kg(r.net) + '</td><td class="l">' +
+          (off ? tag('취소', 'bad') : '') + (r.m1 === '직접' || r.m2 === '직접' ? tag('직접 입력', 'warn') : '') +
+          (!off && r.kind === '매출' && !r.link && LINKABLE.indexOf(r.item) >= 0 ? tag('출고 연결 안 됨', 'warn') : '') + (r.prints ? tag('발행 ' + r.prints, 'ok') : '') + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    }
+    return h + '</section>';
+  }
+
+  /* ───────── 계량증명서 (임시 양식) ───────── */
+  function certHtml(r, re) {
+    var co = (S.d && S.d.co) || {}, p = P3(r.date);
+    var manual = r.m1 === '직접' || r.m2 === '직접';
+    var row = function (k, v, cls) { return '<tr' + (cls ? ' class="' + cls + '"' : '') + '><th>' + k + '</th><td colspan="3"' + (cls ? ' class="r"' : '') + '>' + v + '</td></tr>'; };
+    return '<div class="cert"><p class="ch">계량증명서</p>' + (re ? '<p class="cre">(재발행)</p>' : '') +
+      '<div class="cno"><span>No. ' + esc(r.id) + '</span><span>구분: ' + esc(r.kind) + '</span></div>' +
+      '<table><tbody>' +
+      '<tr><th>계량일자</th><td>' + p[0] + '년 ' + p[1] + '월 ' + p[2] + '일</td><th>차량번호</th><td>' + esc(r.car) + '</td></tr>' +
+      '<tr><th>거래처</th><td>' + esc(r.co) + '</td><th>품명</th><td>' + esc(r.item) + '</td></tr>' +
+      '<tr><th>1차 계량</th><td>' + esc(hm(r.at1)) + '</td><td colspan="2" class="r">' + kg(r.w1) + ' kg</td></tr>' +
+      '<tr><th>2차 계량</th><td>' + esc(hm(r.at2)) + '</td><td colspan="2" class="r">' + kg(r.w2) + ' kg</td></tr>' +
+      row('총중량', kg(r.gross) + ' kg', 'n') + row('공차중량', kg(r.tare) + ' kg', 'n') + row('실중량', kg(r.net) + ' kg', 'net') + row('비고', esc(r.memo || '')) +
+      '</tbody></table><p class="cmsg">위와 같이 계량하였음을 증명합니다.</p><p class="cdate">' + p[0] + '년 ' + p[1] + '월 ' + p[2] + '일</p>' +
+      '<p class="cco">' + esc(co.name || '') + (co.addr || co.tel ? '<small>' + esc([co.addr, co.tel ? '전화 ' + co.tel : ''].filter(function (x) { return x; }).join(' · ')) + '</small>' : '') + '</p>' +
+      (manual ? '<p class="cnote">※ 직접 입력한 중량이 포함되어 있습니다.</p>' : '') + '</div>';
+  }
+  function doPrint(r) {
+    var re = (r.prints || 0) > 0;
+    printEl.innerHTML = certHtml(r, re);
+    document.body.classList.add('printing');
+    var done = false;
+    var after = function () {
+      if (done) return; done = true;
+      document.body.classList.remove('printing');
+      call('apiWeighIn', ['printed', { id: r.id }]).then(function (x) { r.prints = x.rec.prints; if (S.sheet && S.sheet.id === r.id) { S.sheet.rec = x.rec; renderSheet(); } load(true); }, function () {});
+    };
+    window.addEventListener('afterprint', after, { once: true });
+    try { window.print(); } catch (e) { /* 인쇄 창 없음 */ }
+    setTimeout(after, 1500);
+  }
+
+  /* ───────── 창 ───────── */
+  function openSheet(kind, o) { S.sheet = Object.assign({ kind: kind, msg: '', busy: false }, o || {}); renderSheet(); render(); }
+  function closeSheet() { if (!S.sheet) return; closeSheetNow(); if (window.NMCNav) NMCNav.sync(); }
+  function closeSheetNow() { S.sheet = null; sheetEl.hidden = true; sheetEl.innerHTML = ''; document.body.classList.remove('noscroll'); }
+  function fld(k, lab, v, o) {
+    o = o || {};
+    var id = 'f_' + k;
+    var inp = '<input class="inp' + (o.amt ? ' amt' : '') + '" id="' + id + '" data-f="' + k + '" type="text" value="' + esc(v == null ? '' : v) + '"' + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') +
+      (o.im ? ' inputmode="' + o.im + '"' : '') + (o.list ? ' list="' + o.list + '"' : '') + ' maxlength="' + (o.ml || 60) + '" autocomplete="off">';
+    return '<div class="fld"><label class="lab" for="' + id + '">' + lab + (o.sub ? '<small>' + o.sub + '</small>' : '') + '</label>' + (o.unit ? '<div class="inrow">' + inp + '<span class="unit">' + o.unit + '</span></div>' : inp) + (o.after || '') + '</div>';
+  }
+  function dlist(id, arr) { return '<datalist id="' + id + '">' + (arr || []).map(function (n) { return '<option value="' + esc(n) + '">'; }).join('') + '</datalist>'; }
+  function outsFor(f, selfId) {
+    return (S.d.outs || []).filter(function (o) { return !o.weighed || o.weighed === selfId || o.id === f.link; });
+  }
+  function outLabel(o) { return md(o.date) + ' ' + (o.type === '출고예정' ? '출고예정' : '출고') + ' · ' + (o.cust || '거래처 없음') + ' · ' + o.prod + ' ' + o.color + ' · ' + kg(o.qty) + ' kg'; }
+  function infoHtml(f, selfId) {   // 구분 · 차량번호 · 업체 · 품명 · 연결 · 메모
+    var names = S.d.names || {};
+    var h = '<div class="fld"><span class="lab">구분</span><div class="chips">' + ['매입', '매출', '기타'].map(function (k) { return '<button type="button" class="chip" aria-pressed="' + (f.kind === k) + '" data-act="pick" data-k="kind" data-v="' + k + '">' + k + '</button>'; }).join('') + '</div></div>' +
+      fld('car', '차량번호', f.car, { ml: 20, list: 'carList', ph: '예) 81가1234', sub: f.carHit ? '지난 계량 정보로 채웠습니다' : '', after: dlist('carList', Object.keys(S.d.cars || {})) }) +
+      fld('co', f.kind === '매출' ? '거래처' : '업체', f.co, { ml: 40, list: 'coList', sub: f.kind === '기타' ? '없으면 비워 두셔도 됩니다' : '', after: dlist('coList', names.co) }) +
+      '<div class="fld"><label class="lab" for="f_item">품명</label><div class="chips" style="margin-bottom:6px">' + ['폐타이어', 'SBR 고무분말', '분철'].map(function (k) { return '<button type="button" class="chip sm" aria-pressed="' + (f.item === k) + '" data-act="pick" data-k="item" data-v="' + k + '">' + k + '</button>'; }).join('') + '</div>' +
+      '<input class="inp" id="f_item" data-f="item" type="text" value="' + esc(f.item) + '" list="itemList" maxlength="30" autocomplete="off">' + dlist('itemList', names.item) + '</div>';
+    if (f.kind === '매출') {
+      var L = outsFor(f, selfId);
+      h += '<div class="fld"><label class="lab" for="f_link">연결할 출고<small>SBR 고무분말 · 분철 — 연결하면 계량증명서(매출)에 들어갑니다</small></label><select class="inp" id="f_link" data-f="link"><option value="">연결 안 함 (나중에 연결)</option>' +
+        L.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === f.link ? ' selected' : '') + '>' + esc(outLabel(o)) + '</option>'; }).join('') + '</select></div>';
+    }
+    return h + fld('memo', '메모', f.memo, { ml: 200 });
+  }
+  function capHtml(sh, lab) {
+    if (sh.cap) {
+      return '<div class="capw"><span>' + lab + '</span><b>' + kg(sh.cap.w) + ' kg</b><small>저울 · ' + esc(sh.cap.t) + '에 읽음</small></div>' +
+        '<p class="live">지금 저울: <span id="liveW"></span><button type="button" class="btn ghost sm" id="recap" data-act="recap">다시 읽기</button></p>';
+    }
+    return fld('w', lab + ' (직접 입력)', sh.f.w, { unit: 'kg', amt: 1, im: 'numeric', sub: '저울에서 읽지 않은 무게는 기록과 계량증명서에 "직접 입력"으로 남습니다' });
+  }
+  function calc2(sh) {
+    var r = sh.rec, w2 = sh.cap ? sh.cap.w : num(sh.f.w);
+    if (w2 == null || isNaN(w2) || w2 <= 0) return '1차 ' + kg(r.w1) + ' kg · 2차 무게를 넣으면 실중량을 계산합니다.';
+    if (w2 === r.w1) return '<span class="err">2차 무게가 1차와 같습니다.</span>';
+    var g = Math.max(r.w1, w2), t = Math.min(r.w1, w2);
+    return '총중량 <b>' + kg(g) + ' kg</b> − 공차중량 <b>' + kg(t) + ' kg</b> = 실중량 <b>' + kg(g - t) + ' kg</b>';
+  }
+  function renderSheet() {
+    var sh = S.sheet; if (!sh) return;
+    var b = '', foot = '', title = '', f = sh.f || {}, busy = sh.busy ? ' disabled' : '';
+    if (sh.msg) b += '<p class="smsg ' + (sh.msgCls || 'err') + '" role="alert">' + esc(sh.msg) + '</p>';
+    if (sh.kind === 'w1') {
+      title = '1차 계량';
+      b += capHtml(sh, '1차 중량') + infoHtml(f, '');
+      foot = '<button type="button" class="btn" data-act="w1-save"' + busy + '>' + (sh.busy ? '저장 중…' : '1차 계량 저장') + '</button>';
+    } else if (sh.kind === 'w2') {
+      var r = sh.rec;
+      title = '2차 계량 · ' + r.car;
+      b += '<p class="ro"><b>' + esc(r.car) + '</b> ' + tag(r.kind, kindCls(r.kind)) + ' · ' + esc(r.co || '업체 없음') + ' · ' + esc(r.item) + '<br>' + esc(r.id) + ' · 1차 ' + esc(hm(r.at1)) + ' · <b>' + kg(r.w1) + ' kg</b>' + (r.m1 === '직접' ? ' (직접 입력)' : '') + '</p>' +
+        capHtml(sh, '2차 중량') + '<p class="calc" id="calc2">' + calc2(sh) + '</p>';
+      if (r.kind === '매출') {
+        var L = outsFor({ link: f.link }, r.id);
+        b += '<div class="fld"><label class="lab" for="f_link">연결할 출고<small>SBR 고무분말 · 분철</small></label><select class="inp" id="f_link" data-f="link"><option value="">연결 안 함 (나중에 연결)</option>' +
+          L.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === f.link ? ' selected' : '') + '>' + esc(outLabel(o)) + '</option>'; }).join('') + '</select></div>';
+      }
+      foot = '<button type="button" class="btn" data-act="w2-save"' + busy + '>' + (sh.busy ? '저장 중…' : '2차 계량 저장') + '</button>';
+    } else if (sh.kind === 'edit') {
+      var e = sh.rec;
+      title = '계량 고치기 · ' + e.id;
+      b += '<p class="ro">1차 ' + esc(hm(e.at1)) + ' · ' + kg(e.w1) + ' kg' + (e.m1 === '직접' ? ' (직접)' : '') + (e.st === '완료' ? '<br>2차 ' + esc(hm(e.at2)) + ' · ' + kg(e.w2) + ' kg' + (e.m2 === '직접' ? ' (직접)' : '') + '<br>실중량 <b>' + kg(e.net) + ' kg</b>' : '') +
+        '<br><small>무게는 고칠 수 없습니다. 잘못 계량했으면 취소하고 다시 계량해 주십시오.</small></p>' + infoHtml(f, e.id);
+      foot = '<button type="button" class="btn" data-act="edit-save"' + busy + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
+        '<button type="button" class="btn danger" data-act="cancel"' + busy + '>' + (sh.arm ? '한 번 더 누르면 계량 취소' : '계량 취소') + '</button>';
+    } else if (sh.kind === 'rec') {
+      var c = sh.rec;
+      title = '계량증명서 · ' + c.id;
+      if (c.st === '취소') b += '<p class="smsg warn">취소된 계량입니다.</p>';
+      b += '<p class="smsg info">인쇄 모양은 지금 쓰시는 계량증명서를 받으면 같은 모양으로 맞춥니다 (지금은 임시 양식).</p><div class="prev">' + certHtml(c, (c.prints || 0) > 0) + '</div>' +
+        (c.kind === '매출' && !c.link && LINKABLE.indexOf(c.item) >= 0 && c.st === '완료' ? '<p class="smsg warn" style="margin-top:12px">출고와 연결되지 않아 계량증명서(매출) 관리대장에 들어가지 않았습니다. 고치기에서 출고를 연결해 주십시오.</p>' : '');
+      foot = (c.st === '완료' ? '<button type="button" class="btn" data-act="print"' + busy + '>' + ((c.prints || 0) > 0 ? '계량증명서 재발행' : '계량증명서 인쇄') + '</button>' : '') +
+        (c.st !== '취소' ? '<button type="button" class="btn ghost" data-act="edit" data-id="' + esc(c.id) + '">고치기</button>' : '');
+    } else if (sh.kind === 'cfg') {
+      title = '통신 설정 (지시계)';
+      var sel = function (k, lab, opts) { return '<div class="fld"><label class="lab" for="c_' + k + '">' + lab + '</label><select class="inp" id="c_' + k + '" data-c="' + k + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(f[k]) === String(o[0]) ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>'; };
+      b += '<p class="hint" style="margin:0 0 12px">지시계 설명서의 RS-232C 설정과 같게 맞춥니다. 모르면 그대로 두고 연결한 뒤 \'받은 글자\'를 확인해 주십시오.</p>' +
+        '<div class="two">' + sel('baud', '속도 (bps)', [[1200, '1200'], [2400, '2400'], [4800, '4800'], [9600, '9600'], [19200, '19200'], [38400, '38400'], [57600, '57600'], [115200, '115200']]) +
+        sel('data', '데이터 비트', [[8, '8'], [7, '7']]) + '</div><div class="two">' + sel('parity', '패리티', [['none', '없음 (N)'], ['even', '짝수 (E)'], ['odd', '홀수 (O)']]) +
+        sel('stop', '정지 비트', [[1, '1'], [2, '2']]) + '</div>' + sel('unit', '무게 단위', [['auto', '자동 (글자에 kg · t)'], ['kg', 'kg'], ['t', 't (톤 → kg으로)']]) +
+        '<div class="fld"><label class="lab" for="c_req">요청 글자<small>지시계가 요청을 받아야 무게를 보내는 경우만 (예: \\r\\n, \\x05)</small></label><input class="inp" id="c_req" data-c="req" type="text" value="' + esc(f.req || '') + '" maxlength="20" autocomplete="off"></div>' +
+        '<label class="chk"><input type="checkbox" data-c="autoPrint"' + (f.autoPrint ? ' checked' : '') + '> 2차 계량을 저장하면 바로 인쇄 창 열기</label>';
+      foot = '<button type="button" class="btn" data-act="cfg-save">저장' + (SC.port ? ' 후 다시 연결' : '') + '</button>';
+    } else if (sh.kind === 'raw') {
+      title = '받은 글자 (지시계)';
+      var lines = SC.frames.slice(-30).map(function (x) {
+        var d = new Date(x.t), p = x.p;
+        return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()) + '  ' + x.s + '   → ' + (!p ? '읽지 못함' : p.ol ? '과부하' : kg(p.w) + ' kg' + (p.st === true ? ' · 안정' : p.st === false ? ' · 흔들림' : ''));
+      });
+      var hex = SC.bytes.map(function (x) { return (x < 16 ? '0' : '') + x.toString(16).toUpperCase(); }).join(' ');
+      b += '<p class="hint" style="margin:0 0 8px">받은 바이트 ' + SC.nBytes.toLocaleString('ko-KR') + ' · 줄 ' + SC.frames.length + (SC.st === 'on' ? '' : ' · 지금 연결 안 됨') + '</p>' +
+        '<div class="rawl" id="rawl">' + esc(lines.join('\n') || '아직 받은 글자가 없습니다.') + '</div>' +
+        '<p class="hint" style="margin:0 0 6px">마지막 바이트 (16진수)</p><div class="rawl">' + esc(hex || '-') + '</div>';
+      foot = '<button type="button" class="btn ghost" data-act="raw-refresh">새로 보기</button>';
+    }
+    sheetEl.innerHTML = '<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="shTitle"><div class="shead"><h2 id="shTitle">' + esc(title) + '</h2><button type="button" class="btn ghost sm" data-act="close">닫기</button></div>' +
+      '<div class="sbody">' + b + '</div>' + (foot ? '<div class="sfoot">' + foot + '</div>' : '') + '</div>';
+    sheetEl.hidden = false;
+    document.body.classList.add('noscroll');
+    paintScale(true);
+  }
+  function capNow() { return okWeight() ? { w: SC.w, t: clock() } : null; }
+  function openW1(manual) {
+    if (!manual && SC.st === 'on' && !okWeight()) { toast('무게가 멈춘 뒤 눌러 주십시오'); return; }
+    var cap = !manual && SC.st === 'on' ? capNow() : null;
+    openSheet('w1', { cap: cap, f: { kind: '매입', car: '', co: '', item: '폐타이어', link: '', memo: '', w: '' } });
+  }
+  function openW2(id, manual) {
+    var r = recOf(id); if (!r || r.st !== '대기') return;
+    if (!manual && SC.st === 'on' && !okWeight()) { toast('무게가 멈춘 뒤 눌러 주십시오'); return; }
+    var cap = !manual && SC.st === 'on' ? capNow() : null;
+    openSheet('w2', { id: id, rec: r, cap: cap, f: { link: r.link || autoLink(r), w: '' } });
+  }
+  function autoLink(r) {   // 매출: 같은 거래처의 연결 안 된 출고가 하나면 미리 고름
+    if (r.kind !== '매출' || !r.co) return '';
+    var L = (S.d.outs || []).filter(function (o) { return !o.weighed && o.cust === r.co && (!r.item || LINKABLE.indexOf(r.item) < 0 || o.prod === r.item); });
+    return L.length === 1 ? L[0].id : '';
+  }
+  function busy(on) { if (S.sheet) { S.sheet.busy = on; if (on) S.sheet.msg = ''; renderSheet(); } }
+  function fail(e) { if (!S.sheet) { toast(errText(e)); return; } S.sheet.busy = false; S.sheet.msg = errText(e); S.sheet.msgCls = 'err'; renderSheet(); }
+  function infoOf(f) { return { kind: f.kind, car: String(f.car || '').trim(), co: String(f.co || '').trim(), item: String(f.item || '').trim(), memo: String(f.memo || '').trim(), link: f.kind === '매출' ? f.link || '' : '' }; }
+  function checkInfo(v) {
+    if (!v.car) return 'bad_car';
+    if (v.kind !== '기타' && !v.co) return 'bad_co';
+    if (!v.item) return 'bad_item';
+    return '';
+  }
+  function wOf(sh) {
+    if (sh.cap) return { w: sh.cap.w, mode: '저울' };
+    var n = num(sh.f.w);
+    if (n == null || isNaN(n) || n <= 0 || n !== Math.round(n)) return null;
+    return { w: n, mode: '직접' };
+  }
+  function saveW1() {
+    var sh = S.sheet, v = infoOf(sh.f), c = checkInfo(v), w = wOf(sh);
+    if (!c && !w) c = 'bad_weight';
+    if (c) { fail(new Error(c)); return; }
+    v.w = w.w; v.mode = w.mode;
+    busy(true);
+    call('apiWeighIn', ['start', v]).then(function (x) { closeSheet(); toast('1차 계량 저장 · ' + x.rec.car + ' · ' + kg(x.rec.w1) + ' kg'); load(true); }, fail);
+  }
+  function saveW2() {
+    var sh = S.sheet, w = wOf(sh);
+    if (!w) { fail(new Error('bad_weight')); return; }
+    if (w.w === sh.rec.w1) { fail(new Error('same_weight')); return; }
+    var p = { id: sh.id, w: w.w, mode: w.mode };
+    if (sh.rec.kind === '매출') p.link = sh.f.link || '';
+    busy(true);
+    call('apiWeighIn', ['finish', p]).then(function (x) {
+      closeSheetNow();
+      openSheet('rec', { id: x.rec.id, rec: x.rec });
+      if (S.d) { S.d.pend = S.d.pend.filter(function (r) { return r.id !== x.rec.id; }); }
+      load(true);
+      if (C.autoPrint) setTimeout(function () { doPrint(x.rec); }, 150);
+    }, fail);
+  }
+  function saveEdit() {
+    var sh = S.sheet, v = infoOf(sh.f), c = checkInfo(v);
+    if (c) { fail(new Error(c)); return; }
+    v.id = sh.id;
+    busy(true);
+    call('apiWeighIn', ['edit', v]).then(function (x) {
+      closeSheetNow();
+      if (x.rec.st === '완료') openSheet('rec', { id: x.rec.id, rec: x.rec }); else { if (window.NMCNav) NMCNav.sync(); toast('고쳤습니다'); }
+      load(true);
+    }, fail);
+  }
+
+  /* ───────── 누르기 ───────── */
+  document.addEventListener('click', function (ev) {
+    if (ev.target === sheetEl) { closeSheet(); return; }
+    var el = ev.target.closest('[data-act]');
+    if (!el) return;
+    var act = el.getAttribute('data-act');
+    switch (act) {
+      case 'retry': S.err = ''; render(); load(); return;
+      case 'close': closeSheet(); return;
+      case 'sc-pick': scPick(); return;
+      case 'sc-off': scClose(); return;
+      case 'cfg': openSheet('cfg', { f: Object.assign({}, C) }); return;
+      case 'raw': openSheet('raw'); return;
+      case 'raw-refresh': renderSheet(); return;
+      case 'cfg-save': {
+        var f = S.sheet.f;
+        ['baud', 'data', 'stop'].forEach(function (k) { C[k] = Number(f[k]); });
+        C.parity = f.parity; C.unit = f.unit; C.req = String(f.req || '').slice(0, 20); C.autoPrint = !!f.autoPrint;
+        saveCfg();
+        var p = SC.port;
+        closeSheet();
+        if (p) scOpen(p).then(function (ok) { toast(ok ? '설정을 저장하고 다시 연결했습니다' : '설정은 저장했지만 연결하지 못했습니다'); });
+        else toast('설정을 저장했습니다');
+        return;
+      }
+      case 'w1': openW1(SC.st !== 'on'); return;
+      case 'w1m': openW1(true); return;
+      case 'w2': openW2(el.getAttribute('data-id'), false); return;
+      case 'w2m': openW2(el.getAttribute('data-id'), true); return;
+      case 'recap': {
+        var c = capNow(); if (!c || !S.sheet) return;
+        S.sheet.cap = c; renderSheet(); return;
+      }
+      case 'pick': {
+        var sh = S.sheet; if (!sh) return;
+        var k = el.getAttribute('data-k'), v = el.getAttribute('data-v');
+        if (k === 'kind' && sh.f.kind !== v) { var was = sh.f.item; sh.f.kind = v; if (!was || was === KIND_ITEM['매입'] || was === KIND_ITEM['매출']) sh.f.item = KIND_ITEM[v] || was; if (v !== '매출') sh.f.link = ''; }
+        else sh.f[k] = v;
+        renderSheet(); return;
+      }
+      case 'w1-save': saveW1(); return;
+      case 'w2-save': saveW2(); return;
+      case 'edit': {
+        var r = recOf(el.getAttribute('data-id')) || (S.sheet && S.sheet.rec); if (!r) return;
+        closeSheetNow();
+        openSheet('edit', { id: r.id, rec: r, f: { kind: r.kind, car: r.car, co: r.co, item: r.item, link: r.link || '', memo: r.memo || '' } });
+        return;
+      }
+      case 'edit-save': saveEdit(); return;
+      case 'cancel': {
+        var s2 = S.sheet; if (!s2) return;
+        if (!s2.arm) { s2.arm = true; renderSheet(); return; }
+        busy(true);
+        call('apiWeighIn', ['cancel', { id: s2.id }]).then(function () { closeSheet(); toast('계량을 취소했습니다'); load(true); }, fail);
+        return;
+      }
+      case 'rec': { var rr = recOf(el.getAttribute('data-id')); if (rr) openSheet('rec', { id: rr.id, rec: rr }); return; }
+      case 'print': { if (S.sheet && S.sheet.rec) doPrint(S.sheet.rec); return; }
+      case 'dprev': case 'dnext': {
+        if (!S.d) return;
+        var nd = addDays(S.d.day, act === 'dprev' ? -1 : 1);
+        if (nd > S.d.today) return;
+        S.day = nd; S.d.day = nd; S.d.done = []; render(); load();
+        return;
+      }
+    }
+  });
+  document.addEventListener('input', function (ev) {
+    var el = ev.target, sh = S.sheet;
+    if (!sh) return;
+    var c = el.getAttribute('data-c');
+    if (c) { sh.f[c] = el.type === 'checkbox' ? el.checked : el.value; return; }
+    var k = el.getAttribute('data-f');
+    if (!k) return;
+    if (k === 'w') {
+      var nv = fmtInt(el.value);
+      if (nv !== el.value) el.value = nv;
+      sh.f.w = nv;
+      var cc = $('calc2'); if (cc && sh.kind === 'w2') cc.innerHTML = calc2(sh);
+      return;
+    }
+    sh.f[k] = el.value;
+    if (k === 'car' && (sh.kind === 'w1' || sh.kind === 'edit')) {
+      var hit = (S.d.cars || {})[el.value.trim()];
+      if (hit && sh.kind === 'w1') {
+        sh.f.kind = hit.kind; sh.f.co = hit.co; sh.f.item = hit.item; sh.f.carHit = true;
+        if (hit.kind === '매출') sh.f.link = autoLink({ kind: '매출', co: hit.co, item: hit.item });
+        renderSheet();
+        var ci = $('f_car'); if (ci) { ci.focus(); ci.setSelectionRange(ci.value.length, ci.value.length); }
+      }
+    }
+  });
+  document.addEventListener('change', function (ev) {
+    var el = ev.target, sh = S.sheet;
+    if (!sh) return;
+    var c = el.getAttribute('data-c'); if (c) { sh.f[c] = el.type === 'checkbox' ? el.checked : el.value; return; }
+    var k = el.getAttribute('data-f'); if (k === 'link') sh.f.link = el.value;
+    if (k === 'co' && sh.kind === 'w1' && sh.f.kind === '매출' && !sh.f.link) { sh.f.link = autoLink({ kind: '매출', co: el.value.trim(), item: sh.f.item }); if (sh.f.link) renderSheet(); }
+  });
+  document.addEventListener('submit', function (ev) {
+    if (ev.target.id !== 'loginForm') return;
+    ev.preventDefault();
+    var pw = $('pw'), v = pw ? pw.value : '';
+    if (!v) return;
+    S.loginErr = '';
+    var btn = ev.target.querySelector('button'); if (btn) { btn.disabled = true; btn.textContent = '확인 중…'; }
+    post({ action: 'login', pw: v, dev: devId() }).then(function (r) { setToken(r.token); S.authed = true; S.loginErr = ''; start(); },
+      function (e) { S.loginErr = errText(e); render(); });
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && S.sheet) { closeSheet(); return; }
+    if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.getAttribute && ev.target.getAttribute('role') === 'button' && ev.target.tagName !== 'BUTTON') { ev.preventDefault(); ev.target.click(); return; }
+    if (ev.key === 'Enter' && !ev.isComposing && ev.keyCode !== 229 && S.sheet && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox') { ev.preventDefault(); ev.target.blur(); }
+  });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && S.authed && !S.sheet) load(true); });
+  setInterval(function () { if (S.authed && !document.hidden && !S.sheet && S.d) load(true); }, 30000);   // 다른 기기에서 넣은 계량도 보이게
+  var toastT = null;
+  function toast(t) { toastEl.textContent = t; toastEl.hidden = false; clearTimeout(toastT); toastT = setTimeout(function () { toastEl.hidden = true; }, 3600); }
+
+  /* 뒤로 = 온 길로 한 걸음 (공통 nav.js) */
+  function sheetKey(sh) { return sh ? ({ w2: 'r', rec: 'r', edit: 'r' }[sh.kind] || sh.kind) + (sh.id ? ':' + sh.id : '') : ''; }   // 2차 계량 → 계량증명서 → 고치기는 한 칸 (뒤로 한 번 = 닫기)
+  function navGet() { return { day: S.day, sheet: sheetKey(S.sheet) }; }
+  function navSet(v) {
+    v = v || {};
+    if (S.sheet && v.sheet !== sheetKey(S.sheet)) closeSheetNow();
+    if (v.day && v.day !== S.day && S.d) { S.day = v.day; S.d.day = v.day; S.d.done = []; load(); }
+    render();
+  }
+  if (window.NMCNav) NMCNav.page({ get: navGet, set: navSet, url: function (v) { return location.pathname + (v.day && S.d && v.day !== S.d.today ? '?day=' + v.day : ''); } });
+  function start() {
+    S.err = '';
+    render();
+    if (!S.authed) return;
+    load();
+    scAuto();
+  }
+  start();
+  if (DEMO) window.__weigh = { get S() { return S; }, get SC() { return SC; }, C: C, parseFrame: parseFrame, feedText: function (s) { feed(Array.prototype.map.call(s, function (c) { return c.charCodeAt(0); })); } };
+})();
+</script>
+</body>
+</html>
