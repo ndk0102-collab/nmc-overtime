@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="nav.js"></script>
 <script src="menu.js"></script>
+<script src="preview.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
 :root{
@@ -536,6 +537,23 @@ body.labmode .wrap{max-width:1480px}
 .potab .pz{margin-right:4px;color:var(--ink2)}
 .poln.short{background:linear-gradient(90deg,var(--bad-soft),transparent 70%)}
 .poln.need .pl1{color:var(--bad)}
+/* v68: 발주서 그림 · 수량 고치기 · 행 빼기 · 품목 추가 */
+.popv #poRevPv{margin-top:6px;max-height:68vh;overflow:auto;-webkit-overflow-scrolling:touch;border-radius:10px}   /* 그림은 화면 2/3까지 — 아래 품목 줄과 오가기 쉽게 (크게 = 화면 전체) */
+.popic{margin-top:6px}
+.poln .pl1{position:relative;padding-right:46px}
+.podel{position:absolute;right:0;top:-2px;width:40px;height:40px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink2);font-size:22px;font-weight:800;line-height:1;cursor:pointer}
+.podel:hover{border-color:var(--bad);color:var(--bad)}
+.pokgw{display:inline-flex;align-items:center;gap:6px;font-weight:800}
+.pokg{width:7.5em;min-height:42px;padding:0 10px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;font-size:17px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.pokg:focus{outline:0;border-color:var(--vc,#7A3A14)}
+.pokg.need{border-color:var(--bad);background:var(--bad-soft)}
+.potext{display:block;margin-top:3px;font-size:12.5px;color:var(--muted);font-weight:600}
+.poadd{margin-top:10px;padding:12px;border:2px dashed var(--line);border-radius:12px;background:#FBFAF8}
+.poadd h3{margin:0 0 8px;font-size:15px}
+.poaddr{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.poaddr select{min-height:44px;padding:0 10px;border:2px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:15.5px;color:var(--ink);max-width:100%}
+.poaddb{display:flex;gap:8px;margin-top:10px}
+.poaddb button{flex:1;min-height:46px}
 .pl1{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:15.5px}
 .pl2{margin-top:2px;font-size:14.5px;color:var(--ink2)}
 .pl3{margin-top:2px;font-size:14px}
@@ -1596,6 +1614,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     root.className = 'wrap' + (bar ? ' with-bar' : '');
     document.body.className = (bar ? 'has-bar' : '') + (S.ready && S.admin && VIEW === 'out' && S.outMode === 'label' ? ' labmode' : '');
     root.innerHTML = h;
+    poPvAttach();   // v68: 발주서 그림은 다시 그려도 그대로 (다시 받지 않음)
     if (document.body.className.indexOf('labmode') >= 0) {
       labFit();
       try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(labFit); } catch (e) {}
@@ -4883,7 +4902,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function poRow(x) {
     var st = PO_STATE[x.state] || 'off', busy = S.poOpening === x.id;
     var h = '<li class="poitem st-' + st + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '"><div class="pohead"><span class="pochip ' + st + '">' + esc(x.shipped ? '출고 완료' : (poStTxt(x.state) || '?')) + '</span><b class="pfn">' + esc(x.name) + '</b></div>' +
-      '<small class="pometa">' + esc(poWhen(x.at)) + ' 업로드' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>';
+      '<small class="pometa">' + esc(poWhen(x.at)) + ' 업로드' + (x.note ? ' · 메모: ' + esc(x.note) : '') + '</small>' +
+      ((x.fids || []).length ? '<button type="button" class="ghost sm popic" data-act="popic" data-v="' + esc(x.id) + '">발주서 그림</button>' : '');   // v68: 누르면 그림 (크게)
     var readBtn = function (label, cls) { return '<button type="button" class="' + (cls || 'ghost') + ' sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '판독 중…' : label) + '</button>'; };
     if (x.state === '기다림' || (x.state === '읽는 중' && x.stale)) {
       h += '<p class="muted">아직 판독하지 않았습니다.</p><div class="poacts">' + readBtn('즉시 판독', 'primary') + '<button type="button" class="ghost sm" data-act="pocancel" data-v="' + esc(x.id) + '">취소</button></div>';
@@ -5187,6 +5207,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (bl.length) h += '<ul class="poiss bad">' + bl.map(function (i) { return '<li>' + esc(poIssTxt(i.t)) + '</li>'; }).join('') + '</ul>';
     if (inf.length) h += '<ul class="poiss info">' + inf.map(function (i) { return '<li>' + esc(poIssTxt(i.t)) + '</li>'; }).join('') + '</ul>';
     h += '</section>';
+    // v68 (2026-11-26 지시 "발주서를 그림으로 바로 띄워서 … 못읽는거는 우리가 바로 뭐가 나가는지 결정할수있도록"): 발주서 그림을 보며 아래 줄을 고침
+    if ((V.item.fids || []).length) h += '<section class="card popv"><h2 class="label">발주서 그림 <small>그림과 아래 품목 · 수량을 대조해 주십시오 · 그림을 누르면 크게</small></h2><div id="poRevPv"></div></section>';
     // 1. 날짜 · 거래처 · 현장
     var odate = ov && ov.dates && ov.dates.length === 1 ? ov.dates[0] : '';
     h += '<section class="card"><h2 class="label">' + step(1) + '출고 날짜</h2><div class="chips">';
@@ -5235,7 +5257,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       var units = left.reduce(function (s, l) { return s + (l.unit === 'bag' ? (l.units || 0) : 0); }, 0);
       h += '<section class="card"><h2 class="label">' + step(ov ? 4 : 3) + '품목 <small>' + left.length + '건' + (units ? ' · ' + fmt(units) + '포' : '') + ' · ' + grpKgH(left, function (l) { return Number(l.kg) || 0; }) + ' · 물표 ' + pal + '장' + poTbTxt(left) +
         (left.length < p.lines.length ? ' · 이미 들어간 ' + (p.lines.length - left.length) + '건 제외' : '') + '</small></h2>';
-      if (!p.lines.length) h += '<p class="bad">판독된 품목이 없습니다. ‘직접 입력’으로 등록해 주십시오.</p>';
+      if (!p.lines.length) h += '<p class="bad">판독된 품목이 없습니다. ' + ((V.item.fids || []).length ? '위 발주서 그림을 보고 아래 ‘+ 품목 추가’로 넣어 주십시오.' : '아래 ‘+ 품목 추가’로 넣어 주십시오.') + '</p>';
+      else if (p.lines.some(function (l) { return !(l.kg > 0); })) h += '<p class="bad">수량(kg)이 비어 있는 행이 있습니다. 발주서 그림을 보고 수량을 넣거나 × 로 빼 주십시오.</p>';
       if (p.lines.some(function (l) { return prodCands(l.prod, l.color).length > 1; })) h += '<p class="hint">제품 단추로 일반 EPDM · NM-CHIP · 락칩을 변경합니다(같은 색 행은 함께 변경). 해당일 = 출고일에 사용 가능한 양 · kg.</p>';
       var pmx = poMixList(p);
       if (pmx.known.length) h += '<p class="mixw bad">같은 색이 다른 제품으로 섞여 있습니다: ' + esc(pmx.known.join(', ')) + ' — 같은 색은 한 제품으로만 출고됩니다(일반 EPDM·NM-CHIP·락칩은 같은 색이라도 색상 차이가 있음). 제품 단추로 하나를 선택하십시오.</p>';
@@ -5245,6 +5268,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         if (g.zone || poZones(p.lines).length > 1) h += '<h3 class="pozone">' + esc(poZoneName(g.zone)) + ' <small>' + gl.length + '건 · ' + grpKgH(gl.map(function (x) { return x.l; }), function (l) { return Number(l.kg) || 0; }) + (gn ? ' · 이미 들어간 ' + gn + '건 제외' : '') + '</small></h3>';
         h += '<ul class="polines">' + g.lines.map(function (x) { return gone[x.i] ? poGoneHtml(x.l) : poLineHtml(x.l, x.i, V, si[x.i]); }).join('') + '</ul>';
       });
+      h += V.add ? poAddHtml(V) : '<button type="button" class="ghost wide mt8" data-act="poaddl">+ 품목 추가</button>';
       h += '</section>';
     }
     // 4. 계산 · 넣기
@@ -5255,7 +5279,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var label = p.mode === 'skip' ? '등록하지 않기로 결정' : nRep ? '기존 ' + nRep + '건 대체 후 등록' : p.mode === 'rest' ? '나머지 ' + poLeft(p).length + '건 등록' : '등록';
     h += '<button type="button" class="primary wide mt12" data-act="poapply"' + (ready && !V.busy ? '' : ' disabled') + '>' + (V.busy ? '등록 중…' : label) + '</button>';
     if (!ready) h += '<p class="bad">' + (!isYmd(p.date) ? '출고일을 선택하십시오.' : !String(p.cust || '').trim() ? '거래처를 입력하십시오.' :
-      !poLeft(p).length ? '등록할 행이 없습니다.' : !poLeft(p).every(function (l) { return l.prod && l.color && l.kg > 0; }) ? '제품을 선택하지 않은 행이 있습니다.' : '같은 색이 다른 제품으로 혼합되어 등록할 수 없습니다. 제품 단추로 하나를 선택하십시오.') + '</p>';
+      !poLeft(p).length ? '등록할 행이 없습니다.' : !poLeft(p).every(function (l) { return l.kg > 0; }) ? '수량(kg)이 비어 있는 행이 있습니다.' : !poLeft(p).every(function (l) { return l.prod && l.color && l.kg > 0; }) ? '제품을 선택하지 않은 행이 있습니다.' : '같은 색이 다른 제품으로 혼합되어 등록할 수 없습니다. 제품 단추로 하나를 선택하십시오.') + '</p>';
     if (p.mode !== 'skip') {
       var rw = poReadyWait(p);
       h += '<button type="button" class="ghost wide mt8 poqbtn" data-act="poqsave"' + (rw && !V.busy ? '' : ' disabled') + '>' + (V.wait ? '대기 목록에 유지 (수정 내용 저장)' : '날짜 미정 — 대기 목록에 보관') + '</button>';
@@ -5383,7 +5407,11 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     else if (cands.length < 2) h += '<b>' + esc(l.prod || '?') + '</b> ' + esc(l.color);
     else h += '<b>' + esc(l.prod ? (PROD3_NAME[l.prod] || l.prod) : '제품 선택') + '</b> <b>' + esc(l.color) + '</b>' +
       '<small class="pohow">' + esc(l.how ? (PO_HOW[l.how] || '') : l.stated ? '발주서에 적힌 제품' : '칼라칩(제품 안 적힘)') + '</small>';
-    h += '</div><div class="pl2">' + (l.unit === 'bag' ? fmt(l.units) + '포 · ' : l.unit === 'ton' ? l.units + '톤 · ' : l.unit === 'tonbag' ? fmt(l.units) + '톤백 · ' : '') + '<b>' + fmt(l.kg) + ' kg</b>' + (l.note ? ' · ' + esc(l.note) : '') + '</div>';
+    h += '<button type="button" class="podel" data-act="podel" data-i="' + i + '" aria-label="' + esc(l.color) + ' 행 빼기" title="이 행 빼기">×</button>';
+    // v68: 수량은 여기서 바로 고침 (발주서 그림을 보고) — 포 수는 25 kg로 다시 셈
+    h += '</div><div class="pl2"><label class="pokgw"><input id="pokg-' + i + '" class="pokg' + (l.kg > 0 ? '' : ' need') + '" type="text" inputmode="numeric" autocomplete="off" data-in="pokg" data-i="' + i + '" value="' + (l.kg > 0 ? fmt(l.kg) : '') + '" placeholder="수량" aria-label="' + esc(l.color) + ' 수량 (kg)"> kg</label>' +
+      (l.kg > 0 && l.unit === 'bag' ? ' · ' + fmt(l.units) + '포' : l.kg > 0 && l.unit === 'ton' ? ' · ' + l.units + '톤' : l.kg > 0 && l.unit === 'tonbag' ? ' · ' + fmt(l.units) + '톤백' : '') + (l.note ? ' · ' + esc(l.note) : '') +
+      (l.text && l.text !== l.color ? '<small class="potext">발주서: ' + esc(String(l.text).slice(0, 40)) + '</small>' : '') + '</div>';
     if (isSbr(l.prod)) h += packPick({ cur: l.pack === 'small' ? 'small' : 'ton', kg: l.kg, act: 'popack', i: i });   // SBR 톤백 · 소포장 (2026-11-18)
     if (cands.length > 1 || regen) {
       var skip = {};
@@ -5393,6 +5421,48 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (V.simBusy || !l.prod) h += '<div class="pl3 muted">' + (l.prod ? '계산 중…' : '제품을 선택하면 계산합니다') + '</div>';
     else if (x) h += '<div class="pl3">' + (short ? '<b class="bad">부족 ' + fmt(x.short) + ' kg</b> · 해당일 재고 ' + fmt(Math.max(0, x.before)) + ' kg' : '<span class="ok">재고로 출고 가능</span> · 해당일 재고 ' + fmt(x.before) + ' kg') + '</div>';
     return h + '</li>';
+  }
+  /* v68 발주서 그림 (다시 그려도 같은 그림 칸을 다시 붙임 — 받은 그림은 다시 받지 않음) */
+  function poPvAttach() {
+    var slot = document.getElementById('poRevPv'), V = S.poRev;
+    if (!slot || !V || !window.NMCPreview) return;
+    var f = (V.item.fids || []).filter(Boolean), key = f.join(',');
+    if (!V.pvEl || V.pvKey !== key) {
+      NMCPreview.warm();
+      V.pvEl = document.createElement('div'); V.pvKey = key;
+      NMCPreview.mount(V.pvEl, f, { call: function (fn, args) { return call.apply(null, [fn].concat(args || [])); }, drive: function (id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; } });
+    }
+    slot.appendChild(V.pvEl);
+  }
+  /** 수량(kg) → 포 수 (칼라칩 25 kg) · SBR 고무분말 · 분철은 kg */
+  function poUnits(l) {
+    if (!(l.kg > 0)) { l.units = 0; return; }
+    if (isSbr(l.prod) || /분철/.test(String(l.prod || ''))) { if (l.unit === 'bag' && l.kg % 25 === 0) l.units = l.kg / 25; else { l.unit = 'kg'; l.units = l.kg; } return; }
+    if (l.unit === 'kg') { l.units = l.kg; return; }
+    if (l.unit === 'ton' || l.unit === 'tonbag') return;
+    l.unit = 'bag'; l.units = Math.round(l.kg / 25 * 100) / 100;
+  }
+  function poKgInput(el) {
+    var V = S.poRev, l = V && V.plan.lines[Number(el.getAttribute('data-i'))];
+    if (!l) return;
+    var raw = String(el.value).replace(/[^0-9]/g, '').slice(0, 7), nv = raw ? Number(raw).toLocaleString('ko-KR') : '';
+    if (nv !== el.value) { el.value = nv; try { el.setSelectionRange(nv.length, nv.length); } catch (e) { /* 그대로 */ } }
+    l.kg = raw ? Number(raw) : 0;
+    l.how = l.how || 'pick';
+    poUnits(l);
+    el.classList.toggle('need', !(l.kg > 0));
+    clearTimeout(poKgInput.t);
+    poKgInput.t = setTimeout(function () { if (S.poRev === V) poResim(); }, 600);   // 다 치고 잠깐 멈추면 다시 계산
+  }
+  /** 품목 추가 칸 (제품 · 색상(규격) · 수량) */
+  function poAddHtml(V) {
+    var A = V.add, cols = A.prod ? itemsOf(A.prod).map(function (it) { return it.color; }) : [];
+    return '<div class="poadd"><h3>품목 추가 <small class="muted">발주서 그림을 보고 직접</small></h3><div class="poaddr">' +
+      '<select id="poadd-p" data-ch="poaddp" aria-label="제품"><option value="">제품 선택</option>' + S.prods.map(function (p) { return '<option' + (A.prod === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
+      '<select id="poadd-c" data-ch="poaddc" aria-label="색상 · 규격"' + (A.prod ? '' : ' disabled') + '><option value="">색상 · 규격</option>' + cols.map(function (c) { return '<option' + (A.color === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('') + '</select>' +
+      '<label class="pokgw"><input id="poadd-kg" class="pokg" type="text" inputmode="numeric" autocomplete="off" data-in="poaddk" value="' + esc(A.kg || '') + '" placeholder="수량" aria-label="수량 (kg)"> kg</label></div>' +
+      (A.err ? '<p class="bad">' + esc(A.err) + '</p>' : '') +
+      '<div class="poaddb"><button type="button" class="primary" data-act="poaddok">추가</button><button type="button" class="ghost" data-act="poaddx">취소</button></div></div>';
   }
   function poApply() {
     var V = S.poRev;
@@ -7449,6 +7519,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
           poResim();
         }
       } return;
+      case 'popic': { var pic = poItemOf(v) || ((S.poList && S.poList.wait) || []).filter(function (q) { return q.id === v; })[0]; if (pic && (pic.fids || []).length && window.NMCPreview) NMCPreview.big(pic.fids, 0, { call: function (fn, args) { return call.apply(null, [fn].concat(args || [])); }, drive: function (id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; } }, 0); } return;
+      case 'podel': if (S.poRev) { var dli = Number(el.getAttribute('data-i')); if (S.poRev.plan.lines[dli]) { S.poRev.plan.lines.splice(dli, 1); poResim(); } } return;
+      case 'poaddl': if (S.poRev) { S.poRev.add = { prod: '', color: '', kg: '', err: '' }; render(); var pa0 = document.getElementById('poadd-p'); if (pa0) pa0.focus(); } return;
+      case 'poaddx': if (S.poRev) { S.poRev.add = null; render(); } return;
+      case 'poaddok': if (S.poRev && S.poRev.add) {
+        var A0 = S.poRev.add, kgA = Number(String(A0.kg || '').replace(/[^0-9]/g, '')) || 0;
+        if (!A0.prod || !A0.color) { A0.err = '제품과 색상 · 규격을 고르십시오.'; render(); return; }
+        if (!(kgA > 0)) { A0.err = '수량(kg)을 넣으십시오.'; render(); return; }
+        var nl = { zone: '', prod: A0.prod, color: A0.color, stated: true, kg: kgA, units: 0, unit: '', nos: [], text: '직접 입력', price: null, pack: isSbr(A0.prod) ? 'ton' : '', note: '', how: 'pick' };
+        poUnits(nl); S.poRev.plan.lines.push(nl); S.poRev.add = null; poResim();
+      } return;
       case 'popack': if (S.poRev && (v === 'ton' || v === 'small')) { var pkl = S.poRev.plan.lines[Number(el.getAttribute('data-i'))]; if (pkl) { pkl.pack = v; render(); } } return;
       case 'poqadd': S.poLast = null; startPo({ queue: true }); return;
       case 'poqopen': poWaitOpen(v); return;
@@ -7624,6 +7705,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (k === 'ponote') { S.poNote = el.value; return; }
     if (k === 'poedit') { S.poEditNote = el.value; return; }
     if (k === 'prvcust') { if (S.poRev) S.poRev.plan.cust = el.value; return; }
+    if (k === 'pokg' && S.poRev) { poKgInput(el); return; }   // v68 수량 고치기
+    if (k === 'poaddk' && S.poRev && S.poRev.add) { var ak = String(el.value).replace(/[^0-9]/g, ''), av = ak ? Number(ak).toLocaleString('ko-KR') : ''; if (av !== el.value) el.value = av; S.poRev.add.kg = av; return; }
     if (k === 'prvsite') { if (S.poRev) S.poRev.plan.site = el.value; return; }
     if (k === 'prvaddr') { if (S.poRev) S.poRev.plan.addr = el.value; return; }
     if (k === 'price') {
@@ -7684,6 +7767,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     if (el.getAttribute('data-in') === 'cfrest' && S.sheet) { S.sheet.keepRest = el.checked; return; }
     if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
+    if (a === 'poaddp' && S.poRev && S.poRev.add) { var A1 = S.poRev.add, cs1 = el.value ? itemsOf(el.value).map(function (it) { return it.color; }) : []; A1.prod = el.value; A1.color = cs1.length === 1 ? cs1[0] : ''; A1.err = ''; render(); var pc0 = document.getElementById(A1.color ? 'poadd-kg' : 'poadd-c'); if (pc0) pc0.focus(); return; }
+    if (a === 'poaddc' && S.poRev && S.poRev.add) { S.poRev.add.color = el.value; S.poRev.add.err = ''; var pk0 = document.getElementById('poadd-kg'); if (pk0) pk0.focus(); return; }
     if (a === 'labcap') { labSetCap(Number(String(el.value).replace(/[^0-9]/g, ''))); return; }
     if (a === 'labbag') { labSetBag(Number(String(el.value).replace(/[^0-9]/g, ''))); return; }
     if (a === 'labdate') { labDateIn(el.value); return; }

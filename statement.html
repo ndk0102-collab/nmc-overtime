@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <script src="nav.js"></script>
 <script src="menu.js"></script>
+<script src="period.js"></script>
 <!--PREVIEW_SERVER-->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
 <style>
@@ -79,7 +80,7 @@ b,td,th,.num{font-variant-numeric:tabular-nums}
 /* 보기 단위 · 업체명 찾기 (2026-11-26) */
 .lctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 12px}
 .pms{display:inline-flex;gap:4px;padding:4px;border-radius:14px;background:var(--soft)}
-.pm{min-height:42px;min-width:62px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--ink2);font-weight:800;font-size:15.5px;cursor:pointer}
+.pm{min-height:42px;min-width:62px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:var(--ink2);font-weight:800;font-size:15.5px;white-space:nowrap;cursor:pointer}
 .pm[aria-pressed="true"]{background:var(--vc);color:#fff}
 .srch{flex:1 1 230px;display:flex;align-items:center;gap:6px;min-width:0;min-height:50px;margin:0;padding:0 6px 0 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--muted);cursor:text}
 .srch:focus-within{border-color:var(--vc)}
@@ -87,6 +88,9 @@ b,td,th,.num{font-variant-numeric:tabular-nums}
 .srch input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
 .sqx{flex-shrink:0;width:38px;height:38px;border:0;border-radius:10px;background:var(--soft);color:var(--ink2);font-size:21px;font-weight:800;line-height:1;cursor:pointer}
 .pm:focus-visible,.sqx:focus-visible,.qy:focus-visible,.mh:focus-visible,.dpick:focus-visible{outline:3px solid #F4B400;outline-offset:2px}
+.qout{margin:10px 0 0;padding:9px 12px;border-radius:10px;background:var(--vsoft);color:var(--ink2);font-size:14.5px;font-weight:700;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.plabel small .link{font-size:13px;padding:0 0 0 4px}
+@media (max-width:460px){.pms .pm{min-width:0;padding:0 4px;font-size:14.5px}}
 .dpick{display:block;margin:6px auto 0;min-height:38px;padding:0 8px;border:2px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:15px}
 .qhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
 .qhead b{font-size:18px;font-weight:800;word-break:break-all}
@@ -470,18 +474,18 @@ body.pvon{overflow:hidden}
     tab: /^(list|edit|cust|co)$/.test(q0.get('view') || '') ? q0.get('view') : 'list',
     I: null, ym: '', list: [], mLoading: false,
     cur: null, curLoading: '', F: null, busy: false, arm: '', cq: '', co: null, coErr: '', coMsg: '', pv: false,
-    // 목록 보기 (2026-11-26 11:09 지시): 일별 · 월별 · 연별 · 업체명 찾기(전체 기간) — 받은 목록은 탭 안에서만 기억
-    pm: 'm', day: '', yr: '', sq: '', qy: '', mc: {}, mAt: {}, mBusy: {}, mErr: {}, yc: {}, yBusy: {}, qc: {}, qBusy: {}, years: null
+    // 목록 보기 (2026-11-26 12:46 지시 "일별 월별 3개월 6개월 1년 … 업체검색하면 리스트 바로"): 전체 목록(요약)을 한 번 받아 두고 화면에서 바로 거름
+    pm: 'm', day: '', vym: '', off: 0, sq: '', qall: 0, show: 200, ix: { list: null, n: 0, first: '', at: 0, busy: 0, err: '' }, det: {}, detAt: {}, detP: {}, noMany: false
   };
   (function () {   // 새로고침해도 보던 보기 그대로 (이 탭 안에서만)
     try {
       var o = JSON.parse(sessionStorage.getItem('nmc_stmt_list') || 'null');
       if (!o || typeof o !== 'object') return;
-      if (/^[dmy]$/.test(o.pm)) S.pm = o.pm;
+      if (/^[dm36y]$/.test(o.pm)) S.pm = o.pm;
       if (/^\d{4}-\d{2}-\d{2}$/.test(o.day)) S.day = o.day;
-      if (/^\d{4}$/.test(o.yr)) S.yr = o.yr;
+      if (/^\d{4}-\d{2}$/.test(o.ym)) S.vym = o.ym;
+      if (typeof o.off === 'number' && o.off <= 0 && o.off > -100) S.off = Math.round(o.off);
       if (typeof o.sq === 'string') S.sq = o.sq.slice(0, 40);
-      if (/^\d{4}$/.test(o.qy)) S.qy = o.qy;
     } catch (e) { /* 그대로 */ }
   })();
   var token = '';
@@ -643,22 +647,35 @@ body.pvon{overflow:hidden}
   function isAuth(e) { return String(e && e.message) === 'auth'; }
 
   /* ───────── 처음 · 달 · 보기 ───────── */
+  /* 빠르게 (2026-11-26 지시 "클릭하면 속도가 너무 느리다. 빠르게 띄워라"): 이 탭에서 전에 받은 첫 자료 · 전체 목록을 먼저 보이고(30분 안의 것) 서버 것으로 바꿈 */
+  var NP = window.NMCPeriod;
   function start() {
     S.err = '';
     if (!S.authed) { render(); return; }
-    S.loading = true; render();
-    call('apiStmtInit', [q0.get('ym') || '']).then(function (d) {
-      S.loading = false; S.I = d; S.ym = d.ym; S.list = d.list || [];
-      S.mc = {}; S.mAt = {}; S.mErr = {}; S.yc = {}; S.qc = {}; S.mc[d.ym] = S.list; S.mAt[d.ym] = Date.now();   // 처음부터 다시: 받아 둔 목록도 새로
+    var first = !S.I, C = first ? NP.cache.get('stmt_init', 1800000) : null, X = NP.cache.get('stmt_ix', 1800000);
+    if (X && X.v && !S.ix.at) S.ix = { list: X.v.list || [], n: X.v.n || 0, first: X.v.first || '', at: 0, busy: 0, err: '' };
+    var go = function (d, fresh) {
+      S.I = d; S.ym = d.ym;
       if (!S.day) S.day = d.today;
-      if (!S.yr) S.yr = d.today.slice(0, 4);
+      if (!S.vym) S.vym = d.today.slice(0, 7);
+      if (go.done) return;
+      go.done = true;
       var ids = q0.get('ids'), no = q0.get('no');
       if (ids) { S.tab = 'edit'; loadDraft(ids.split(',').filter(String)); }
       else if (no) openStmt(no);
       else if (S.tab === 'edit' && !S.F) S.F = blankForm();
-      render();
       navStart();
-    }, function (e) { S.loading = false; if (!isAuth(e)) S.err = errText(e); render(); });
+    };
+    if (C && C.v && C.v.today) { go(C.v); S.loading = false; } else S.loading = true;
+    render();
+    needIx(true);
+    call('apiStmtInit', [q0.get('ym') || '']).then(function (d) {
+      S.loading = false; NP.cache.set('stmt_init', d);
+      var keepTab = go.done;
+      go(d, true);
+      if (Array.isArray(d.list) && S.ix.list) mergeMonth(d.ym, d.list);
+      if (!keepTab) render(); else if (S.tab === 'list' && !S.cur && !S.curLoading) relist();   // 보던 화면은 그대로(쓰는 중인 칸이 끊기지 않게), 목록만 새로
+    }, function (e) { S.loading = false; if (!isAuth(e)) { if (!S.I) S.err = errText(e); else toast(errText(e)); } render(); });
   }
   function navStart() {   // 첫 자료가 온 뒤부터 기록 (그 전 화면은 '불러오는 중')
     if (!window.NMCNav || navStart.done) return;
@@ -666,15 +683,23 @@ body.pvon{overflow:hidden}
     NMCNav.onBlock = toast;
     NMCNav.page({ get: navGet, set: navSet, url: navUrl, block: function () { return S.busy ? '저장 중입니다. 완료 후 다시 눌러 주십시오' : ''; } });
   }
-  function loadMonth(ym) {
-    S.ym = ym; S.mLoading = true; S.list = S.mc[ym] || []; render();
-    call('apiStmtMonth', [ym]).then(function (d) { S.mLoading = false; S.mc[d.ym] = d.list || []; S.mAt[d.ym] = Date.now(); if (d.mail && S.I) S.I.mail = d.mail; if (d.ym === S.ym) S.list = S.mc[d.ym]; render(); },
-      function (e) { S.mLoading = false; if (!isAuth(e)) toast(errText(e)); render(); });
+  /** 명세서 한 장: 미리 받아 둔 것이 있으면 바로 (뒤에서 새로 받아 바뀌었으면 다시 그림) */
+  function detGet(no) {
+    if (!S.detP[no]) S.detP[no] = call('apiStmtGet', [no]).then(function (d) { delete S.detP[no]; S.det[no] = d.stmt; S.detAt[no] = Date.now(); return d.stmt; },
+      function (e) { delete S.detP[no]; throw e; });
+    return S.detP[no];
   }
   function openStmt(no) {
-    S.tab = 'list'; S.cur = null; S.curLoading = no; S.arm = ''; render();
-    call('apiStmtGet', [no]).then(function (d) { S.curLoading = ''; S.cur = d.stmt; setUrl('no=' + encodeURIComponent(no)); render(); window.scrollTo(0, 0); },
-      function (e) { S.curLoading = ''; if (!isAuth(e)) toast(errText(e)); render(); });
+    S.tab = 'list'; S.arm = '';
+    var c = S.det[no];
+    if (c) {
+      S.cur = c; S.curLoading = ''; setUrl('no=' + encodeURIComponent(no)); render(); window.scrollTo(0, 0);
+      if (!(Date.now() - (S.detAt[no] || 0) < 15000)) detGet(no).then(function (st) { if (S.cur && S.cur.no === no && S.tab === 'list' && JSON.stringify(st) !== JSON.stringify(c)) { S.cur = st; render(); } }, function () {});
+      return;
+    }
+    S.cur = null; S.curLoading = no; render();
+    detGet(no).then(function (st) { if (S.curLoading !== no) return; S.curLoading = ''; S.cur = st; setUrl('no=' + encodeURIComponent(no)); render(); window.scrollTo(0, 0); },
+      function (e) { if (S.curLoading !== no) return; S.curLoading = ''; if (!isAuth(e)) toast(errText(e)); render(); });
   }
   function setUrl(qs) { if (window.NMCNav) return; try { history.replaceState(history.state, '', location.pathname + (qs ? '?' + qs : '')); } catch (e) {} }   // nav.js가 있으면 칸마다 주소를 nav가 정함
   /* 뒤로 = 온 길로 한 걸음 (2026-11-22 지시, 공통 nav.js): 기록에 남는 것 = 칸(명세서 · 작성 · 거래처 · 회사 정보) · 열어 본 명세서 · 미리보기 · 거래처 창 */
@@ -824,118 +849,74 @@ body.pvon{overflow:hidden}
 
   /* ───────── 목록: 일별 · 월별 · 연별 · 업체명 찾기 (2026-11-26 11:09 지시 "거래명세서 리스트를 일별, 월별, 년별로 정리하고
      업체명을 치면 검색될수잇게만들고 검색되서 나온거를 누르면 언제든지 거래명세서를 한장짜리 우리가 보관하는용으로 항상 인쇄할수잇도록") ───────── */
-  var PM = [['d', '일별'], ['m', '월별'], ['y', '연별']];
-  function lsave() { try { sessionStorage.setItem('nmc_stmt_list', JSON.stringify({ pm: S.pm, day: S.day, yr: S.yr, sq: S.sq, qy: S.qy })); } catch (e) { /* 그대로 */ } }
-  /** 업체명 비교: 띄어쓰기 · (주) · ㈜ · 주식회사 · (유) · 유한회사 무시 (서버 coNorm_과 같음) */
-  function coNorm(v) { return String(v == null ? '' : v).replace(/\s+/g, '').replace(/\(주\)|㈜|주식회사|\(유\)|유한회사/g, '').toLowerCase(); }
-  /** 지금 찾는 말 (없으면 '') — 한글을 치는 중인 끝 글자(자모)는 빼고 */
-  function qk() {
-    var t = String(S.sq || '').replace(/[ㄱ-ㅎㅏ-ㅣ]+$/, '').trim().replace(/\s+/g, ' ');
-    return t.split(' ').some(function (w) { return coNorm(w); }) ? t.slice(0, 40) : '';
-  }
-  /** 저장 · 취소 뒤: 그 달 목록은 새로 받은 것으로, 연별 · 찾기 결과는 다시 받음 */
-  function listDirty(d) {
-    if (d && d.ym && Array.isArray(d.list)) { S.mc[d.ym] = d.list; S.mAt[d.ym] = Date.now(); if (d.ym === S.ym) S.list = d.list; }
-    S.yc = {}; S.qc = {};
-  }
-  /** 받아 둔 모든 목록의 요약 줄마다 (인쇄 횟수 고치기) */
-  function eachSum(fn) {
-    var seen = [];
-    var walk = function (L) { if (L && seen.indexOf(L) < 0) { seen.push(L); L.forEach(fn); } };
-    walk(S.list);
-    Object.keys(S.mc).forEach(function (k) { walk(S.mc[k]); });
-    Object.keys(S.yc).forEach(function (k) { walk(S.yc[k] && S.yc[k].list); });
-    Object.keys(S.qc).forEach(function (k) { walk(S.qc[k] && S.qc[k].list); });
-  }
+  /* ───────── 목록 (2026-11-26 12:46 지시 "일별 월별 3개월 6개월 1년으로 … 업체검색하면 리스트 바로 나올수있도록")
+     전체 명세서 목록(요약)을 한 번 받아 두고(이 탭 안 임시 저장 · 1분 지나면 보이는 채로 새로) 기간 · 업체명은 화면에서 바로 거름.
+     일별 = 그날, 월별 = 날마다 묶음, 3개월 · 6개월 · 1년 = 이번 달까지 꽉 찬 달 3 · 6 · 12개를 달마다 묶음.
+     찾기 = 고른 기간 안에서, 기간 밖에도 있으면 '전체 기간 보기'. 보이는 명세서는 미리 받아 두어 누르면 바로 열림 ───────── */
+  var SHOW = 200;
+  function lsave() { try { sessionStorage.setItem('nmc_stmt_list', JSON.stringify({ pm: S.pm, day: S.day, ym: S.vym, off: S.off, sq: S.sq })); } catch (e) { /* 그대로 */ } }
+  function coNorm(v) { return NP.norm(v); }
+  function qT() { return NP.terms(S.sq); }
+  function qk() { return qT().join(' '); }
   function byNew(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : a.no < b.no ? 1 : a.no > b.no ? -1 : 0; }
+  function view() { return { pm: S.pm, day: S.day, ym: S.vym, off: S.off }; }
+  /** 전체 목록 받기 — 받는 동안은 받아 둔 것을 그대로 보임 */
+  function needIx(force) {
+    var X = S.ix;
+    if (X.busy || (!force && X.at && Date.now() - X.at < 60000)) return;
+    X.busy = 1;
+    call('apiStmtList', [{}]).then(function (d) {
+      S.ix = { list: d.list || [], n: d.n || 0, first: d.first || '', at: Date.now(), busy: 0, err: '' };
+      NP.cache.set('stmt_ix', { list: S.ix.list, n: S.ix.n, first: S.ix.first });
+      relist();
+    }, function (e) {
+      X.busy = 0;
+      if (isAuth(e)) return;
+      X.err = errText(e); X.at = Date.now(); relist();
+    });
+  }
+  /** 서버가 준 한 달 목록(저장 · 취소 · 첫 자료)을 전체 목록에 바로 반영 */
+  function mergeMonth(ym, list) {
+    if (!S.ix.list || !ym) return;
+    S.ix.list = S.ix.list.filter(function (s) { return s.date.slice(0, 7) !== ym; }).concat(list).sort(byNew);
+  }
+  /** 저장 · 취소 뒤: 그 달은 받은 것으로 바로, 전체 목록은 다시 받음 */
+  function listDirty(d) {
+    if (d && d.stmt) { S.det[d.stmt.no] = d.stmt; S.detAt[d.stmt.no] = Date.now(); }
+    if (d && d.ym && Array.isArray(d.list)) mergeMonth(d.ym, d.list);
+    needIx(true);
+  }
+  /** 받아 둔 모든 요약 줄 · 명세서마다 (인쇄 횟수 고치기) */
+  function eachSum(fn) {
+    (S.ix.list || []).forEach(fn);
+    Object.keys(S.det).forEach(function (k) { if (S.det[k]) fn(S.det[k]); });
+  }
   /** 목록 칸만 다시 그림 (찾기 칸은 그대로 — 한글 조합이 끊기지 않게) */
   function relist() {
     if (!(S.authed && S.I && S.tab === 'list' && !S.cur && !S.curLoading)) return;
-    var hd = $('lhead'), bd = $('lbody');
+    var hd = $('lhead'), bd = $('lbody'), cb = $('pmsb');
     if (!hd || !bd) { render(); return; }
     var L = listData();
     hd.innerHTML = listHead(L); bd.innerHTML = listRows(L);
-    Array.prototype.forEach.call(root.querySelectorAll('.pm'), function (b) { b.setAttribute('aria-pressed', String(!qk() && b.getAttribute('data-v') === S.pm)); });
+    if (cb) cb.innerHTML = pmBtns(L);
     var x = $('sqx'); if (x) x.hidden = !S.sq;
+    preDet(L);
   }
-  var sqTimer = 0;
-  function stopSq() { clearTimeout(sqTimer); sqTimer = 0; }
-  /** 찾기 칸에 칠 때마다: 목록 칸만 다시 그리고, 멈추고 0.35초 뒤 서버에서 찾음 (엔터 = 바로) */
-  function sqInput(v) {
-    S.sq = String(v || '').slice(0, 40); S.qy = ''; lsave();
-    stopSq();
-    var k = qk();
-    if (k && !(S.qc[k] && fresh(S.qc[k].at))) sqTimer = setTimeout(function () { sqTimer = 0; if (qk() === k) needQ(k); }, 350);
-    relist();
-  }
-  /* 받기: 달 (일별 · 월별) · 해 (연별) · 찾기 — 받는 중에는 '불러오는 중…' */
-  /** 받아 둔 목록은 1분 동안만 그대로 씀 — 그 뒤에 그 보기를 다시 열면 보이는 채로 새로 받음 (다른 화면 · 다른 사람이 발행한 것) */
-  function fresh(at) { return !!at && Date.now() - at < 60000; }
-  function needMon(ym) {
-    if (S.mBusy[ym] || fresh(S.mAt[ym])) return;   // 방금 받았거나(실패 포함) 받는 중
-    S.mBusy[ym] = 1; delete S.mErr[ym];
-    call('apiStmtMonth', [ym]).then(function (d) {
-      delete S.mBusy[ym]; S.mc[d.ym || ym] = d.list || []; S.mAt[d.ym || ym] = Date.now();
-      if ((d.ym || ym) === S.ym) S.list = S.mc[d.ym || ym];
-      if (d.mail && S.I) S.I.mail = d.mail;
-      relist();
-    }, function (e) { delete S.mBusy[ym]; if (!isAuth(e)) { S.mErr[ym] = errText(e); S.mAt[ym] = Date.now(); relist(); } });
-  }
-  function needYear(y) {
-    if ((S.yc[y] && fresh(S.yc[y].at)) || S.yBusy[y]) return;
-    S.yBusy[y] = 1;
-    call('apiStmtList', [{ from: y + '-01-01', to: y + '-12-31' }]).then(function (d) {
-      delete S.yBusy[y]; S.yc[y] = { list: d.list || [], n: d.n, at: Date.now() }; if (d.years) S.years = d.years; relist();
-    }, function (e) {
-      delete S.yBusy[y];
-      if (isAuth(e)) return;
-      if (String(e && e.message) === 'bad_action') { yearByMonths(y); return; }   // 서버가 아직 v67 전: 달 목록을 모아서
-      S.yc[y] = { list: [], err: errText(e), at: Date.now() }; relist();
-    });
-  }
-  function yearByMonths(y) {
-    var ms = [], top = addYm(S.I.today.slice(0, 7), 1), low = S.I.first ? S.I.first.slice(0, 7) : S.I.today.slice(0, 7);
-    for (var mo = 1; mo <= 12; mo++) { var ym = y + '-' + (mo < 10 ? '0' : '') + mo; if (ym >= low && ym <= top) ms.push(ym); }
-    S.yBusy[y] = 1;
-    Promise.all(ms.map(function (ym) { return S.mc[ym] ? Promise.resolve({ ym: ym, list: S.mc[ym] }) : call('apiStmtMonth', [ym]); })).then(function (rs) {
-      var all = [];
-      rs.forEach(function (d) { S.mc[d.ym] = d.list || []; all = all.concat(d.list || []); });
-      delete S.yBusy[y]; S.yc[y] = { list: all.sort(byNew), n: all.length, at: Date.now() }; relist();
-    }, function (e) { delete S.yBusy[y]; if (!isAuth(e)) { S.yc[y] = { list: [], err: errText(e), at: Date.now() }; relist(); } });
-  }
-  function needQ(k) {
-    if (!k || (S.qc[k] && fresh(S.qc[k].at)) || S.qBusy[k]) return;
-    S.qBusy[k] = 1;
-    call('apiStmtList', [{ q: k }]).then(function (d) {
-      delete S.qBusy[k]; S.qc[k] = { list: d.list || [], n: d.n, years: d.years || [], at: Date.now() }; if (d.years) S.years = d.years; relist();
-    }, function (e) {
-      delete S.qBusy[k];
-      if (isAuth(e)) return;
-      S.qc[k] = { list: [], err: String(e && e.message) === 'bad_action' ? '서버 업데이트 후 전체 기간 업체명 검색이 됩니다.' : errText(e), at: Date.now() }; relist();
-    });
-  }
-  /** 지금 보기의 목록 → { mode, list(요약 줄), wait, err, label, ... } */
+  function sqInput(v) { S.sq = String(v || '').slice(0, 40); S.qall = 0; S.show = SHOW; lsave(); relist(); }
+  function stopSq() {}
+  /** 지금 보기의 목록 → { R(기간), T(찾는 말), list, out(기간 밖 찾은 건수), all(전체 기간 찾기), wait, err } */
   function listData() {
-    var I = S.I, k = qk(), o;
-    if (k) {
-      var Q = S.qc[k];
-      if (!sqTimer && !(Q && fresh(Q.at))) needQ(k);   // 치는 중이면 0.35초 기다렸다가 · 오래된 결과는 보이는 채로 새로
-      if (!Q) return { mode: 'q', k: k, list: [], wait: true };
-      var ys = {};
-      Q.list.forEach(function (s) { ys[s.date.slice(0, 4)] = 1; });
-      var yl = Object.keys(ys).sort().reverse(), qy = S.qy && ys[S.qy] ? S.qy : '';
-      return { mode: 'q', k: k, all: Q.list, list: qy ? Q.list.filter(function (s) { return s.date.slice(0, 4) === qy; }) : Q.list, n: Q.n, err: Q.err, years: yl, qy: qy };
-    }
-    if (S.pm === 'd') {
-      var dm = S.day.slice(0, 7), M = S.mc[dm];
-      if (!fresh(S.mAt[dm])) needMon(dm);
-      o = { mode: 'd', list: (M || []).filter(function (s) { return s.date === S.day; }), wait: !M && !S.mErr[dm], err: S.mErr[dm] };
-    } else if (S.pm === 'y') {
-      var Y = S.yc[S.yr];
-      if (!Y || !fresh(Y.at)) needYear(S.yr);
-      o = { mode: 'y', list: Y ? Y.list : [], wait: !Y, err: Y && Y.err };
-    } else o = { mode: 'm', list: S.list || [], wait: S.mLoading && !(S.list || []).length };
-    return o;
+    var I = S.I, X = S.ix, R = NP.range(view(), I.today), T = qT(), all = X.list || [];
+    if (!X.list && !X.err) needIx(false);
+    else if (!X.busy && !(X.at && Date.now() - X.at < 60000)) needIx(false);   // 1분 지난 목록: 보이는 채로 새로
+    var inR = function (s) { return s.date >= R.from && s.date <= R.upto; };
+    var list, out = 0, qall = !!(S.qall && T.length);
+    if (T.length) {
+      var hits = all.filter(function (s) { return NP.hit([s.cust, s.site, s.no].join(' '), T); });
+      list = qall ? hits : hits.filter(inR);
+      out = hits.length - list.length;
+    } else list = all.filter(inR);
+    return { R: R, T: T, list: list, out: out, all: qall, wait: !X.list && !X.err, err: !X.list && X.err ? X.err : '', more: X.n > all.length ? X.n - all.length : 0 };
   }
   function sums(list) {
     var ok = list.filter(function (s) { return s.state !== '취소'; }), r = { n: ok.length, v: list.length - ok.length, sup: 0, tax: 0, tot: 0, kg: {}, order: [] };
@@ -950,42 +931,36 @@ body.pvon{overflow:hidden}
       (t.order.length ? '<div class="kgs">' + t.order.map(function (g) { return '<span>' + esc(g) + ' ' + fmtQ(t.kg[g]) + ' kg</span>'; }).join('') + '</div>' : '');
   }
   function cntTxt(t) { return '발행 ' + t.n + '건' + (t.v ? ' · 취소 ' + t.v + '건' : ''); }
-  function lowDay() { return S.I.first && S.I.first < S.I.today ? S.I.first : S.I.today; }
+  function lowDay() { var f = S.ix.first || S.I.first; return f && f < S.I.today ? f : S.I.today; }
+  function pmBtns(L) {
+    return NP.MODES.map(function (p) { return '<button type="button" class="pm" data-act="pm" data-v="' + p[0] + '" aria-pressed="' + (!L.all && S.pm === p[0]) + '">' + p[1] + '</button>'; }).join('');
+  }
   function listHtml() {
     var L = listData();
-    var h = '<section class="card"><div class="lctl"><div class="pms" role="group" aria-label="보기 단위">' + PM.map(function (p) {
-      return '<button type="button" class="pm" data-act="pm" data-v="' + p[0] + '" aria-pressed="' + (!qk() && S.pm === p[0]) + '">' + p[1] + '</button>';
-    }).join('') + '</div>' +
+    var h = '<section class="card"><div class="lctl"><div class="pms" id="pmsb" role="group" aria-label="보기 기간">' + pmBtns(L) + '</div>' +
       '<label class="srch"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>' +
-      '<input type="search" id="sq" data-f="sq" placeholder="업체명 검색 (전체 기간)" value="' + esc(S.sq) + '" maxlength="40" autocomplete="off" aria-label="업체명 검색 (전체 기간)">' +
+      '<input type="search" id="sq" data-f="sq" placeholder="업체명 · 현장 · 번호 검색" value="' + esc(S.sq) + '" maxlength="40" autocomplete="off" aria-label="업체명 · 현장 · 번호 검색">' +
       '<button type="button" class="sqx" id="sqx" data-act="sqx" aria-label="검색어 지우기"' + (S.sq ? '' : ' hidden') + '>×</button></label></div>' +
       '<div id="lhead">' + listHead(L) + '</div></section><div id="lbody">' + listRows(L) + '</div>';
+    setTimeout(function () { preDet(L); }, 0);
     return h;
   }
   function listHead(L) {
-    var I = S.I, t = sums(L.list), h = '';
-    if (L.mode === 'q') {
-      h += '<div class="qhead"><b>‘' + esc(L.k) + '’ 검색 결과</b><small>' + (L.wait ? '찾는 중…' : L.err ? '' : (L.qy ? L.qy + '년 · ' : '전체 기간 · ') + cntTxt(t)) + '</small></div>';
-      if (L.years && L.years.length > 1) h += '<div class="qys" role="group" aria-label="연도">' + [''].concat(L.years).map(function (y) {
-        return '<button type="button" class="qy" data-act="qy" data-v="' + y + '" aria-pressed="' + (L.qy === y) + '">' + (y ? y + '년' : '전체') + '</button>';
-      }).join('') + '</div>';
-      if (!L.wait && !L.err && L.list.length) h += sumHtml(t);
-      return h + '<p class="hint">업체명 · 현장 · 번호의 일부로 찾습니다(띄어쓰기 · (주) · 주식회사 무시). 누르면 명세서가 열리고 ‘보관용 1장 인쇄’로 언제든 A4 한 장(공급자 보관용)을 인쇄합니다.</p>';
+    var I = S.I, t = sums(L.list), R = L.R, q = String(S.sq || '').trim(), h = '';
+    if (L.all) {
+      h += '<div class="qhead"><b>‘' + esc(q) + '’ 검색 결과</b><small>전체 기간 · ' + cntTxt(t) + '</small></div>' +
+        '<div class="qys"><button type="button" class="qy" data-act="qall" data-v="0">' + esc(R.label) + '만 보기</button></div>';
+      if (L.list.length) h += sumHtml(t);
+      return h + '<p class="hint">업체명 · 현장 · 번호의 일부로 찾습니다(띄어쓰기 · (주) · 주식회사 무시). 누르면 명세서가 바로 열리고 ‘보관용 1장 인쇄’로 언제든 A4 한 장(공급자 보관용)을 인쇄합니다.</p>';
     }
-    var lab, dis0 = false, dis1 = false, sub = L.wait ? '불러오는 중…' : cntTxt(t);
-    if (L.mode === 'd') {
-      lab = dateKo(S.day) + ' (' + wday(S.day) + ')'; dis0 = S.day <= lowDay(); dis1 = S.day >= addDays(I.today, 31);
-      sub += '<input type="date" class="dpick" id="dpick" data-f="dpick" value="' + esc(S.day) + '" aria-label="날짜 선택">';
-    } else if (L.mode === 'y') {
-      lab = S.yr + '년'; dis0 = S.yr <= lowDay().slice(0, 4); dis1 = S.yr >= addDays(I.today, 31).slice(0, 4);
-    } else {
-      lab = ymKo(S.ym); dis0 = S.ym <= lowDay().slice(0, 7); dis1 = S.ym >= addYm(I.today.slice(0, 7), 1);
-      if (S.mLoading) sub = '불러오는 중…';
-    }
-    var unit = L.mode === 'd' ? '날' : L.mode === 'y' ? '해' : '달';
-    h += '<div class="pnav"><button type="button" class="nav" data-act="pd" data-v="-1" aria-label="이전 ' + unit + '"' + (dis0 ? ' disabled' : '') + '>‹</button>' +
-      '<div class="plabel"><b>' + lab + '</b><small>' + sub + '</small></div>' +
-      '<button type="button" class="nav" data-act="pd" data-v="1" aria-label="다음 ' + unit + '"' + (dis1 ? ' disabled' : '') + '>›</button></div>';
+    var V = view(), dis0 = !NP.canPrev(V, I.today, lowDay()), dis1 = !NP.canNext(V, I.today);
+    var sub = L.wait ? '불러오는 중…' : L.err ? '' : (R.cur ? (S.pm === 'd' ? '오늘 · ' : S.pm === 'm' ? '이번 달 · ' : '이번 달까지 · ') : '') + (L.T.length ? '‘' + esc(q) + '’ ' : '') + cntTxt(t);
+    var now = S.pm === 'd' ? S.day === I.today : S.pm === 'm' ? S.vym === I.today.slice(0, 7) : !S.off;
+    h += '<div class="pnav"><button type="button" class="nav" data-act="pd" data-v="-1" aria-label="이전 ' + R.unit + '"' + (dis0 ? ' disabled' : '') + '>‹</button>' +
+      '<div class="plabel"><b>' + esc(R.label) + '</b><small>' + sub + (now ? '' : ' <button type="button" class="link" data-act="pnow">' + (S.pm === 'd' ? '오늘로' : S.pm === 'm' ? '이번 달로' : '최근으로') + '</button>') + '</small>' +
+      (S.pm === 'd' ? '<input type="date" class="dpick" id="dpick" data-f="dpick" value="' + esc(S.day) + '" aria-label="날짜 선택">' : '') + '</div>' +
+      '<button type="button" class="nav" data-act="pd" data-v="1" aria-label="다음 ' + R.unit + '"' + (dis1 ? ' disabled' : '') + '>›</button></div>';
+    if (L.T.length && L.out > 0) h += '<p class="qout">이 기간 밖에도 ‘' + esc(q) + '’ 거래명세서가 ' + L.out + '건 있습니다. <button type="button" class="btn sm ghost" data-act="qall" data-v="1">전체 기간 보기</button></p>';
     h += sumHtml(t) + '<div class="tools"><button type="button" class="btn gold" data-act="new">+ 새 거래명세서</button></div>' +
       '<p class="hint">출고 화면의 거래처 상자에서 \'거래명세서\'를 누르면 그 출고 내용이 그대로 들어갑니다. 발행한 단가는 출고 기록과 손익계산서 매출에 그대로 반영됩니다.</p>';
     return h;
@@ -997,20 +972,32 @@ body.pvon{overflow:hidden}
       '<span class="ea"><b>' + won(s.total) + '</b><small>' + (v ? '<span class="st void">취소</span>' : (s.printed ? '인쇄 ' + s.printed + '회' : '<span class="st gold">인쇄 전</span>') + (I.mail && I.mail[s.no] ? ' ' + mailTag(I.mail[s.no]) : '')) + '</small></span></button>';
   }
   function listRows(L) {
-    var I = S.I, list = L.list, h = '';
-    if (L.err) return '<p class="err" role="alert">' + esc(L.err) + '</p>';
-    if (L.wait) return '<p class="wait">' + (L.mode === 'q' ? '찾는 중…' : '불러오는 중…') + '</p>';
-    if (!list.length) return '<p class="empty">' + (L.mode === 'q' ? '‘' + esc(L.k) + '’가 들어간 업체의 거래명세서가 없습니다.' : L.mode === 'd' ? dateKo(S.day) + '에 발행한 거래명세서가 없습니다.' : L.mode === 'y' ? S.yr + '년에 발행한 거래명세서가 없습니다.' : ymKo(S.ym) + '에 발행한 거래명세서가 없습니다.') + '</p>';
-    var grp = L.mode === 'q' || L.mode === 'y' ? 7 : 10, G = {}, order = [];
-    list.forEach(function (s) { var g = s.date.slice(0, grp); if (!G[g]) { G[g] = []; order.push(g); } G[g].push(s); });
-    order.forEach(function (g) {
-      var t = sums(G[g]);
-      if (grp === 7) h += '<button type="button" class="mh" data-act="gom" data-v="' + g + '"><span>' + ymKo(g) + '</span><small>' + t.n + '건 · ' + won(t.tot) + ' ›</small></button>';
-      else h += '<div class="dayh"><span>' + dayKo(g) + (g === I.today ? ' · 오늘' : '') + '</span><small>' + t.n + '건 · ' + won(t.tot) + '</small></div>';
-      G[g].forEach(function (s) { h += entHtml(s, grp === 7); });
+    var I = S.I, list = L.list, h = '', q = String(S.sq || '').trim();
+    if (L.err) return '<p class="err" role="alert">' + esc(L.err) + ' <button type="button" class="btn sm ghost" data-act="ixre">다시 불러오기</button></p>';
+    if (L.wait) return '<p class="wait">불러오는 중…</p>';
+    if (!list.length) return '<p class="empty">' + (L.T.length ? '‘' + esc(q) + '’가 들어간 거래명세서가 ' + (L.all ? '없습니다.' : esc(L.R.label) + '에 없습니다.') : esc(L.R.label) + '에 발행한 거래명세서가 없습니다.') + '</p>';
+    var grp = L.all || /^[36y]$/.test(S.pm) ? 7 : S.pm === 'm' ? 10 : 0, shown = list.slice(0, S.show);
+    if (!grp) shown.forEach(function (s) { h += entHtml(s, false); });
+    else NP.group(shown, function (s) { return s.date.slice(0, grp); }).forEach(function (g) {
+      var t = sums(list.filter(function (s) { return s.date.slice(0, grp) === g.k; }));
+      if (grp === 7) h += '<button type="button" class="mh" data-act="gom" data-v="' + g.k + '"><span>' + ymKo(g.k) + '</span><small>' + t.n + '건 · ' + won(t.tot) + ' ›</small></button>';
+      else h += '<div class="dayh"><span>' + dayKo(g.k) + (g.k === I.today ? ' · 오늘' : '') + '</span><small>' + t.n + '건 · ' + won(t.tot) + '</small></div>';
+      g.xs.forEach(function (s) { h += entHtml(s, grp === 7); });
     });
-    if (L.mode === 'q' && L.n > (L.all || []).length) h += '<p class="hint">최근 ' + (L.all || []).length + '건까지 표시했습니다 (전체 ' + L.n + '건). 업체명을 더 길게 입력하면 좁혀집니다.</p>';
+    if (list.length > shown.length) h += '<div class="tools"><button type="button" class="btn ghost" data-act="more">' + (list.length - shown.length) + '건 더 보기</button></div>';
+    if (L.more) h += '<p class="hint">가장 최근 ' + (S.ix.list || []).length + '건까지 목록에 있습니다 (전체 ' + S.ix.n + '건).</p>';
     return h;
+  }
+  /** 보이는 명세서 미리 받기 (한 번에 40장까지 · 서버 v68부터) — 누르면 바로 열림 */
+  function preDet(L) {
+    if (S.noMany || preDet.busy || !L || !L.list) return;
+    var want = L.list.slice(0, 40).map(function (s) { return s.no; }).filter(function (no) { return !S.det[no] && !S.detP[no]; });
+    if (!want.length) return;
+    preDet.busy = 1;
+    call('apiStmtMany', [want]).then(function (d) {
+      preDet.busy = 0;
+      (d.stmts || []).forEach(function (st) { S.det[st.no] = st; S.detAt[st.no] = Date.now(); });
+    }, function (e) { preDet.busy = 0; if (String(e && e.message) === 'bad_action') S.noMany = true; });
   }
 
   /* 보기 */
@@ -1719,20 +1706,24 @@ body.pvon{overflow:hidden}
         S.tab = v; S.cur = null; S.arm = '';
         setUrl(v === 'list' ? '' : 'view=' + v); render(); window.scrollTo(0, 0); return;
       case 'retry': start(); return;
-      case 'ym': loadMonth(addYm(S.ym, Number(v))); return;
-      case 'pm':   // 일별 · 월별 · 연별 (찾는 중이면 찾기를 끝내고 그 보기로)
-        S.pm = v; S.sq = ''; S.qy = ''; stopSq(); lsave();
-        if (v === 'm' && !S.mc[S.ym]) { loadMonth(S.ym); return; }
-        render(); return;
-      case 'pd': {   // 이전 · 다음 (날 · 달 · 해)
-        var k = Number(v);
-        if (S.pm === 'd') { S.day = addDays(S.day, k); lsave(); render(); return; }
-        if (S.pm === 'y') { S.yr = String(Number(S.yr) + k); lsave(); render(); return; }
-        loadMonth(addYm(S.ym, k)); return;
+      case 'pm': {   // 일별 · 월별 · 3개월 · 6개월 · 1년 (찾는 말은 그대로 — 그 기간 안에서)
+        var V0 = NP.setMode(view(), v, S.I.today);
+        S.pm = V0.pm; S.day = V0.day || S.day; S.vym = V0.ym || S.vym; S.off = V0.off || 0; S.qall = 0; S.show = SHOW; lsave(); relist(); return;
       }
-      case 'qy': S.qy = v; lsave(); relist(); return;
-      case 'gom': S.pm = 'm'; S.sq = ''; S.qy = ''; stopSq(); lsave(); loadMonth(v); window.scrollTo(0, 0); return;   // 달 머리 → 그 달 보기
-      case 'sqx': S.sq = ''; S.qy = ''; stopSq(); lsave(); render(); var q1 = $('sq'); if (q1) q1.focus(); return;
+      case 'pd': {   // ‹ › (날 · 달 · 기간)
+        var V1 = NP.shift(view(), Number(v), S.I.today);
+        S.day = V1.day || S.day; S.vym = V1.ym || S.vym; S.off = V1.off || 0; S.show = SHOW; lsave(); relist(); return;
+      }
+      case 'pnow': S.day = S.I.today; S.vym = S.I.today.slice(0, 7); S.off = 0; S.show = SHOW; lsave(); relist(); return;
+      case 'qall': S.qall = v === '1' ? 1 : 0; S.show = SHOW; relist(); return;
+      case 'more': S.show += 300; relist(); return;
+      case 'ixre': S.ix.err = ''; S.ix.at = 0; needIx(true); relist(); return;
+      case 'gom': {   // 달 머리 → 그 달 보기 (찾는 말은 그대로)
+        S.pm = 'm'; S.vym = v; S.qall = 0; S.show = SHOW; lsave(); relist();
+        var lb = $('lhead'); if (lb && lb.getBoundingClientRect().top < 0) window.scrollTo(0, Math.max(0, window.scrollY + lb.getBoundingClientRect().top - 80));
+        return;
+      }
+      case 'sqx': S.sq = ''; S.qall = 0; S.show = SHOW; lsave(); var q1 = $('sq'); if (q1) { q1.value = ''; q1.focus(); } relist(); return;
       case 'keep': keepPrint(); return;
       case 'new': S.F = blankForm(); S.tab = 'edit'; S.cur = null; setUrl('view=edit'); render(); window.scrollTo(0, 0); return;
       case 'open': openStmt(v); return;
@@ -1828,11 +1819,16 @@ body.pvon{overflow:hidden}
     if (ev.isComposing || ev.keyCode === 229) return;   // 한글 조합 중(엔터 · Esc로 조합을 끝내는 키)은 건드리지 않음 (2026-11-25)
     if (ev.key === 'Escape' && S.sheet) { if (!S.sheet.step) closeSheet(); return; }
     if (ev.key === 'Escape' && S.pv) { closePv(); return; }
-    if (ev.target.id === 'sq' && ev.key === 'Enter') { ev.preventDefault(); stopSq(); var k = qk(); if (k) needQ(k); return; }
+    if (ev.target.id === 'sq' && ev.key === 'Enter') { ev.preventDefault(); ev.target.blur(); return; }   // 치는 즉시 거름 (엔터 = 자판 닫기)
     if (ev.target.id === 'sq' && ev.key === 'Escape' && S.sq) { ev.preventDefault(); ev.target.value = ''; sqInput(''); return; }
     if (ev.key === 'Enter' && ev.target.tagName === 'INPUT' && ev.target.type !== 'checkbox' && ev.target.type !== 'radio' && ev.target.type !== 'search') { ev.preventDefault(); ev.target.blur(); }
   });
   window.addEventListener('resize', fitPreview);
+  // 누르기 시작할 때 명세서를 받기 시작 (손을 떼기 전에 받아 두어 바로 열림)
+  document.addEventListener('pointerdown', function (ev) {
+    var b = ev.target.closest && ev.target.closest('.ent[data-act="open"]');
+    if (b && S.authed && S.I) { var no = b.getAttribute('data-v'); if (no && !S.det[no]) detGet(no).catch(function () {}); }
+  }, { passive: true });
   window.addEventListener('beforeprint', function () { if (S.cur && !printEl.innerHTML) printEl.innerHTML = docHtml(S.cur); });
 
   start();
