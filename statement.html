@@ -547,29 +547,32 @@ body.pvon{overflow:hidden}
     return p + ' ' + c;
   }
   /* 규격 1-4mm (2026-11-24 지시 "epdm 연갈 옆에 규격 1-4mm 로 epdm nmchip lok chip 전부 규격에 1-4mm 표기하도록 해라.
-     sbr 고무분말도 1-4mm 로 전부다 수정해라"): 일반 EPDM · NM-CHIP · LOK-CHIP · SBR 고무분말(크기 상관없이)의 규격은 1-4mm.
+     sbr 고무분말도 1-4mm 로 전부다 수정해라"): 일반 EPDM · NM-CHIP · LOK-CHIP · SBR 고무분말의 규격은 1-4mm.
+     단, SBR 고무분말 5-7mm는 5-7mm (2026-11-26 16:00 지시 "SBR5-7mm 규격은 5-7mm 이다"). EPDM BK는 크기 그대로(1-4mm · 5-7mm).
      이미 발행한 명세서도 찍을 때 · 고칠 때 비어 있는 규격과 예전 자동 규격(SBR '5-7mm 톤백' · '2-3mm 소포장')을 1-4mm로 바꿈.
      SBR 포장(톤백 · 소포장)은 포장마다 단가가 달라 비고 칸으로 옮겨 남김. 손으로 적어 넣은 다른 규격은 그대로. */
   var SPEC_STD = '1-4mm', SPEC_CHIPS = ['일반 EPDM', 'NM-CHIP', 'LOK-CHIP'];
   function sbrName() { return (S.I && S.I.sbr) || 'SBR 고무분말'; }
   function stdSpecProd(p) { return SPEC_CHIPS.indexOf(p) >= 0 || (!!p && p === sbrName()); }
+  /** 그 제품 · 색의 기준 규격 — 2026-11-26 16:00 지시 "SBR 5-7mm 규격은 5-7mm 이다": SBR 고무분말 5-7mm만 5-7mm, 나머지는 1-4mm */
+  function specStd(p, c) { return p === sbrName() && c === '5-7mm' ? '5-7mm' : SPEC_STD; }
   function specDef(p, c) {
-    if (stdSpecProd(p)) return SPEC_STD;
+    if (stdSpecProd(p)) return specStd(p, c);
     if (!isChip(p) && /\d/.test(c)) return c;
     return '';
   }
   /** 명세서 줄(k 's')의 규격 · 비고를 위 기준대로 (바꿀 것이 있으면 새 객체, 없으면 그 줄 그대로) */
   function stdLine(l) {
     if (!l || l.k !== 's' || !stdSpecProd(l.prod)) return l;
-    var sp = String(l.spec == null ? '' : l.spec).trim(), memo = String(l.memo == null ? '' : l.memo).trim(), pack = '';
+    var sp = String(l.spec == null ? '' : l.spec).trim(), memo = String(l.memo == null ? '' : l.memo).trim(), pack = '', want = specStd(l.prod, l.color);
     if (l.prod === sbrName()) {
       var m = /^(.*?)\s*(톤백|소포장)$/.exec(sp), size = m ? m[1].trim() : sp;
       if (m) pack = m[2];
-      if (size && size !== SPEC_STD && size !== l.color && colorsOf(l.prod).indexOf(size) < 0) return l;   // 손으로 적은 규격
+      if (size && size !== SPEC_STD && size !== want && size !== l.color && colorsOf(l.prod).indexOf(size) < 0) return l;   // 손으로 적은 규격
     } else if (sp) return l;
     if (pack && memo.indexOf(pack) < 0) memo = memo ? memo + ' · ' + pack : pack;
-    if (sp === SPEC_STD && memo === String(l.memo == null ? '' : l.memo).trim()) return l;
-    return Object.assign({}, l, { spec: SPEC_STD, memo: memo });
+    if (sp === want && memo === String(l.memo == null ? '' : l.memo).trim()) return l;
+    return Object.assign({}, l, { spec: want, memo: memo });   // SBR 5-7mm에 예전 기준(1-4mm)으로 적힌 것도 5-7mm로 (2026-11-26)
   }
   /** 거래처 · 제품 · 색의 단가 제안: 지난 단가 → 기준 단가 */
   function priceOf(cust, p, c) {
@@ -1130,7 +1133,8 @@ body.pvon{overflow:hidden}
      2026-11-24: 규격 14 → 16mm, 비고 14 → 18mm (규격 · 비고가 잘리지 않게), 품명 76mm */
   var COLS_H = [6, 0, 16, 10, 16, 13, 21, 18, 18], COLS_F = [8, 0, 20, 12, 18, 15, 25, 22, 16];
   function copyHtml(st, co, cu, pl, pi, pn, L, pos) {
-    var amt = st.amt !== false, last = pi === pn - 1, per = L.per, base = pi * per, half = !L.full, i, l;
+    // 2026-11-26 16:00 지시 "거래명세서 공급자 보관용은 금액 다 표기해야되겠다. 인수자용만 단가체크하면 안나오도록": 단가 · 금액 빈칸은 공급받는자(인수자) 보관용(위 't')만, 공급자 보관용(아래 'b')은 늘 금액
+    var amt = st.amt !== false || pos === 'b', last = pi === pn - 1, per = L.per, base = pi * per, half = !L.full, i, l;
     var CW = half ? 194 : 182, cols = (half ? COLS_H : COLS_F).slice(), padT = half ? 1.6 : 2, padN = half ? 1.2 : 2;
     cols[1] = CW - cols.reduce(function (a, b) { return a + b; }, 0);
     var FZ = half ? { nm: 9.6, c: 8.6, r: 9, q: 9.4, mm: 7.4, tf: 8.4 } : { nm: 9, c: 9, r: 9, q: 9, mm: 8, tf: 8.6 };
@@ -1215,7 +1219,7 @@ body.pvon{overflow:hidden}
       '<div class="t"><span>합계금액</span><b id="tTot">' + fmt(T.total) + '</b></div></div><p class="han" id="tHan">' + (T.total ? '일금 ' + numKo(T.total) + '원정' : '') + '</p>' +
       '<p class="fwarn" id="tNo"' + (T.noPrice ? '' : ' hidden') + '>단가 없는 줄 <b id="tNoN">' + T.noPrice + '</b>개 — 명세서에는 빈칸으로 찍히고, 손익계산서에는 기준 단가(추정)로 계산됩니다.</p>' +
       '<div class="opts"><label class="chk"><input type="checkbox" data-f="vatnone"' + (F.vat === 'none' ? ' checked' : '') + '>부가세 없음 (영세율 · 면세)</label>' +
-      '<label class="chk"><input type="checkbox" data-f="noamt"' + (F.amt ? '' : ' checked') + '>단가 · 금액 빈칸으로 인쇄 (인수증용 · 양식은 그대로)</label></div>' +
+      '<label class="chk"><input type="checkbox" data-f="noamt"' + (F.amt ? '' : ' checked') + '>인수자용(공급받는자 보관용)만 단가 · 금액 빈칸으로 인쇄 — 공급자 보관용은 금액 그대로</label></div>' +
       '<label class="fld" style="margin-top:8px"><span>전달사항 <small>품목 8줄 이상(한 부씩 크게)일 때만 아래 칸에 찍힘</small></span><textarea class="inp" data-f="memo" maxlength="200" rows="2">' + esc(F.memo) + '</textarea></label></section>';
     return h;
   }
