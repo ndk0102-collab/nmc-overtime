@@ -495,6 +495,21 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 .tivk .tiv .tist{display:none}
 .pvw{margin:0 0 12px}
 .qout{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+/* v71 받은 발주서 여러 건 삭제: 선택 띠 · 고른 줄 · 아래 고정 띠 */
+.psrow{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:8px 12px;border-bottom:1px solid #EEE8E2;background:var(--card)}
+.psrow.on{justify-content:space-between;background:#FFF7F5}
+.psrow .pshint{flex:1;min-width:0;font-size:13px;color:var(--muted)}
+.tbl.psel-on .it,.tbl.psel-on .thr{padding-left:48px}
+.it.psel{position:relative}
+.it.psel .pck{position:absolute;left:16px;top:50%;width:22px;height:22px;margin-top:-11px;border:2px solid #B9B2AA;border-radius:6px;background:#fff;box-sizing:border-box}
+.it.psel.on{background:#FFF1EF}
+.it.psel.on .pck{border-color:var(--bad);background:var(--bad);box-shadow:inset 0 0 0 3px #fff}
+.it.psel .qd{display:none}   /* 고르는 중에는 '✓ 처리' 숨김 (누르면 고르기만 됨) */
+.pself{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fff;border-top:2px solid #F2C4BF;box-shadow:0 -4px 14px rgba(15,23,42,.12)}
+.pself.ask{display:block}
+.pself.ask p{margin:0 0 8px;font-size:14px;line-height:1.5}
+.pself .tools{display:flex;gap:8px;flex-wrap:wrap}
+.psel-sp{height:150px}
 .dirs button.hot small{background:#B3261E;color:#fff;border-radius:999px;padding:0 6px}
 .dirs button.hot[aria-pressed="true"] small{background:#fff;color:#B3261E}
 @media print{.tivw,.pvw{display:none}}
@@ -570,6 +585,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     taxDir: 'buy', taxYear: '', taxYm: '', taxMon: {}, taxBusy: {}, keep: {},
     taxPm: 'm', taxDay: '', taxOff: 0, tqall: 0, tshow: 300, tix: { rows: null, n: 0, at: 0, busy: 0, err: '' }, noInvs: false, taxLed: null, tinv: {}, tkBusy: '',
     pv: { pm: 'm', day: '', ym: '', off: 0, q: '', qall: 0, show: 300, st: '' },   // v68 발주서 칸: 기간 · 업체명 찾기 · 상태(확인 필요만)   // v67: 일별 · 월별 · 연별 · 업체명 찾기 · 보관용 인쇄 (2026-11-26)   // keep: 방금 처리 완료한 것(보기 · 분류를 바꿀 때까지 자리에, v62)
+    psel: { on: false, ids: {}, ask: false, busy: false },   // v71 받은 발주서 여러 건 삭제: 고르는 중 · 고른 것('d:공문 번호' · 'p:발주서함 번호') · 확인 · 보내는 중
     sq: '', srC: {}, srE: {}, srBusy: {}, srBy: {}, srLast: null, srGen: 0 };   // 돋보기 찾기 (v55): 친 글자 · 서버 답(찾는 말마다) · 오류 · 받은 건(번호마다)   // 세금계산서: 매입 · 매출 · 확인 필요, 해 · 달 (2026-11-22)
   /* 분류 (2026-11-21 22:14 지시 "공문함에 발주서와 세금계산서 그다음 각종 공문들 정리할 수 있도록 나눠 주고")
      발주서 = 발주서함(출고 화면에서 처리하는 받은 발주서) + 종류가 발주서인 것 + 제목 · 첨부가 발주서인 메일 · 팩스
@@ -586,7 +602,8 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     net: '인터넷 연결을 확인해 주십시오.', timeout: '응답이 지연되고 있습니다. 잠시 후 다시 시도해 주십시오.',
     bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.', not_found: '해당 공문이 없습니다. 다른 기기에서 삭제되었을 수 있습니다.',
     bad_input: '입력 값을 확인해 주십시오.', bad_date: '날짜를 확인해 주십시오.', doc_type: '등록할 수 없는 파일 형식입니다 (PDF · 사진 · 한글 · 워드 · 메일 · 텍스트 파일).',
-    doc_size: '파일 용량 초과 (최대 10MB).', doc_bad: '파일을 판독할 수 없습니다.'
+    doc_size: '파일 용량 초과 (최대 10MB).', doc_bad: '파일을 판독할 수 없습니다.',
+    too_many: '한 번에 500건까지 삭제할 수 있습니다.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + ')'); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -708,17 +725,18 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       '<details class="more" id="poCusts"><summary>거래처별 보기</summary><table class="tm"><thead><tr><th>거래처</th><th>발주</th><th>칼라칩</th><th>SBR</th><th>기간</th></tr></thead><tbody>' + cr + '</tbody></table></details>' +
       '<details class="more" id="poYears"><summary>연도별 보기</summary><table class="tm"><thead><tr><th>연도</th><th>발주</th><th>칼라칩</th><th>SBR</th></tr></thead><tbody>' + yr + '</tbody></table></details></section>';
   }
-  // 발주서함 한 줄 (서버 v44부터 공문함에도 옴): [번호, 받은 시각, 파일 이름, 상태, 결과, 거래처들, 출고 날짜들, 넣은 줄 수, 파일 번호들, 메모]
+  // 발주서함 한 줄 (서버 v44부터 공문함에도 옴): [번호, 받은 시각, 파일 이름, 상태, 결과, 거래처들, 출고 날짜들, 넣은 줄 수, 파일 번호들, 메모, 목록 삭제(v71)]
   function poObj(r) {
-    return { t: 'po', id: r[0], at: r[1], name: r[2], st: r[3], result: r[4], custs: r[5] || [], dates: r[6] || [], n: Number(r[7]) || 0, files: r[8] || [], note: r[9] || '', kind: '발주서' };
+    return { t: 'po', id: r[0], at: r[1], name: r[2], st: r[3], result: r[4], custs: r[5] || [], dates: r[6] || [], n: Number(r[7]) || 0, files: r[8] || [], note: r[9] || '', hid: r[10] ? 1 : 0, kind: '발주서' };
   }
   function put(d) {
     d.R = (d.rows || []).map(obj);
     d.noPo = !Array.isArray(d.po);
-    d.P = d.noPo ? [] : d.po.map(poObj);
+    d.Pall = d.noPo ? [] : d.po.map(poObj);   // v71: 목록에서 삭제한 발주서(hid)는 목록에서 빼고 메일 첨부 잇기에만 씀
+    d.P = d.Pall.filter(function (p) { return !p.hid; });
     // 메일 첨부 ↔ 첨부가 간 곳(발주서함 · 공문함): 파일 번호로 잇습니다
     var byFile = {};
-    d.P.forEach(function (p) { p.files.forEach(function (fid) { if (fid) byFile[fid] = { po: p }; }); });
+    d.Pall.forEach(function (p) { p.files.forEach(function (fid) { if (fid) byFile[fid] = { po: p }; }); });
     d.R.forEach(function (x) { x.files.forEach(function (f) { if (f[0] && !f[3] && !byFile[f[0]]) byFile[f[0]] = { doc: x }; }); });
     d.R.forEach(function (x) {
       x.atts = x.files.filter(function (f) { return f[3]; }).map(function (f) {
@@ -1125,6 +1143,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     if (!V.day) V.day = D.today;
     if (!V.ym) V.ym = D.today.slice(0, 7);
     var P = poData(), R = P.R, list = P.list, q = String(V.q || '').trim(), pv = pview();
+    if (S.psel.on) { var inL = {}; list.forEach(function (e) { inL[pselKey(e)] = 1; }); Object.keys(S.psel.ids).forEach(function (k) { if (!inL[k]) delete S.psel.ids[k]; }); }   // v71: 고른 것 = 지금 목록 안에서만
     var c = { todo: 0, done: 0, skip: 0 };
     list.forEach(function (e) { if (isOpen(e)) c.todo++; else if (e.t === 'po' && (e.st === '취소' || e.st === '중복')) c.skip++; else c.done++; });
     var now = V.pm === 'd' ? V.day === D.today : V.pm === 'm' ? V.ym === D.today.slice(0, 7) : !V.off;
@@ -1143,24 +1162,91 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     h += '<div class="tk"><div class="big"><small>' + esc(label) + (P.T.length && !P.qall && V.st !== 'open' ? ' · ‘' + esc(q) + '’' : '') + '</small><b>' + list.length + '건</b></div>' +
       '<div' + (c.todo ? ' class="unk"' : '') + '><small>확인 필요</small><b>' + c.todo + '건</b></div><div><small>출고예정 등록</small><b>' + c.done + '건</b></div></div>' +
       '<p class="hint">받은 날 기준 · 누르면 발주서 그림이 바로 열리고, ‘출고 화면에서 확인 · 결정’으로 판독 내용(일자 · 거래처 · 품목 · 수량)을 고쳐 출고예정으로 넣습니다. 판독하지 못한 발주서도 그림을 보며 품목 · 수량을 직접 정할 수 있습니다.</p></section>';
-    h += '<div id="list" class="tbl t-po">';
+    h += '<div id="list" class="tbl t-po' + (S.psel.on ? ' psel-on' : '') + '">' + pselBarHtml(list);   // v71: 선택 삭제
     if (P.out > 0) h += '<p class="tnote qout">이 기간 밖에도 ‘' + esc(q) + '’ 발주서가 ' + P.out + '건 있습니다. <button type="button" class="btn ghost sm" data-pqall="1">전체 기간 보기</button></p>';
     if (!list.length) h += '<ul class="list"><li class="empty">' + (V.st === 'open' ? '확인할 발주서가 없습니다.' : P.T.length ? '‘' + esc(q) + '’가 들어간 발주서가 ' + (P.qall ? '' : esc(label) + '에 ') + '없습니다.' : esc(label) + '에 받은 발주서가 없습니다.') + '</li></ul>';
     else {
       var shown = list.slice(0, V.show), byM = V.st !== 'open' && (P.qall || /^[36y]$/.test(V.pm));
       h += thrHtml('po');
-      if (V.pm === 'd' && V.st !== 'open' && !P.qall) h += '<ul class="list">' + shown.map(entHtml).join('') + '</ul>';
+      if (V.pm === 'd' && V.st !== 'open' && !P.qall) h += '<ul class="list">' + shown.map(S.psel.on ? pselRow : entHtml).join('') + '</ul>';
       else NP.group(shown, function (e) { return byM ? poDay(e).slice(0, 7) : poDay(e); }).forEach(function (g) {
         var n = list.filter(function (e) { return (byM ? poDay(e).slice(0, 7) : poDay(e)) === g.k; }).length;
         h += byM ? '<h3 class="dh tmh"><button type="button" class="link" data-pgom="' + g.k + '">' + Number(g.k.slice(0, 4)) + '년 ' + Number(g.k.slice(5, 7)) + '월</button><small>' + n + '건</small></h3>'
           : '<h3 class="dh' + (g.k === D.today ? ' today' : '') + '">' + esc(dayHead(g.k)) + '<small>' + n + '건</small></h3>';
-        h += '<ul class="list">' + g.xs.map(entHtml).join('') + '</ul>';
+        h += '<ul class="list">' + g.xs.map(S.psel.on ? pselRow : entHtml).join('') + '</ul>';
       });
       if (list.length > shown.length) h += '<div class="tools mt12"><button type="button" class="btn ghost" data-pmore="1">' + (list.length - shown.length) + '건 더 보기</button></div>';
     }
     if (D.noPo) h += '<p class="hint">발주서함(수신 발주서)은 서버 업데이트 후 이 화면에 함께 표시됩니다.</p>';
     setTimeout(function () { prePo(list); }, 0);
-    return h + '</div>';
+    return h + (S.psel.on ? '<div class="psel-sp"></div>' : '') + '</div>' + (S.psel.on ? pselFixHtml() : '');
+  }
+  /* ── v71 받은 발주서 여러 건 한 번에 삭제 (2026-11-27 11:30 지시 "발주서에 하나하나 삭제 되도록 되어있다. 전체적으로 다 삭제 되게끔 해달라")
+     '선택 삭제' → 줄을 눌러 고름('전체 선택' = 지금 기간 · 찾기 목록 전체) → '선택한 n건 삭제' → '삭제 확인'. 서버 apiDocDelMany 한 번:
+     메일 · 팩스로 받은 발주서(공문함 건)는 하나씩 지우던 '목록에서 삭제'와 같게 지움, 발주서함 건은 목록에서만 뺌
+     (처리 전 발주서 = '등록 안 함'과 같게 취소 · 등록한 출고예정 · 드라이브 원본 파일은 그대로). ── */
+  var DEL_MAX = 500;
+  function pselKey(e) { return (e.t === 'po' ? 'p:' : 'd:') + e.id; }
+  function pselOff() { S.psel = { on: false, ids: {}, ask: false, busy: false }; }
+  function pselCount() {
+    var c = { d: 0, p: 0 };
+    Object.keys(S.psel.ids).forEach(function (k) { c[k.charAt(0)]++; });
+    return c;
+  }
+  /** 고르는 중의 한 줄: 누르면 고름(열지 않음) · 왼쪽 네모 · 상태 칸의 '✓ 처리'는 끔 */
+  function pselRow(e) {
+    var k = pselKey(e), on = !!S.psel.ids[k];
+    var h = entHtml(e).replace(/ data-done="/g, ' data-xdone="')
+      .replace('<button type="button" class="it', '<button type="button" data-psel="' + esc(k) + '" aria-pressed="' + on + '" class="it psel' + (on ? ' on' : ''));
+    var i = h.indexOf('>', h.indexOf('<button'));
+    return h.slice(0, i + 1) + '<span class="pck" aria-hidden="true"></span>' + h.slice(i + 1);
+  }
+  function pselBarHtml(list) {
+    if (!S.psel.on) return list.length ? '<div class="psrow"><button type="button" class="btn ghost sm" data-pselon="1">선택 삭제</button></div>' : '';
+    var all = list.length > 0 && list.every(function (e) { return S.psel.ids[pselKey(e)]; });
+    return '<div class="psrow on"><button type="button" class="btn ghost sm" data-pselall="1"' + (list.length ? '' : ' disabled') + '>' +
+      (all ? '전체 해제' : '전체 선택 (' + Math.min(list.length, DEL_MAX) + '건)') + '</button><span class="pshint">삭제할 줄을 누르십시오</span>' +
+      '<button type="button" class="btn ghost sm" data-pseloff="1"' + (S.psel.busy ? ' disabled' : '') + '>선택 끝내기</button></div>';
+  }
+  /** 화면 아래 고정 띠: 고른 건수 · 삭제 단추 → 확인 */
+  function pselFixHtml() {
+    var c = pselCount(), m = c.d + c.p, b = S.psel.busy ? ' disabled' : '';
+    if (S.psel.ask && m) return '<div class="pself ask" id="pselFix" role="region" aria-label="삭제 확인"><p><b>' + m + '건을 목록에서 삭제합니다.</b> ' +
+      (c.d ? '메일 · 팩스로 받은 발주서 ' + c.d + '건은 목록에서 지웁니다(드라이브 원본 파일은 그대로). ' : '') +
+      (c.p ? '발주서함 ' + c.p + '건은 목록에서 뺍니다(등록한 출고예정은 그대로, 처리 전 발주서는 ‘등록 안 함’으로 바뀜). ' : '') + '</p>' +
+      '<div class="tools"><button type="button" class="btn danger" data-pselgo="1"' + b + '>' + (S.psel.busy ? '삭제하는 중…' : '삭제 확인') + '</button>' +
+      '<button type="button" class="btn ghost" data-pselx="1"' + b + '>아니요</button></div></div>';
+    return '<div class="pself" id="pselFix"><span><b>' + m + '건</b> 선택</span><button type="button" class="btn danger" data-pseldel="1"' + (m ? '' : ' disabled') + '>선택한 ' + m + '건 삭제</button></div>';
+  }
+  function pselToggle(k) {
+    if (S.psel.busy) return;
+    if (S.psel.ids[k]) delete S.psel.ids[k];
+    else if (Object.keys(S.psel.ids).length >= DEL_MAX) { toast('한 번에 ' + DEL_MAX + '건까지 삭제할 수 있습니다.'); return; }
+    else S.psel.ids[k] = 1;
+    S.psel.ask = false;
+    poRe();
+  }
+  function pselAll() {
+    if (S.psel.busy) return;
+    var keys = poData().list.map(pselKey), all = keys.length > 0 && keys.every(function (k) { return S.psel.ids[k]; });
+    S.psel.ids = {}; S.psel.ask = false;
+    if (!all) {
+      keys.slice(0, DEL_MAX).forEach(function (k) { S.psel.ids[k] = 1; });
+      if (keys.length > DEL_MAX) toast('한 번에 ' + DEL_MAX + '건까지 삭제할 수 있습니다. 앞 ' + DEL_MAX + '건을 골랐습니다.');
+    }
+    poRe();
+  }
+  function pselGo() {
+    var dd = [], pp = [];
+    Object.keys(S.psel.ids).forEach(function (k) { (k.charAt(0) === 'p' ? pp : dd).push(k.slice(2)); });
+    if (!(dd.length + pp.length) || S.psel.busy) return;
+    S.psel.busy = true; poRe();
+    call('apiDocDelMany', [dd, pp]).then(function (d) {
+      var r = d.del || {}, done = (Number(r.doc) || 0) + (Number(r.po) || 0);
+      NP.cache.set('docs', d);
+      pselOff(); put(d); render();
+      toast('목록에서 ' + done + '건 삭제했습니다.' + (r.busy ? ' 판독 중인 발주서 ' + r.busy + '건은 남겨 두었습니다.' : '') + (r.miss ? ' ' + r.miss + '건은 이미 목록에 없었습니다.' : ''));
+    }, function (e) { S.psel.busy = false; S.psel.ask = false; poRe(); toast(errText(e)); });
   }
   /** 확인할 발주서 앞 몇 건의 첫 파일을 미리 받아 둠 (누르면 그림이 바로) */
   function prePo(list) {
@@ -2212,6 +2298,10 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
 
   /* ── 목록 · 올리기 ── */
   root.addEventListener('click', function (ev) {
+    if (S.psel.on && S.cat === 'po') {   // v71: 고르는 중에는 줄을 누르면 고름(열지 않음)
+      var ps = ev.target.closest('[data-psel]');
+      if (ps) { pselToggle(ps.getAttribute('data-psel')); return; }
+    }
     var ud = ev.target.closest('[data-undo]');
     if (ud) { undoDone(ud.getAttribute('data-undo')); return; }
     var dn = ev.target.closest('[data-done]');
@@ -2230,11 +2320,17 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var ct = ev.target.closest('[data-cat]');
     if (ct) {   // 칸 바꾸기: 받은 것 전체 = 전부, 발주서 = 확인할 것부터
       var nc = ct.getAttribute('data-cat');
-      if (nc !== S.cat) { S.cat = nc; S.f = nc === 'po' ? 'open' : nc === 'all' ? 'every' : S.f; S.calDay = ''; S.keep = {}; }
+      if (nc !== S.cat) { S.cat = nc; S.f = nc === 'po' ? 'open' : nc === 'all' ? 'every' : S.f; S.calDay = ''; S.keep = {}; pselOff(); }
       render(); return;
     }
     var dr = ev.target.closest('[data-dir]');
     if (dr) { S.taxDir = dr.getAttribute('data-dir'); S.tshow = TSHOW; taxRe(); return; }
+    if (ev.target.closest('[data-pselon]')) { S.psel = { on: true, ids: {}, ask: false, busy: false }; poRe(); return; }   // v71 선택 삭제
+    if (ev.target.closest('[data-pseloff]')) { if (!S.psel.busy) { pselOff(); poRe(); } return; }
+    if (ev.target.closest('[data-pselall]')) { pselAll(); return; }
+    if (ev.target.closest('[data-pseldel]')) { if (Object.keys(S.psel.ids).length && !S.psel.busy) { S.psel.ask = true; poRe(); } return; }
+    if (ev.target.closest('[data-pselgo]')) { pselGo(); return; }
+    if (ev.target.closest('[data-pselx]')) { if (!S.psel.busy) { S.psel.ask = false; poRe(); } return; }
     var pst = ev.target.closest('[data-pst]');
     if (pst) { S.pv.st = pst.getAttribute('data-pst'); S.pv.show = 300; poRe(); return; }
     var ppm = ev.target.closest('[data-ppm]');
