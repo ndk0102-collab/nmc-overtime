@@ -79,6 +79,10 @@ b,td,th,.wnum{font-variant-numeric:tabular-nums}
 @media (max-width:480px){.wnum{font-size:48px}}
 .act1{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
 
+/* 계량 프로그램 연동 (v72) */
+.sync .srow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.jt th{width:34%;text-align:left}
+
 /* 대기 차량 */
 .pend{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line)}
 .pend:first-of-type{border-top:0}
@@ -145,6 +149,7 @@ select.inp{font-size:16px}
 .smsg.warn{background:var(--warn-soft);color:var(--warn)}
 .chk{display:flex;align-items:center;gap:8px;min-height:44px;font-weight:700}
 .chk input{width:22px;height:22px}
+.keybox{margin:0 0 12px;padding:14px;border-radius:12px;background:#0F172A;color:#E2E8F0;font-family:Consolas,'D2Coding',monospace;font-size:16px;line-height:1.6;word-break:break-all;user-select:all}
 .rawl{margin:0 0 12px;padding:10px;border-radius:10px;background:#0F172A;color:#E2E8F0;font-family:Consolas,'D2Coding',monospace;font-size:13px;line-height:1.55;max-height:46vh;overflow:auto;white-space:pre-wrap;word-break:break-all}
 
 .login{max-width:440px;margin:20px auto}
@@ -226,6 +231,9 @@ select.inp{font-size:16px}
   function clock() { var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
   function tag(t, c) { return '<span class="tag' + (c ? ' ' + c : '') + '">' + esc(t) + '</span>'; }
   function kindCls(k) { return k === '매입' ? 'info' : k === '매출' ? 'ok' : ''; }
+  function isJ(r) { return /^J\d+$/.test(String((r && r.id) || '')); }   // v72: 계량 프로그램(차량계량관리)에서 들어온 기록
+  function noOf(r) { return isJ(r) ? (r.sn || r.id) : r.id; }            // 계량 프로그램 기록은 그 프로그램 순번(계량증명서 번호)
+  function ageTxt(a) { return a == null ? '' : a < 1 ? '방금' : a < 60 ? a + '분 전' : Math.floor(a / 60) + '시간 ' + (a % 60) + '분 전'; }
 
   /* ───────── 서버 ───────── */
   var ERR = {
@@ -235,7 +243,8 @@ select.inp{font-size:16px}
     bad_weight: '무게를 확인해 주십시오 (1kg 이상 120,000kg 이하의 정수).', bad_link: '연결할 출고를 확인해 주십시오 (매출 · SBR 고무분말 · 분철 출고만).',
     dup_link: '이 출고에는 이미 다른 계량이 연결되어 있습니다.', not_waiting: '이미 2차 계량을 마친 차량입니다.', same_weight: '2차 무게가 1차와 같습니다. 차량을 확인해 주십시오.',
     cancelled: '취소된 계량입니다.', not_done: '2차 계량을 마친 뒤 발행할 수 있습니다.', not_found: '해당 계량이 없습니다. 다른 곳에서 취소되었을 수 있습니다.',
-    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.'
+    bad_action: '서버가 아직 이 기능을 지원하지 않습니다. 서버 배포 후 다시 시도해 주십시오.',
+    from_program: '계량 프로그램에서 들어온 기록입니다. 지우려면 계량 프로그램(차량계량관리)에서 지워 주십시오. 5분 안에 여기서도 취소됩니다.'
   };
   function errText(e) { var c = String((e && e.message) || e || ''); return ERR[c] || ('처리하지 못했습니다 (' + c + '). 잠시 후 다시 시도해 주십시오.'); }
   function post(body) {
@@ -423,7 +432,7 @@ select.inp{font-size:16px}
     var h;
     if (!S.authed) h = loginHtml();
     else if (!S.d) h = S.err ? errHtml() : '<p class="wait">조회 중…</p>';
-    else h = scaleHtml() + pendHtml() + doneHtml();
+    else h = syncHtml() + scaleHtml() + pendHtml() + doneHtml();
     root.innerHTML = h;
     paintScale(true);
     if (window.NMCNav) NMCNav.sync();
@@ -434,6 +443,29 @@ select.inp{font-size:16px}
     return '<section class="card login"><h2>관리자 로그인</h2><p class="hint">계근대 계량은 관리자 전용입니다. 관리자 비밀번호를 입력해 주십시오. 다른 관리자 화면에서 이미 로그인한 경우 바로 열립니다.</p>' +
       '<form id="loginForm" autocomplete="off"><label class="hint" for="pw" style="position:absolute;left:-9999px">비밀번호</label><input id="pw" type="password" autocomplete="current-password" placeholder="비밀번호" required maxlength="100"><button class="btn" type="submit">로그인</button></form>' +
       '<p class="err" id="loginErr" role="alert">' + esc(S.loginErr) + '</p></section>';
+  }
+  /* v72 계량 프로그램 연동: 계량 PC의 연동 프로그램이 5분마다 계량 프로그램 기록을 보냄 (연결 키) */
+  function syncHtml() {
+    var s = (S.d && S.d.sync) || { on: false }, p = s.ping || null;
+    var h = '<section class="card sync" aria-label="계량 프로그램 연동"><h2>계량 프로그램 연동<small>차량계량관리 기록 → 계량기록 · 폐타이어 서식</small></h2>';
+    if (!s.on) {
+      return h + '<p class="hint">꺼져 있습니다. 계량 PC의 연동 프로그램에 넣을 연결 키를 만들면 켜집니다.</p>' +
+        '<div class="tools"><button type="button" class="btn sm" data-act="wk-new">연결 키 만들기</button></div></section>';
+    }
+    var st = '연동 중', cls = 'stable';
+    if (!p) { st = '연동 프로그램 연락 기다리는 중'; cls = 'nodata'; }
+    else if (p.stale) { st = ageTxt(p.age) + '부터 연락 없음'; cls = 'err'; }
+    else if (p.err) { st = '연동 오류'; cls = 'err'; }
+    h += '<div class="srow"><span class="wst ' + cls + '">' + esc(st) + '</span>' +
+      (p ? '<span class="wport">' + esc((p.host ? p.host + ' · ' : '') + '마지막 확인 ' + ageTxt(p.age) + (p.ver ? ' · ' + p.ver + '판' : '')) + '</span>' : '') + '</div>';
+    if (!p) h += '<p class="hint">연결 키를 ' + esc(String(s.at || '').slice(5, 16)) + '에 만들었습니다. 계량 PC에 연동 프로그램을 설치하면 5분 안에 연락이 옵니다.</p>';
+    else {
+      h += '<p class="hint">오늘 받은 기록 ' + (Number(p.today) || 0) + '건' + (p.last && String(p.last).slice(0, 10) === (S.d && S.d.today) ? ' · 마지막으로 받은 시각 ' + esc(String(p.last).slice(11, 16)) : '') +
+        (p.from ? ' · ' + esc(md(p.from)) + '부터 가져옴' : '') + (p.bad ? ' · 받지 못한 기록 ' + p.bad + '건 (날짜 · 무게를 계량 프로그램에서 확인해 주십시오)' : '') + '</p>';
+      if (p.err) h += '<p class="err">' + esc(p.err) + '</p>';
+      if (p.stale) h += '<p class="hint">계량 PC가 켜져 있고 윈도우에 로그인되어 있는지 확인해 주십시오. 그동안의 기록은 PC가 다시 켜지면 한꺼번에 들어옵니다.</p>';
+    }
+    return h + '<div class="tools"><button type="button" class="btn ghost sm" data-act="wk-new">연결 키 다시 만들기</button><button type="button" class="btn ghost sm" data-act="wk-off">연동 끊기</button></div></section>';
   }
   function scaleHtml() {
     return '<section class="card scale" aria-label="계근대"><div class="srow"><span class="wst" id="wst"></span><span class="wport" id="wport"></span></div>' +
@@ -450,7 +482,7 @@ select.inp{font-size:16px}
   function hintTxt(st) {
     if (st === 'nosup') return '지시계 연결은 PC의 크롬 또는 엣지에서 됩니다. 지금은 무게를 직접 입력할 수 있습니다.';
     if (st === 'off') return "'계근대 연결'을 누르고 지시계가 연결된 단자(COM)를 고르십시오. 처음 한 번만 고르면 다음부터 자동으로 연결됩니다.";
-    if (st === 'err') return SC.err === 'busy' ? '단자를 열지 못했습니다. 기존 계근 프로그램이 켜져 있으면 닫고 다시 연결해 주십시오.' : '연결하지 못했습니다 (' + SC.err + '). 통신 설정을 확인해 주십시오.';
+    if (st === 'err') return SC.err === 'busy' ? '단자를 열지 못했습니다. 계량 프로그램(차량계량관리)이 이 단자를 쓰고 있으면 그 프로그램으로 계량하십시오 — 기록은 계량 프로그램 연동으로 여기에 들어옵니다.' : '연결하지 못했습니다 (' + SC.err + '). 통신 설정을 확인해 주십시오.';
     if (st === 'nodata') return "지시계에서 받은 값이 없습니다. 통신 설정(속도)과 지시계 출력 설정을 확인해 주십시오. '받은 글자'에서 들어오는 내용을 볼 수 있습니다.";
     if (st === 'ol') return '과부하 — 지시계를 확인해 주십시오.';
     if (st === 'move') return '무게가 멈추면 계량할 수 있습니다.';
@@ -502,9 +534,9 @@ select.inp{font-size:16px}
       D.forEach(function (r) {
         var off = r.st === '취소';
         h += '<tr class="rb' + (off ? ' off' : '') + '" data-act="rec" data-id="' + esc(r.id) + '" tabindex="0" role="button">' +
-          '<td>' + esc(r.id) + '</td><td class="l">' + esc(r.car) + '</td><td>' + esc(r.kind) + '</td><td class="l">' + esc(r.co) + '</td><td class="l">' + esc(r.item) + '</td>' +
+          '<td>' + esc(noOf(r)) + '</td><td class="l">' + esc(r.car) + '</td><td>' + esc(r.kind) + '</td><td class="l">' + esc(r.co) + '</td><td class="l">' + esc(r.item) + '</td>' +
           '<td>' + esc(hm(r.at1)) + '</td><td>' + esc(hm(r.at2)) + '</td><td class="r">' + kg(r.gross) + '</td><td class="r">' + kg(r.tare) + '</td><td class="r b">' + kg(r.net) + '</td><td class="l">' +
-          (off ? tag('취소', 'bad') : '') + (r.m1 === '직접' || r.m2 === '직접' ? tag('직접 입력', 'warn') : '') +
+          (off ? tag('취소', 'bad') : '') + (isJ(r) ? tag('계량 프로그램', 'info') : '') + (r.m1 === '직접' || r.m2 === '직접' ? tag('직접 입력', 'warn') : '') +
           (!off && r.kind === '매출' && !r.link && LINKABLE.indexOf(r.item) >= 0 ? tag('출고 연결 안 됨', 'warn') : '') + (r.prints ? tag('발행 ' + r.prints, 'ok') : '') + '</td></tr>';
       });
       h += '</tbody></table></div>';
@@ -574,6 +606,19 @@ select.inp{font-size:16px}
     }
     return h + fld('memo', '메모', f.memo, { ml: 200 });
   }
+  function linkSel(f, selfId, sub) {   // 연결할 출고 (매출)
+    var L = outsFor(f, selfId);
+    return '<div class="fld"><label class="lab" for="f_link">연결할 출고<small>' + sub + '</small></label><select class="inp" id="f_link" data-f="link"><option value="">연결 안 함 (나중에 연결)</option>' +
+      L.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === f.link ? ' selected' : '') + '>' + esc(outLabel(o)) + '</option>'; }).join('') + '</select></div>';
+  }
+  function jInfoHtml(c) {   // 계량 프로그램 기록 내용
+    var row = function (k, v) { return '<tr><th>' + k + '</th><td class="l">' + v + '</td></tr>'; };
+    return '<div class="tw"><table class="dl jt"><tbody>' + row('계량일자', esc(dLong(c.date))) + row('구분', esc(c.kind)) + row('차량번호', esc(c.car)) +
+      row(c.kind === '매출' ? '거래처' : '업체', esc(c.co)) + row('품명', esc(c.item)) +
+      row('1차 계량', esc(hm(c.at1)) + ' · ' + kg(c.w1) + ' kg') + row('2차 계량', esc(hm(c.at2)) + ' · ' + kg(c.w2) + ' kg') +
+      row('총중량', kg(c.gross) + ' kg') + row('공차중량', kg(c.tare) + ' kg') + row('실중량', '<b>' + kg(c.net) + ' kg</b>') +
+      (c.memo ? row('메모', esc(c.memo)) : '') + row('계량 프로그램 번호', '순번 ' + esc(c.sn || '-') + ' · 일련번호 ' + esc(String(c.id).slice(1))) + '</tbody></table></div>';
+  }
   function capHtml(sh, lab) {
     if (sh.cap) {
       return '<div class="capw"><span>' + lab + '</span><b>' + kg(sh.cap.w) + ' kg</b><small>저울 · ' + esc(sh.cap.t) + '에 읽음</small></div>' +
@@ -607,6 +652,13 @@ select.inp{font-size:16px}
           L.map(function (o) { return '<option value="' + esc(o.id) + '"' + (o.id === f.link ? ' selected' : '') + '>' + esc(outLabel(o)) + '</option>'; }).join('') + '</select></div>';
       }
       foot = '<button type="button" class="btn" data-act="w2-save"' + busy + '>' + (sh.busy ? '저장 중…' : '2차 계량 저장') + '</button>';
+    } else if (sh.kind === 'edit' && isJ(sh.rec)) {   // v72: 계량 프로그램 기록은 출고 연결 · 메모만
+      var je = sh.rec;
+      title = '연결 · 메모 고치기 · 순번 ' + noOf(je);
+      b += '<p class="ro"><b>' + esc(je.car) + '</b> ' + tag(je.kind, kindCls(je.kind)) + ' · ' + esc(je.co || '업체 없음') + ' · ' + esc(je.item) + ' · 실중량 <b>' + kg(je.net) + ' kg</b>' +
+        '<br><small>계량 프로그램에서 들어온 기록이라 여기서는 출고 연결과 메모만 고칩니다. 무게 · 업체 · 품명 · 차량번호는 계량 프로그램에서 고쳐 주십시오.</small></p>' +
+        (je.kind === '매출' ? linkSel(f, je.id, 'SBR 고무분말 · 분철 — 연결하면 계량증명서(매출)에 들어갑니다') : '') + fld('memo', '메모', f.memo, { ml: 200 });
+      foot = '<button type="button" class="btn" data-act="edit-save"' + busy + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>';
     } else if (sh.kind === 'edit') {
       var e = sh.rec;
       title = '계량 고치기 · ' + e.id;
@@ -614,6 +666,27 @@ select.inp{font-size:16px}
         '<br><small>무게는 고칠 수 없습니다. 잘못 계량했으면 취소하고 다시 계량해 주십시오.</small></p>' + infoHtml(f, e.id);
       foot = '<button type="button" class="btn" data-act="edit-save"' + busy + '>' + (sh.busy ? '저장 중…' : '저장') + '</button>' +
         '<button type="button" class="btn danger" data-act="cancel"' + busy + '>' + (sh.arm ? '한 번 더 누르면 계량 취소' : '계량 취소') + '</button>';
+    } else if (sh.kind === 'rec' && isJ(sh.rec)) {   // v72: 계량 프로그램 기록 (계량증명서는 그 프로그램에서 발행)
+      var jc = sh.rec;
+      title = '계량 기록 · 순번 ' + noOf(jc);
+      if (jc.st === '취소') b += '<p class="smsg warn">계량 프로그램에서 지워진 기록입니다.</p>';
+      b += '<p class="smsg info">계량 프로그램(차량계량관리)에서 계량하고 계량증명서를 발행한 기록입니다. 무게 · 업체 · 품명 · 차량번호를 고치거나 지우려면 계량 프로그램에서 해 주십시오. 5분 안에 여기에 반영됩니다.</p>' + jInfoHtml(jc) +
+        (jc.kind === '매출' && !jc.link && LINKABLE.indexOf(jc.item) >= 0 && jc.st === '완료' ? '<p class="smsg warn" style="margin-top:12px">출고와 연결되지 않아 계량증명서(매출) 관리대장에 들어가지 않았습니다. 아래 \'연결 · 메모 고치기\'에서 출고를 연결해 주십시오.</p>' : '') +
+        (jc.link ? '<p class="hint">연결한 출고: ' + esc(jc.link) + '</p>' : '');
+      foot = jc.st !== '취소' ? '<button type="button" class="btn ghost" data-act="edit" data-id="' + esc(jc.id) + '">연결 · 메모 고치기</button>' : '';
+    } else if (sh.kind === 'wkey') {   // v72: 계량 프로그램 연동 연결 키
+      title = '연결 키 (계량 프로그램 연동)';
+      if (sh.key) {
+        b += '<p class="smsg warn">이 창을 닫으면 다시 볼 수 없습니다. 계량 PC에 연동 프로그램을 설치할 때 붙여 넣습니다. 다른 사람에게 보내지 마십시오.</p><div class="keybox" id="wkey">' + esc(sh.key) + '</div>';
+        foot = '<button type="button" class="btn" data-act="wk-copy">복사</button><button type="button" class="btn ghost" data-act="close">닫기</button>';
+      } else if (sh.off) {
+        b += '<p class="ro">연동을 끊으면 계량 PC의 연동 프로그램이 더는 기록을 보내지 못합니다. 이미 받은 기록은 그대로 남습니다. 다시 연동하려면 새 연결 키를 만들어 연동 프로그램에 넣어야 합니다.</p>';
+        foot = '<button type="button" class="btn danger" data-act="wk-off-go"' + busy + '>' + (sh.busy ? '끊는 중…' : '연동 끊기') + '</button><button type="button" class="btn ghost" data-act="close">닫기</button>';
+      } else {
+        b += '<p class="ro">계량 PC의 연동 프로그램은 이 연결 키로만 기록을 보낼 수 있습니다. 키는 만들 때 한 번만 보입니다.' +
+          (S.d && S.d.sync && S.d.sync.on ? '<br><b>새로 만들면 지금 쓰는 키는 바로 막힙니다.</b> 연동 프로그램에 새 키를 다시 넣어야 합니다.' : '') + '</p>';
+        foot = '<button type="button" class="btn" data-act="wk-go"' + busy + '>' + (sh.busy ? '만드는 중…' : '연결 키 만들기') + '</button><button type="button" class="btn ghost" data-act="close">닫기</button>';
+      }
     } else if (sh.kind === 'rec') {
       var c = sh.rec;
       title = '계량증명서 · ' + c.id;
@@ -706,7 +779,15 @@ select.inp{font-size:16px}
     }, fail);
   }
   function saveEdit() {
-    var sh = S.sheet, v = infoOf(sh.f), c = checkInfo(v);
+    var sh = S.sheet;
+    if (isJ(sh.rec)) {   // v72: 계량 프로그램 기록은 연결 · 메모만
+      busy(true);
+      call('apiWeighIn', ['edit', { id: sh.id, memo: String(sh.f.memo || '').trim(), link: sh.rec.kind === '매출' ? sh.f.link || '' : '' }]).then(function (x) {
+        closeSheetNow(); openSheet('rec', { id: x.rec.id, rec: x.rec }); load(true);
+      }, fail);
+      return;
+    }
+    var v = infoOf(sh.f), c = checkInfo(v);
     if (c) { fail(new Error(c)); return; }
     v.id = sh.id;
     busy(true);
@@ -774,6 +855,25 @@ select.inp{font-size:16px}
         return;
       }
       case 'rec': { var rr = recOf(el.getAttribute('data-id')); if (rr) openSheet('rec', { id: rr.id, rec: rr }); return; }
+      case 'wk-new': openSheet('wkey', {}); return;
+      case 'wk-off': openSheet('wkey', { off: true }); return;
+      case 'wk-go': {
+        busy(true);
+        call('apiWeighKey', []).then(function (x) { if (S.d) S.d.sync = x.sync; if (S.sheet) { S.sheet.busy = false; S.sheet.key = x.weighKey; renderSheet(); } render(); }, fail);
+        return;
+      }
+      case 'wk-off-go': {
+        busy(true);
+        call('apiWeighKeyOff', []).then(function (x) { if (S.d) S.d.sync = x.sync; closeSheet(); toast('연동을 끊었습니다'); render(); }, fail);
+        return;
+      }
+      case 'wk-copy': {
+        var kk = S.sheet && S.sheet.key; if (!kk) return;
+        var sel = function () { var ke = $('wkey'); if (!ke) return; var rg = document.createRange(); rg.selectNodeContents(ke); var ws = window.getSelection(); ws.removeAllRanges(); ws.addRange(rg); };
+        (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(kk) : Promise.reject(new Error('no')))
+          .then(function () { toast('연결 키를 복사했습니다'); }, function () { sel(); toast('키를 선택했습니다. Ctrl+C로 복사해 주십시오'); });
+        return;
+      }
       case 'print': { if (S.sheet && S.sheet.rec) doPrint(S.sheet.rec); return; }
       case 'dprev': case 'dnext': {
         if (!S.d) return;
