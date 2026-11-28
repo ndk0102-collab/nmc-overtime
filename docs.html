@@ -778,7 +778,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   }
   function isMail(x) { return x.t !== 'po' && (x.kind === '메일' || /^메일\(eml\)/.test(x.how) || (x.files[0] && x.files[0][2] === 'eml')); }
   function findPo(id) { return S.D ? S.D.P.filter(function (p) { return p.id === id; })[0] : null; }
-  function poHref(id) { return 'stock.html?view=out&poid=' + encodeURIComponent(id); }
+  function poHref(id) { return 'stock.html?view=out&pane=po&poid=' + encodeURIComponent(id); }   // v73: 발주서 관리
   function poTagCls(st) { return st === '확인 필요' ? 'bad' : PO_TODO[st] ? 'warn' : st === '넣음' ? 'ok' : ''; }
   function poRes(t) { return String(t || '').replace(/^읽음:\s*/, ''); }
   function driveView(id) { return 'https://drive.google.com/file/d/' + encodeURIComponent(id) + '/view'; }
@@ -1129,6 +1129,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
   function poTabHtml() {
     return '<div class="filt"><label class="tsrch"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>' +
       '<input type="search" id="pq" placeholder="업체명 · 현장 · 파일 이름 검색" value="' + esc(S.pv.q) + '" maxlength="40" autocomplete="off" aria-label="발주서 업체명 · 현장 · 파일 이름 검색"></label></div>' +
+      '<p class="hint" style="margin:0 0 8px">발주서 등록(파일 · 사진 · 받은 문자 · 전화 주문) · 확인 후 등록은 <a href="stock.html?view=out&amp;pane=po">발주서 관리</a>에서 합니다.</p>' +   // v73
       '<div id="poWrap">' + poBodyHtml() + '</div>' + poCard();
   }
   function poRe() {
@@ -1161,7 +1162,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     }
     h += '<div class="tk"><div class="big"><small>' + esc(label) + (P.T.length && !P.qall && V.st !== 'open' ? ' · ‘' + esc(q) + '’' : '') + '</small><b>' + list.length + '건</b></div>' +
       '<div' + (c.todo ? ' class="unk"' : '') + '><small>확인 필요</small><b>' + c.todo + '건</b></div><div><small>출고예정 등록</small><b>' + c.done + '건</b></div></div>' +
-      '<p class="hint">받은 날 기준 · 누르면 발주서 그림이 바로 열리고, ‘출고 화면에서 확인 · 결정’으로 판독 내용(일자 · 거래처 · 품목 · 수량)을 고쳐 출고예정으로 넣습니다. 판독하지 못한 발주서도 그림을 보며 품목 · 수량을 직접 정할 수 있습니다.</p></section>';
+      '<p class="hint">받은 날 기준 · 누르면 발주서 그림이 바로 열리고, ‘발주서 관리에서 확인 · 등록’으로 판독 내용(일자 · 거래처 · 품목 · 수량)을 고쳐 등록합니다. 판독하지 못한 발주서도 그림을 보며 품목 · 수량을 직접 정할 수 있습니다.</p></section>';
     h += '<div id="list" class="tbl t-po' + (S.psel.on ? ' psel-on' : '') + '">' + pselBarHtml(list);   // v71: 선택 삭제
     if (P.out > 0) h += '<p class="tnote qout">이 기간 밖에도 ‘' + esc(q) + '’ 발주서가 ' + P.out + '건 있습니다. <button type="button" class="btn ghost sm" data-pqall="1">전체 기간 보기</button></p>';
     if (!list.length) h += '<ul class="list"><li class="empty">' + (V.st === 'open' ? '확인할 발주서가 없습니다.' : P.T.length ? '‘' + esc(q) + '’가 들어간 발주서가 ' + (P.qall ? '' : esc(label) + '에 ') + '없습니다.' : esc(label) + '에 받은 발주서가 없습니다.') + '</li></ul>';
@@ -2054,16 +2055,16 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
     var todo = !!PO_TODO[p.st];
     var h = '<div class="sh"><h2 id="shTitle" tabindex="-1"><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st || '?') + '</span>' + esc(p.name) + '</h2><button type="button" class="x" data-act="close" aria-label="닫기">×</button></div>';
     // v68 (2026-11-26 지시 "발주서 누르면 … 파일열기 말고 발주서를 그림으로 바로 띄워서"): 발주서 그림 · 출고 결정 단추를 맨 위에
-    h += '<div class="tools" style="margin:0 0 10px"><a class="btn' + (todo ? ' okb' : '') + '" href="' + esc(poHref(p.id)) + '">' + (todo ? '출고 화면에서 확인 · 결정' : '출고 화면에서 보기') + '</a></div>';
+    h += '<div class="tools" style="margin:0 0 10px"><a class="btn' + (todo ? ' okb' : '') + '" href="' + esc(poHref(p.id)) + '">' + (todo ? '발주서 관리에서 확인 · 등록' : '발주서 관리에서 보기') + '</a></div>';
     if (p.files.filter(Boolean).length) h += '<div id="poPv" class="pvw" data-fids="' + esc(p.files.filter(Boolean).join(',')) + '"></div>';
-    h += '<dl class="kv"><dt>종류</dt><dd><span class="tag c-po">발주서</span>발주서함(출고 화면에서 처리)</dd><dt>수신 시각</dt><dd>' + esc(dtx(p.at)) + '</dd>' +
+    h += '<dl class="kv"><dt>종류</dt><dd><span class="tag c-po">발주서</span>발주서함(발주서 관리에서 처리)</dd><dt>수신 시각</dt><dd>' + esc(dtx(p.at)) + '</dd>' +
       (p.custs.length ? '<dt>거래처</dt><dd>' + esc(p.custs.join(', ')) + '</dd>' : '') +
       (p.dates.length ? '<dt>출고일</dt><dd>' + esc(p.dates.map(ymd).join(' · ')) + '</dd>' : '') +
       (p.n ? '<dt>등록 품목</dt><dd>' + p.n + '행</dd>' : '') + (p.note ? '<dt>메모</dt><dd>' + esc(p.note) + '</dd>' : '') + '</dl>';
     if (p.mail) h += '<p class="from">메일 수신: <button type="button" class="link" data-open="' + esc(p.mail.id) + '">' + esc(p.mail.title || p.mail.orig) + '</button>' + (p.mail.from ? ' · ' + esc(p.mail.from) : '') + '</p>';
     if (p.result) h += '<h3 style="margin:14px 0 4px;font-size:15px">판독 결과</h3><div class="text">' + esc(poRes(p.result)) + '</div>';
-    h += '<p class="hint">' + (todo ? '‘출고 화면에서 확인 · 결정’을 누르면 출고 화면에 이 발주서의 그림과 판독 내용(일자 · 거래처 · 품목 · 수량)이 표시됩니다. 읽지 못한 칸은 그림을 보며 직접 넣고 ‘등록’, 기등록 발주서는 ‘중복’으로 처리합니다.'
-      : '출고 화면의 ‘수신 발주서’에서 조회할 수 있습니다.') + '</p>';
+    h += '<p class="hint">' + (todo ? '‘발주서 관리에서 확인 · 등록’을 누르면 발주서 관리에 이 발주서의 그림과 판독 내용(일자 · 거래처 · 품목 · 수량)이 표시됩니다. 읽지 못한 칸은 그림을 보며 직접 넣고 ‘등록’, 이미 등록한 발주서는 ‘등록하지 않음 — 이미 등록됨’으로 처리합니다.'
+      : '발주서 관리의 ‘등록된 발주서’에서 조회할 수 있습니다.') + '</p>';
     return h;
   }
   /** v68: 시트 안의 파일 그림 칸 채우기 (발주서 · 공문 파일) */
@@ -2114,7 +2115,7 @@ table.tm{width:100%;border-collapse:collapse;margin:6px 0 0;font-size:14.5px;fon
       if (a.po) {
         var p = a.po;
         where = '<small><span class="tag c-po">발주서</span><span class="tag ' + poTagCls(p.st) + '">' + esc(PO_LAB[p.st] || p.st) + '</span>' + esc(poRes(p.result)) + '</small>';
-        btns = '<a class="btn sm" href="' + esc(poHref(p.id)) + '">' + (PO_TODO[p.st] ? '출고 화면에서 처리' : '출고 화면에서 보기') + '</a>';
+        btns = '<a class="btn sm" href="' + esc(poHref(p.id)) + '">' + (PO_TODO[p.st] ? '발주서 관리에서 처리' : '발주서 관리에서 보기') + '</a>';
       } else if (a.doc) {
         where = '<small><span class="tag c-' + a.doc.cat + '">' + esc(a.doc.kind) + '</span>공문함 · ' + esc(a.doc.title || a.doc.orig) + '</small>';
         btns = '<button type="button" class="btn ghost sm" data-open="' + esc(a.doc.id) + '">공문함에서 보기</button>';

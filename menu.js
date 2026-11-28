@@ -1,7 +1,7 @@
 /* NMC 전체 메뉴 — 대분류 → 소분류 (2026-11-25 10:11 지시: "전체카테고리 -소카테고리로 해서 좀 정리를 하자. 정렬도 하고 전체적으로 체계적으로 만들어서 우리가 일하기 편하게")
    · 관리자 첫 화면(manage.html)과 관리자 화면마다 위쪽의 '메뉴' 단추가 이 목록 하나를 같이 씁니다. 메뉴를 바꿀 때는 여기 한 곳만 고칩니다.
    · 소분류는 그 화면의 그 칸으로 바로 엽니다 — 예: 거래명세서 작성 = statement.html?view=edit, 현재고 = stock.html?view=all&tab=stock
-   · 순서 = 일하는 순서. 대분류: 업무 → 영업·출고 → 생산·재고 → 폐타이어 → 공사 → 재무 → 인사·급여, 소분류도 업무 흐름대로 (받은 발주서 → 출고 → 거래명세서 → 거래처 …)
+   · 순서 = 일하는 순서. 대분류: 업무 → 영업·출고 → 생산·재고 → 폐타이어 → 공사 → 재무 → 인사·급여, 소분류도 업무 흐름대로 (발주서 관리 → 출고 관리 → 거래명세서 → 거래처 …)
    · 폐타이어(2026-11-25 지시): 서식-1 보고서 · 서식-2 보고서 · 계량증명서 관리 · 세금계산서 관리 · 총괄표 — 쓰던 서식 그대로 (tire.html)
    · 인사·급여(2026-11-26 지시): 메뉴에는 '인사·급여' 한 칸만, 세부 칸(잔업 기록 · 근태·연차 · 급여대장 …)은 들어간 화면의 탭
    · '메뉴' 단추 = <a href="manage.html" data-nmc-menu> — 이 파일을 못 읽으면 관리자 첫 화면으로 그냥 갑니다.
@@ -58,9 +58,10 @@
         { k: 'docs', n: '공문함', d: '메일 · 팩스 공문 — 처리 대기 · 기한 · 찾기', u: 'docs.html', p: { cat: 'todo' }, w: 1, kw: '공문 처리대기 메일 팩스' },
         { k: 'docs-all', n: '수신 공문 전체', d: '일자별 목록 · 달력', u: 'docs.html?cat=all', p: { cat: 'all' }, kw: '공문 수신 달력' }
       ].concat(depts().map(deptItem)) },
-      { k: 'sales', n: '영업·출고', d: '받은 발주서 → 출고 → 거래명세서', c: '#1E5AA8', s: '#E6EFFB', items: [
-        { k: 'po', n: '받은 발주서', d: '메일 · 팩스로 받은 발주서 확인 · 출고 등록', u: 'docs.html?cat=po', p: { cat: 'po' }, kw: '발주 주문' },
-        { k: 'out', n: '출고 관리', d: '발주서 올리기 · 출고 예정 · 물표 · 거래처별 찾기', u: 'stock.html?view=out', p: { view: 'out' }, kw: '출고 물표 출고예정 달력 발주서올리기 거래처찾기' },
+      { k: 'sales', n: '영업·출고', d: '발주서 관리 → 출고 관리 → 거래명세서', c: '#1E5AA8', s: '#E6EFFB', items: [
+        /* v73 (2026-11-28 지시 "받은발주서라고 하지말고 발주서관리로 하고 발주서등록할수있도록"): 출고 화면의 두 칸 [발주서 관리] [출고 관리] */
+        { k: 'po', n: '발주서 관리', d: '발주서 등록(파일 · 사진 · 문자 · 직접 입력) · 처리할 발주서 · 물표 · 거래명세서', u: 'stock.html?view=out&pane=po', p: { view: 'out', pane: 'po' }, kw: '발주 주문 받은발주서 발주서등록 문자 전화주문 판독' },
+        { k: 'out', n: '출고 관리', d: '출고 달력 · 출고 등록 · 확정 · 일자 변경 · 삭제 · 물표 · 거래처별 찾기', u: 'stock.html?view=out', p: { view: 'out', pane: 'ship' }, kw: '출고 물표 출고예정 달력 확정 일자변경 삭제 거래처찾기' },
         { k: 'stmt', n: '거래명세서', d: '일일 기록 · 인쇄 · 거래처 메일 발송', u: 'statement.html', p: { view: 'list' }, kw: '명세서 거래명세 인쇄 발행 일일기록' },
         { k: 'stmt-new', n: '거래명세서 작성', d: '새 거래명세서 작성 · 발행', u: 'statement.html?view=edit', p: { view: 'edit' }, kw: '명세서 새로 발행' },
         { k: 'cust', n: '거래처', d: '거래처 등록 · 수정 (가나다순)', u: 'statement.html?view=cust', p: { view: 'cust' }, kw: '고객 업체' },
@@ -111,8 +112,8 @@
   function fileOf(u) { return String(u).split('?')[0]; }
 
   /* ── 지금 보고 있는 화면 = 주소 + 화면 안 칸(nav.js가 적어 둔 기록 칸의 상태) ── */
-  var DEF = { 'statement.html': { view: 'list' }, 'pj.html': { view: 'list' }, 'ledger.html': { view: 'buy' }, 'docs.html': { cat: 'todo' }, 'admin.html': { tab: 'ot' }, 'stock.html': { view: 'prod' }, 'tire.html': { view: 'f1' } };
-  var SV = { 'statement.html': { view: 'tab' }, 'pj.html': { view: 'tab' }, 'ledger.html': { view: 'view' }, 'stock.html': { tab: 'tab' }, 'docs.html': { cat: 'cat' }, 'admin.html': { tab: 'tab' }, 'work.html': { d: 'd' }, 'tire.html': { view: 'view' } };
+  var DEF = { 'statement.html': { view: 'list' }, 'pj.html': { view: 'list' }, 'ledger.html': { view: 'buy' }, 'docs.html': { cat: 'todo' }, 'admin.html': { tab: 'ot' }, 'stock.html': { view: 'prod', pane: 'ship' }, 'tire.html': { view: 'f1' } };
+  var SV = { 'statement.html': { view: 'tab' }, 'pj.html': { view: 'tab' }, 'ledger.html': { view: 'view' }, 'stock.html': { tab: 'tab', pane: 'pane' }, 'docs.html': { cat: 'cat' }, 'admin.html': { tab: 'tab' }, 'work.html': { d: 'd' }, 'tire.html': { view: 'view' } };
   function hereFile() {
     var path = location.pathname || '';
     if (/\/sketchbook\/(?:index\.html)?$/.test(path)) return 'sketchbook/';
