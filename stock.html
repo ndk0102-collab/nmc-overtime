@@ -1113,6 +1113,104 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
 .dgdel{color:var(--bad)!important;border-color:#F2C4BF!important}
 .dgask{margin:8px 0 4px;padding:10px 12px;border-radius:12px;background:var(--bad-soft)}
 .dgask p{margin:0 0 8px;font-size:14.5px}
+/* v74 (2026-11-28 11:59) 발주서 관리: 받은 날 기준 일별 · 월별 · 연별, 한 줄 = 거래처 · 출고일 · 상태 (누르면 상세) — 크게 · 필요한 것만 */
+.pmtop{padding:14px}
+.pmtop .pmnew{min-height:62px;font-size:21px;gap:8px}
+.pmnote{display:flex;align-items:center;gap:10px;width:100%;min-height:60px;padding:10px 16px;border:2px solid #E9A23B;border-radius:14px;background:#FFF7EA;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.pmnotet{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pmnotet b{font-size:17px;font-weight:800;color:#8A4F00}
+.pmnotet small{font-size:14px;color:var(--ink2)}
+.pmnotego{flex:none;font-size:15px;font-weight:800;color:#8A4F00}
+.pmlist{padding:14px}
+.pmmodes{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;background:#E6EBF1;border-radius:12px}
+.pmmodes button{min-height:46px;border:0;border-radius:9px;background:transparent;font:inherit;font-size:17px;font-weight:800;color:var(--ink2);cursor:pointer}
+.pmmodes button[aria-selected="true"]{background:var(--card);color:var(--accent-strong);box-shadow:0 1px 3px rgba(18,24,32,.18)}
+.pmnav{display:flex;align-items:center;gap:8px;margin-top:12px}
+.pmarr{flex:none;width:52px;height:52px;border:2px solid var(--line);border-radius:12px;background:var(--card);font:inherit;font-size:30px;font-weight:800;line-height:1;color:var(--ink);cursor:pointer}
+.pmarr:disabled{opacity:.3;cursor:default}
+.pmlab{flex:1;min-width:0;text-align:center}
+.pmlab b{font-size:23px;font-weight:800;color:var(--ink)}
+.pmlab i,.pmdh i{font-style:normal;margin-left:8px;padding:2px 9px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-size:13px;font-weight:800;vertical-align:3px;white-space:nowrap}
+.pmnavx{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 14px;margin-top:8px}
+.pmdate{min-height:44px;padding:0 10px;border:2px solid var(--line);border-radius:10px;background:var(--card);font:inherit;font-size:15px;font-weight:700;color:var(--ink)}
+.pmfind{margin-top:12px}
+.pmfind .pmq{min-height:48px;font-size:16px;background:var(--card)}
+.pmtot{margin:14px 0 4px;font-size:15px;color:var(--ink2)}
+.pmtot b{font-size:17px;color:var(--ink)}
+.pmtot small{margin-left:6px;font-size:13.5px;color:var(--muted)}
+.pmdh{display:flex;align-items:center;gap:0;margin:20px 0 8px;padding-bottom:6px;border-bottom:2px solid var(--ink);font-size:19px;font-weight:800;color:var(--ink)}
+.pmdh.today{border-bottom-color:var(--accent);color:var(--accent-strong)}
+.pmdh small{margin-left:auto;font-size:15px;font-weight:700;color:var(--muted)}
+.pml{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.pmrow{display:flex;align-items:center;gap:10px;width:100%;min-height:66px;padding:10px 12px 10px 14px;border:1px solid var(--line);border-left:6px solid var(--line);border-radius:12px;background:#fff;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.pmrow:hover{background:#F8FAFC}
+.pmrow:active{background:var(--soft)}
+.pmrow.st-bad{border-left-color:var(--bad)}
+.pmrow.st-wait,.pmrow.st-qwait{border-left-color:#C98A12}
+.pmrow.st-ok{border-left-color:var(--accent)}
+.pmrow.st-ship{border-left-color:var(--ok)}
+.pmrow.st-off{border-left-color:#B9C0CA;background:#FAFBFC}
+.pmrow.st-off .pmrn{color:var(--ink2)}
+.pmrow.hi{box-shadow:0 0 0 3px #F6C344}
+.pmrt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pmrn{font-size:18px;font-weight:800;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.pmrn small{font-size:14px;color:var(--muted);font-weight:700}
+.pmrs{font-size:15px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmrow .pchip{flex:none;font-size:13.5px;padding:3px 10px}
+.pmgo{flex:none;font-size:26px;line-height:1;color:#9AA4B2}
+.pmempty{margin:10px 0;padding:18px 12px;border:2px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted);font-size:16px}
+.pmyl{margin-top:6px}
+.pmym{display:flex;align-items:center;gap:10px;width:100%;min-height:60px;padding:8px 12px 8px 16px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.pmym b{min-width:52px;font-size:19px;font-weight:800}
+.pmymn{margin-left:auto;font-size:18px;font-weight:800}
+.pmym.zero{background:#FAFBFC}
+.pmym.zero b,.pmym.zero .pmymn{color:#A3ACB8;font-weight:700}
+.pmtodoh{display:flex;align-items:center;gap:10px}
+.pmtodoh h2{margin:0;font-size:20px;font-weight:800}
+.pmtodoh h2 b{color:#8A4F00}
+.pmtodoh .ghost{margin-left:auto;min-height:44px}
+/* 상세 */
+.pmdhd{padding:12px 16px 14px}
+.pmback{padding:0;min-height:40px;font-size:16px;text-decoration:none}
+.pmdt{display:flex;align-items:flex-start;gap:10px;margin-top:2px}
+.pmdt h2{flex:1;min-width:0;margin:0;font-size:24px;font-weight:800;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.pmdt .pchip{flex:none;margin-top:4px;font-size:14px;padding:4px 12px}
+.pmdl{margin:12px 0 0}
+.pmdl div{display:flex;gap:12px;padding:9px 0;border-top:1px solid var(--soft);font-size:16px;line-height:1.45}
+.pmdl dt{flex:none;width:76px;color:var(--muted);font-weight:700}
+.pmdl dd{flex:1;min-width:0;margin:0;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.pmdl dd small{margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-size:12.5px;font-weight:800}
+.pmdres{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--soft);font-size:15px;line-height:1.5}
+.pmdres.bad{background:#FFF1EF;color:#8A1F14}
+.pmdres.warn{background:#FFF7EA;color:#7A4600}
+.pmzero{margin:8px 2px 0;font-size:14.5px;color:var(--muted)}
+.pmdi h3{margin:0 0 4px;font-size:18px;font-weight:800}
+.pmdi h3 small{margin-left:6px;font-size:15px;color:var(--muted);font-weight:700}
+.pmdil{list-style:none;margin:0;padding:0}
+.pmdil li{display:flex;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--soft);font-size:16.5px}
+.pmdin{flex:1;min-width:0;font-weight:700}
+.pmdin small{margin-left:6px;padding:1px 7px;border-radius:6px;background:var(--soft);font-size:13px;color:var(--ink2)}
+.pmdil b{flex:none;font-size:17px}
+.pmda{display:flex;flex-direction:column;gap:10px}
+.pmdab{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pmdab .primary{min-height:58px;font-size:18px;text-decoration:none}
+.pmdab2{display:flex;flex-wrap:wrap;gap:8px}
+.pmdab2 .ghost{flex:1 1 150px;min-height:50px;font-size:16px}
+.pmda .primary.wide,.pmda .ghost.wide{min-height:58px;font-size:18px}
+.pmdton{display:flex;align-items:center;justify-content:center;min-height:58px;border-radius:12px;background:var(--soft);font-weight:800;color:var(--ink2);text-align:center}
+.pmdx{align-self:center;min-height:46px;padding:0 18px;border:0;background:none;color:var(--bad);font:inherit;font-size:16px;font-weight:800;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.pmdask{padding:12px;border-radius:12px;background:var(--bad-soft)}
+.pmdask p{margin:0 0 10px;font-size:15.5px;font-weight:700;line-height:1.5}
+.pmdask .danger,.pmdask .ghost{min-height:50px}
+/* 발주서 등록 화면: 고를 단추는 이름만(부족할 때만 '부족'), 설명 줄은 짧게 */
+.fm .pohow{display:none}
+.fm .ppick .pp{min-height:44px;justify-content:center}
+.fm .ppick .pp small{display:none}
+.fm .ppick.pk2 .pp.on small{display:block}
+.fm .rgq{font-size:14.5px}
+.fmor{margin:12px 0 0;text-align:center;font-size:14px;color:var(--muted)}
+.fmhow{margin:8px 0 2px;font-size:13.5px;color:var(--muted)}
+.fmmemo summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:15px;font-weight:800;color:var(--accent-strong)}
 </style>
 </head>
 <body>
@@ -1217,7 +1315,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var S = {
     ready: false, fatal: false, busy: false, gen: 0,
     today: '', items: [], byKey: {}, prods: [], kind: {}, lineOf: {}, lines: [], money: false, admin: false, saved: [], outMode: 'cal', calYm: DAY0 ? DAY0.slice(0, 7) : '', calDay: DAY0, pick: null, po: false, poNeedDate: false, inZone: '', zoneOwn: false, poLast: null, poFiles: [], poNote: '', poBusy: '', poMsg: null, poList: null, poLoading: false, poErr: false, poMore: false, poOffOpen: false, poEdit: '', poEditNote: '', poFlash: false, poRev: null, poShow: null, poOpening: '', poUndoAsk: '',
-    pane: PANE0, pmq: '', pmMore: false, poN: 150, poCxAsk: '', poQDel: '', delAsk: '', labBack: '',   // v73 발주서 관리 allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    allAdd: '', allAddFrom: '', sumYm: '', sumType: '', anaPer: '',
+    pane: PANE0, pmq: '', pmMore: false, poN: 400, poCxAsk: '', poQDel: '', delAsk: '', labBack: '',   // v73 발주서 관리
+    pmv: null, pmOpen: '', pmTodo: false, pmY: 0,   // v74 발주서 관리: 보기(일별 · 월별 · 연별) · 연 상세 · 확인할 발주서만
     stats: {}, sLoading: {}, sErr: {}, pnl: null, pnlLoading: false, pnlErr: false,
     led: null, ledAt: 0, ledLoading: false, ledErr: false, ledErrAt: 0, boxEd: null,
     stock: {}, customers: [], firstYm: '', badRows: [], ver: '', stmt: {},
@@ -1763,6 +1863,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return true;
     }
     if (VIEW === 'out' && S.outMode === 'porev') { formClose(); return true; }
+    if (VIEW === 'out' && S.outMode === 'cal' && S.pane === 'po' && S.pmOpen) { pmCloseD(); return true; }   // v74 발주서 상세 → 목록
+    if (VIEW === 'out' && S.outMode === 'cal' && S.pane === 'po' && S.pmTodo) { S.pmTodo = false; render(); window.scrollTo(0, 0); return true; }
     if (VIEW === 'out' && S.outMode === 'find') { S.outMode = 'cal'; S.fromFind = false; render(); window.scrollTo(0, 0); return true; }
     if (VIEW === 'out' && S.outMode === 'add') { S.outMode = 'cal'; S.po = false; S.poNeedDate = false; S.poQueue = false; S.pick = null; S.qty = {}; S.price = {}; S.sheet = null; render(); return true; }
     if (VIEW === 'all' && S.allAdd) { S.allAdd = ''; S.qty = {}; S.price = {}; S.sheet = null; render(); window.scrollTo(0, 0); return true; }
@@ -1773,12 +1875,17 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
      이 화면 안에서 기록에 남는 것 = 칸(탭) · 안쪽 화면(물표 · 출고 등록 · 발주서 확인 · 찾기 · 전체관리 등록) · 열어 본 창(시트).
      뒤로 하면 안쪽 화면 · 창은 닫히고 칸은 전에 보던 칸으로, 보던 자리(위치)도 그대로. 다른 화면에서 왔으면 그 화면으로 돌아감. */
   function navGet() {
-    return { tab: S.tab || '', mode: VIEW === 'out' && S.outMode && S.outMode !== 'cal' ? S.outMode : '', pane: VIEW === 'out' ? S.pane : '', add: VIEW === 'all' ? (S.allAdd || '') : '', sheet: S.sheet && S.ready ? S.sheet.kind : '' };   // 바탕(달력 · 창 없음) = 빈 값
+    return { tab: S.tab || '', mode: VIEW === 'out' && S.outMode && S.outMode !== 'cal' ? S.outMode : '', pane: VIEW === 'out' ? S.pane : '', pmd: VIEW === 'out' && S.pane === 'po' ? (S.pmOpen || '') : '', pmt: VIEW === 'out' && S.pane === 'po' && S.pmTodo ? '1' : '', add: VIEW === 'all' ? (S.allAdd || '') : '', sheet: S.sheet && S.ready ? S.sheet.kind : '' };   // 바탕(달력 · 창 없음) = 빈 값
   }
   function navSet(v) {
     v = v || {};
     if (S.sheet && !v.sheet) S.sheet = null;
     if (VIEW === 'out' && (v.pane === 'po' || v.pane === 'ship') && v.pane !== S.pane) S.pane = v.pane;   // v73
+    if (VIEW === 'out') {   // v74 발주서 상세 · 확인할 발주서
+      var vd = String(v.pmd || '');
+      if (vd !== String(S.pmOpen || '')) { S.pmOpen = vd; S.poUndoAsk = ''; S.poCxAsk = ''; S.poQDel = ''; }
+      S.pmTodo = !!v.pmt;
+    }
     if (VIEW === 'out' && v.mode === 'porev' && S.poRev && S.outMode !== 'porev') { S.outMode = 'porev'; S.labBack = ''; }   // v73: 등록 화면 자료가 남아 있으면 그 화면으로 (예: 끝 화면에서 연 물표 → 뒤로)
     if (VIEW === 'out' && S.outMode !== 'cal' && (v.mode || 'cal') === 'cal') {   // 안쪽 화면 닫기 (다시 여는 것은 안 함 — 그때의 자료가 없어서)
       if (S.outMode === 'porev') S.poRev = null;
@@ -5115,9 +5222,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (S.poLoading || !S.admin) return;
     S.poLoading = true;
     S.poErr = false;
-    call('apiPoList', { n: S.poN || 150 }).then(function (r) {   // v73: 발주서 관리 목록
+    call('apiPoList', { n: S.poN || 400 }).then(function (r) {   // v73: 발주서 관리 목록 · v74: 최근 400건(일별 · 월별 · 연별)
       S.poLoading = false;
-      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [] };
+      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [], total: (r && r.total) || 0 };
       render();
     }, function (e) {
       S.poLoading = false;
@@ -5251,14 +5358,13 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     PO_GO = '';
     try { history.replaceState(history.state, '', location.pathname + '?view=out&pane=po'); } catch (e) {}
     S.pane = 'po'; S.outMode = 'cal'; S.poOpening = id; render();
-    call('apiPoList', { n: S.poN || 150 }).then(function (r) {
-      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [] };
+    call('apiPoList', { n: S.poN || 400 }).then(function (r) {
+      S.poList = { items: (r && r.items) || [], wait: (r && r.wait) || [], total: (r && r.total) || 0 };
       S.poOpening = '';
       var it = S.poList.items.concat(S.poList.wait).filter(function (x) { return x.id === id; })[0];
       if (it && it.state === '넣음') {
-        S.poHi = id; S.poMore = true; render();
-        setTimeout(function () { var li = document.getElementById('po-' + id); if (li && li.scrollIntoView) { try { li.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) { li.scrollIntoView(); } } }, 60);
-        toastOk('이미 등록된 발주서입니다 (노란 테두리)');
+        S.pmOpen = id; S.pmY = 0; render(); window.scrollTo(0, 0);   // v74: 상세를 바로
+        toastOk('이미 등록된 발주서입니다');
         return;
       }
       if (it && it.state === '날짜 대기') { render(); poWaitOpen(id); return; }
@@ -5310,7 +5416,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   var ICON_MSG = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
     '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>';
   function paneName() { return S.pane === 'po' ? '발주서 관리' : '출고 관리'; }
-  function poTodoN() { return (((S.poList && S.poList.items) || []).concat(poWaitOnly())).filter(function (x) { return PO_SEC[x.state] === 'todo'; }).length; }
+  function poTodoN() { return pmAll().filter(pmNeed).length; }   // v74
   function poWaitOnly() {
     var have = {};
     ((S.poList && S.poList.items) || []).forEach(function (x) { have[x.id] = 1; });
@@ -5331,101 +5437,244 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     window.scrollTo(0, 0);
   }
 
-  /* ── 발주서 관리 첫 화면 ── */
+  /* ── 발주서 관리 첫 화면 (v74, 2026-11-28 11:59 지시) ──
+     "발주서 관리에는 발주서 받은 리스트를 일별로 정리하라니까. 월별 일별 년별 로 해서 처리할발주서는 좀 줄이라고 보고싶지 않다고 …
+      날짜는 콩만하고 11월 27일 14:38분 받음 뭐 이런거 다 적혀잇고 sbr 고무분말 5-7mm 이런거 다 적혀있고 등록취소 저기다가
+      첫화면부터 다 담아내려고 하지마라. 큰거 중요한것만 보이고 누르면 다 볼수있게 … 모르는사람이 봤을때도 편하고 보기 쉽도록"
+     · 받은 날 기준 [일별] [월별] [연별]: 일별 = 그날, 월별 = 그 달(날짜마다 큰 제목), 연별 = 달마다 건수(누르면 그 달)
+     · 목록 한 줄 = 거래처(크게) · 출고일 · 현장 · 상태. 받은 시각 · 품목 · 물표 · 거래명세서 · 수정 · 등록 취소는 줄을 누른 상세 화면에만
+     · '처리할 발주서' 칸 대신 맨 위 한 줄 '확인할 발주서 n건' (누르면 그것만 모아 봄) */
   function pmNorm(s) { return String(s == null ? '' : s).replace(/\(\s*주\s*\)|㈜|주식회사|\s+/g, '').toLowerCase(); }
-  function pmHay(x) { var w = x.wait || {}; return pmNorm([x.name, (x.custs || []).join(' '), x.result, x.note, w.cust, w.site].join(' ')); }
-  function poHome() {
-    var h = '<section class="card pmtop"><button type="button" class="primary wide pmnew" data-act="fnew"><span aria-hidden="true">＋</span> 발주서 등록</button>' +
-      '<p class="hint">파일 · 사진 · 받은 문자 · 직접 입력(전화 주문)을 모두 이 단추로 등록합니다.' + (PO_TOUCH ? '' : ' 발주서 파일을 이 화면에 끌어다 놓거나 카톡 캡처를 Ctrl+V로 붙여넣어도 바로 판독합니다.') + '</p>' +
-      (S.poBusy ? '<p class="pmbusy"><span class="spinner sm" aria-hidden="true"></span><b>' + esc(S.poBusy) + '</b></p>' : '') + '</section>';
-    if (!S.poList) return h + '<section class="card"><p class="muted">' + (S.poErr ? '발주서 목록을 불러오지 못했습니다. <button type="button" class="link" data-act="polist">다시 불러오기</button>' : '발주서 목록을 불러오는 중…') + '</p></section>';
-    h += '<div class="pmfind"><input id="pm-q" class="text pmq" type="search" data-in="pmq" autocomplete="off" placeholder="거래처 · 현장 · 파일 이름으로 찾기" value="' + esc(S.pmq || '') + '" aria-label="발주서 찾기"></div>';
-    return h + '<div id="pmlists" class="stack">' + pmListsHtml() + '</div>';
+  function pmHay(x) { var w = x.wait || {}; return pmNorm([x.name, (x.custs || []).join(' '), x.result, x.note, w.cust, w.site, pmSite(x)].join(' ')); }
+  var PM_MODES = [['d', '일별'], ['m', '월별'], ['y', '연별']];
+  var PM_CHIP = { '확인 필요': ['bad', '확인 필요'], '기다림': ['wait', '판독 대기'], '읽는 중': ['wait', '판독 중'], '날짜 대기': ['qwait', '날짜 미정'], '취소': ['off', '등록 안 함'], '중복': ['off', '중복'] };
+  function pmV() {
+    if (!S.pmv) { var m = stored('nmc_pm_mode'); S.pmv = { pm: m === 'd' || m === 'y' ? m : 'm', day: S.today, ym: S.today.slice(0, 7), y: S.today.slice(0, 4) }; }
+    return S.pmv;
   }
-  function pmListsHtml() {
+  function pmDay(x) { var d = String((x && x.at) || '').slice(0, 10); return isYmd(d) ? d : ''; }
+  /** 발주서함 + 오래된 날짜 대기, 받은 순서 거꾸로(최근 것 먼저) */
+  function pmAll() {
     var L = S.poList;
-    if (!L) return '';
-    var q = pmNorm(S.pmq), all = L.items.concat(poWaitOnly()).filter(function (x) { return !q || pmHay(x).indexOf(q) >= 0; });
-    var T = [], D = [], O = [];
-    all.forEach(function (x) { var g = PO_SEC[x.state] || 'off'; (g === 'todo' ? T : g === 'done' ? D : O).push(x); });
-    var newest = function (a, b) { return a.at < b.at ? 1 : a.at > b.at ? -1 : 0; };
-    T.sort(function (a, b) { var pa = PO_TODO_ORDER[a.state], pb = PO_TODO_ORDER[b.state]; return pa !== pb ? pa - pb : newest(a, b); });
-    var h = '<section class="card pmsec" id="pmtodo"><h2 class="pmh2">처리할 발주서 <b class="' + (T.length ? 'bad' : '') + '">' + T.length + '건</b></h2>' +
-      (T.length ? '<ul class="pml">' + T.map(pmRow).join('') + '</ul>' : '<p class="pmempty">' + (q ? '찾는 말에 맞는 처리할 발주서가 없습니다.' : '처리할 발주서가 없습니다. 들어온 발주서는 모두 처리했습니다.') + '</p>') + '</section>';
-    var dOf = function (x) { return (x.dates && x.dates[0]) || String(x.at || '').slice(0, 10); };
-    var up = D.filter(function (x) { return !x.shipped && dOf(x) >= S.today; }).sort(function (a, b) { return dOf(a) < dOf(b) ? -1 : dOf(a) > dOf(b) ? 1 : newest(a, b); });
-    var past = D.filter(function (x) { return up.indexOf(x) < 0; }).sort(function (a, b) { return dOf(a) < dOf(b) ? 1 : dOf(a) > dOf(b) ? -1 : newest(a, b); });
-    h += '<section class="card pmsec" id="pmdone"><h2 class="pmh2">등록된 발주서 <b>' + D.length + '건</b></h2>';
-    if (!D.length) h += '<p class="pmempty">' + (q ? '찾는 말에 맞는 발주서가 없습니다.' : '등록된 발주서가 없습니다.') + '</p>';
-    if (up.length) h += '<h3 class="pmday">앞으로 출고 <small>' + up.length + '건 · 출고일 순</small></h3>' + pmByDay(up, dOf);
-    if (past.length) {
-      var ps = S.pmMore || q ? past : past.slice(0, 12);
-      h += '<h3 class="pmday">출고 완료 · 지난 출고일 <small>' + past.length + '건 · 최근 순</small></h3>' + pmByDay(ps, dOf);
-      if (past.length > ps.length) h += '<button type="button" class="ghost wide mt8" data-act="pmmore">' + (past.length - ps.length) + '건 더 보기</button>';
+    if (!L) return [];
+    return L.items.concat(poWaitOnly()).filter(Boolean).sort(function (a, b) { var x = String(a.at || ''), y = String(b.at || ''); return x < y ? 1 : x > y ? -1 : 0; });
+  }
+  function pmById(id) { return pmAll().filter(function (x) { return x.id === id; })[0] || null; }
+  /** 사람이 손볼 것: 판독 확인 · 날짜 미정 · 판독 대기 · 오래 걸린 판독 */
+  function pmNeed(x) { var st = x.state; return st === '확인 필요' || st === '날짜 대기' || st === '기다림' || (st === '읽는 중' && !!x.stale); }
+  function pmRecs(x) { return x.state === '넣음' ? (x.ids || []).map(recOf).filter(Boolean) : []; }
+  function pmStat(x) {
+    if (x.state === '넣음') {
+      var recs = pmRecs(x), d0 = (x.dates || []).filter(isYmd).sort()[0] || '';
+      if (x.shipped || (recs.length && recs.every(function (r) { return r.type === '출고'; }))) return ['ship', '출고 완료'];
+      return d0 && d0 < S.today ? ['qwait', '미확정'] : ['ok', '출고예정'];   // 출고일이 지났는데 확정하지 않음 (출고 달력의 '미확정'과 같은 말)
     }
-    if ((L.total || 0) > L.items.length) h += '<button type="button" class="link mt8" data-act="pmolder">더 오래된 발주서도 불러오기 (전체 ' + fmt(L.total) + '건 중 ' + fmt(L.items.length) + '건 표시)</button>';
-    h += '</section>';
-    if (O.length) {
-      O.sort(newest);
-      h += '<section class="card pmsec pmoff"><button type="button" class="pmoffb" data-act="pooff" aria-expanded="' + !!S.poOffOpen + '"><span>등록 안 한 발주서 · 중복</span><b>' + O.length + '건</b><i aria-hidden="true">' + (S.poOffOpen ? '접기 ▲' : '펼치기 ▼') + '</i></button>' +
-        (S.poOffOpen ? '<ul class="pml">' + O.map(pmRow).join('') + '</ul>' : '') + '</section>';
-    }
+    if (x.state === '읽는 중' && x.stale) return ['bad', '확인 필요'];
+    return PM_CHIP[x.state] || ['off', x.state || '?'];
+  }
+  function pmCust(x) { var w = x.wait || {}, r = pmRecs(x)[0]; return (x.custs && x.custs[0]) || w.cust || (r && r.cust) || ''; }
+  function pmSite(x) { var w = x.wait || {}, r = pmRecs(x)[0]; return (r && r.po) || w.site || ''; }
+  function pmSms(x) { return /^문자 발주 /.test(String(x.name || '')); }
+  function pmTitle(x) { return pmCust(x) || (x.file && !pmSms(x) ? String(x.name || '').replace(/\.[A-Za-z0-9]{1,5}$/, '') : '거래처 미확인'); }
+  function pmMd(d) { var p = parseYmd(d); return (p.getMonth() + 1) + '월 ' + p.getDate() + '일 (' + WD[p.getDay()] + ')'; }
+  function pmRel(d) { return d === S.today ? '오늘' : d === addDays(S.today, -1) ? '어제' : d === addDays(S.today, 1) ? '내일' : ''; }
+  function pmWhen(at) { var m = /^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2})/.exec(String(at || '')); return m && isYmd(m[1]) ? pmMd(m[1]) + ' ' + m[2] + ':' + m[3] : String(at || ''); }
+  function pmSrc(x) { return !x.file ? '직접 입력' : pmSms(x) ? '받은 문자' : '파일 · ' + String(x.name || ''); }
+  /** 목록 둘째 줄: 출고일 · 현장 (받은 시각 · 품목은 상세에만) */
+  function pmSub(x) {
+    var st = x.state, s = [];
+    if (st === '넣음') {
+      var ds = (x.dates || []).filter(isYmd).sort();
+      if (ds.length) s.push((pmRel(ds[0]) || pmMd(ds[0])) + (ds.length > 1 ? ' 외 ' + (ds.length - 1) + '일' : '') + ' 출고');
+    } else if (st === '날짜 대기') s.push('출고일 미정');
+    else if (st === '기다림') s.push('자동 판독 대기');
+    else if (st === '읽는 중' && !x.stale) s.push('자동 판독 중');
+    else if (pmNeed(x)) s.push('눌러서 확인 · 등록');
+    var site = pmSite(x);
+    if (site) s.push(site);
+    return s.join(' · ');
+  }
+  function pmRowHtml(x) {
+    var c = pmStat(x), sub = pmSub(x), cs = x.custs || [];
+    return '<li><button type="button" class="pmrow st-' + c[0] + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '" data-act="pmopen" data-v="' + esc(x.id) + '">' +
+      '<span class="pmrt"><b class="pmrn">' + esc(pmTitle(x)) + (cs.length > 1 ? ' <small>외 ' + (cs.length - 1) + '곳</small>' : '') + '</b>' +
+      (sub ? '<span class="pmrs">' + esc(sub) + '</span>' : '') + '</span>' +
+      '<span class="pchip ' + c[0] + '">' + esc(c[1]) + '</span><span class="pmgo" aria-hidden="true">›</span></button></li>';
+  }
+  /** 받은 날마다 큰 제목 + 줄 */
+  function pmGroups(list) {
+    var G = {}, out = [];
+    list.forEach(function (x) { var k = pmDay(x); if (!G[k]) { G[k] = { k: k, xs: [] }; out.push(G[k]); } G[k].xs.push(x); });
+    return out.map(function (g) {
+      var r = g.k ? pmRel(g.k) : '';
+      return '<h3 class="pmdh' + (g.k === S.today ? ' today' : '') + '"><span>' + (g.k ? esc(pmMd(g.k)) : '받은 날짜 모름') + '</span>' + (r ? '<i>' + r + '</i>' : '') + '<small>' + g.xs.length + '건</small></h3>' +
+        '<ul class="pml">' + g.xs.map(pmRowHtml).join('') + '</ul>';
+    }).join('');
+  }
+  /** 가장 오래된 받은 날 (서버에 더 오래된 것이 남아 있으면 '' = 막지 않음) */
+  function pmFirst() {
+    var L = S.poList;
+    if (!L || (L.total || 0) > (L.items || []).length) return '';
+    var ds = pmAll().map(pmDay).filter(String);
+    return ds.length ? ds[ds.length - 1] : S.today;
+  }
+  function pmBar() {
+    var v = pmV(), first = pmFirst(), lab, cur, prev, next, unit, rel = '';
+    if (v.pm === 'd') { lab = pmMd(v.day); rel = pmRel(v.day); cur = v.day === S.today; next = v.day < S.today; prev = !first || v.day > first; unit = '날'; }
+    else if (v.pm === 'm') { lab = fmtYm(v.ym); cur = v.ym === S.today.slice(0, 7); next = v.ym < S.today.slice(0, 7); prev = !first || v.ym > first.slice(0, 7); unit = '달'; if (cur) rel = '이번 달'; }
+    else { lab = v.y + '년'; cur = v.y === S.today.slice(0, 4); next = v.y < S.today.slice(0, 4); prev = !first || v.y > first.slice(0, 4); unit = '해'; if (cur) rel = '올해'; }
+    var h = '<div class="pmmodes" role="tablist" aria-label="보기 기간">' + PM_MODES.map(function (m) {
+      return '<button type="button" role="tab" aria-selected="' + (v.pm === m[0]) + '" data-act="pmmode" data-v="' + m[0] + '">' + m[1] + '</button>'; }).join('') + '</div>';
+    h += '<div class="pmnav"><button type="button" class="pmarr" data-act="pmstep" data-v="-1"' + (prev ? '' : ' disabled') + ' aria-label="앞 ' + unit + '">‹</button>' +
+      '<div class="pmlab"><b>' + esc(lab) + '</b>' + (rel ? '<i>' + rel + '</i>' : '') + '</div>' +
+      '<button type="button" class="pmarr" data-act="pmstep" data-v="1"' + (next ? '' : ' disabled') + ' aria-label="다음 ' + unit + '">›</button></div>';
+    if (v.pm === 'd' || !cur) h += '<div class="pmnavx">' + (v.pm === 'd' ? '<input type="date" class="pmdate" data-ch="pmday" value="' + esc(v.day) + '" max="' + esc(S.today) + '" aria-label="날짜 고르기">' : '') +
+      (cur ? '' : '<button type="button" class="link" data-act="pmnow">' + (v.pm === 'd' ? '오늘로' : v.pm === 'm' ? '이번 달로' : '올해로') + '</button>') + '</div>';
     return h;
   }
-  function pmByDay(list, dOf) {
-    var out = '', cur = '';
-    list.forEach(function (x) {
-      var d = dOf(x);
-      if (d !== cur) { if (cur) out += '</ul>'; cur = d; out += '<p class="pmd">' + esc(isYmd(d) ? fmtDate(d) + (d === S.today ? ' · 오늘' : d === addDays(S.today, 1) ? ' · 내일' : '') : '날짜 없음') + '</p><ul class="pml">'; }
-      out += pmRow(x);
-    });
-    return out + (cur ? '</ul>' : '');
-  }
-  var PM_CHIP = { '확인 필요': ['bad', '확인 필요'], '기다림': ['wait', '판독 대기'], '읽는 중': ['wait', '판독 중'], '날짜 대기': ['qwait', '날짜 미정'], '취소': ['off', '등록 안 함'], '중복': ['off', '중복'] };
-  function pmLinesTxt(recs) {
-    var by = {}, order = [];
-    recs.forEach(function (r) { var k = r.prod + '|' + r.color; if (!by[k]) { by[k] = { prod: r.prod, color: r.color, kg: 0 }; order.push(k); } by[k].kg += r.qty; });
-    var a = order.map(function (k) { return by[k]; });
-    return a.slice(0, 4).map(function (o) { return '<span><span class="sw" style="background:' + labTint(o.prod, o.color) + '"></span>' + esc((PROD3_NAME[o.prod] || o.prod) + ' ' + o.color) + ' <b>' + fmt(o.kg) + '</b></span>'; }).join('') +
-      (a.length > 4 ? '<span>외 ' + (a.length - 4) + '건</span>' : '');
-  }
-  function pmRow(x) {
-    var st = x.state, done = st === '넣음', w = x.wait || null, ids = done ? (x.ids || []) : [], recs = ids.map(recOf).filter(Boolean);
-    var shipped = done && (x.shipped || (recs.length && recs.every(function (r) { return r.type === '출고'; })));
-    var chipC = done ? (shipped ? ['ship', '출고 완료'] : ['ok', '출고예정']) : (PM_CHIP[st] || ['off', st || '?']);
-    var cust = (x.custs && x.custs[0]) || (w && w.cust) || (recs[0] && recs[0].cust) || '';
-    var site = (recs[0] && recs[0].po) || (w && w.site) || '';
-    var src = x.file ? x.name : '직접 입력';
-    var h = '<li class="pmr st-' + chipC[0] + (S.poHi === x.id ? ' hi' : '') + '" id="po-' + esc(x.id) + '"><div class="pmrh"><span class="pchip ' + chipC[0] + '">' + esc(chipC[1]) + '</span>' +
-      '<b class="pmn">' + esc(cust || (x.file ? x.name : '거래처 미확인')) + (site ? ' · ' + esc(site) : '') + '</b></div>' +
-      '<small class="pmm">' + esc(poWhen(x.at)) + ' 받음 · ' + esc(src) + (x.note ? ' · ' + esc(x.note) : '') + '</small>';
-    if (recs.length) h += '<p class="pms">' + pmLinesTxt(recs) + '<span class="pmt">' + recs.length + '건 · ' + grpKgH(recs) + '</span></p>';
-    else if (w && w.lines && w.lines.length) h += '<p class="pms">' + pmLinesTxt(w.lines.map(function (l) { return { prod: l.prod, color: l.color, qty: Number(l.kg) || 0 }; })) + '</p>';
-    else if (x.result) h += '<p class="pmres' + (st === '확인 필요' ? ' bad' : '') + '">' + esc(poResTxt(x.result)) + '</p>';
-    var pic = (x.fids || []).length ? '<button type="button" class="ghost sm" data-act="popic" data-v="' + esc(x.id) + '">발주서 보기</button>' : '';
-    var busy = S.poOpening === x.id, a = [];
-    if (done) {
-      if (ids.length) a.push(recs.length && recs.every(function (r) { return packOf(r) === 'ton'; }) ? '<span class="dgtb">톤백 · 물표 없음</span>' : '<button type="button" class="ghost sm" data-act="polabids" data-v="' + esc(x.id) + '"' + (recs.length ? '' : ' disabled') + '>물표</button>');
-      if (ids.length) a.push('<a class="ghost sm" href="statement.html?ids=' + encodeURIComponent(ids.join(',')) + '">거래명세서</a>');
-      if (recs.length) a.push('<button type="button" class="ghost sm" data-act="poedit" data-v="' + esc(x.id) + '">' + ICON_PEN + '수정</button>');
-      if (x.dates && x.dates[0]) a.push('<button type="button" class="ghost sm" data-act="pogoto" data-v="' + esc(x.dates[0]) + '">달력</button>');
-      a.push(pic);
-      if (x.undo) a.push(S.poUndoAsk === x.id ? '<span class="pmask">등록을 취소할까요? <button type="button" class="danger sm" data-act="poundo" data-v="' + esc(x.id) + '">등록 취소</button><button type="button" class="ghost sm" data-act="poundox">아니요</button></span>'
-        : '<button type="button" class="link" data-act="poundoask" data-v="' + esc(x.id) + '">등록 취소</button>');
-    } else if (st === '날짜 대기') {
-      a.push('<button type="button" class="primary sm" data-act="poqopen" data-v="' + esc(x.id) + '">날짜 정해 등록</button>', pic);
-      a.push(S.poQDel === x.id ? '<span class="pmask">대기 목록에서 뺄까요? <button type="button" class="danger sm" data-act="poqdel" data-v="' + esc(x.id) + '">빼기</button><button type="button" class="ghost sm" data-act="poqdelx">아니요</button></span>'
-        : '<button type="button" class="link" data-act="poqdelask" data-v="' + esc(x.id) + '">대기 목록에서 빼기</button>');
-    } else if (st === '읽는 중' && !x.stale) {
-      a.push('<span class="muted">판독 중…</span>');
-    } else if (PO_SEC[st] === 'todo') {
-      a.push('<button type="button" class="primary sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '여는 중…' : '확인 후 등록') + '</button>', pic);
-      a.push(S.poCxAsk === x.id ? '<span class="pmask">등록하지 않을까요? <button type="button" class="danger sm" data-act="pocancel" data-v="' + esc(x.id) + '">등록 안 함</button><button type="button" class="ghost sm" data-act="pocxx">아니요</button></span>'
-        : '<button type="button" class="link" data-act="pocxask" data-v="' + esc(x.id) + '">등록 안 함</button>');
-    } else {
-      a.push('<button type="button" class="ghost sm" data-act="poread" data-v="' + esc(x.id) + '"' + (busy || S.poOpening ? ' disabled' : '') + '>' + (busy ? '여는 중…' : '다시 열어 등록') + '</button>', pic);
+  function pmMoreNote() { var L = S.poList; return L && (L.total || 0) > L.items.length ? '<p class="hint mt8">최근 ' + fmt(L.items.length) + '건까지 보입니다(전체 ' + fmt(L.total) + '건).</p>' : ''; }
+  function pmYearHtml(v, all) {
+    var by = {}, need = {}, tot = 0, li = '';
+    all.forEach(function (x) { var d = pmDay(x); if (d.slice(0, 4) !== v.y) return; var m = d.slice(0, 7); by[m] = (by[m] || 0) + 1; tot++; if (pmNeed(x)) need[m] = (need[m] || 0) + 1; });
+    var last = v.y === S.today.slice(0, 4) ? Number(S.today.slice(5, 7)) : 12, zero = 0;
+    for (var m = last; m >= 1; m--) {
+      var ym = v.y + '-' + pad(m), n = by[ym] || 0;
+      if (!n && ym !== S.today.slice(0, 7)) { zero++; continue; }   // 받은 것이 없는 달은 한 줄로
+      li += '<li><button type="button" class="pmym' + (n ? '' : ' zero') + '" data-act="pmgoym" data-v="' + ym + '"><b>' + m + '월</b>' +
+        (need[ym] ? '<span class="pchip bad">확인 ' + need[ym] + '건</span>' : '') + '<span class="pmymn">' + n + '건</span><span class="pmgo" aria-hidden="true">›</span></button></li>';
     }
-    return h + '<div class="pma">' + a.filter(String).join('') + '</div></li>';
+    return '<p class="pmtot">' + esc(v.y) + '년 받은 발주서 <b>' + tot + '건</b>' + (li ? ' <small>달을 누르면 그 달 목록</small>' : '') + '</p>' +
+      (li ? '<ul class="pml pmyl">' + li + '</ul>' : '<p class="pmempty">이 해에 받은 발주서가 없습니다.</p>') +
+      (li && zero ? '<p class="pmzero">나머지 ' + zero + '개월은 받은 발주서가 없습니다.</p>' : '') + pmMoreNote();
+  }
+  /** 목록 부분 (찾는 칸에 칠 때는 이것만 다시 그림) */
+  function pmBody() {
+    var v = pmV(), all = pmAll(), q = pmNorm(S.pmq);
+    if (q && !S.pmTodo) {
+      var hits = all.filter(function (x) { return pmHay(x).indexOf(q) >= 0; });
+      return '<p class="pmtot">‘' + esc(String(S.pmq).trim()) + '’ 찾은 발주서 <b>' + hits.length + '건</b> <small>전체 기간</small></p>' +
+        (hits.length ? pmGroups(hits) : '<p class="pmempty">이 이름의 발주서가 없습니다.</p>');
+    }
+    if (S.pmTodo) { var need = all.filter(pmNeed); return need.length ? pmGroups(need) : '<p class="pmempty">확인할 발주서가 없습니다.</p>'; }
+    if (v.pm === 'y') return pmYearHtml(v, all);
+    var inP = all.filter(function (x) { var d = pmDay(x); return v.pm === 'd' ? d === v.day : d.slice(0, 7) === v.ym; });
+    var h = '<p class="pmtot">' + (v.pm === 'd' ? '이 날' : '이 달') + ' 받은 발주서 <b>' + inP.length + '건</b></p>';
+    if (inP.length) return h + (v.pm === 'd' ? '<ul class="pml">' + inP.map(pmRowHtml).join('') + '</ul>' : pmGroups(inP)) + pmMoreNote();
+    h += '<p class="pmempty">' + (v.pm === 'd' ? '이 날' : '이 달') + ' 받은 발주서가 없습니다.</p>';
+    var key = v.pm === 'd' ? v.day : v.ym, older = all.filter(function (x) { var d = pmDay(x); return d && (v.pm === 'd' ? d < key : d.slice(0, 7) < key); })[0];
+    if (older) { var od = pmDay(older), to = v.pm === 'd' ? od : od.slice(0, 7); h += '<button type="button" class="ghost wide" data-act="pmjump" data-v="' + esc(to) + '">' + (v.pm === 'd' ? '앞 날짜 ' + esc(pmMd(od)) : '앞 달 ' + esc(fmtYm(to))) + ' 보기</button>'; }
+    return h + pmMoreNote();
+  }
+  function pmNotice(all) {
+    var need = all.filter(pmNeed);
+    if (!need.length) return '';
+    var nq = need.filter(function (x) { return x.state === '날짜 대기'; }).length, nr = need.length - nq;
+    return '<button type="button" class="pmnote" data-act="pmtodo"><span class="pmnotet"><b>확인할 발주서 ' + need.length + '건</b><small>' +
+      [nr ? '판독 확인 ' + nr + '건' : '', nq ? '날짜 미정 ' + nq + '건' : ''].filter(String).join(' · ') + '</small></span><span class="pmnotego">보기 ›</span></button>';
+  }
+  function poHome() {
+    if (S.pmOpen) { var dx = pmById(S.pmOpen); if (dx) return pmDetail(dx); if (S.poList) S.pmOpen = ''; }
+    var h = '<section class="card pmtop"><button type="button" class="primary wide pmnew" data-act="fnew"><span aria-hidden="true">＋</span> 발주서 등록</button>' +
+      (S.poBusy ? '<p class="pmbusy"><span class="spinner sm" aria-hidden="true"></span><b>' + esc(S.poBusy) + '</b></p>' : '') + '</section>';
+    if (!S.poList) return h + '<section class="card"><p class="muted">' + (S.poErr ? '발주서 목록을 불러오지 못했습니다. <button type="button" class="link" data-act="polist">다시 불러오기</button>' : '발주서 목록을 불러오는 중…') + '</p></section>';
+    var all = pmAll();
+    if (S.pmTodo) {
+      var nn = all.filter(pmNeed).length;
+      return h + '<section class="card pmlist"><div class="pmtodoh"><h2>확인할 발주서 <b>' + nn + '건</b></h2><button type="button" class="ghost sm" data-act="pmtodox">전체 목록</button></div>' +
+        '<p class="hint">줄을 눌러 내용을 보고 등록하거나 ‘등록 안 함’으로 정리합니다.</p><div id="pmlists">' + pmBody() + '</div></section>';
+    }
+    return h + pmNotice(all) + '<section class="card pmlist">' + pmBar() +
+      '<div class="pmfind"><input id="pm-q" class="text pmq" type="search" data-in="pmq" autocomplete="off" placeholder="거래처 · 현장 이름으로 찾기" value="' + esc(S.pmq || '') + '" aria-label="발주서 찾기 (거래처 · 현장)"></div>' +
+      '<div id="pmlists">' + pmBody() + '</div></section>';
+  }
+
+  /* ── 발주서 상세 (목록 한 줄을 누르면): 받은 날 · 받은 방법 · 품목 · 물표 · 거래명세서 · 수정 · 원본 · 등록 취소 ── */
+  function pmItemsHtml(lines) {
+    var by = {}, order = [];
+    lines.forEach(function (l) { var k = l.prod + '|' + l.color + '|' + (l.pk || ''); if (!by[k]) { by[k] = { prod: l.prod, color: l.color, qty: 0, pk: l.pk || '' }; order.push(k); } by[k].qty += Number(l.qty) || 0; });
+    var a = order.map(function (k) { return by[k]; });
+    return '<section class="card pmdi"><h3>품목 <small>' + a.length + '건 · ' + grpKgH(a) + '</small></h3><ul class="pmdil">' + a.map(function (o) {
+      return '<li><span class="sw" style="background:' + labTint(o.prod, o.color) + '"></span><span class="pmdin">' + esc((PROD3_NAME[o.prod] || o.prod) + ' ' + o.color) +
+        (o.pk === 'ton' ? '<small>톤백</small>' : o.pk === 'small' ? '<small>소포장</small>' : '') + '</span><b>' + fmt(o.qty) + ' kg</b></li>'; }).join('') + '</ul></section>';
+  }
+  function pmAsk(text, yes, yesAct, id, noAct) {
+    return '<div class="pmdask" role="alert"><p>' + text + '</p><div class="two"><button type="button" class="danger" data-act="' + yesAct + '" data-v="' + esc(id) + '">' + yes + '</button>' +
+      '<button type="button" class="ghost" data-act="' + noAct + '">아니요</button></div></div>';
+  }
+  function pmActs(x, recs) {
+    var st = x.state, ids = x.ids || [], busy = S.poOpening === x.id, h = '';
+    var pic = (x.fids || []).length ? '<button type="button" class="ghost" data-act="popic" data-v="' + esc(x.id) + '">' + (pmSms(x) ? '받은 문자 원본 보기' : '발주서 원본 보기') + '</button>' : '';
+    if (st === '넣음') {
+      var ton = recs.length && recs.every(function (r) { return packOf(r) === 'ton'; });
+      if (ids.length) h += '<div class="pmdab">' + (ton ? '<span class="pmdton">톤백 · 물표 없음</span>' : '<button type="button" class="primary" data-act="polabids" data-v="' + esc(x.id) + '"' + (recs.length ? '' : ' disabled') + '>물표</button>') +
+        '<a class="primary" href="statement.html?ids=' + encodeURIComponent(ids.join(',')) + '">거래명세서</a></div>';
+      var b2 = (recs.length ? '<button type="button" class="ghost" data-act="poedit" data-v="' + esc(x.id) + '">' + ICON_PEN + '수정</button>' : '') +
+        ((x.dates || [])[0] ? '<button type="button" class="ghost" data-act="pogoto" data-v="' + esc(x.dates[0]) + '">달력에서 보기</button>' : '') + pic;
+      if (b2) h += '<div class="pmdab2">' + b2 + '</div>';
+      if (x.undo) h += S.poUndoAsk === x.id ? pmAsk('등록을 취소할까요? 이 발주서로 넣은 출고예정 ' + ids.length + '건을 지웁니다.', '등록 취소', 'poundo', x.id, 'poundox')
+        : '<button type="button" class="pmdx" data-act="poundoask" data-v="' + esc(x.id) + '">등록 취소</button>';
+      return h;
+    }
+    if (st === '날짜 대기') {
+      h += '<button type="button" class="primary wide" data-act="poqopen" data-v="' + esc(x.id) + '">날짜 정해 등록</button>' + (pic ? '<div class="pmdab2">' + pic + '</div>' : '');
+      return h + (S.poQDel === x.id ? pmAsk('대기 목록에서 뺄까요? ‘등록 안 함’으로 남습니다.', '빼기', 'poqdel', x.id, 'poqdelx')
+        : '<button type="button" class="pmdx" data-act="poqdelask" data-v="' + esc(x.id) + '">대기 목록에서 빼기</button>');
+    }
+    if (st === '읽는 중' && !x.stale) return '<p class="pmdres">자동으로 판독하는 중입니다. 잠시 뒤 화면 위 새로 고침(⟳)을 눌러 주십시오.</p>' + (pic ? '<div class="pmdab2">' + pic + '</div>' : '');
+    var dis = busy || S.poOpening ? ' disabled' : '';
+    if (pmNeed(x)) {
+      h += '<button type="button" class="primary wide" data-act="poread" data-v="' + esc(x.id) + '"' + dis + '>' + (busy ? '여는 중…' : '확인하고 등록') + '</button>' + (pic ? '<div class="pmdab2">' + pic + '</div>' : '');
+      return h + (S.poCxAsk === x.id ? pmAsk('이 발주서는 등록하지 않을까요? 목록에는 ‘등록 안 함’으로 남습니다.', '등록 안 함', 'pocancel', x.id, 'pocxx')
+        : '<button type="button" class="pmdx" data-act="pocxask" data-v="' + esc(x.id) + '">등록 안 함</button>');
+    }
+    return '<button type="button" class="ghost wide" data-act="poread" data-v="' + esc(x.id) + '"' + dis + '>' + (busy ? '여는 중…' : '다시 열어 등록') + '</button>' + (pic ? '<div class="pmdab2">' + pic + '</div>' : '');
+  }
+  function pmDetail(x) {
+    var c = pmStat(x), st = x.state, done = st === '넣음', w = x.wait || null, recs = pmRecs(x), ids = x.ids || [];
+    var ds = (x.dates || []).filter(isYmd).sort(), cur = S.today.slice(0, 7), loading = false;
+    if (done && recs.length < ids.length) ds.forEach(function (d) { var ym = d.slice(0, 7); if (ym <= cur && !S.months[ym]) { ensureMonth(ym); if (S.mLoading[ym]) loading = true; } });
+    var row = function (k, v) { return v ? '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>' : ''; };
+    var h = '<div class="stack pmdv"><section class="card pmdhd"><button type="button" class="link pmback" data-act="pmclose">‹ 목록으로</button>' +
+      '<div class="pmdt"><h2>' + esc(pmTitle(x)) + '</h2><span class="pchip ' + c[0] + '">' + esc(c[1]) + '</span></div><dl class="pmdl">' +
+      row('출고일', done ? ds.map(function (d) { return esc(pmMd(d)) + (pmRel(d) ? ' <small>' + pmRel(d) + '</small>' : ''); }).join('<br>') : st === '날짜 대기' ? '미정' : '') +
+      row('현장', esc(pmSite(x))) + ((x.custs || []).length > 1 ? row('거래처', esc(x.custs.join(', '))) : '') + row('현장 주소', esc(x.addr || (w && w.addr) || '')) +
+      row('받은 날', esc(pmWhen(x.at))) + row('받은 방법', esc(pmSrc(x))) + row('메모', esc(x.note || '')) + '</dl>';
+    if (!done && st !== '날짜 대기' && x.result) h += '<p class="pmdres' + (c[0] === 'bad' ? ' bad' : '') + '">' + esc(poResTxt(x.result)) + '</p>';
+    if (done && c[1] === '미확정') h += '<p class="pmdres warn">출고일이 지났는데 아직 확정하지 않았습니다. 실제로 나갔으면 아래 ‘달력에서 보기’ → 그날 ‘확정’을 누르십시오.</p>';
+    h += '</section>';
+    var lines = recs.length ? recs.map(function (r) { return { prod: r.prod, color: r.color, qty: r.qty, pk: isSale(r.type) ? packOf(r) : '' }; })
+      : w && w.lines ? w.lines.map(function (l) { return { prod: l.prod, color: l.color, qty: Number(l.kg) || 0, pk: isSbr(l.prod) ? (l.pack === 'small' ? 'small' : 'ton') : '' }; }) : [];
+    if (lines.length) h += pmItemsHtml(lines);
+    else if (done && ids.length) h += '<section class="card"><p class="muted">' + (loading ? '품목을 불러오는 중…' : '품목 ' + ids.length + '건 — 출고 기록에서 찾지 못했습니다(지워졌을 수 있습니다).') + '</p></section>';
+    return h + '<section class="card pmda">' + pmActs(x, recs) + '</section></div>';
+  }
+  /* 상세 닫기 · 보기 바꾸기 */
+  function pmCloseD() { S.pmOpen = ''; S.poUndoAsk = ''; S.poCxAsk = ''; S.poQDel = ''; render(); window.scrollTo(0, S.pmY || 0); }
+  function pmMode(m) {
+    var v = pmV();
+    if ((m !== 'd' && m !== 'm' && m !== 'y') || m === v.pm) return;
+    if (m === 'd') {   // 보던 달 · 해 안의 가장 최근 받은 날 (없으면 오늘 또는 그 기간 끝 날)
+      var key = v.pm === 'm' ? v.ym : v.y, lastD = pmAll().map(pmDay).filter(function (d) { return d && d.slice(0, key.length) === key; })[0];
+      v.day = lastD || (key === S.today.slice(0, key.length) ? S.today : v.pm === 'm' ? v.ym + '-' + pad(daysIn(v.ym)) : v.y + '-12-31');
+    } else if (m === 'm') v.ym = v.pm === 'd' ? v.day.slice(0, 7) : v.y === S.today.slice(0, 4) ? S.today.slice(0, 7) : v.y + '-12';
+    else v.y = (v.pm === 'd' ? v.day : v.ym).slice(0, 4);
+    v.pm = m;
+    store('nmc_pm_mode', m);
+    render();
+  }
+  function pmStep(k) {
+    var v = pmV();
+    if (v.pm === 'd') { var nd = addDays(v.day, k); if (nd > S.today) return; v.day = nd; }
+    else if (v.pm === 'm') { var nm = addMonths(v.ym, k); if (nm > S.today.slice(0, 7)) return; v.ym = nm; }
+    else { var ny = String(Number(v.y) + k); if (ny > S.today.slice(0, 4)) return; v.y = ny; }
+    render();
+  }
+  function pmNow() { var v = pmV(); v.day = S.today; v.ym = S.today.slice(0, 7); v.y = S.today.slice(0, 4); render(); }
+  function pmJump(to) {
+    var v = pmV();
+    if (v.pm === 'd' && isYmd(to)) v.day = to;
+    else if (v.pm === 'm' && /^\d{4}-\d{2}$/.test(String(to))) v.ym = to;
+    render();
   }
 
   /* ── 품목 한 줄 읽기: 'SBR 5-7mm 3200' · 'NM 녹색 40포' · '아이보리 1톤' · '고무분말 2~3 톤백 2개' · '분철 코드 500' ──
@@ -5795,7 +6044,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     var R = V.R || {}, iss = R.issues || [], ov = V.kind === 'po' ? R.overlap : null;
     var title = ship ? '출고 등록' : V.kind === 'wait' ? '날짜 미정 발주서 — 날짜 정해 등록' : po ? '발주서 확인 후 등록' : '발주서 등록';
     var h = '<div class="stack fm"><section class="card fmh"><h2 class="fmt">' + esc(title) + '</h2>';
-    if (ship) h += '<p class="hint">실제로 나간 출고를 넣습니다(재고에서 바로 빠짐). 앞으로 나갈 주문은 ‘발주서 관리 → 발주서 등록’으로 넣습니다.</p>';
+    if (ship) h += '<p class="hint">이미 나간 출고를 넣습니다 · 재고에서 바로 빠집니다.</p>';
     if (V.kind === 'new') {
       h += '<div class="fmread"><button type="button" class="fmrb" data-act="pofile"' + (S.poBusy ? ' disabled' : '') + '>' + ICON_DOC + '<span><b>파일 · 사진으로 읽기</b><small>PDF · 엑셀 · 사진 · 카톡 캡처</small></span></button>' +
         '<button type="button" class="fmrb' + (V.textOpen ? ' on' : '') + '" data-act="fmtext" aria-expanded="' + !!V.textOpen + '">' + ICON_MSG + '<span><b>문자 붙여넣기</b><small>받은 문자를 그대로</small></span></button></div>' +
@@ -5804,7 +6053,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       if (V.textOpen) h += '<div class="fmtx"><label class="label" for="fm-text">받은 문자</label><textarea id="fm-text" class="text fmta" rows="6" data-in="fmtext" placeholder="받은 문자를 길게 눌러 복사한 뒤 여기에 붙여넣으십시오">' + esc(V.text) + '</textarea>' +
         '<button type="button" class="primary wide mt8" data-act="fmread"' + (String(V.text).trim() ? '' : ' disabled') + '>문자 읽어서 아래 칸 채우기</button></div>';
       if (V.read) h += fmReadHtml(V.read);
-      if (!V.textOpen && !V.read) h += '<p class="hint">파일 · 문자가 없으면 아래 칸을 바로 채우십시오(전화 주문 등).</p>';
+      if (!V.textOpen && !V.read) h += '<p class="fmor">또는 아래 ①②③을 직접 채우십시오</p>';
     }
     if (po) {
       h += '<p class="fmsrc">' + esc(V.item.file ? V.item.name : '직접 입력') + (V.item.at ? ' · ' + esc(poWhen(V.item.at)) + ' 받음' : '') + '</p>';
@@ -5818,7 +6067,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '<section class="card"><h2 class="label">' + step(1) + '출고일</h2>' + fmDateHtml(V);
     h += '<label class="label mt16" for="fm-cust">' + step(2) + '거래처</label><input id="fm-cust" class="text" type="text" data-in="fmcust" list="cust-list" maxlength="60" autocomplete="off" value="' + esc(p.cust || '') + '" placeholder="거래처 이름">';
     if (p.cust && S.customers.indexOf(String(p.cust).trim()) < 0) h += '<p class="hint">처음 보는 거래처입니다. 기존 거래처라면 목록에서 고르십시오(이름이 같아야 합계가 맞습니다).</p>';
-    h += '<label class="label mt12" for="fm-site">현장</label><input id="fm-site" class="text" type="text" data-in="fmsite" maxlength="60" autocomplete="off" value="' + esc(p.site || '') + '" placeholder="현장명 (물표의 현장명 칸에 찍힙니다)">';
+    h += '<label class="label mt12" for="fm-site">현장</label><input id="fm-site" class="text" type="text" data-in="fmsite" maxlength="60" autocomplete="off" value="' + esc(p.site || '') + '" placeholder="현장명 (선택)">';
     if (!ship) h += '<details class="fmmore"' + (p.addr ? ' open' : '') + '><summary>현장 주소 (거래명세서 납품장소, 선택)</summary><input id="fm-addr" class="text mt8" type="text" data-in="fmaddr" maxlength="120" autocomplete="off" value="' + esc(p.addr || '') + '" placeholder="거래명세서 납품장소에 찍힙니다"></details>';
     if (p.poNo) h += '<p class="hint">발주번호 ' + esc(p.poNo) + '</p>';
     h += '</section>';
@@ -5831,7 +6080,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
         '<div class="fmadd"><input id="fm-entry" class="text" type="text" data-in="fmentry" autocomplete="off" enterkeyhint="done" placeholder="예: SBR 5-7mm 3200" value="' + esc(V.entry || '') + '" aria-label="품목 한 줄 (제품 색상·규격 수량)">' +
         '<button type="button" class="primary" data-act="fmadd">담기</button></div>';
       if (V.entErr) h += '<p class="bad fmerr">' + esc(V.entErr) + '</p>';
-      h += '<p class="hint fmhow">제품 · 색상(규격) · 수량을 한 줄로 쓰고 <b>담기</b>(또는 Enter). 쉼표로 여러 개를 한 번에 담습니다 — 예: <code>SBR 2-3mm 1600, NM 녹색 40포, 아이보리 500</code>. 숫자만 쓰면 kg · 포 = 25 kg · 톤 = 1,000 kg · 톤백 = 800 kg.</p>';
+      h += '<p class="fmhow">쉼표로 여러 개 · 숫자만 쓰면 kg · 포 = 25 kg · 톤 = 1,000 kg · 톤백 = 800 kg</p>';
       h += fmPickHtml(V);
       if (V.bad && V.bad.length) h += '<div class="fmbad"><p><b>읽지 못한 줄 ' + V.bad.length + '개</b> — 고쳐서 담거나 무시하십시오.</p><ul>' + V.bad.map(function (b, i) {
         return '<li><span>' + esc(b[0]) + '</span><small>' + esc(b[1]) + '</small><button type="button" class="link" data-act="fmbadput" data-v="' + i + '">위 칸에 넣어 고치기</button></li>'; }).join('') + '</ul>' +
@@ -5850,7 +6099,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     }
     // 3. 메모 · 계산 · 등록
     var why = formReady(V), dup = formDup(V);
-    h += '<section class="card fma"><label class="label" for="fm-memo">메모 (선택)</label><input id="fm-memo" class="text" type="text" data-in="fmmemo" maxlength="200" autocomplete="off" value="' + esc(p.note || '') + '" placeholder="' + (ship ? '기록에 남길 메모' : '비고 (상차 순서 · 연락처 등)') + '">';
+    h += '<section class="card fma"><details class="fmmemo"' + (p.note ? ' open' : '') + '><summary>메모 추가 (선택)</summary><input id="fm-memo" class="text mt8" type="text" data-in="fmmemo" maxlength="200" autocomplete="off" value="' + esc(p.note || '') + '" placeholder="' + (ship ? '기록에 남길 메모' : '비고 (상차 순서 · 연락처 등)') + '"></details>';
     if (ship) h += fmShipCalc(V);
     else if (!(V.kind === 'po' && p.mode === 'skip') && !V.noDate && p.lines.length) h += poCalcHtml(V.sim, poLeft(p));
     if (dup.length) h += '<div class="warnbox mt12">' + esc(p.cust) + '에 비슷한 날 같은 품목이 이미 있습니다: ' + dup.slice(0, 4).map(function (r) { return esc(poMd(r.date) + ' ' + (r.type === '출고' ? '출고 ' : '') + (PROD3_NAME[r.prod] || r.prod) + ' ' + r.color + ' ' + fmt(r.qty) + ' kg'); }).join(', ') +
@@ -6047,6 +6296,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   }
   function formClose() {
     var V = S.poRev, from = V ? V.from : S.pane;
+    if (V && V.done) S.pmOpen = '';   // v74: 등록을 마쳤으면 상세 대신 목록
     S.poRev = null; S.outMode = 'cal'; S.pane = from === 'ship' ? 'ship' : 'po';
     render();
     window.scrollTo(0, 0);
@@ -6599,7 +6849,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     h += '</div><p class="calleg"><span class="lg"><span class="lgc co"><i class="ck">✓</i><s>1.2t</s></span>출고 완료</span>' +
       '<span class="lg"><span class="lgc cp">1.2t</span>출고예정</span><span class="lg"><span class="lgc cs">' + CAL_TRI + '</span>재고 부족(건수)</span>' +
       '<span class="lg"><span class="lgc td"></span>오늘</span>' + (GL.length > 1 ? '<span class="lg ot">다른 제품 기록</span>' : '') + '</p>';
-    if (GL.length > 1) h += '<p class="note calnote">달력 칸의 숫자는 위에서 고른 <b>' + esc(G) + '</b>만 집계합니다. ' + esc(GL.join('·')) + '은(는) 합산하지 않습니다.</p>';
     return h + '</section>';
   }
   /* ───────── 출고 목록 · 금액 (2026-11-20 지시) ─────────
@@ -6688,7 +6937,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     rows.forEach(function (r) { cs[String(r.cust || '').trim()] = 1; });
     var nC = Object.keys(cs).length;
     return '<h3 class="dsec">' + label + ' · ' + rows.length + '건' + (label === '생산예정' ? '' : ' · 거래처 ' + nC + '곳') + '</h3>' +
-      (label === '생산예정' ? '' : daySum(rows)) + dayGroups(rows);
+      (label === '생산예정' || nC < 2 ? '' : daySum(rows)) + dayGroups(rows);
   }
 
   /* 그 달 1일부터 누른 날까지 출고 · 생산 합계 (2026-11-21 14:04 지시 "당월 총 출고량과 생산량" →
@@ -6750,7 +6999,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
   function dayCard() {
     var d = S.calDay, x = calDays(d.slice(0, 7))[d] || { out: [], plan: [], pin: [], outKg: 0, planKg: 0 };
     var past = d < S.today, fut = d > S.today;
-    var h = '<section class="card day" id="daycard"><div class="dayhead"><h2>' + esc(fmtDate(d)) + '</h2><span class="dtag">' + (d === S.today ? '금일' : past ? '지난 일자' : '향후 (예정)') + '</span></div>';
+    var h = '<section class="card day" id="daycard"><div class="dayhead"><h2>' + esc(pmMd(d)) + '</h2><span class="dtag">' + (d === S.today ? '금일' : past ? '지난 일자' : '향후 (예정)') + '</span></div>';
     h += monthTot(d);
     h += daySec('출고', x.out);
     if (!past || x.plan.length) {
@@ -6764,8 +7013,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (!fut) h += '<button type="button" class="primary" data-act="fship">＋ 출고 등록 (이미 나간 것)</button>';
     if (!past) h += '<button type="button" class="' + (fut ? 'primary' : 'ghost') + '" data-act="fnewday">＋ 발주서 등록 (이 날 출고)</button>';
     h += '</div>';
-    if (x.out.length || x.plan.length || x.pin.length) h += '<p class="note">거래처 상자의 ‘수정’으로 여러 행을 한 번에 고치고(물표도 고친 대로), ‘일자 변경’으로 날짜를 옮기고(지난 날짜로 옮긴 출고예정은 그날 출고로 확정), ‘삭제’로 상자째 지웁니다. 행을 누르면 한 줄씩 수정 · 삭제 · 출고일에 ‘확정’을 누르면 재고에서 빠집니다.' +
-      (S.money && (x.out.length || x.plan.length) ? ' 금액 = kg × 단가(부가세 제외 공급가액) · 거래처 상자의 ‘단가 입력’으로 단가를 일괄 입력합니다.' : '') + '</p>';
     return h + '</section>';
   }
   /* 줄의 메모(포장 표시는 뺌) */
@@ -8397,6 +8644,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       case 'fdlab': if (S.poRev && S.poRev.done && (S.poRev.done.item.ids || []).length) { S.labBack = 'porev'; labOpen(S.poRev.done.item.ids); } return;
       case 'fdhome': formClose(); return;
       case 'pmmore': S.pmMore = true; render(); return;
+      case 'pmopen': S.pmY = window.scrollY || 0; S.pmOpen = v; S.poUndoAsk = ''; S.poCxAsk = ''; S.poQDel = ''; S.poHi = ''; render(); window.scrollTo(0, 0); return;   // v74 발주서 상세
+      case 'pmclose': pmCloseD(); return;
+      case 'pmmode': pmMode(v); return;
+      case 'pmstep': pmStep(Number(v) || 0); return;
+      case 'pmnow': pmNow(); return;
+      case 'pmjump': pmJump(v); return;
+      case 'pmgoym': pmV().pm = 'm'; S.pmv.ym = v; render(); window.scrollTo(0, 0); return;
+      case 'pmtodo': S.pmTodo = true; S.pmq = ''; render(); window.scrollTo(0, 0); return;
+      case 'pmtodox': S.pmTodo = false; render(); window.scrollTo(0, 0); return;
       case 'pmolder': S.poN = 400; S.poList = null; poLoad(false); render(); return;
       case 'pocxask': S.poCxAsk = v; render(); return;
       case 'pocxx': S.poCxAsk = ''; render(); return;
@@ -8615,7 +8871,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
       return;
     }
     if (k === 'findq') { findInput(el.value); return; }
-    if (k === 'pmq') { S.pmq = el.value; S.pmMore = false; var pl = document.getElementById('pmlists'); if (pl) pl.innerHTML = pmListsHtml(); return; }   // v73: 목록만 다시 (치는 칸은 그대로)
+    if (k === 'pmq') { S.pmq = el.value; var pl = document.getElementById('pmlists'); if (pl) pl.innerHTML = pmBody(); return; }   // v73: 목록만 다시 (치는 칸은 그대로)
     if (S.poRev && k && k.indexOf('fm') === 0) { fmInput(el, k); return; }
     if (k === 'memo') { S.inMemo = el.value; return; }
     if (k === 'po') { S.inPo = el.value; return; }
@@ -8687,6 +8943,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visi
     if (el.getAttribute('data-in') === 'mvpick' && S.sheet && S.sheet.kind === 'move') { S.sheet.pick[el.getAttribute('data-v')] = el.checked; renderSheet(); return; }
     if (a === 'poaddp' && S.poRev && S.poRev.add) { var A1 = S.poRev.add, cs1 = el.value ? itemsOf(el.value).map(function (it) { return it.color; }) : []; A1.prod = el.value; A1.color = cs1.length === 1 ? cs1[0] : ''; A1.err = ''; render(); var pc0 = document.getElementById(A1.color ? 'poadd-kg' : 'poadd-c'); if (pc0) pc0.focus(); return; }
     if (a === 'fmpp' && S.poRev) { var A9 = S.poRev.pick, cs9 = el.value ? itemsOf(el.value).map(function (it) { return it.color; }) : []; A9.prod = el.value; A9.color = cs9.length === 1 ? cs9[0] : ''; S.poRev.entErr = ''; S.poRev.pickOpen = true; render(); var pc9 = document.getElementById(A9.color ? 'fm-pk' : 'fm-pc'); if (pc9) pc9.focus(); return; }   // v73
+    if (a === 'pmday') { if (isYmd(el.value) && el.value <= S.today) { pmV().day = el.value; render(); } else if (el.value) toast(el.value > S.today ? '오늘 뒤 날짜에는 받은 발주서가 없습니다' : ERR.bad_date); return; }   // v74
     if (a === 'fmpc' && S.poRev) { S.poRev.pick.color = el.value; S.poRev.entErr = ''; var pk9 = document.getElementById('fm-pk'); if (pk9) pk9.focus(); return; }
     if (a === 'poaddc' && S.poRev && S.poRev.add) { S.poRev.add.color = el.value; S.poRev.add.err = ''; var pk0 = document.getElementById('poadd-kg'); if (pk0) pk0.focus(); return; }
     if (a === 'labcap') { labSetCap(Number(String(el.value).replace(/[^0-9]/g, ''))); return; }
